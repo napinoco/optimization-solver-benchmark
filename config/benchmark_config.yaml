@@ -1,0 +1,4 @@
+# Benchmark execution configuration
+timeout: 300  # seconds per problem
+parallel_jobs: 2  # number of parallel solver executions
+output_format: "json"  # output format for intermediate results
