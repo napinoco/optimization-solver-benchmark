@@ -14,6 +14,7 @@ from scripts.benchmark.solver_interface import SolverInterface, SolverResult
 from scripts.benchmark.result_collector import ResultCollector
 from scripts.benchmark.environment_info import collect_environment_info
 from scripts.solvers.python.scipy_runner import ScipySolver
+from scripts.solvers.python.cvxpy_runner import CvxpySolver, create_cvxpy_solvers
 from scripts.utils.config_loader import load_benchmark_config, load_solvers_config
 from scripts.utils.logger import get_logger
 from scripts.database.models import create_database
@@ -60,12 +61,13 @@ class BenchmarkRunner:
         """Initialize configured solvers."""
         self.logger.info("Setting up solvers...")
         
-        # For now, we'll initialize SciPy solver by default
-        # This will be expanded when we add more solvers
+        timeout = self.benchmark_config.get('solver_timeout', 300.0)
+        
+        # Initialize SciPy solver
         try:
             scipy_solver = ScipySolver(
                 name="SciPy",
-                timeout=self.benchmark_config.get('solver_timeout', 300.0)
+                timeout=timeout
             )
             self.solvers["scipy"] = scipy_solver
             self.logger.info(f"Initialized solver: {scipy_solver.name}")
@@ -81,7 +83,38 @@ class BenchmarkRunner:
             
         except Exception as e:
             self.logger.error(f"Failed to initialize SciPy solver: {e}")
-            raise
+        
+        # Initialize CVXPY solvers
+        try:
+            # Add default CVXPY solver
+            cvxpy_solver = CvxpySolver(
+                name="CVXPY",
+                timeout=timeout
+            )
+            self.solvers["cvxpy"] = cvxpy_solver
+            self.logger.info(f"Initialized solver: {cvxpy_solver.name}")
+            
+            # Store solver info in database
+            solver_info = cvxpy_solver.get_info()
+            self.result_collector.store_solver_info(
+                name=cvxpy_solver.name,
+                version=cvxpy_solver.get_version(),
+                environment="python",
+                metadata=solver_info
+            )
+            
+            # Optionally add multiple CVXPY backends as separate solvers
+            # cvxpy_variants = create_cvxpy_solvers()
+            # for variant in cvxpy_variants:
+            #     if variant.name not in [s.name for s in self.solvers.values()]:
+            #         self.solvers[variant.name.lower().replace('-', '_')] = variant
+            #         self.logger.info(f"Initialized solver: {variant.name}")
+            
+        except Exception as e:
+            self.logger.error(f"Failed to initialize CVXPY solver: {e}")
+        
+        if not self.solvers:
+            raise RuntimeError("No solvers were successfully initialized")
         
         self.logger.info(f"Successfully initialized {len(self.solvers)} solvers")
     
