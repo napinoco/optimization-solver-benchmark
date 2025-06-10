@@ -10,17 +10,21 @@ CREATE TABLE IF NOT EXISTS benchmarks (
 -- Problems table stores problem metadata
 CREATE TABLE IF NOT EXISTS problems (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    name TEXT NOT NULL UNIQUE,
+    name TEXT NOT NULL,
     problem_class TEXT NOT NULL,  -- LP, QP, SDP, SOCP
-    file_path TEXT NOT NULL
+    file_path TEXT NOT NULL,
+    metadata TEXT,  -- JSON string for additional metadata
+    UNIQUE(name, problem_class)
 );
 
 -- Solvers table stores solver information
 CREATE TABLE IF NOT EXISTS solvers (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    name TEXT NOT NULL UNIQUE,
+    name TEXT NOT NULL,
     version TEXT,
-    environment TEXT  -- python, octave, matlab
+    environment TEXT,  -- python, octave, matlab
+    metadata TEXT,  -- JSON string for additional metadata
+    UNIQUE(name, version, environment)
 );
 
 -- Results table stores individual benchmark results
@@ -32,5 +36,9 @@ CREATE TABLE IF NOT EXISTS results (
     solve_time REAL,
     status TEXT,
     objective_value REAL,
+    duality_gap REAL,
+    iterations INTEGER,
+    error_message TEXT,
+    solver_info TEXT,  -- JSON string for solver-specific information
     FOREIGN KEY (benchmark_id) REFERENCES benchmarks (id)
 );
