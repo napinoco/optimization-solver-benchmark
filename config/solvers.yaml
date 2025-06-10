@@ -6,5 +6,20 @@ solvers:
     version: "auto"  # will be detected at runtime
     methods:
       - "linprog"  # for LP problems
+      - "minimize"  # for QP problems
+    timeout: 300  # seconds
+    enabled: true
+    
+  cvxpy:
+    name: "CVXPY"
+    environment: "python"
+    version: "auto"  # will be detected at runtime
+    backends:
+      - "CLARABEL"
+      - "OSQP"
+      - "SCS"
+    supported_types:
+      - "LP"  # Linear Programming
+      - "QP"  # Quadratic Programming
     timeout: 300  # seconds
     enabled: true
