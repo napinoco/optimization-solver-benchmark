@@ -1,0 +1,383 @@
+{% extends "base.html" %}
+
+{% block title %}Environment Information - Optimization Solver Benchmark{% endblock %}
+
+{% block breadcrumb %}
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{{ url_for('dashboard') if url_for else '#' }}">Dashboard</a></li>
+        <li class="breadcrumb-item active">Environment Information</li>
+    </ol>
+</nav>
+{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h2>
+            <i class="fas fa-desktop me-2"></i>Environment Information
+        </h2>
+        <p class="text-muted">System specifications and environment details for benchmark execution.</p>
+    </div>
+</div>
+
+<!-- System Overview -->
+{% if environment_info %}
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="card problem-info h-100">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-computer me-2"></i>System Information
+                </h5>
+            </div>
+            <div class="card-body">
+                <dl class="row mb-0">
+                    <dt class="col-sm-4">Operating System:</dt>
+                    <dd class="col-sm-8">
+                        {{ environment_info.os.system if environment_info.os else 'Unknown' }}
+                        {% if environment_info.os and environment_info.os.release %}
+                            {{ environment_info.os.release }}
+                        {% endif %}
+                    </dd>
+                    
+                    <dt class="col-sm-4">Architecture:</dt>
+                    <dd class="col-sm-8">{{ environment_info.os.machine if environment_info.os else 'Unknown' }}</dd>
+                    
+                    <dt class="col-sm-4">Platform:</dt>
+                    <dd class="col-sm-8">{{ environment_info.os.platform if environment_info.os else 'Unknown' }}</dd>
+                    
+                    <dt class="col-sm-4">Hostname:</dt>
+                    <dd class="col-sm-8">{{ environment_info.os.node if environment_info.os else 'Unknown' }}</dd>
+                </dl>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card solver-info h-100">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-microchip me-2"></i>Hardware Specifications
+                </h5>
+            </div>
+            <div class="card-body">
+                <dl class="row mb-0">
+                    <dt class="col-sm-4">CPU Cores:</dt>
+                    <dd class="col-sm-8">
+                        {{ environment_info.cpu.cpu_count if environment_info.cpu else 'Unknown' }}
+                        {% if environment_info.cpu and environment_info.cpu.logical_cores %}
+                            ({{ environment_info.cpu.logical_cores }} logical)
+                        {% endif %}
+                    </dd>
+                    
+                    <dt class="col-sm-4">CPU Frequency:</dt>
+                    <dd class="col-sm-8">
+                        {% if environment_info.cpu and environment_info.cpu.frequency %}
+                            {{ "%.2f GHz" | format(environment_info.cpu.frequency / 1000) }}
+                        {% else %}
+                            Unknown
+                        {% endif %}
+                    </dd>
+                    
+                    <dt class="col-sm-4">Total Memory:</dt>
+                    <dd class="col-sm-8">
+                        {% if environment_info.memory and environment_info.memory.total_gb %}
+                            {{ "%.1f GB" | format(environment_info.memory.total_gb) }}
+                        {% else %}
+                            Unknown
+                        {% endif %}
+                    </dd>
+                    
+                    <dt class="col-sm-4">Available Memory:</dt>
+                    <dd class="col-sm-8">
+                        {% if environment_info.memory and environment_info.memory.available_gb %}
+                            {{ "%.1f GB" | format(environment_info.memory.available_gb) }}
+                            ({{ "%.1f%%" | format((environment_info.memory.available_gb / environment_info.memory.total_gb) * 100) }})
+                        {% else %}
+                            Unknown
+                        {% endif %}
+                    </dd>
+                </dl>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Python Environment -->
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fab fa-python me-2"></i>Python Environment
+                </h5>
+            </div>
+            <div class="card-body">
+                <dl class="row mb-0">
+                    <dt class="col-sm-4">Python Version:</dt>
+                    <dd class="col-sm-8">{{ environment_info.python.version if environment_info.python else 'Unknown' }}</dd>
+                    
+                    <dt class="col-sm-4">Implementation:</dt>
+                    <dd class="col-sm-8">{{ environment_info.python.implementation if environment_info.python else 'Unknown' }}</dd>
+                    
+                    <dt class="col-sm-4">Executable:</dt>
+                    <dd class="col-sm-8">
+                        <small class="text-muted">{{ environment_info.python.executable if environment_info.python else 'Unknown' }}</small>
+                    </dd>
+                    
+                    <dt class="col-sm-4">Virtual Env:</dt>
+                    <dd class="col-sm-8">
+                        {% if environment_info.python and environment_info.python.virtual_env %}
+                            <span class="badge bg-success">Active</span>
+                            <br><small class="text-muted">{{ environment_info.python.virtual_env }}</small>
+                        {% else %}
+                            <span class="badge bg-warning">None</span>
+                        {% endif %}
+                    </dd>
+                </dl>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-cogs me-2"></i>Solver Libraries
+                </h5>
+            </div>
+            <div class="card-body">
+                {% if environment_info.packages %}
+                <dl class="row mb-0">
+                    {% for package_name, version in environment_info.packages.items() %}
+                    <dt class="col-sm-4">{{ package_name }}:</dt>
+                    <dd class="col-sm-8">
+                        <span class="badge bg-info">{{ version }}</span>
+                    </dd>
+                    {% endfor %}
+                </dl>
+                {% else %}
+                <p class="text-muted mb-0">No package information available</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Performance Metrics -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-tachometer-alt me-2"></i>System Performance Metrics
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="card border-light">
+                            <div class="card-body text-center">
+                                <h6 class="card-title text-primary">CPU Usage</h6>
+                                {% if environment_info.cpu and environment_info.cpu.usage_percent is not none %}
+                                <h4 class="text-primary">{{ "%.1f%%" | format(environment_info.cpu.usage_percent) }}</h4>
+                                <div class="progress">
+                                    <div class="progress-bar bg-primary" style="width: {{ environment_info.cpu.usage_percent }}%"></div>
+                                </div>
+                                {% else %}
+                                <h4 class="text-muted">N/A</h4>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-3">
+                        <div class="card border-light">
+                            <div class="card-body text-center">
+                                <h6 class="card-title text-success">Memory Usage</h6>
+                                {% if environment_info.memory and environment_info.memory.usage_percent is not none %}
+                                <h4 class="text-success">{{ "%.1f%%" | format(environment_info.memory.usage_percent) }}</h4>
+                                <div class="progress">
+                                    <div class="progress-bar bg-success" style="width: {{ environment_info.memory.usage_percent }}%"></div>
+                                </div>
+                                {% else %}
+                                <h4 class="text-muted">N/A</h4>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-3">
+                        <div class="card border-light">
+                            <div class="card-body text-center">
+                                <h6 class="card-title text-warning">Load Average</h6>
+                                {% if environment_info.cpu and environment_info.cpu.load_avg %}
+                                <h4 class="text-warning">{{ "%.2f" | format(environment_info.cpu.load_avg[0]) }}</h4>
+                                <small class="text-muted">1 min avg</small>
+                                {% else %}
+                                <h4 class="text-muted">N/A</h4>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-3">
+                        <div class="card border-light">
+                            <div class="card-body text-center">
+                                <h6 class="card-title text-info">Disk Usage</h6>
+                                {% if environment_info.disk and environment_info.disk.usage_percent is not none %}
+                                <h4 class="text-info">{{ "%.1f%%" | format(environment_info.disk.usage_percent) }}</h4>
+                                <div class="progress">
+                                    <div class="progress-bar bg-info" style="width: {{ environment_info.disk.usage_percent }}%"></div>
+                                </div>
+                                {% else %}
+                                <h4 class="text-muted">N/A</h4>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Benchmark History -->
+{% if benchmark_sessions %}
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-history me-2"></i>Recent Benchmark Sessions
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Session ID</th>
+                                <th>Timestamp</th>
+                                <th>Total Results</th>
+                                <th>Duration</th>
+                                <th>Environment</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for session in benchmark_sessions %}
+                            <tr>
+                                <td><strong>{{ session.id }}</strong></td>
+                                <td class="timestamp">{{ session.timestamp }}</td>
+                                <td>{{ session.total_results }}</td>
+                                <td>{{ "%.2fs" | format(session.duration) if session.duration else "N/A" }}</td>
+                                <td>
+                                    <small class="text-muted">
+                                        {{ session.environment_summary if session.environment_summary else "Not recorded" }}
+                                    </small>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- System Recommendations -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-lightbulb me-2"></i>Performance Recommendations
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6 class="text-success">Strengths</h6>
+                        <ul class="list-unstyled">
+                            {% if environment_info.cpu and environment_info.cpu.cpu_count >= 4 %}
+                            <li><i class="fas fa-check text-success me-2"></i>Multi-core CPU available for parallel benchmarks</li>
+                            {% endif %}
+                            {% if environment_info.memory and environment_info.memory.total_gb >= 8 %}
+                            <li><i class="fas fa-check text-success me-2"></i>Sufficient memory for large optimization problems</li>
+                            {% endif %}
+                            {% if environment_info.python and environment_info.python.virtual_env %}
+                            <li><i class="fas fa-check text-success me-2"></i>Using virtual environment for isolation</li>
+                            {% endif %}
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h6 class="text-warning">Considerations</h6>
+                        <ul class="list-unstyled">
+                            {% if environment_info.memory and environment_info.memory.usage_percent > 80 %}
+                            <li><i class="fas fa-exclamation-triangle text-warning me-2"></i>High memory usage may affect performance</li>
+                            {% endif %}
+                            {% if environment_info.cpu and environment_info.cpu.usage_percent > 90 %}
+                            <li><i class="fas fa-exclamation-triangle text-warning me-2"></i>High CPU usage detected</li>
+                            {% endif %}
+                            {% if not (environment_info.python and environment_info.python.virtual_env) %}
+                            <li><i class="fas fa-info-circle text-info me-2"></i>Consider using a virtual environment</li>
+                            {% endif %}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- No Data Message -->
+{% if not environment_info %}
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body text-center py-5">
+                <i class="fas fa-desktop fa-3x text-muted mb-3"></i>
+                <h4 class="text-muted">No Environment Information Available</h4>
+                <p class="text-muted">Environment information will be collected when benchmarks are run.</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+{% endblock %}
+
+{% block extra_js %}
+{% if environment_info %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Auto-refresh environment info every 30 seconds if enabled
+    {% if auto_refresh_env %}
+    setInterval(function() {
+        // Update performance metrics without full page reload
+        fetch(window.location.href + '?ajax=1')
+            .then(response => response.json())
+            .then(data => {
+                // Update CPU usage
+                if (data.cpu_usage !== undefined) {
+                    document.querySelector('.cpu-usage-text').textContent = data.cpu_usage.toFixed(1) + '%';
+                    document.querySelector('.cpu-usage-bar').style.width = data.cpu_usage + '%';
+                }
+                
+                // Update memory usage
+                if (data.memory_usage !== undefined) {
+                    document.querySelector('.memory-usage-text').textContent = data.memory_usage.toFixed(1) + '%';
+                    document.querySelector('.memory-usage-bar').style.width = data.memory_usage + '%';
+                }
+            })
+            .catch(error => console.log('Auto-refresh failed:', error));
+    }, 30000);
+    {% endif %}
+});
+</script>
+{% endif %}
+{% endblock %}
