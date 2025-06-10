@@ -180,7 +180,7 @@
                         <div class="card border-light">
                             <div class="card-body text-center">
                                 <h6 class="card-title text-primary">CPU Usage</h6>
-                                {% if environment_info.cpu and environment_info.cpu.usage_percent is not none %}
+                                {% if environment_info.cpu and environment_info.cpu.get('usage_percent') is not none %}
                                 <h4 class="text-primary">{{ "%.1f%%" | format(environment_info.cpu.usage_percent) }}</h4>
                                 <div class="progress">
                                     <div class="progress-bar bg-primary" style="width: {{ environment_info.cpu.usage_percent }}%"></div>
@@ -196,7 +196,7 @@
                         <div class="card border-light">
                             <div class="card-body text-center">
                                 <h6 class="card-title text-success">Memory Usage</h6>
-                                {% if environment_info.memory and environment_info.memory.usage_percent is not none %}
+                                {% if environment_info.memory and environment_info.memory.get('usage_percent') is not none %}
                                 <h4 class="text-success">{{ "%.1f%%" | format(environment_info.memory.usage_percent) }}</h4>
                                 <div class="progress">
                                     <div class="progress-bar bg-success" style="width: {{ environment_info.memory.usage_percent }}%"></div>
@@ -212,7 +212,7 @@
                         <div class="card border-light">
                             <div class="card-body text-center">
                                 <h6 class="card-title text-warning">Load Average</h6>
-                                {% if environment_info.cpu and environment_info.cpu.load_avg %}
+                                {% if environment_info.cpu and environment_info.cpu.get('load_avg') %}
                                 <h4 class="text-warning">{{ "%.2f" | format(environment_info.cpu.load_avg[0]) }}</h4>
                                 <small class="text-muted">1 min avg</small>
                                 {% else %}
@@ -226,7 +226,7 @@
                         <div class="card border-light">
                             <div class="card-body text-center">
                                 <h6 class="card-title text-info">Disk Usage</h6>
-                                {% if environment_info.disk and environment_info.disk.usage_percent is not none %}
+                                {% if environment_info.disk and environment_info.disk.get('usage_percent') is not none %}
                                 <h4 class="text-info">{{ "%.1f%%" | format(environment_info.disk.usage_percent) }}</h4>
                                 <div class="progress">
                                     <div class="progress-bar bg-info" style="width: {{ environment_info.disk.usage_percent }}%"></div>
@@ -316,10 +316,10 @@
                     <div class="col-md-6">
                         <h6 class="text-warning">Considerations</h6>
                         <ul class="list-unstyled">
-                            {% if environment_info.memory and environment_info.memory.usage_percent > 80 %}
+                            {% if environment_info.memory and environment_info.memory.get('usage_percent', 0) > 80 %}
                             <li><i class="fas fa-exclamation-triangle text-warning me-2"></i>High memory usage may affect performance</li>
                             {% endif %}
-                            {% if environment_info.cpu and environment_info.cpu.usage_percent > 90 %}
+                            {% if environment_info.cpu and environment_info.cpu.get('usage_percent', 0) > 90 %}
                             <li><i class="fas fa-exclamation-triangle text-warning me-2"></i>High CPU usage detected</li>
                             {% endif %}
                             {% if not (environment_info.python and environment_info.python.virtual_env) %}
