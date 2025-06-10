@@ -13,22 +13,31 @@ from scripts.benchmark.solver_interface import SolverResult
 from scripts.benchmark.environment_info import collect_environment_info
 from scripts.database.models import get_database_path
 from scripts.utils.logger import get_logger
+from scripts.utils.validation import ResultValidator, create_default_validator
 
 logger = get_logger("result_collector")
 
 class ResultCollector:
     """Collects and stores benchmark results in the database."""
     
-    def __init__(self, db_path: Optional[str] = None):
+    def __init__(self, db_path: Optional[str] = None, enable_validation: bool = True):
         """
         Initialize result collector.
         
         Args:
             db_path: Path to database file. If None, uses default path.
+            enable_validation: Whether to enable result validation
         """
         self.db_path = db_path or get_database_path()
         self.logger = get_logger("result_collector")
-        self.logger.info(f"Initialized result collector with database: {self.db_path}")
+        self.enable_validation = enable_validation
+        
+        if self.enable_validation:
+            self.validator = create_default_validator()
+            self.logger.info(f"Initialized result collector with database: {self.db_path} (validation enabled)")
+        else:
+            self.validator = None
+            self.logger.info(f"Initialized result collector with database: {self.db_path} (validation disabled)")
     
     def create_benchmark_session(self, environment_info: Optional[Dict[str, Any]] = None) -> int:
         """
@@ -59,17 +68,43 @@ class ResultCollector:
         self.logger.info(f"Created benchmark session {benchmark_id} at {timestamp}")
         return benchmark_id
     
-    def store_result(self, benchmark_id: int, result: SolverResult) -> int:
+    def store_result(self, benchmark_id: int, result: SolverResult, timeout: Optional[float] = None) -> int:
         """
-        Store a single solver result in the database.
+        Store a single solver result in the database with optional validation.
         
         Args:
             benchmark_id: ID of the benchmark session
             result: SolverResult to store
+            timeout: Configured timeout for validation (optional)
             
         Returns:
             result_id: ID of the stored result
         """
+        # Validate result if validation is enabled
+        if self.enable_validation and self.validator:
+            result_dict = {
+                'solver_name': result.solver_name,
+                'problem_name': result.problem_name,
+                'solve_time': result.solve_time,
+                'status': result.status,
+                'objective_value': result.objective_value
+            }
+            
+            validation_result = self.validator.validate_single_result(result_dict, timeout)
+            
+            # Log validation warnings/errors
+            if validation_result.errors:
+                self.logger.error(f"Validation errors for {result.solver_name} on {result.problem_name}: "
+                                f"{validation_result.errors}")
+            if validation_result.warnings:
+                self.logger.warning(f"Validation warnings for {result.solver_name} on {result.problem_name}: "
+                                   f"{validation_result.warnings}")
+            
+            # Optionally stop storage if validation fails critically
+            if not validation_result.is_valid and validation_result.severity == 'error':
+                self.logger.error(f"Refusing to store invalid result: {validation_result.errors}")
+                raise ValueError(f"Result validation failed: {validation_result.errors}")
+        
         # Convert solver_info to JSON if it exists
         solver_info_json = None
         if result.solver_info:
@@ -344,6 +379,98 @@ class ResultCollector:
         self.logger.info(f"Cleaned up {deleted_results} results and {deleted_benchmarks} "
                         f"benchmark sessions older than {keep_days} days")
         return deleted_results
+    
+    def validate_stored_results(self, benchmark_id: Optional[int] = None, 
+                               timeout: Optional[float] = None) -> Dict[str, Any]:
+        """
+        Validate results already stored in the database.
+        
+        Args:
+            benchmark_id: Specific benchmark to validate (None for all recent results)
+            timeout: Timeout value for validation
+            
+        Returns:
+            Dictionary with validation summary
+        """
+        if not self.enable_validation or not self.validator:
+            self.logger.warning("Validation is disabled, cannot validate stored results")
+            return {'validation_enabled': False}
+        
+        # Get results to validate
+        if benchmark_id is not None:
+            results = self.get_benchmark_results(benchmark_id)
+        else:
+            results = self.get_latest_results(limit=100)
+        
+        if not results:
+            self.logger.info("No results found to validate")
+            return {'validation_enabled': True, 'results_count': 0}
+        
+        # Convert to validation format
+        validation_results = []
+        for result in results:
+            result_dict = {
+                'solver_name': result['solver_name'],
+                'problem_name': result['problem_name'],
+                'solve_time': result['solve_time'],
+                'status': result['status'],
+                'objective_value': result['objective_value']
+            }
+            validation_results.append(result_dict)
+        
+        # Perform validation
+        individual_validations, consistency_validation = self.validator.validate_batch_results(
+            validation_results, timeout
+        )
+        
+        # Summarize results
+        total_results = len(individual_validations)
+        valid_results = sum(1 for v in individual_validations if v.is_valid)
+        error_results = sum(1 for v in individual_validations if v.severity == 'error')
+        warning_results = sum(1 for v in individual_validations if v.severity == 'warning')
+        
+        # Collect error and warning details
+        all_errors = []
+        all_warnings = []
+        for i, validation in enumerate(individual_validations):
+            if validation.errors:
+                result_info = f"{results[i]['solver_name']} on {results[i]['problem_name']}"
+                all_errors.extend([f"{result_info}: {error}" for error in validation.errors])
+            if validation.warnings:
+                result_info = f"{results[i]['solver_name']} on {results[i]['problem_name']}"
+                all_warnings.extend([f"{result_info}: {warning}" for warning in validation.warnings])
+        
+        # Add consistency validation results
+        if consistency_validation.errors:
+            all_errors.extend(consistency_validation.errors)
+        if consistency_validation.warnings:
+            all_warnings.extend(consistency_validation.warnings)
+        
+        summary = {
+            'validation_enabled': True,
+            'results_count': total_results,
+            'valid_results': valid_results,
+            'error_results': error_results,
+            'warning_results': warning_results,
+            'success_rate': valid_results / total_results if total_results > 0 else 0,
+            'all_errors': all_errors,
+            'all_warnings': all_warnings,
+            'consistency_validation': {
+                'is_valid': consistency_validation.is_valid,
+                'errors': consistency_validation.errors,
+                'warnings': consistency_validation.warnings
+            }
+        }
+        
+        self.logger.info(f"Validation completed: {valid_results}/{total_results} valid results, "
+                        f"{error_results} errors, {warning_results} warnings")
+        
+        if all_errors:
+            self.logger.error(f"Found {len(all_errors)} validation errors in stored results")
+        if all_warnings:
+            self.logger.warning(f"Found {len(all_warnings)} validation warnings in stored results")
+        
+        return summary
 
 if __name__ == "__main__":
     # Test script to verify result collector
