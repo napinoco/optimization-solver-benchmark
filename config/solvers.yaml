@@ -1,0 +1,10 @@
+# Solver definitions
+solvers:
+  scipy:
+    name: "SciPy"
+    environment: "python"
+    version: "auto"  # will be detected at runtime
+    methods:
+      - "linprog"  # for LP problems
+    timeout: 300  # seconds
+    enabled: true

@@ -114,10 +114,34 @@ The project follows a staged development approach:
 
 ## CODING PROTOCOL
 
-Coding Instructions
+### Task Development Workflow
+Follow tasks.md sequentially, completing one task at a time:
+1. **Complete the task** following its specific requirements
+2. **Test the implementation** using the provided test criteria
+3. **COMMIT THE CHANGES** immediately after successful completion
+4. **Stop and wait** for user approval before proceeding to next task
+
+### Coding Instructions
 - Write the absolute minimum code required
 - No sweeping changes
 - No unrelated edits - focus on just the task you're on
 - Make code precise, modular, testable
 - Don't break existing functionality
-- If I need to do anything (e.g. Supabase/AWS config), tell me clearly 
+- If I need to do anything (e.g. Supabase/AWS config), tell me clearly
+
+### Git Commit Protocol
+After each completed task:
+- Run `git status` and `git diff` to review changes
+- Add relevant files with `git add`
+- Create descriptive commit message following the pattern:
+  ```
+  Complete Task X: Brief description
+  
+  - Bullet points of what was implemented
+  - Key functionality added
+  - Any important technical details
+  
+  🤖 Generated with [Claude Code](https://claude.ai/code)
+  
+  Co-Authored-By: Claude <noreply@anthropic.com>
+  ```
