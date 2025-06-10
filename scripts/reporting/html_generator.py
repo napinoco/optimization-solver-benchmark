@@ -19,6 +19,16 @@ try:
 except ImportError:
     raise ImportError("jinja2 is required for HTML report generation. Install with: pip install jinja2")
 
+# Import the statistics calculator
+try:
+    from .statistics import StatisticsCalculator
+except ImportError:
+    # When running as main module, use absolute import
+    import sys
+    import os
+    sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+    from statistics import StatisticsCalculator
+
 # Configure logging
 logger = logging.getLogger(__name__)
 
@@ -83,6 +93,9 @@ class HTMLReportGenerator:
             loader=FileSystemLoader(str(self.templates_dir)),
             autoescape=True
         )
+        
+        # Initialize statistics calculator
+        self.stats_calculator = StatisticsCalculator(database_path)
         
         logger.info(f"HTML generator initialized: DB={database_path}, Templates={templates_dir}, Output={output_dir}")
     
@@ -272,16 +285,25 @@ class HTMLReportGenerator:
         """Generate the main dashboard HTML"""
         logger.info("Generating dashboard HTML...")
         
-        # Collect all data
-        solver_stats = self._query_solver_stats()
-        problem_stats = self._query_problem_stats()
+        # Get enhanced statistics from the statistics calculator
+        enhanced_stats = self.stats_calculator.calculate_all_statistics()
+        
+        # Also get basic data for compatibility
         recent_results = self._query_recent_results()
         environment_info = self._query_environment_info()
-        summary = self._calculate_summary_stats(solver_stats)
         
-        # Convert dataclasses to dictionaries for template rendering
-        solver_stats_dict = {name: asdict(stats) for name, stats in solver_stats.items()}
-        problem_stats_dict = {name: asdict(stats) for name, stats in problem_stats.items()}
+        # Convert dataclasses to dictionaries for template rendering and add compatibility fields
+        solver_stats_dict = {}
+        for name, stats in enhanced_stats['solver_statistics'].items():
+            stats_dict = asdict(stats)
+            # Add compatibility field mappings for templates
+            stats_dict['avg_time'] = stats_dict['avg_solve_time']
+            stats_dict['min_time'] = stats_dict['min_solve_time']
+            stats_dict['max_time'] = stats_dict['max_solve_time']
+            stats_dict['unique_problems_solved'] = stats_dict['problems_solved']
+            solver_stats_dict[name] = stats_dict
+        
+        problem_stats_dict = {name: asdict(stats) for name, stats in enhanced_stats['problem_statistics'].items()}
         
         # Load and render template
         template = self.jinja_env.get_template('dashboard.html')
@@ -290,7 +312,9 @@ class HTMLReportGenerator:
             problem_stats=problem_stats_dict,
             recent_results=recent_results,
             environment_info=environment_info,
-            summary=asdict(summary),
+            summary=asdict(enhanced_stats['benchmark_summary']),
+            solver_rankings=enhanced_stats['solver_rankings'],
+            problem_rankings=enhanced_stats['problem_rankings'],
             last_updated=datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         )
         
@@ -300,17 +324,27 @@ class HTMLReportGenerator:
         """Generate solver comparison HTML"""
         logger.info("Generating solver comparison HTML...")
         
-        solver_stats = self._query_solver_stats()
-        problem_stats = self._query_problem_stats()
+        # Get enhanced statistics from the statistics calculator
+        enhanced_stats = self.stats_calculator.calculate_all_statistics()
         
-        # Convert dataclasses to dictionaries for template rendering
-        solver_stats_dict = {name: asdict(stats) for name, stats in solver_stats.items()}
-        problem_stats_dict = {name: asdict(stats) for name, stats in problem_stats.items()}
+        # Convert dataclasses to dictionaries for template rendering and add compatibility fields
+        solver_stats_dict = {}
+        for name, stats in enhanced_stats['solver_statistics'].items():
+            stats_dict = asdict(stats)
+            # Add compatibility field mappings for templates
+            stats_dict['avg_time'] = stats_dict['avg_solve_time']
+            stats_dict['min_time'] = stats_dict['min_solve_time']
+            stats_dict['max_time'] = stats_dict['max_solve_time']
+            stats_dict['unique_problems_solved'] = stats_dict['problems_solved']
+            solver_stats_dict[name] = stats_dict
+        
+        problem_stats_dict = {name: asdict(stats) for name, stats in enhanced_stats['problem_statistics'].items()}
         
         template = self.jinja_env.get_template('solver_comparison.html')
         html_content = template.render(
             solver_stats=solver_stats_dict,
             problem_stats=problem_stats_dict,
+            solver_rankings=enhanced_stats['solver_rankings'],
             last_updated=datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         )
         
@@ -320,24 +354,54 @@ class HTMLReportGenerator:
         """Generate problem analysis HTML"""
         logger.info("Generating problem analysis HTML...")
         
-        problem_stats = self._query_problem_stats()
+        # Get enhanced statistics from the statistics calculator
+        enhanced_stats = self.stats_calculator.calculate_all_statistics()
         
-        # Convert dataclasses to dictionaries for template rendering
-        problem_stats_dict = {name: asdict(stats) for name, stats in problem_stats.items()}
+        # Convert dataclasses to dictionaries for template rendering and add compatibility fields
+        problem_stats_dict = {}
+        for name, stats in enhanced_stats['problem_statistics'].items():
+            stats_dict = asdict(stats)
+            # Add solver_results compatibility field by querying the database
+            solver_results = {}
+            with self._get_database_connection() as conn:
+                cursor = conn.cursor()
+                cursor.execute("""
+                    SELECT 
+                        r.solver_name,
+                        r.status,
+                        r.solve_time,
+                        r.objective_value
+                    FROM results r
+                    WHERE r.problem_name = ?
+                    ORDER BY r.solve_time ASC
+                """, (name,))
+                
+                for result_row in cursor.fetchall():
+                    solver_results[result_row['solver_name']] = {
+                        'status': result_row['status'],
+                        'solve_time': result_row['solve_time'],
+                        'objective_value': result_row['objective_value']
+                    }
+            
+            stats_dict['solver_results'] = solver_results
+            problem_stats_dict[name] = stats_dict
         
         # Create problem info for characteristics section
         problem_info = {}
-        for name, stats in problem_stats.items():
+        for name, stats in enhanced_stats['problem_statistics'].items():
             problem_info[name] = {
                 'type': stats.problem_type,
                 'attempts': stats.total_attempts,
-                'success_rate': stats.success_rate
+                'success_rate': stats.success_rate,
+                'difficulty_score': stats.difficulty_score,
+                'fastest_solver': stats.fastest_solver
             }
         
         template = self.jinja_env.get_template('problem_analysis.html')
         html_content = template.render(
             problem_stats=problem_stats_dict,
             problem_info=problem_info,
+            problem_rankings=enhanced_stats['problem_rankings'],
             last_updated=datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         )
         

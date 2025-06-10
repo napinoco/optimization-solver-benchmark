@@ -187,7 +187,7 @@
                 <h5 class="card-title text-warning">
                     <i class="fas fa-clock me-2"></i>Avg Time
                 </h5>
-                <h2 class="text-warning">0.005s</h2>
+                <h2 class="text-warning">N/A</h2>
                 <p class="text-muted small mb-0">Per benchmark run</p>
             </div>
         </div>
@@ -242,25 +242,6 @@
                             
                             <tr>
                                 <td>
-                                    <strong>SciPy</strong>
-                                    
-                                        <span class="badge bg-success performance-badge ms-2">Perfect</span>
-                                    
-                                </td>
-                                <td>14</td>
-                                <td>
-                                    <span class="text-success">
-                                        100.0%
-                                    </span>
-                                </td>
-                                <td>0.006s</td>
-                                <td>0.001s</td>
-                                <td>0.016s</td>
-                                <td>2</td>
-                            </tr>
-                            
-                            <tr>
-                                <td>
                                     <strong>CVXPY</strong>
                                     
                                         <span class="badge bg-success performance-badge ms-2">Perfect</span>
@@ -275,6 +256,25 @@
                                 <td>0.005s</td>
                                 <td>0.005s</td>
                                 <td>0.006s</td>
+                                <td>2</td>
+                            </tr>
+                            
+                            <tr>
+                                <td>
+                                    <strong>SciPy</strong>
+                                    
+                                        <span class="badge bg-success performance-badge ms-2">Perfect</span>
+                                    
+                                </td>
+                                <td>14</td>
+                                <td>
+                                    <span class="text-success">
+                                        100.0%
+                                    </span>
+                                </td>
+                                <td>0.006s</td>
+                                <td>0.001s</td>
+                                <td>0.016s</td>
                                 <td>2</td>
                             </tr>
                             
@@ -801,16 +801,16 @@
                 <ul class="list-unstyled mb-0">
                     
                     <li class="mb-2">
-                        <strong>SciPy</strong>
+                        <strong>CVXPY</strong>
                         <small class="text-muted d-block">
-                            14 runs, 100.0% success
+                            2 runs, 100.0% success
                         </small>
                     </li>
                     
                     <li class="mb-2">
-                        <strong>CVXPY</strong>
+                        <strong>SciPy</strong>
                         <small class="text-muted d-block">
-                            2 runs, 100.0% success
+                            14 runs, 100.0% success
                         </small>
                     </li>
                     
@@ -849,7 +849,7 @@
                 <div class="col-md-6 text-md-end">
                     <p class="text-muted small mb-2">
                         <i class="fas fa-clock me-1"></i>
-                        Last updated: 2025-06-11 08:12:33
+                        Last updated: 2025-06-11 08:20:40
                     </p>
                     <p class="text-muted small mb-0">
                         <i class="fas fa-code me-1"></i>
@@ -923,12 +923,12 @@
 document.addEventListener('DOMContentLoaded', function() {
     const ctx = document.getElementById('solverPerformanceChart').getContext('2d');
     
-    const solverNames = ["SciPy", "CVXPY", "scipy"];
+    const solverNames = ["CVXPY", "SciPy", "scipy"];
     const avgTimes = [
         
-        0.005756378173828125,
-        
         0.005184531211853027,
+        
+        0.005756378173828125,
         
         0.0
         
