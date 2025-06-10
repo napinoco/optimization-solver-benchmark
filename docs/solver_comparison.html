@@ -216,42 +216,6 @@
                             
                             <tr>
                                 <td>
-                                    <strong class="text-primary">SciPy</strong>
-                                    <br>
-                                    <small class="text-muted">Python</small>
-                                </td>
-                                <td>14</td>
-                                <td>
-                                    <div class="d-flex align-items-center">
-                                        <span class="text-success fw-bold">
-                                            100.0%
-                                        </span>
-                                        <div class="progress ms-2" style="width: 60px; height: 8px;">
-                                            <div class="progress-bar bg-success" 
-                                                 style="width: 100.0%"></div>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td>
-                                    <span class="fw-bold">0.006s</span>
-                                    
-                                        <span class="badge bg-success ms-1">Fastest</span>
-                                    
-                                </td>
-                                <td>0.001s</td>
-                                <td>0.016s</td>
-                                <td>0.000s</td>
-                                <td>2</td>
-                                <td>
-                                    
-                                    <span class="text-warning fw-bold">
-                                        70.0
-                                    </span>
-                                </td>
-                            </tr>
-                            
-                            <tr>
-                                <td>
                                     <strong class="text-primary">CVXPY</strong>
                                     <br>
                                     <small class="text-muted">Python</small>
@@ -271,6 +235,8 @@
                                 <td>
                                     <span class="fw-bold">0.005s</span>
                                     
+                                        <span class="badge bg-success ms-1">Fastest</span>
+                                    
                                 </td>
                                 <td>0.005s</td>
                                 <td>0.006s</td>
@@ -280,6 +246,40 @@
                                     
                                     <span class="text-warning fw-bold">
                                         73.0
+                                    </span>
+                                </td>
+                            </tr>
+                            
+                            <tr>
+                                <td>
+                                    <strong class="text-primary">SciPy</strong>
+                                    <br>
+                                    <small class="text-muted">Python</small>
+                                </td>
+                                <td>14</td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <span class="text-success fw-bold">
+                                            100.0%
+                                        </span>
+                                        <div class="progress ms-2" style="width: 60px; height: 8px;">
+                                            <div class="progress-bar bg-success" 
+                                                 style="width: 100.0%"></div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="fw-bold">0.006s</span>
+                                    
+                                </td>
+                                <td>0.001s</td>
+                                <td>0.016s</td>
+                                <td>0.000s</td>
+                                <td>2</td>
+                                <td>
+                                    
+                                    <span class="text-warning fw-bold">
+                                        70.0
                                     </span>
                                 </td>
                             </tr>
@@ -418,7 +418,7 @@
                 <div class="col-md-6 text-md-end">
                     <p class="text-muted small mb-2">
                         <i class="fas fa-clock me-1"></i>
-                        Last updated: 2025-06-11 08:12:33
+                        Last updated: 2025-06-11 08:20:40
                     </p>
                     <p class="text-muted small mb-0">
                         <i class="fas fa-code me-1"></i>
@@ -489,12 +489,12 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    const solverNames = ["SciPy", "CVXPY", "scipy"];
+    const solverNames = ["CVXPY", "SciPy", "scipy"];
     const avgTimes = [
         
-        0.005756378173828125,
-        
         0.005184531211853027,
+        
+        0.005756378173828125,
         
         0.0
         
@@ -593,7 +593,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const datasets = solverNames.map((solverName, index) => ({
         label: solverName,
         data: problemNames.map(problemName => {
-            const problemData = {"SIMPLE_LP": {"name": "SIMPLE_LP", "problem_type": "LP", "solver_results": {"CVXPY": {"objective_value": 5.982995652060769e-10, "solve_time": 0.005861043930053711, "status": "optimal"}, "SciPy": {"objective_value": 0.0, "solve_time": 0.007433891296386719, "status": "optimal"}}, "success_rate": 1.0, "successful_attempts": 11, "total_attempts": 11}, "SIMPLE_QP": {"name": "SIMPLE_QP", "problem_type": "QP", "solver_results": {"CVXPY": {"objective_value": 7.286774213686732e-10, "solve_time": 0.004508018493652344, "status": "optimal"}, "SciPy": {"objective_value": 5.135527253823579e-06, "solve_time": 0.016376018524169922, "status": "optimal"}}, "success_rate": 1.0, "successful_attempts": 5, "total_attempts": 5}, "simple_lp": {"name": "simple_lp", "problem_type": "Unknown", "solver_results": {"scipy": {"objective_value": null, "solve_time": 0.0001862049102783203, "status": "error"}}, "success_rate": 0.0, "successful_attempts": 0, "total_attempts": 2}, "simple_qp": {"name": "simple_qp", "problem_type": "Unknown", "solver_results": {"scipy": {"objective_value": null, "solve_time": 0.00013113021850585938, "status": "error"}}, "success_rate": 0.0, "successful_attempts": 0, "total_attempts": 2}};
+            const problemData = {"SIMPLE_LP": {"avg_solve_time": 0.0026150399988347835, "difficulty_score": 5.2300799976695676e-05, "fastest_solver": "SciPy", "max_solve_time": 0.007433891296386719, "min_solve_time": 0.0008921623229980469, "name": "SIMPLE_LP", "problem_type": "LP", "slowest_solver": "SciPy", "success_rate": 1.0, "successful_attempts": 11, "total_attempts": 11}, "SIMPLE_QP": {"avg_solve_time": 0.012438583374023437, "difficulty_score": 0.00024877166748046874, "fastest_solver": "CVXPY", "max_solve_time": 0.016376018524169922, "min_solve_time": 0.004508018493652344, "name": "SIMPLE_QP", "problem_type": "QP", "slowest_solver": "SciPy", "success_rate": 1.0, "successful_attempts": 5, "total_attempts": 5}, "simple_lp": {"avg_solve_time": 0.0, "difficulty_score": 0.8, "fastest_solver": null, "max_solve_time": 0.0, "min_solve_time": 0.0, "name": "simple_lp", "problem_type": "Unknown", "slowest_solver": null, "success_rate": 0.0, "successful_attempts": 0, "total_attempts": 2}, "simple_qp": {"avg_solve_time": 0.0, "difficulty_score": 0.8, "fastest_solver": null, "max_solve_time": 0.0, "min_solve_time": 0.0, "name": "simple_qp", "problem_type": "Unknown", "slowest_solver": null, "success_rate": 0.0, "successful_attempts": 0, "total_attempts": 2}};
             const solverResults = problemData[problemName].solver_results;
             return solverResults[solverName] ? solverResults[solverName].solve_time : null;
         }),
