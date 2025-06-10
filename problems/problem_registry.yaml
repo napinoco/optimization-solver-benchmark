@@ -1,0 +1,17 @@
+# Problem registry for optimization solver benchmark
+problems:
+  light_set:
+    lp:
+      - name: "simple_lp"
+        file_path: "problems/light_set/lp/simple_lp.mps"
+        problem_class: "LP"
+        description: "Simple 2-variable, 2-constraint linear program: max 3x1 + 2x2 s.t. x1 + x2 <= 4, 2x1 + x2 <= 6, x1,x2 >= 0"
+        variables: 2
+        constraints: 2
+    qp:
+      - name: "simple_qp"
+        file_path: "problems/light_set/qp/simple_qp.qps"
+        problem_class: "QP"
+        description: "Simple 2-variable quadratic program: min x1^2 + x2^2 s.t. x1 + x2 <= 1, x1,x2 >= 0"
+        variables: 2
+        constraints: 1
