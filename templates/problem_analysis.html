@@ -1,0 +1,530 @@
+{% extends "base.html" %}
+
+{% block title %}Problem Analysis - Optimization Solver Benchmark{% endblock %}
+
+{% block breadcrumb %}
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{{ url_for('dashboard') if url_for else '#' }}">Dashboard</a></li>
+        <li class="breadcrumb-item active">Problem Analysis</li>
+    </ol>
+</nav>
+{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h2>
+            <i class="fas fa-puzzle-piece me-2"></i>Problem Analysis
+        </h2>
+        <p class="text-muted">Analyze solver performance across different optimization problem types and characteristics.</p>
+    </div>
+</div>
+
+<!-- Problem Type Overview -->
+{% if problem_stats %}
+<div class="row mb-4">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-chart-pie me-2"></i>Problem Type Distribution
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="chart-container" style="height: 300px;">
+                    <canvas id="problemTypeChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h6 class="card-title mb-0">
+                    <i class="fas fa-info-circle me-2"></i>Problem Statistics
+                </h6>
+            </div>
+            <div class="card-body">
+                {% set problem_types = {} %}
+                {% for problem_name, stats in problem_stats.items() %}
+                    {% set problem_type = stats.get('type', 'Unknown') %}
+                    {% if problem_type in problem_types %}
+                        {% set _ = problem_types.update({problem_type: problem_types[problem_type] + 1}) %}
+                    {% else %}
+                        {% set _ = problem_types.update({problem_type: 1}) %}
+                    {% endif %}
+                {% endfor %}
+                
+                <dl class="row mb-0">
+                    <dt class="col-sm-6">Total Problems:</dt>
+                    <dd class="col-sm-6">{{ problem_stats | length }}</dd>
+                    
+                    {% for problem_type, count in problem_types.items() %}
+                    <dt class="col-sm-6">{{ problem_type }}:</dt>
+                    <dd class="col-sm-6">{{ count }}</dd>
+                    {% endfor %}
+                    
+                    <dt class="col-sm-6">Avg Success Rate:</dt>
+                    <dd class="col-sm-6">
+                        {% set total_success_rate = problem_stats.values() | map(attribute='success_rate') | sum %}
+                        {{ "%.1f%%" | format((total_success_rate / problem_stats.values() | length) * 100) if problem_stats else "0%" }}
+                    </dd>
+                </dl>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Problem Difficulty Analysis -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-chart-bar me-2"></i>Problem Difficulty Analysis
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="chart-container">
+                    <canvas id="difficultyChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Detailed Problem Results -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-table me-2"></i>Problem Performance Details
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped" id="problemTable">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Problem</th>
+                                <th>Type</th>
+                                <th>Attempts</th>
+                                <th>Success Rate</th>
+                                <th>Best Time</th>
+                                <th>Worst Time</th>
+                                <th>Best Solver</th>
+                                <th>Difficulty</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for problem_name, stats in problem_stats.items() %}
+                            <tr>
+                                <td>
+                                    <strong class="text-primary">{{ problem_name }}</strong>
+                                    {% if stats.get('description') %}
+                                    <br><small class="text-muted">{{ stats.description }}</small>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <span class="badge bg-secondary">{{ stats.get('type', 'Unknown') }}</span>
+                                </td>
+                                <td>{{ stats.total_attempts }}</td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <span class="{% if stats.success_rate >= 0.9 %}text-success{% elif stats.success_rate >= 0.5 %}text-warning{% else %}text-danger{% endif %} fw-bold">
+                                            {{ "%.1f%%" | format(stats.success_rate * 100) }}
+                                        </span>
+                                        <div class="progress ms-2" style="width: 50px; height: 6px;">
+                                            <div class="progress-bar {% if stats.success_rate >= 0.9 %}bg-success{% elif stats.success_rate >= 0.5 %}bg-warning{% else %}bg-danger{% endif %}" 
+                                                 style="width: {{ stats.success_rate * 100 }}%"></div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    {% set best_time = stats.solver_results.values() | selectattr('status', 'equalto', 'optimal') | map(attribute='solve_time') | min %}
+                                    {{ "%.3fs" | format(best_time) if best_time else "N/A" }}
+                                </td>
+                                <td>
+                                    {% set worst_time = stats.solver_results.values() | selectattr('status', 'equalto', 'optimal') | map(attribute='solve_time') | max %}
+                                    {{ "%.3fs" | format(worst_time) if worst_time else "N/A" }}
+                                </td>
+                                <td>
+                                    {% set best_solver = none %}
+                                    {% set best_time = none %}
+                                    {% for solver_name, result in stats.solver_results.items() %}
+                                        {% if result.status == 'optimal' and (best_time is none or result.solve_time < best_time) %}
+                                            {% set best_solver = solver_name %}
+                                            {% set best_time = result.solve_time %}
+                                        {% endif %}
+                                    {% endfor %}
+                                    {% if best_solver %}
+                                        <span class="badge bg-success">{{ best_solver }}</span>
+                                    {% else %}
+                                        <span class="text-muted">None</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if stats.success_rate >= 0.9 %}
+                                        <span class="badge bg-success">Easy</span>
+                                    {% elif stats.success_rate >= 0.7 %}
+                                        <span class="badge bg-warning">Medium</span>
+                                    {% elif stats.success_rate >= 0.3 %}
+                                        <span class="badge bg-danger">Hard</span>
+                                    {% else %}
+                                        <span class="badge bg-dark">Very Hard</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Solver Performance on Each Problem -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-heatmap me-2"></i>Solver-Problem Performance Matrix
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="chart-container">
+                    <canvas id="heatmapChart"></canvas>
+                </div>
+                
+                <div class="mt-3">
+                    <small class="text-muted">
+                        <strong>Legend:</strong> 
+                        <span class="badge bg-success me-2">Optimal</span>
+                        <span class="badge bg-warning me-2">Suboptimal</span>
+                        <span class="badge bg-danger me-2">Failed</span>
+                        Color intensity represents relative solve time.
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Problem Characteristics -->
+{% if problem_info %}
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-cogs me-2"></i>Problem Characteristics
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    {% for problem_name, info in problem_info.items() %}
+                    <div class="col-md-6 col-lg-4 mb-3">
+                        <div class="card border-light h-100">
+                            <div class="card-body">
+                                <h6 class="card-title text-primary">{{ problem_name }}</h6>
+                                <dl class="row mb-0 small">
+                                    <dt class="col-sm-6">Type:</dt>
+                                    <dd class="col-sm-6">{{ info.get('type', 'Unknown') }}</dd>
+                                    
+                                    <dt class="col-sm-6">Variables:</dt>
+                                    <dd class="col-sm-6">{{ info.get('variables', 'N/A') }}</dd>
+                                    
+                                    <dt class="col-sm-6">Constraints:</dt>
+                                    <dd class="col-sm-6">{{ info.get('constraints', 'N/A') }}</dd>
+                                    
+                                    {% if info.get('file_size') %}
+                                    <dt class="col-sm-6">File Size:</dt>
+                                    <dd class="col-sm-6">{{ info.file_size }}</dd>
+                                    {% endif %}
+                                </dl>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- No Data Message -->
+{% if not problem_stats %}
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body text-center py-5">
+                <i class="fas fa-puzzle-piece fa-3x text-muted mb-3"></i>
+                <h4 class="text-muted">No Problem Data Available</h4>
+                <p class="text-muted">Run benchmarks to analyze problem-specific performance characteristics.</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+{% endblock %}
+
+{% block extra_js %}
+{% if problem_stats %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const problemNames = {{ problem_stats.keys() | list | tojson }};
+    const successRates = [
+        {% for name in problem_stats.keys() %}
+        {{ problem_stats[name].success_rate * 100 }}{{ ',' if not loop.last }}
+        {% endfor %}
+    ];
+    
+    // Get problem types for color coding
+    const problemTypes = problemNames.map(name => {
+        const stats = {{ problem_stats | tojson }};
+        return stats[name].type || 'Unknown';
+    });
+    
+    const typeColors = {
+        'LP': 'rgba(255, 99, 132, 0.8)',
+        'QP': 'rgba(54, 162, 235, 0.8)',
+        'SDP': 'rgba(255, 205, 86, 0.8)',
+        'SOCP': 'rgba(75, 192, 192, 0.8)',
+        'Unknown': 'rgba(153, 102, 255, 0.8)'
+    };
+    
+    // Problem Type Distribution Chart
+    const typeCtx = document.getElementById('problemTypeChart').getContext('2d');
+    const typeCounts = {};
+    problemTypes.forEach(type => {
+        typeCounts[type] = (typeCounts[type] || 0) + 1;
+    });
+    
+    new Chart(typeCtx, {
+        type: 'doughnut',
+        data: {
+            labels: Object.keys(typeCounts),
+            datasets: [{
+                data: Object.values(typeCounts),
+                backgroundColor: Object.keys(typeCounts).map(type => typeColors[type] || typeColors['Unknown']),
+                borderWidth: 2
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                },
+                title: {
+                    display: true,
+                    text: 'Distribution by Problem Type'
+                }
+            }
+        }
+    });
+    
+    // Difficulty Analysis Chart
+    const diffCtx = document.getElementById('difficultyChart').getContext('2d');
+    const avgTimes = problemNames.map(name => {
+        const stats = {{ problem_stats | tojson }};
+        const solverResults = Object.values(stats[name].solver_results);
+        const optimalResults = solverResults.filter(r => r.status === 'optimal');
+        if (optimalResults.length === 0) return 0;
+        return optimalResults.reduce((sum, r) => sum + r.solve_time, 0) / optimalResults.length;
+    });
+    
+    new Chart(diffCtx, {
+        type: 'scatter',
+        data: {
+            datasets: [{
+                label: 'Problems',
+                data: problemNames.map((name, i) => ({
+                    x: avgTimes[i],
+                    y: successRates[i],
+                    problemName: name,
+                    problemType: problemTypes[i]
+                })),
+                backgroundColor: problemNames.map((name, i) => typeColors[problemTypes[i]] || typeColors['Unknown']),
+                borderColor: problemNames.map((name, i) => typeColors[problemTypes[i]]?.replace('0.8', '1') || typeColors['Unknown'].replace('0.8', '1')),
+                borderWidth: 2,
+                pointRadius: 8
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                },
+                title: {
+                    display: true,
+                    text: 'Problem Difficulty: Success Rate vs Average Solve Time'
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            const point = context.raw;
+                            return [
+                                `Problem: ${point.problemName}`,
+                                `Type: ${point.problemType}`,
+                                `Success Rate: ${point.y.toFixed(1)}%`,
+                                `Avg Time: ${point.x.toFixed(3)}s`
+                            ];
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Average Solve Time (seconds)'
+                    },
+                    beginAtZero: true
+                },
+                y: {
+                    title: {
+                        display: true,
+                        text: 'Success Rate (%)'
+                    },
+                    beginAtZero: true,
+                    max: 100
+                }
+            }
+        }
+    });
+    
+    // Performance Matrix (simplified visualization)
+    const heatmapCtx = document.getElementById('heatmapChart').getContext('2d');
+    
+    // Get all solver names
+    const allSolvers = new Set();
+    Object.values({{ problem_stats | tojson }}).forEach(stats => {
+        Object.keys(stats.solver_results).forEach(solver => allSolvers.add(solver));
+    });
+    const solverNames = Array.from(allSolvers);
+    
+    // Create matrix data
+    const matrixData = [];
+    problemNames.forEach((problemName, pIndex) => {
+        solverNames.forEach((solverName, sIndex) => {
+            const stats = {{ problem_stats | tojson }};
+            const result = stats[problemName].solver_results[solverName];
+            
+            if (result) {
+                let value = 0;
+                if (result.status === 'optimal') {
+                    // Normalize time to 0-1 scale (inverted so faster = higher value)
+                    const maxTime = Math.max(...Object.values(stats[problemName].solver_results)
+                        .filter(r => r.status === 'optimal')
+                        .map(r => r.solve_time));
+                    value = maxTime > 0 ? 1 - (result.solve_time / maxTime) : 1;
+                }
+                
+                matrixData.push({
+                    x: sIndex,
+                    y: pIndex,
+                    v: value,
+                    status: result.status,
+                    time: result.solve_time,
+                    solver: solverName,
+                    problem: problemName
+                });
+            }
+        });
+    });
+    
+    new Chart(heatmapCtx, {
+        type: 'scatter',
+        data: {
+            datasets: [{
+                label: 'Performance',
+                data: matrixData,
+                backgroundColor: function(context) {
+                    const point = context.raw;
+                    if (point.status === 'optimal') {
+                        const intensity = point.v;
+                        return `rgba(40, 167, 69, ${0.3 + intensity * 0.7})`;
+                    } else if (point.status === 'error') {
+                        return 'rgba(220, 53, 69, 0.8)';
+                    } else {
+                        return 'rgba(255, 193, 7, 0.8)';
+                    }
+                },
+                pointRadius: 15
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                },
+                title: {
+                    display: true,
+                    text: 'Solver Performance Matrix'
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            const point = context.raw;
+                            return [
+                                `Solver: ${point.solver}`,
+                                `Problem: ${point.problem}`,
+                                `Status: ${point.status}`,
+                                `Time: ${point.time.toFixed(3)}s`
+                            ];
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    type: 'linear',
+                    position: 'bottom',
+                    title: {
+                        display: true,
+                        text: 'Solvers'
+                    },
+                    ticks: {
+                        callback: function(value) {
+                            return solverNames[Math.round(value)] || '';
+                        },
+                        stepSize: 1
+                    },
+                    min: -0.5,
+                    max: solverNames.length - 0.5
+                },
+                y: {
+                    title: {
+                        display: true,
+                        text: 'Problems'
+                    },
+                    ticks: {
+                        callback: function(value) {
+                            return problemNames[Math.round(value)] || '';
+                        },
+                        stepSize: 1
+                    },
+                    min: -0.5,
+                    max: problemNames.length - 0.5
+                }
+            }
+        }
+    });
+});
+</script>
+{% endif %}
+{% endblock %}
