@@ -12,6 +12,7 @@ sys.path.insert(0, str(project_root))
 from scripts.benchmark.solver_interface import SolverInterface, SolverResult
 from scripts.benchmark.problem_loader import ProblemData
 from scripts.utils.logger import get_logger
+from scripts.utils.solver_diagnostics import SolverDiagnostics
 
 logger = get_logger("cvxpy_solver")
 
@@ -20,16 +21,20 @@ class CvxpySolver(SolverInterface):
     
     def __init__(self, name: str = None, timeout: float = 300.0, 
                  backend: str = "CLARABEL", verbose: bool = False,
-                 solver_options: Optional[Dict] = None):
+                 solver_options: Optional[Dict] = None,
+                 problem_optimizations: Optional[Dict] = None,
+                 enable_diagnostics: bool = True):
         """
-        Initialize CVXPY solver with specific backend.
+        Initialize CVXPY solver with specific backend and enhanced configuration.
         
         Args:
             name: Solver name (auto-generated if None)
             timeout: Timeout in seconds
             backend: CVXPY backend solver (CLARABEL, OSQP, SCS, etc.)
             verbose: Whether to enable verbose solver output
-            solver_options: Additional options for the backend solver
+            solver_options: Backend-specific solver options
+            problem_optimizations: Problem-type-specific parameter overrides
+            enable_diagnostics: Enable parameter validation and diagnostics
         """
         # Auto-generate name with proper "(via CVXPY)" format
         if name is None:
@@ -39,6 +44,26 @@ class CvxpySolver(SolverInterface):
         self.backend = backend
         self.verbose = verbose
         self.solver_options = solver_options or {}
+        self.problem_optimizations = problem_optimizations or {}
+        self.enable_diagnostics = enable_diagnostics
+        
+        # Initialize diagnostics if enabled
+        self.diagnostics = None
+        if self.enable_diagnostics:
+            try:
+                self.diagnostics = SolverDiagnostics()
+                # Validate parameters
+                if self.solver_options:
+                    validation_results = self.diagnostics.validate_backend_parameters(
+                        self.backend, self.solver_options
+                    )
+                    failed_validations = [r for r in validation_results if not r.passed]
+                    if failed_validations:
+                        self.logger.warning(f"Parameter validation issues for {self.backend}:")
+                        for result in failed_validations:
+                            self.logger.warning(f"  {result.message}")
+            except Exception as e:
+                self.logger.warning(f"Could not initialize diagnostics: {e}")
         
         # Verify solver availability
         available_solvers = cp.installed_solvers()
@@ -82,6 +107,23 @@ class CvxpySolver(SolverInterface):
             "supported_problem_types": backend_capabilities.get(self.backend, ["LP", "QP"]),
             "backend_name": self.backend
         }
+    
+    def _get_optimized_options(self, problem_class: str) -> Dict[str, Any]:
+        """Get solver options optimized for specific problem type."""
+        # Start with base solver options
+        options = self.solver_options.copy()
+        
+        # Apply problem-specific optimizations if available
+        if problem_class in self.problem_optimizations:
+            optimizations = self.problem_optimizations[problem_class]
+            options.update(optimizations)
+            self.logger.debug(f"Applied {len(optimizations)} problem-specific optimizations for {problem_class}")
+        
+        # Add verbosity setting
+        if 'verbose' not in options:
+            options['verbose'] = self.verbose
+        
+        return options
     
     def solve(self, problem: ProblemData) -> SolverResult:
         """
@@ -173,10 +215,8 @@ class CvxpySolver(SolverInterface):
         
         self.logger.debug(f"LP problem: {n_vars} variables, {len(constraints)} constraints")
         
-        # Solve
-        solver_options = self.solver_options.copy()
-        if 'verbose' not in solver_options:
-            solver_options['verbose'] = self.verbose
+        # Get optimized solver options for this problem type
+        solver_options = self._get_optimized_options(problem.problem_class)
         
         try:
             cvx_problem.solve(
@@ -303,10 +343,8 @@ class CvxpySolver(SolverInterface):
         self.logger.debug(f"QP problem: {n_vars} variables, P shape: {P.shape}, "
                          f"{len(constraints)} constraints")
         
-        # Solve
-        solver_options = self.solver_options.copy()
-        if 'verbose' not in solver_options:
-            solver_options['verbose'] = self.verbose
+        # Get optimized solver options for this problem type
+        solver_options = self._get_optimized_options(problem.problem_class)
         
         try:
             cvx_problem.solve(
