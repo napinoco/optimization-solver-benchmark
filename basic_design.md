@@ -101,19 +101,19 @@ GitHub Actions (6-hour limit)
 - **SQLite Storage** - Local file-based
 - **Basic HTML Display** - Tabular result display
 
-### Phase 2: Feature Extension
-**Goal**: Practical benchmark system
-- **Octave Support** - Execution in MATLAB-compatible environment
-- **External Storage** - Support for large problems
-- **Detailed Analysis** - Graph and statistical information display
-- **CI Optimization** - Parallel execution and cache utilization
+### Phase 2: Data Publishing Platform
+**Goal**: Reliable data publishing system
+- **Octave Support** - MATLAB-compatible optimization environment
+- **Data Publishing** - Clean JSON/CSV exports for research use
+- **External Storage** - Basic support for large problem sets
+- **Essential Production** - Testing, monitoring, and reliability features
 
-### Phase 3: Complete Version
-**Goal**: Production-ready public system
-- **Manual Result Integration** - Import local and MATLAB execution results
-- **Advanced Visualization** - Interactive dashboard
-- **Problem Management** - Complete support for standard benchmark collections
-- **Performance Optimization** - Support for large-scale execution
+### Phase 3: Advanced Features (Optional)
+**Goal**: Enhanced analysis capabilities
+- **Advanced Analytics** - Statistical analysis and performance profiling
+- **Interactive Dashboards** - Complex visualizations and trends
+- **Solver Recommendations** - AI-powered solver selection
+- **MATLAB Integration** - Support for commercial solver environments
 
 ## Technical Choice Rationale
 

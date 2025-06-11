@@ -52,11 +52,15 @@ optimizer-benchmark/
 │   │   ├── qp/                   # Quadratic programming problems
 │   │   │   ├── qp_example1.qps
 │   │   │   └── qp_example2.qps
+│   │   ├── socp/                 # Second-order cone programming
+│   │   │   └── portfolio_optimization.py
 │   │   └── sdp/                  # Semidefinite programming problems
 │   │       ├── arch0.dat-s
 │   │       └── control1.dat-s
-│   ├── standard_set/             # Phase 2: Standard problems
-│   │   └── external_urls.yaml    # External storage problem URLs
+│   ├── medium_set/               # Phase 2: External medium problems
+│   │   └── external_urls.yaml    # External storage URLs
+│   ├── large_set/                # Phase 2: External large problems  
+│   │   └── external_urls.yaml    # External storage URLs
 │   └── problem_registry.yaml     # Problem metadata
 │
 ├── scripts/
@@ -71,14 +75,14 @@ optimizer-benchmark/
 │   ├── solvers/
 │   │   ├── python/
 │   │   │   ├── __init__.py
-│   │   │   ├── cvxpy_runner.py   # CVXPY execution
-│   │   │   ├── scipy_runner.py   # SciPy execution
-│   │   │   └── gurobipy_runner.py # Gurobi execution
+│   │   │   ├── cvxpy_runner.py   # CVXPY execution with multiple backends
+│   │   │   └── scipy_runner.py   # SciPy execution
 │   │   └── octave/
+│   │       ├── __init__.py
 │   │       ├── octave_runner.py  # Octave execution control
-│   │       ├── quadprog_test.m   # Quadratic programming test
-│   │       ├── linprog_test.m    # Linear programming test
-│   │       └── utils.m           # Utility functions
+│   │       ├── linprog_solver.m  # Linear programming
+│   │       ├── quadprog_solver.m # Quadratic programming
+│   │       └── problem_loader.m  # Problem loading utilities
 │   │
 │   ├── database/
 │   │   ├── __init__.py
@@ -89,10 +93,10 @@ optimizer-benchmark/
 │   │
 │   ├── reporting/
 │   │   ├── __init__.py
-│   │   ├── html_generator.py     # HTML generation
-│   │   ├── chart_generator.py    # Chart generation
-│   │   ├── statistics.py         # Statistical calculations
-│   │   └── export.py             # Data export
+│   │   ├── data_publisher.py     # JSON/CSV data publishing
+│   │   ├── html_generator.py     # Simple HTML generation
+│   │   ├── statistics.py         # Basic statistical calculations
+│   │   └── export.py             # Multi-format data export
 │   │
 │   └── utils/
 │       ├── __init__.py
@@ -279,28 +283,51 @@ optimizer-benchmark/
 
 ## Extension Points
 
-### Phase 2 Extension (Octave Support)
+### Phase 2 Extensions (Current)
+
+#### Octave Support
 ```
 ├── scripts/solvers/octave/
+│   ├── octave_runner.py
+│   ├── linprog_solver.m
+│   ├── quadprog_solver.m
+│   └── problem_loader.m
 ├── config/octave_config.yaml
-└── .github/workflows/octave.yml
+└── .github/workflows/octave_test.yml
 ```
 
-### Phase 3 Extension (External Storage)
+#### External Storage (Simplified)
 ```
 ├── scripts/storage/
-│   ├── s3_handler.py
-│   ├── gcs_handler.py
-│   └── url_resolver.py
-├── config/storage_config.yaml
-└── problems/external/
+│   ├── external_storage.py
+│   └── external_manager.py
+├── problems/medium_set/external_urls.yaml
+└── problems/large_set/external_urls.yaml
 ```
 
-### Phase 4 Extension (MATLAB Support)
+#### Data Publishing Infrastructure
+```
+├── scripts/reporting/data_publisher.py
+├── docs/data/
+│   ├── results.json
+│   ├── summary.json
+│   └── metadata.json
+└── scripts/api/ (basic endpoints)
+```
+
+### Future Extensions (Optional)
+
+#### Advanced Analytics (Optional)
+```
+├── scripts/analytics/ (moved from core)
+├── advanced_reports/
+└── machine_learning_models/
+```
+
+#### MATLAB Support (Future)
 ```
 ├── scripts/solvers/matlab/
 ├── config/matlab_config.yaml
-├── scripts/manual_upload.py
 └── api/result_submission.py
 ```
 
