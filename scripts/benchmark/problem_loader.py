@@ -272,6 +272,15 @@ def load_python_problem(file_path: str, problem_class: str) -> ProblemData:
                 problem_dict, problem_data = module.generate_facility_location_socp()
             else:
                 raise ValueError(f"No suitable SOCP generation function found in {file_path}")
+        elif problem_class == "SDP":
+            if hasattr(module, 'generate_matrix_completion_sdp'):
+                problem_dict, problem_data = module.generate_matrix_completion_sdp()
+            elif hasattr(module, 'generate_control_lmi_sdp'):
+                problem_dict, problem_data = module.generate_control_lmi_sdp()
+            elif hasattr(module, 'generate_max_cut_sdp'):
+                problem_dict, problem_data = module.generate_max_cut_sdp()
+            else:
+                raise ValueError(f"No suitable SDP generation function found in {file_path}")
         else:
             raise ValueError(f"Unsupported Python problem class: {problem_class}")
         

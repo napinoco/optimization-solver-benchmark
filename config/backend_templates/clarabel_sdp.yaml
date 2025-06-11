@@ -1,0 +1,106 @@
+# CLARABEL SDP Backend Configuration Template
+# Rust-based interior point solver with comprehensive SDP support
+
+clarabel_sdp_cvxpy:
+  name: "CLARABEL (via CVXPY)"
+  environment: "python"
+  backend: "CLARABEL"
+  
+  # Problem type support
+  supported_types: ["LP", "QP", "SOCP", "SDP"]
+  
+  # Performance characteristics
+  performance:
+    tier: "high"
+    memory_efficiency: "high"
+    stability: "excellent"
+    recommended_for: ["semidefinite_programming", "control_theory", "machine_learning", "combinatorial_optimization"]
+  
+  # MINIMAL CONFIGURATION (for fair baseline comparison)
+  # Recommended for initial benchmarking to establish baseline performance
+  solver_options:
+    verbose: false          # Disable verbose output (essential for clean benchmarking)
+  
+  # ADVANCED CONFIGURATION OPTIONS (commented out for minimal baseline)
+  # Uncomment and adjust these parameters for performance tuning:
+  # solver_options:
+  #   # Convergence tolerances
+  #   feastol: 1.0e-8         # Feasibility tolerance
+  #   gap_tol: 1.0e-8         # Duality gap tolerance
+  #   
+  #   # Iteration limits
+  #   max_iter: 200           # Maximum iterations
+  #   time_limit: 1000.0      # Time limit in seconds
+  #   
+  #   # Interior point parameters
+  #   sigma: 1.0e-8           # Centering parameter
+  #   alpha: 0.99             # Step size scaling
+  #   
+  #   # Linear algebra settings
+  #   direct_solve_method: "qdldl"  # Direct solver method
+  #   static_regularization_enable: true
+  #   static_regularization_constant: 1.0e-8
+  #   dynamic_regularization_enable: true
+  #   
+  #   # Presolve and scaling
+  #   presolve_enable: true   # Enable presolving
+  #   equilibrate_enable: true # Enable matrix equilibration
+  #   
+  #   # Advanced SDP settings
+  #   chordal_decomposition_enable: false  # Use chordal decomposition for large SDP
+  #   reduced_tol: 1.0e-4     # Reduced accuracy tolerance
+  #   
+  #   # Verbosity
+  #   verbose: false          # Enable verbose output
+    
+  # Installation requirements
+  installation:
+    package: "clarabel"
+    min_version: "0.5.0"
+    pip_install: "clarabel>=0.5.0"
+    conda_install: "conda install -c conda-forge clarabel"
+    notes: "Excellent SDP performance, modern Rust implementation with Python bindings"
+  
+  # MINIMAL CONFIGURATION: Empty problem optimizations for baseline comparison
+  problem_optimizations: {}
+  
+  # ADVANCED PROBLEM-SPECIFIC OPTIMIZATIONS (commented out for minimal baseline)
+  # Uncomment and adjust these for performance tuning:
+  # problem_optimizations:
+  #   LP:
+  #     # Linear programming optimizations
+  #     feastol: 1.0e-9
+  #     max_iter: 100
+  #     
+  #   QP:
+  #     # Quadratic programming optimizations
+  #     feastol: 1.0e-8
+  #     gap_tol: 1.0e-8
+  #     
+  #   SOCP:
+  #     # Second-order cone programming optimizations
+  #     feastol: 1.0e-8
+  #     max_iter: 200
+  #     
+  #   SDP:
+  #     # Semidefinite programming optimizations
+  #     feastol: 1.0e-7
+  #     gap_tol: 1.0e-7
+  #     max_iter: 500
+  #     equilibrate_enable: true
+  #     chordal_decomposition_enable: false
+  
+  # Timeout and resource limits
+  timeout: 300
+  memory_limit: null
+  
+  # Diagnostics and monitoring
+  diagnostics:
+    enabled: true
+    track_iterations: true
+    track_objective_progress: true
+    track_feasibility: true
+    track_duality_gap: true
+    track_matrix_properties: true  # For SDP problems
+  
+  enabled: true

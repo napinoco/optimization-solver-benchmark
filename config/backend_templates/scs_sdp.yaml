@@ -1,0 +1,120 @@
+# SCS SDP Backend Configuration Template
+# Splitting Conic Solver with comprehensive SDP support
+
+scs_sdp_cvxpy:
+  name: "SCS (via CVXPY)"
+  environment: "python"
+  backend: "SCS"
+  
+  # Problem type support
+  supported_types: ["LP", "QP", "SOCP", "SDP"]
+  
+  # Performance characteristics
+  performance:
+    tier: "high"
+    memory_efficiency: "medium"
+    stability: "excellent"
+    recommended_for: ["semidefinite_programming", "robust_optimization", "research_applications", "large_scale_problems"]
+  
+  # MINIMAL CONFIGURATION (for fair baseline comparison)
+  # Recommended for initial benchmarking to establish baseline performance
+  solver_options:
+    verbose: false          # Disable verbose output (essential for clean benchmarking)
+  
+  # ADVANCED CONFIGURATION OPTIONS (commented out for minimal baseline)
+  # Uncomment and adjust these parameters for performance tuning:
+  # solver_options:
+  #   # Convergence tolerances
+  #   eps: 1.0e-5             # Convergence tolerance
+  #   
+  #   # Iteration limits
+  #   max_iters: 100000       # Maximum iterations
+  #   
+  #   # Algorithm parameters
+  #   alpha: 1.5              # Relaxation parameter
+  #   rho_x: 1.0e-6          # Primal proximal penalty
+  #   
+  #   # Scaling and normalization
+  #   normalize: true         # Normalize problem data
+  #   scale: 1.0             # Scaling factor
+  #   
+  #   # Adaptive restart
+  #   adaptive_scale: true    # Enable adaptive scaling
+  #   
+  #   # Linear system solver
+  #   use_indirect: true      # Use indirect method for linear systems
+  #   
+  #   # Acceleration
+  #   acceleration_lookback: 10  # Lookback for acceleration
+  #   acceleration_interval: 10 # Acceleration interval
+  #   
+  #   # SDP-specific settings
+  #   cg_rate: 2.0           # Conjugate gradient rate
+  #   verbose: false          # Enable verbose output
+  #   
+  #   # Write data (for debugging)
+  #   write_data_filename: null  # Write problem data to file
+  #   
+  #   # Warm starting  
+  #   warm_start: false       # Enable warm starting
+  #   
+  #   # Time limits
+  #   time_limit_secs: null   # Time limit in seconds
+    
+  # Installation requirements
+  installation:
+    package: "scs"
+    min_version: "3.2.0"
+    pip_install: "scs>=3.2.0"
+    conda_install: "conda install -c conda-forge scs"
+    notes: "Robust SDP solver, excellent for large-scale problems and research"
+  
+  # MINIMAL CONFIGURATION: Empty problem optimizations for baseline comparison
+  problem_optimizations: {}
+  
+  # ADVANCED PROBLEM-SPECIFIC OPTIMIZATIONS (commented out for minimal baseline)
+  # Uncomment and adjust these for performance tuning:
+  # problem_optimizations:
+  #   LP:
+  #     # Linear programming optimizations
+  #     eps: 1.0e-6
+  #     normalize: true
+  #     use_indirect: false
+  #     
+  #   QP:
+  #     # Quadratic programming optimizations  
+  #     alpha: 1.6
+  #     rho_x: 1.0e-6
+  #     adaptive_scale: true
+  #     
+  #   SOCP:
+  #     # Second-order cone programming optimizations
+  #     eps: 1.0e-6
+  #     max_iters: 50000
+  #     acceleration_lookback: 20
+  #     
+  #   SDP:
+  #     # Semidefinite programming optimizations
+  #     eps: 1.0e-4
+  #     max_iters: 25000
+  #     use_indirect: true
+  #     normalize: false
+  #     alpha: 1.8
+  #     adaptive_scale: false
+  #     acceleration_lookback: 0  # Disable acceleration for SDP
+  
+  # Timeout and resource limits
+  timeout: 300
+  memory_limit: null
+  
+  # Diagnostics and monitoring
+  diagnostics:
+    enabled: true
+    track_iterations: true
+    track_objective_progress: true
+    track_residuals: true
+    track_acceleration: true
+    track_cg_iterations: true      # For SDP problems
+    track_matrix_factorization: true  # For SDP problems
+  
+  enabled: true
