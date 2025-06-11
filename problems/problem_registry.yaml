@@ -37,3 +37,25 @@ problems:
         variables: 33
         constraints: 23
         soc_constraints: 15
+    sdp:
+      - name: "matrix_completion"
+        file_path: "problems/light_set/sdp/matrix_completion.py"
+        problem_class: "SDP"
+        description: "Matrix completion with nuclear norm minimization via SDP"
+        variables: 32
+        constraints: 11
+        sdp_constraints: 1
+      - name: "control_lmi"
+        file_path: "problems/light_set/sdp/control_lmi.py"
+        problem_class: "SDP"
+        description: "Lyapunov stability analysis for linear dynamical systems via LMI"
+        variables: 6
+        constraints: 4
+        sdp_constraints: 2
+      - name: "max_cut_relaxation"
+        file_path: "problems/light_set/sdp/max_cut_relaxation.py"
+        problem_class: "SDP"
+        description: "Goemans-Williamson SDP relaxation of the Maximum Cut problem"
+        variables: 15
+        constraints: 6
+        sdp_constraints: 1
