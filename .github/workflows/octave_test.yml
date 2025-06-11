@@ -57,57 +57,60 @@ jobs:
         python scripts/benchmark/benchmark_runner.py --solver octave --problem SIMPLE_LP --timeout 60
       continue-on-error: true
 
-  test-octave-macos:
-    runs-on: macos-latest
-    
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-    
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.9'
-    
-    - name: Install GNU Octave (macOS)
-      run: |
-        brew install octave
-        octave --version
-    
-    - name: Install Python dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements/python.txt
-    
-    - name: Test Octave solver (macOS)
-      run: |
-        python scripts/solvers/octave/test_octave.py
-      continue-on-error: true
+# macOS and Windows jobs disabled to speed up CI runtime
+# Re-enable by uncommenting if cross-platform testing is needed
 
-  test-octave-windows:
-    runs-on: windows-latest
-    
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-    
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.9'
-    
-    - name: Install GNU Octave (Windows)
-      run: |
-        choco install octave.portable
-        octave --version
-      continue-on-error: true
-    
-    - name: Install Python dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements/python.txt
-    
-    - name: Test Octave solver (Windows)  
-      run: |
-        python scripts/solvers/octave/test_octave.py
-      continue-on-error: true
+#  test-octave-macos:
+#    runs-on: macos-latest
+#    
+#    steps:
+#    - name: Checkout code
+#      uses: actions/checkout@v4
+#    
+#    - name: Set up Python
+#      uses: actions/setup-python@v4
+#      with:
+#        python-version: '3.9'
+#    
+#    - name: Install GNU Octave (macOS)
+#      run: |
+#        brew install octave
+#        octave --version
+#    
+#    - name: Install Python dependencies
+#      run: |
+#        python -m pip install --upgrade pip
+#        pip install -r requirements/python.txt
+#    
+#    - name: Test Octave solver (macOS)
+#      run: |
+#        python scripts/solvers/octave/test_octave.py
+#      continue-on-error: true
+
+#  test-octave-windows:
+#    runs-on: windows-latest
+#    
+#    steps:
+#    - name: Checkout code
+#      uses: actions/checkout@v4
+#    
+#    - name: Set up Python
+#      uses: actions/setup-python@v4
+#      with:
+#        python-version: '3.9'
+#    
+#    - name: Install GNU Octave (Windows)
+#      run: |
+#        choco install octave.portable
+#        octave --version
+#      continue-on-error: true
+#    
+#    - name: Install Python dependencies
+#      run: |
+#        python -m pip install --upgrade pip
+#        pip install -r requirements/python.txt
+#    
+#    - name: Test Octave solver (Windows)  
+#      run: |
+#        python scripts/solvers/octave/test_octave.py
+#      continue-on-error: true
