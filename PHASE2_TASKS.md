@@ -1,14 +1,14 @@
-# Phase 2 Development Plan - Enhanced Open-Source Solver Ecosystem
+# Phase 2 Development Plan - Data Publishing Focus
 
 ## Overview
-Phase 2 transforms the MVP into a comprehensive optimization solver benchmark platform by adding multi-backend CVXPY support, expanding problem types (SOCP/SDP), and implementing advanced analytics capabilities.
+Phase 2 transforms the MVP into a robust data publishing platform by expanding solver support, adding Octave environment, and implementing essential features for publishing benchmark results as accessible data.
 
-## Phase 2 Goals
+## Phase 2 Goals (Realigned)
 - **Expand solver ecosystem** with 8+ open-source solvers via CVXPY backends
-- **Add problem types** beyond LP/QP to include SOCP and SDP
-- **Implement external storage** for large problem sets
-- **Advanced analytics** with performance tracking and solver recommendations
-- **Production features** with monitoring and containerization
+- **Add Octave support** for MATLAB-compatible optimization
+- **Implement data publishing** with clean JSON exports and simple visualizations
+- **Add external storage** for large problem sets (simplified)
+- **Essential production features** with testing and monitoring
 
 ---
 
@@ -292,77 +292,246 @@ Phase 2 transforms the MVP into a comprehensive optimization solver benchmark pl
 
 ---
 
-## Advanced Analytics (Tasks 28-32)
+## Data Publishing & Octave Support (Tasks 28-30)
 
-### Task 28: Advanced Statistical Analysis and Benchmarking Metrics
-**Objective**: Implement sophisticated performance analysis
-**Implementation**: Advanced statistical models, performance profiling, solver characterization
+### Task 28: Implement Data Publishing Infrastructure
+**Objective**: Create clean data export system for benchmark results
+**Start**: Complex analytics system
+**End**: Simple, accessible JSON data publishing
 
-### Task 29: Solver Performance Regression Detection
-**Objective**: Detect performance degradation over time
-**Implementation**: Time-series analysis, automated alerts, performance baselines
+**Implementation Plan**:
+1. **Create docs/data/ structure**:
+   - `results.json` - Complete benchmark results in standard format
+   - `summary.json` - Aggregated statistics and solver comparisons
+   - `metadata.json` - Problem and solver information
 
-### Task 30: Time-Series Analysis for Performance Tracking
-**Objective**: Track solver performance evolution
-**Implementation**: Historical performance database, trend analysis, performance forecasting
+2. **Implement data export API**:
+   - CSV export for spreadsheet analysis
+   - JSON API endpoints for programmatic access
+   - Simple filtering and querying capabilities
 
-### Task 31: Solver Recommendation Engine
-**Objective**: Intelligent solver selection based on problem characteristics
-**Implementation**: Machine learning models, problem-solver matching, recommendation algorithms
+3. **Simplify HTML reporting**:
+   - Tabular displays instead of complex dashboards
+   - Focus on presenting data clearly
+   - Maintain original architecture.md design
 
-### Task 32: Export Functionality (PDF, CSV, JSON API)
-**Objective**: Multiple output formats for reports and data
-**Implementation**: PDF generation, CSV exports, RESTful API endpoints
+4. **Reorganize documentation**:
+   - Move technical docs out of docs/ (GitHub Pages)
+   - Keep docs/ focused on published benchmark data
+
+**Files to Create/Modify**:
+- `scripts/reporting/data_publisher.py`
+- `docs/data/` directory structure
+- Simplified HTML templates
+- Updated export functionality
+
+**Test Criteria**:
+- Clean JSON files accessible via GitHub Pages
+- Simple HTML tables displaying results
+- CSV exports work correctly
+- External tools can easily consume data
 
 ---
 
-## Production Features (Tasks 33-35)
+### Task 29: Add Octave Environment Support
+**Objective**: Add MATLAB-compatible optimization environment
+**Start**: Python-only system
+**End**: Python + Octave dual environment support
 
-### Task 33: Automated Testing Framework with Continuous Validation
-**Objective**: Comprehensive testing infrastructure
-**Implementation**: Unit tests, integration tests, performance regression tests
+**Implementation Plan**:
+1. **Create Octave solver interface**:
+   - Octave-specific problem loading
+   - Standard optimization toolbox functions
+   - Result collection and formatting
 
-### Task 34: Docker Containerization for Reproducible Environments
-**Objective**: Containerized deployment for consistency
-**Implementation**: Docker images, docker-compose setup, environment isolation
+2. **Add Octave problem runners**:
+   - Linear programming with linprog
+   - Quadratic programming with quadprog
+   - SOCP/SDP via supported packages
 
-### Task 35: Monitoring and Alerting for Production Deployment
-**Objective**: Production-ready monitoring and alerting
-**Implementation**: Performance monitoring, error alerting, resource usage tracking
+3. **Integrate with benchmark system**:
+   - Octave solver registration
+   - Environment detection and setup
+   - Results comparison with Python solvers
+
+4. **GitHub Actions integration**:
+   - Octave installation in CI
+   - Parallel execution support
+   - Error handling and reporting
+
+**Files to Create/Modify**:
+- `scripts/solvers/octave/` directory
+- `config/octave_config.yaml`
+- `.github/workflows/` updates
+- `requirements/octave.txt`
+
+**Test Criteria**:
+- Octave solvers execute successfully
+- Results comparable to Python equivalents
+- CI/CD pipeline supports Octave
+- Error handling works correctly
 
 ---
 
-## Phase 2 Success Criteria
+### Task 30: Essential Export Functionality
+**Objective**: Implement core data export features for research use
+**Start**: Internal reporting only
+**End**: Multiple export formats for external consumption
 
-### Functional Requirements
+**Implementation Plan**:
+1. **CSV export system**:
+   - Solver performance comparison tables
+   - Problem-wise results export
+   - Configurable column selection
+
+2. **JSON API endpoints**:
+   - RESTful access to benchmark data
+   - Filtering by solver, problem type, date
+   - Pagination for large datasets
+
+3. **Simple report generation**:
+   - Basic PDF reports (not complex dashboards)
+   - Summary statistics tables
+   - Solver comparison charts
+
+4. **Data validation and quality**:
+   - Ensure data consistency across formats
+   - Validate export completeness
+   - Handle missing or incomplete data
+
+**Files to Create/Modify**:
+- Enhanced `scripts/reporting/export.py`
+- `scripts/api/` directory for endpoints
+- Basic PDF generation utilities
+- Data validation modules
+
+**Test Criteria**:
+- CSV files open correctly in spreadsheet software
+- JSON API returns valid, complete data
+- Basic PDF reports are readable
+- All export formats contain consistent information
+
+---
+
+## Essential Production Features (Tasks 31-32)
+
+### Task 31: Automated Testing Framework
+**Objective**: Comprehensive testing for reliability
+**Start**: Ad-hoc testing
+**End**: Complete test coverage with CI integration
+
+**Implementation Plan**:
+1. **Unit tests for all components**:
+   - Solver interfaces and execution
+   - Data export and publishing
+   - Configuration loading and validation
+
+2. **Integration tests**:
+   - End-to-end benchmark execution
+   - GitHub Actions workflow testing
+   - Multi-environment compatibility
+
+3. **Performance regression tests**:
+   - Benchmark execution time monitoring
+   - Memory usage validation
+   - Result consistency checking
+
+4. **Continuous validation**:
+   - Automated test runs on all commits
+   - Test result reporting
+   - Quality gates for releases
+
+**Files to Create/Modify**:
+- `tests/` directory structure
+- Test fixtures and sample data
+- GitHub Actions test workflows
+- Test reporting tools
+
+**Test Criteria**:
+- 90%+ code coverage achieved
+- All critical paths tested
+- CI tests pass consistently
+- Performance regressions detected
+
+---
+
+### Task 32: Basic Monitoring and Alerting
+**Objective**: Essential monitoring for production deployment
+**Start**: No monitoring
+**End**: Basic health monitoring and error alerting
+
+**Implementation Plan**:
+1. **Health monitoring**:
+   - Benchmark execution success rates
+   - GitHub Actions job status tracking
+   - Basic system health checks
+
+2. **Error alerting**:
+   - Failed benchmark notifications
+   - GitHub Issues auto-creation for failures
+   - Email/Slack notifications for critical issues
+
+3. **Performance tracking**:
+   - Execution time monitoring
+   - Resource usage tracking
+   - Simple trend analysis
+
+4. **Dashboard integration**:
+   - Basic status indicators
+   - Recent execution results
+   - System health overview
+
+**Files to Create/Modify**:
+- `scripts/monitoring/` directory
+- GitHub Actions notification setup
+- Basic alerting configuration
+- Health check endpoints
+
+**Test Criteria**:
+- Failed benchmarks trigger alerts
+- Health status accurately reported
+- Performance trends captured
+- Notifications work reliably
+
+---
+
+## Phase 2 Success Criteria (Realigned)
+
+### Core Data Publishing Requirements
+- [ ] Clean JSON data files accessible via GitHub Pages (`docs/data/`)
+- [ ] Simple, tabular HTML displays for benchmark results
+- [ ] CSV export functionality for spreadsheet analysis  
 - [ ] Support 8+ open-source solvers via CVXPY backends
 - [ ] Handle 4 problem types: LP, QP, SOCP, SDP
-- [ ] External storage system for large problem sets
-- [ ] Advanced analytics with performance tracking
-- [ ] Solver recommendation system
 
-### Technical Requirements
+### Environment & Infrastructure Requirements  
+- [ ] Octave environment support with optimization toolbox
+- [ ] Basic external storage for large problem sets
+- [ ] Automated testing framework with CI integration
+- [ ] Essential monitoring and alerting system
 - [ ] Robust backend detection and validation
-- [ ] Comprehensive problem classification
-- [ ] Performance regression detection
-- [ ] Production-ready monitoring
-- [ ] Docker containerization
 
-### Quality Requirements
-- [ ] All backends tested across all compatible problem types
-- [ ] Performance improvements measured and documented
-- [ ] External storage tested with large problem sets
-- [ ] Recommendation system validated against expert knowledge
-- [ ] Production deployment tested and monitored
+### Quality & Usability Requirements
+- [ ] External tools can easily consume benchmark data
+- [ ] All backends tested across compatible problem types
+- [ ] Test coverage >90% for critical components
+- [ ] Documentation organized and accessible
+- [ ] System reliably publishes results on schedule
+
+### Removed from Phase 2 (Moved to Future/Optional)
+- ~~Advanced analytics with performance tracking~~ → Optional features
+- ~~Solver recommendation system~~ → Future Phase 3
+- ~~Docker containerization~~ → Not essential for core mission
+- ~~Complex performance profiling~~ → Optional features
 
 ## Expected Impact
 
-Phase 2 will transform the benchmark system into a comprehensive optimization platform:
+Phase 2 will establish the system as a reliable data publishing platform for optimization research:
 
-- **10x solver coverage**: From 2 to 10+ different solver implementations
-- **4x problem type coverage**: LP, QP, SOCP, SDP support
-- **Scalable storage**: Support for thousands of problems via external storage
-- **Intelligent recommendations**: AI-powered solver selection
-- **Production ready**: Containerized deployment with monitoring
+- **Dual environment support**: Python + Octave for broader solver coverage
+- **Clean data access**: Researchers can easily access and analyze benchmark results
+- **Production reliability**: Automated testing and monitoring ensure consistent operation
+- **Simplified maintenance**: Focus on core features reduces complexity
+- **Community adoption**: Easy data access encourages research community usage
 
-This positions the platform as a leading open-source optimization benchmark system.
+This positions the platform as a trusted, accessible source of optimization solver benchmark data for the research community.
