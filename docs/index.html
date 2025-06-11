@@ -151,7 +151,7 @@
                 <h5 class="card-title text-primary">
                     <i class="fas fa-calculator me-2"></i>Total Runs
                 </h5>
-                <h2 class="text-primary">20</h2>
+                <h2 class="text-primary">21</h2>
                 <p class="text-muted small mb-0">Benchmark executions</p>
             </div>
         </div>
@@ -175,7 +175,7 @@
                 <h5 class="card-title text-info">
                     <i class="fas fa-tools me-2"></i>Active Solvers
                 </h5>
-                <h2 class="text-info">3</h2>
+                <h2 class="text-info">4</h2>
                 <p class="text-muted small mb-0">Available solvers</p>
             </div>
         </div>
@@ -280,6 +280,25 @@
                             
                             <tr>
                                 <td>
+                                    <strong>TestSolver</strong>
+                                    
+                                        <span class="badge bg-success performance-badge ms-2">Perfect</span>
+                                    
+                                </td>
+                                <td>1</td>
+                                <td>
+                                    <span class="text-success">
+                                        100.0%
+                                    </span>
+                                </td>
+                                <td>0.005s</td>
+                                <td>0.005s</td>
+                                <td>0.005s</td>
+                                <td>1</td>
+                            </tr>
+                            
+                            <tr>
+                                <td>
                                     <strong>scipy</strong>
                                     
                                         <span class="badge bg-danger performance-badge ms-2">Issues</span>
@@ -331,6 +350,27 @@
                             </tr>
                         </thead>
                         <tbody>
+                            
+                            <tr>
+                                <td class="timestamp">
+                                    2025-06-11T08:43:06.920868
+                                </td>
+                                <td>
+                                    <span class="fw-bold">TestSolver</span>
+                                </td>
+                                <td>test_problem</td>
+                                <td>
+                                    <span class="status-optimal">
+                                        Optimal
+                                    </span>
+                                </td>
+                                <td>0.005s</td>
+                                <td>
+                                    
+                                        2.50e+00
+                                    
+                                </td>
+                            </tr>
                             
                             <tr>
                                 <td class="timestamp">
@@ -731,27 +771,6 @@
                                 </td>
                             </tr>
                             
-                            <tr>
-                                <td class="timestamp">
-                                    2025-06-11T00:53:48.908004
-                                </td>
-                                <td>
-                                    <span class="fw-bold">SciPy</span>
-                                </td>
-                                <td>SIMPLE_LP</td>
-                                <td>
-                                    <span class="status-optimal">
-                                        Optimal
-                                    </span>
-                                </td>
-                                <td>0.001s</td>
-                                <td>
-                                    
-                                        0.0
-                                    
-                                </td>
-                            </tr>
-                            
                         </tbody>
                     </table>
                 </div>
@@ -815,6 +834,13 @@
                     </li>
                     
                     <li class="mb-2">
+                        <strong>TestSolver</strong>
+                        <small class="text-muted d-block">
+                            1 runs, 100.0% success
+                        </small>
+                    </li>
+                    
+                    <li class="mb-2">
                         <strong>scipy</strong>
                         <small class="text-muted d-block">
                             4 runs, 0.0% success
@@ -849,7 +875,7 @@
                 <div class="col-md-6 text-md-end">
                     <p class="text-muted small mb-2">
                         <i class="fas fa-clock me-1"></i>
-                        Last updated: 2025-06-11 08:37:56
+                        Last updated: 2025-06-11 09:38:55
                     </p>
                     <p class="text-muted small mb-0">
                         <i class="fas fa-code me-1"></i>
@@ -923,17 +949,21 @@
 document.addEventListener('DOMContentLoaded', function() {
     const ctx = document.getElementById('solverPerformanceChart').getContext('2d');
     
-    const solverNames = ["CVXPY", "SciPy", "scipy"];
+    const solverNames = ["CVXPY", "SciPy", "TestSolver", "scipy"];
     const avgTimes = [
         
         0.005184531211853027,
         
         0.005756378173828125,
         
+        0.005,
+        
         0.0
         
     ];
     const successRates = [
+        
+        100.0,
         
         100.0,
         

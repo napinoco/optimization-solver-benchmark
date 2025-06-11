@@ -201,20 +201,25 @@
                         
                     
                 
+                    
+                    
+                        
+                    
+                
                 
                 <dl class="row mb-0">
                     <dt class="col-sm-6">Total Problems:</dt>
-                    <dd class="col-sm-6">4</dd>
+                    <dd class="col-sm-6">5</dd>
                     
                     
                     <dt class="col-sm-6">Unknown:</dt>
-                    <dd class="col-sm-6">4</dd>
+                    <dd class="col-sm-6">5</dd>
                     
                     
                     <dt class="col-sm-6">Avg Success Rate:</dt>
                     <dd class="col-sm-6">
                         
-                        50.0%
+                        60.0%
                     </dd>
                 </dl>
             </div>
@@ -462,6 +467,54 @@
                                 </td>
                             </tr>
                             
+                            <tr>
+                                <td>
+                                    <strong class="text-primary">test_problem</strong>
+                                    
+                                </td>
+                                <td>
+                                    <span class="badge bg-secondary">Unknown</span>
+                                </td>
+                                <td>1</td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <span class="text-success fw-bold">
+                                            100.0%
+                                        </span>
+                                        <div class="progress ms-2" style="width: 50px; height: 6px;">
+                                            <div class="progress-bar bg-success" 
+                                                 style="width: 100.0%"></div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    
+                                    0.005s
+                                </td>
+                                <td>
+                                    
+                                    0.005s
+                                </td>
+                                <td>
+                                    
+                                    
+                                    
+                                        
+                                            
+                                            
+                                        
+                                    
+                                    
+                                        <span class="text-muted">None</span>
+                                    
+                                </td>
+                                <td>
+                                    
+                                        <span class="badge bg-success">Easy</span>
+                                    
+                                </td>
+                            </tr>
+                            
                         </tbody>
                     </table>
                 </div>
@@ -592,6 +645,26 @@
                         </div>
                     </div>
                     
+                    <div class="col-md-6 col-lg-4 mb-3">
+                        <div class="card border-light h-100">
+                            <div class="card-body">
+                                <h6 class="card-title text-primary">test_problem</h6>
+                                <dl class="row mb-0 small">
+                                    <dt class="col-sm-6">Type:</dt>
+                                    <dd class="col-sm-6">LP</dd>
+                                    
+                                    <dt class="col-sm-6">Variables:</dt>
+                                    <dd class="col-sm-6">N/A</dd>
+                                    
+                                    <dt class="col-sm-6">Constraints:</dt>
+                                    <dd class="col-sm-6">N/A</dd>
+                                    
+                                    
+                                </dl>
+                            </div>
+                        </div>
+                    </div>
+                    
                 </div>
             </div>
         </div>
@@ -619,7 +692,7 @@
                 <div class="col-md-6 text-md-end">
                     <p class="text-muted small mb-2">
                         <i class="fas fa-clock me-1"></i>
-                        Last updated: 2025-06-11 08:37:56
+                        Last updated: 2025-06-11 09:38:55
                     </p>
                     <p class="text-muted small mb-0">
                         <i class="fas fa-code me-1"></i>
@@ -690,7 +763,7 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    const problemNames = ["SIMPLE_LP", "SIMPLE_QP", "simple_lp", "simple_qp"];
+    const problemNames = ["SIMPLE_LP", "SIMPLE_QP", "simple_lp", "simple_qp", "test_problem"];
     const successRates = [
         
         100.0,
@@ -699,13 +772,15 @@ document.addEventListener('DOMContentLoaded', function() {
         
         0.0,
         
-        0.0
+        0.0,
+        
+        100.0
         
     ];
     
     // Get problem types for color coding
     const problemTypes = problemNames.map(name => {
-        const stats = {"SIMPLE_LP": {"avg_solve_time": 0.0026150399988347835, "difficulty_score": 5.2300799976695676e-05, "fastest_solver": "SciPy", "max_solve_time": 0.007433891296386719, "min_solve_time": 0.0008921623229980469, "name": "SIMPLE_LP", "problem_type": "LP", "slowest_solver": "SciPy", "solver_results": {"CVXPY": {"objective_value": 5.982995652060769e-10, "solve_time": 0.005861043930053711, "status": "optimal"}, "SciPy": {"objective_value": 0.0, "solve_time": 0.007433891296386719, "status": "optimal"}}, "success_rate": 1.0, "successful_attempts": 11, "total_attempts": 11}, "SIMPLE_QP": {"avg_solve_time": 0.012438583374023437, "difficulty_score": 0.00024877166748046874, "fastest_solver": "CVXPY", "max_solve_time": 0.016376018524169922, "min_solve_time": 0.004508018493652344, "name": "SIMPLE_QP", "problem_type": "QP", "slowest_solver": "SciPy", "solver_results": {"CVXPY": {"objective_value": 7.286774213686732e-10, "solve_time": 0.004508018493652344, "status": "optimal"}, "SciPy": {"objective_value": 5.135527253823579e-06, "solve_time": 0.016376018524169922, "status": "optimal"}}, "success_rate": 1.0, "successful_attempts": 5, "total_attempts": 5}, "simple_lp": {"avg_solve_time": 0.0, "difficulty_score": 0.8, "fastest_solver": null, "max_solve_time": 0.0, "min_solve_time": 0.0, "name": "simple_lp", "problem_type": "Unknown", "slowest_solver": null, "solver_results": {"scipy": {"objective_value": null, "solve_time": 0.0001862049102783203, "status": "error"}}, "success_rate": 0.0, "successful_attempts": 0, "total_attempts": 2}, "simple_qp": {"avg_solve_time": 0.0, "difficulty_score": 0.8, "fastest_solver": null, "max_solve_time": 0.0, "min_solve_time": 0.0, "name": "simple_qp", "problem_type": "Unknown", "slowest_solver": null, "solver_results": {"scipy": {"objective_value": null, "solve_time": 0.00013113021850585938, "status": "error"}}, "success_rate": 0.0, "successful_attempts": 0, "total_attempts": 2}};
+        const stats = {"SIMPLE_LP": {"avg_solve_time": 0.0026150399988347835, "difficulty_score": 5.2300799976695676e-05, "fastest_solver": "SciPy", "max_solve_time": 0.007433891296386719, "min_solve_time": 0.0008921623229980469, "name": "SIMPLE_LP", "problem_type": "LP", "slowest_solver": "SciPy", "solver_results": {"CVXPY": {"objective_value": 5.982995652060769e-10, "solve_time": 0.005861043930053711, "status": "optimal"}, "SciPy": {"objective_value": 0.0, "solve_time": 0.007433891296386719, "status": "optimal"}}, "success_rate": 1.0, "successful_attempts": 11, "total_attempts": 11}, "SIMPLE_QP": {"avg_solve_time": 0.012438583374023437, "difficulty_score": 0.00024877166748046874, "fastest_solver": "CVXPY", "max_solve_time": 0.016376018524169922, "min_solve_time": 0.004508018493652344, "name": "SIMPLE_QP", "problem_type": "QP", "slowest_solver": "SciPy", "solver_results": {"CVXPY": {"objective_value": 7.286774213686732e-10, "solve_time": 0.004508018493652344, "status": "optimal"}, "SciPy": {"objective_value": 5.135527253823579e-06, "solve_time": 0.016376018524169922, "status": "optimal"}}, "success_rate": 1.0, "successful_attempts": 5, "total_attempts": 5}, "simple_lp": {"avg_solve_time": 0.0, "difficulty_score": 0.8, "fastest_solver": null, "max_solve_time": 0.0, "min_solve_time": 0.0, "name": "simple_lp", "problem_type": "Unknown", "slowest_solver": null, "solver_results": {"scipy": {"objective_value": null, "solve_time": 0.0001862049102783203, "status": "error"}}, "success_rate": 0.0, "successful_attempts": 0, "total_attempts": 2}, "simple_qp": {"avg_solve_time": 0.0, "difficulty_score": 0.8, "fastest_solver": null, "max_solve_time": 0.0, "min_solve_time": 0.0, "name": "simple_qp", "problem_type": "Unknown", "slowest_solver": null, "solver_results": {"scipy": {"objective_value": null, "solve_time": 0.00013113021850585938, "status": "error"}}, "success_rate": 0.0, "successful_attempts": 0, "total_attempts": 2}, "test_problem": {"avg_solve_time": 0.005, "difficulty_score": 0.0001, "fastest_solver": "TestSolver", "max_solve_time": 0.005, "min_solve_time": 0.005, "name": "test_problem", "problem_type": "LP", "slowest_solver": "TestSolver", "solver_results": {"TestSolver": {"objective_value": 2.5, "solve_time": 0.005, "status": "optimal"}}, "success_rate": 1.0, "successful_attempts": 1, "total_attempts": 1}};
         return stats[name].type || 'Unknown';
     });
     
@@ -752,7 +827,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Difficulty Analysis Chart
     const diffCtx = document.getElementById('difficultyChart').getContext('2d');
     const avgTimes = problemNames.map(name => {
-        const stats = {"SIMPLE_LP": {"avg_solve_time": 0.0026150399988347835, "difficulty_score": 5.2300799976695676e-05, "fastest_solver": "SciPy", "max_solve_time": 0.007433891296386719, "min_solve_time": 0.0008921623229980469, "name": "SIMPLE_LP", "problem_type": "LP", "slowest_solver": "SciPy", "solver_results": {"CVXPY": {"objective_value": 5.982995652060769e-10, "solve_time": 0.005861043930053711, "status": "optimal"}, "SciPy": {"objective_value": 0.0, "solve_time": 0.007433891296386719, "status": "optimal"}}, "success_rate": 1.0, "successful_attempts": 11, "total_attempts": 11}, "SIMPLE_QP": {"avg_solve_time": 0.012438583374023437, "difficulty_score": 0.00024877166748046874, "fastest_solver": "CVXPY", "max_solve_time": 0.016376018524169922, "min_solve_time": 0.004508018493652344, "name": "SIMPLE_QP", "problem_type": "QP", "slowest_solver": "SciPy", "solver_results": {"CVXPY": {"objective_value": 7.286774213686732e-10, "solve_time": 0.004508018493652344, "status": "optimal"}, "SciPy": {"objective_value": 5.135527253823579e-06, "solve_time": 0.016376018524169922, "status": "optimal"}}, "success_rate": 1.0, "successful_attempts": 5, "total_attempts": 5}, "simple_lp": {"avg_solve_time": 0.0, "difficulty_score": 0.8, "fastest_solver": null, "max_solve_time": 0.0, "min_solve_time": 0.0, "name": "simple_lp", "problem_type": "Unknown", "slowest_solver": null, "solver_results": {"scipy": {"objective_value": null, "solve_time": 0.0001862049102783203, "status": "error"}}, "success_rate": 0.0, "successful_attempts": 0, "total_attempts": 2}, "simple_qp": {"avg_solve_time": 0.0, "difficulty_score": 0.8, "fastest_solver": null, "max_solve_time": 0.0, "min_solve_time": 0.0, "name": "simple_qp", "problem_type": "Unknown", "slowest_solver": null, "solver_results": {"scipy": {"objective_value": null, "solve_time": 0.00013113021850585938, "status": "error"}}, "success_rate": 0.0, "successful_attempts": 0, "total_attempts": 2}};
+        const stats = {"SIMPLE_LP": {"avg_solve_time": 0.0026150399988347835, "difficulty_score": 5.2300799976695676e-05, "fastest_solver": "SciPy", "max_solve_time": 0.007433891296386719, "min_solve_time": 0.0008921623229980469, "name": "SIMPLE_LP", "problem_type": "LP", "slowest_solver": "SciPy", "solver_results": {"CVXPY": {"objective_value": 5.982995652060769e-10, "solve_time": 0.005861043930053711, "status": "optimal"}, "SciPy": {"objective_value": 0.0, "solve_time": 0.007433891296386719, "status": "optimal"}}, "success_rate": 1.0, "successful_attempts": 11, "total_attempts": 11}, "SIMPLE_QP": {"avg_solve_time": 0.012438583374023437, "difficulty_score": 0.00024877166748046874, "fastest_solver": "CVXPY", "max_solve_time": 0.016376018524169922, "min_solve_time": 0.004508018493652344, "name": "SIMPLE_QP", "problem_type": "QP", "slowest_solver": "SciPy", "solver_results": {"CVXPY": {"objective_value": 7.286774213686732e-10, "solve_time": 0.004508018493652344, "status": "optimal"}, "SciPy": {"objective_value": 5.135527253823579e-06, "solve_time": 0.016376018524169922, "status": "optimal"}}, "success_rate": 1.0, "successful_attempts": 5, "total_attempts": 5}, "simple_lp": {"avg_solve_time": 0.0, "difficulty_score": 0.8, "fastest_solver": null, "max_solve_time": 0.0, "min_solve_time": 0.0, "name": "simple_lp", "problem_type": "Unknown", "slowest_solver": null, "solver_results": {"scipy": {"objective_value": null, "solve_time": 0.0001862049102783203, "status": "error"}}, "success_rate": 0.0, "successful_attempts": 0, "total_attempts": 2}, "simple_qp": {"avg_solve_time": 0.0, "difficulty_score": 0.8, "fastest_solver": null, "max_solve_time": 0.0, "min_solve_time": 0.0, "name": "simple_qp", "problem_type": "Unknown", "slowest_solver": null, "solver_results": {"scipy": {"objective_value": null, "solve_time": 0.00013113021850585938, "status": "error"}}, "success_rate": 0.0, "successful_attempts": 0, "total_attempts": 2}, "test_problem": {"avg_solve_time": 0.005, "difficulty_score": 0.0001, "fastest_solver": "TestSolver", "max_solve_time": 0.005, "min_solve_time": 0.005, "name": "test_problem", "problem_type": "LP", "slowest_solver": "TestSolver", "solver_results": {"TestSolver": {"objective_value": 2.5, "solve_time": 0.005, "status": "optimal"}}, "success_rate": 1.0, "successful_attempts": 1, "total_attempts": 1}};
         const solverResults = Object.values(stats[name].solver_results);
         const optimalResults = solverResults.filter(r => r.status === 'optimal');
         if (optimalResults.length === 0) return 0;
@@ -826,7 +901,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Get all solver names
     const allSolvers = new Set();
-    Object.values({"SIMPLE_LP": {"avg_solve_time": 0.0026150399988347835, "difficulty_score": 5.2300799976695676e-05, "fastest_solver": "SciPy", "max_solve_time": 0.007433891296386719, "min_solve_time": 0.0008921623229980469, "name": "SIMPLE_LP", "problem_type": "LP", "slowest_solver": "SciPy", "solver_results": {"CVXPY": {"objective_value": 5.982995652060769e-10, "solve_time": 0.005861043930053711, "status": "optimal"}, "SciPy": {"objective_value": 0.0, "solve_time": 0.007433891296386719, "status": "optimal"}}, "success_rate": 1.0, "successful_attempts": 11, "total_attempts": 11}, "SIMPLE_QP": {"avg_solve_time": 0.012438583374023437, "difficulty_score": 0.00024877166748046874, "fastest_solver": "CVXPY", "max_solve_time": 0.016376018524169922, "min_solve_time": 0.004508018493652344, "name": "SIMPLE_QP", "problem_type": "QP", "slowest_solver": "SciPy", "solver_results": {"CVXPY": {"objective_value": 7.286774213686732e-10, "solve_time": 0.004508018493652344, "status": "optimal"}, "SciPy": {"objective_value": 5.135527253823579e-06, "solve_time": 0.016376018524169922, "status": "optimal"}}, "success_rate": 1.0, "successful_attempts": 5, "total_attempts": 5}, "simple_lp": {"avg_solve_time": 0.0, "difficulty_score": 0.8, "fastest_solver": null, "max_solve_time": 0.0, "min_solve_time": 0.0, "name": "simple_lp", "problem_type": "Unknown", "slowest_solver": null, "solver_results": {"scipy": {"objective_value": null, "solve_time": 0.0001862049102783203, "status": "error"}}, "success_rate": 0.0, "successful_attempts": 0, "total_attempts": 2}, "simple_qp": {"avg_solve_time": 0.0, "difficulty_score": 0.8, "fastest_solver": null, "max_solve_time": 0.0, "min_solve_time": 0.0, "name": "simple_qp", "problem_type": "Unknown", "slowest_solver": null, "solver_results": {"scipy": {"objective_value": null, "solve_time": 0.00013113021850585938, "status": "error"}}, "success_rate": 0.0, "successful_attempts": 0, "total_attempts": 2}}).forEach(stats => {
+    Object.values({"SIMPLE_LP": {"avg_solve_time": 0.0026150399988347835, "difficulty_score": 5.2300799976695676e-05, "fastest_solver": "SciPy", "max_solve_time": 0.007433891296386719, "min_solve_time": 0.0008921623229980469, "name": "SIMPLE_LP", "problem_type": "LP", "slowest_solver": "SciPy", "solver_results": {"CVXPY": {"objective_value": 5.982995652060769e-10, "solve_time": 0.005861043930053711, "status": "optimal"}, "SciPy": {"objective_value": 0.0, "solve_time": 0.007433891296386719, "status": "optimal"}}, "success_rate": 1.0, "successful_attempts": 11, "total_attempts": 11}, "SIMPLE_QP": {"avg_solve_time": 0.012438583374023437, "difficulty_score": 0.00024877166748046874, "fastest_solver": "CVXPY", "max_solve_time": 0.016376018524169922, "min_solve_time": 0.004508018493652344, "name": "SIMPLE_QP", "problem_type": "QP", "slowest_solver": "SciPy", "solver_results": {"CVXPY": {"objective_value": 7.286774213686732e-10, "solve_time": 0.004508018493652344, "status": "optimal"}, "SciPy": {"objective_value": 5.135527253823579e-06, "solve_time": 0.016376018524169922, "status": "optimal"}}, "success_rate": 1.0, "successful_attempts": 5, "total_attempts": 5}, "simple_lp": {"avg_solve_time": 0.0, "difficulty_score": 0.8, "fastest_solver": null, "max_solve_time": 0.0, "min_solve_time": 0.0, "name": "simple_lp", "problem_type": "Unknown", "slowest_solver": null, "solver_results": {"scipy": {"objective_value": null, "solve_time": 0.0001862049102783203, "status": "error"}}, "success_rate": 0.0, "successful_attempts": 0, "total_attempts": 2}, "simple_qp": {"avg_solve_time": 0.0, "difficulty_score": 0.8, "fastest_solver": null, "max_solve_time": 0.0, "min_solve_time": 0.0, "name": "simple_qp", "problem_type": "Unknown", "slowest_solver": null, "solver_results": {"scipy": {"objective_value": null, "solve_time": 0.00013113021850585938, "status": "error"}}, "success_rate": 0.0, "successful_attempts": 0, "total_attempts": 2}, "test_problem": {"avg_solve_time": 0.005, "difficulty_score": 0.0001, "fastest_solver": "TestSolver", "max_solve_time": 0.005, "min_solve_time": 0.005, "name": "test_problem", "problem_type": "LP", "slowest_solver": "TestSolver", "solver_results": {"TestSolver": {"objective_value": 2.5, "solve_time": 0.005, "status": "optimal"}}, "success_rate": 1.0, "successful_attempts": 1, "total_attempts": 1}}).forEach(stats => {
         Object.keys(stats.solver_results).forEach(solver => allSolvers.add(solver));
     });
     const solverNames = Array.from(allSolvers);
@@ -835,7 +910,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const matrixData = [];
     problemNames.forEach((problemName, pIndex) => {
         solverNames.forEach((solverName, sIndex) => {
-            const stats = {"SIMPLE_LP": {"avg_solve_time": 0.0026150399988347835, "difficulty_score": 5.2300799976695676e-05, "fastest_solver": "SciPy", "max_solve_time": 0.007433891296386719, "min_solve_time": 0.0008921623229980469, "name": "SIMPLE_LP", "problem_type": "LP", "slowest_solver": "SciPy", "solver_results": {"CVXPY": {"objective_value": 5.982995652060769e-10, "solve_time": 0.005861043930053711, "status": "optimal"}, "SciPy": {"objective_value": 0.0, "solve_time": 0.007433891296386719, "status": "optimal"}}, "success_rate": 1.0, "successful_attempts": 11, "total_attempts": 11}, "SIMPLE_QP": {"avg_solve_time": 0.012438583374023437, "difficulty_score": 0.00024877166748046874, "fastest_solver": "CVXPY", "max_solve_time": 0.016376018524169922, "min_solve_time": 0.004508018493652344, "name": "SIMPLE_QP", "problem_type": "QP", "slowest_solver": "SciPy", "solver_results": {"CVXPY": {"objective_value": 7.286774213686732e-10, "solve_time": 0.004508018493652344, "status": "optimal"}, "SciPy": {"objective_value": 5.135527253823579e-06, "solve_time": 0.016376018524169922, "status": "optimal"}}, "success_rate": 1.0, "successful_attempts": 5, "total_attempts": 5}, "simple_lp": {"avg_solve_time": 0.0, "difficulty_score": 0.8, "fastest_solver": null, "max_solve_time": 0.0, "min_solve_time": 0.0, "name": "simple_lp", "problem_type": "Unknown", "slowest_solver": null, "solver_results": {"scipy": {"objective_value": null, "solve_time": 0.0001862049102783203, "status": "error"}}, "success_rate": 0.0, "successful_attempts": 0, "total_attempts": 2}, "simple_qp": {"avg_solve_time": 0.0, "difficulty_score": 0.8, "fastest_solver": null, "max_solve_time": 0.0, "min_solve_time": 0.0, "name": "simple_qp", "problem_type": "Unknown", "slowest_solver": null, "solver_results": {"scipy": {"objective_value": null, "solve_time": 0.00013113021850585938, "status": "error"}}, "success_rate": 0.0, "successful_attempts": 0, "total_attempts": 2}};
+            const stats = {"SIMPLE_LP": {"avg_solve_time": 0.0026150399988347835, "difficulty_score": 5.2300799976695676e-05, "fastest_solver": "SciPy", "max_solve_time": 0.007433891296386719, "min_solve_time": 0.0008921623229980469, "name": "SIMPLE_LP", "problem_type": "LP", "slowest_solver": "SciPy", "solver_results": {"CVXPY": {"objective_value": 5.982995652060769e-10, "solve_time": 0.005861043930053711, "status": "optimal"}, "SciPy": {"objective_value": 0.0, "solve_time": 0.007433891296386719, "status": "optimal"}}, "success_rate": 1.0, "successful_attempts": 11, "total_attempts": 11}, "SIMPLE_QP": {"avg_solve_time": 0.012438583374023437, "difficulty_score": 0.00024877166748046874, "fastest_solver": "CVXPY", "max_solve_time": 0.016376018524169922, "min_solve_time": 0.004508018493652344, "name": "SIMPLE_QP", "problem_type": "QP", "slowest_solver": "SciPy", "solver_results": {"CVXPY": {"objective_value": 7.286774213686732e-10, "solve_time": 0.004508018493652344, "status": "optimal"}, "SciPy": {"objective_value": 5.135527253823579e-06, "solve_time": 0.016376018524169922, "status": "optimal"}}, "success_rate": 1.0, "successful_attempts": 5, "total_attempts": 5}, "simple_lp": {"avg_solve_time": 0.0, "difficulty_score": 0.8, "fastest_solver": null, "max_solve_time": 0.0, "min_solve_time": 0.0, "name": "simple_lp", "problem_type": "Unknown", "slowest_solver": null, "solver_results": {"scipy": {"objective_value": null, "solve_time": 0.0001862049102783203, "status": "error"}}, "success_rate": 0.0, "successful_attempts": 0, "total_attempts": 2}, "simple_qp": {"avg_solve_time": 0.0, "difficulty_score": 0.8, "fastest_solver": null, "max_solve_time": 0.0, "min_solve_time": 0.0, "name": "simple_qp", "problem_type": "Unknown", "slowest_solver": null, "solver_results": {"scipy": {"objective_value": null, "solve_time": 0.00013113021850585938, "status": "error"}}, "success_rate": 0.0, "successful_attempts": 0, "total_attempts": 2}, "test_problem": {"avg_solve_time": 0.005, "difficulty_score": 0.0001, "fastest_solver": "TestSolver", "max_solve_time": 0.005, "min_solve_time": 0.005, "name": "test_problem", "problem_type": "LP", "slowest_solver": "TestSolver", "solver_results": {"TestSolver": {"objective_value": 2.5, "solve_time": 0.005, "status": "optimal"}}, "success_rate": 1.0, "successful_attempts": 1, "total_attempts": 1}};
             const result = stats[problemName].solver_results[solverName];
             
             if (result) {
