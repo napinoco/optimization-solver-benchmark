@@ -16,39 +16,72 @@ from scripts.utils.logger import get_logger
 logger = get_logger("cvxpy_solver")
 
 class CvxpySolver(SolverInterface):
-    """CVXPY-based solver for LP and QP problems."""
+    """CVXPY-based solver for LP, QP, SOCP, and SDP problems."""
     
-    def __init__(self, name: str = "CVXPY", timeout: float = 300.0, 
-                 solver: str = "CLARABEL", verbose: bool = False,
+    def __init__(self, name: str = None, timeout: float = 300.0, 
+                 backend: str = "CLARABEL", verbose: bool = False,
                  solver_options: Optional[Dict] = None):
         """
-        Initialize CVXPY solver.
+        Initialize CVXPY solver with specific backend.
         
         Args:
-            name: Solver name
+            name: Solver name (auto-generated if None)
             timeout: Timeout in seconds
-            solver: CVXPY backend solver (CLARABEL, OSQP, SCS, etc.)
+            backend: CVXPY backend solver (CLARABEL, OSQP, SCS, etc.)
             verbose: Whether to enable verbose solver output
             solver_options: Additional options for the backend solver
         """
+        # Auto-generate name with proper "(via CVXPY)" format
+        if name is None:
+            name = f"{backend} (via CVXPY)"
+        
         super().__init__(name, timeout)
-        self.backend_solver = solver
+        self.backend = backend
         self.verbose = verbose
         self.solver_options = solver_options or {}
         
         # Verify solver availability
         available_solvers = cp.installed_solvers()
-        if solver not in available_solvers:
-            self.logger.warning(f"Requested solver {solver} not available. "
-                              f"Available solvers: {available_solvers}")
+        if backend not in available_solvers:
+            self.logger.warning(f"Requested backend {backend} not available. "
+                              f"Available backends: {available_solvers}")
             # Fall back to first available solver
             if available_solvers:
-                self.backend_solver = available_solvers[0]
-                self.logger.info(f"Using fallback solver: {self.backend_solver}")
+                self.backend = available_solvers[0]
+                self.name = f"{self.backend} (via CVXPY)"
+                self.logger.info(f"Using fallback backend: {self.backend}")
             else:
-                raise RuntimeError("No CVXPY solvers available")
+                raise RuntimeError("No CVXPY backends available")
         
-        self.logger.info(f"Initialized CVXPY solver with backend '{self.backend_solver}'")
+        # Get backend capabilities
+        self.backend_capabilities = self._get_backend_capabilities()
+        
+        self.logger.info(f"Initialized CVXPY solver '{self.name}' with backend '{self.backend}'")
+    
+    def _get_backend_capabilities(self) -> Dict[str, List[str]]:
+        """Get capabilities of the current backend solver."""
+        # Define backend capabilities for different problem types
+        backend_capabilities = {
+            "CLARABEL": ["LP", "QP", "SOCP", "SDP"],
+            "SCS": ["LP", "QP", "SOCP", "SDP"],
+            "ECOS": ["LP", "QP", "SOCP"],
+            "OSQP": ["QP", "SOCP"],
+            "QSQP": ["QP"],
+            "CBC": ["LP"],
+            "GLOP": ["LP"],
+            "GLOP_MI": ["LP"],
+            "SCIP": ["LP", "QP"],
+            "GUROBI": ["LP", "QP", "SOCP"],
+            "MOSEK": ["LP", "QP", "SOCP", "SDP"],
+            "CPLEX": ["LP", "QP", "SOCP"],
+            "CVXOPT": ["LP", "QP", "SOCP"],
+            "XPRESS": ["LP", "QP"]
+        }
+        
+        return {
+            "supported_problem_types": backend_capabilities.get(self.backend, ["LP", "QP"]),
+            "backend_name": self.backend
+        }
     
     def solve(self, problem: ProblemData) -> SolverResult:
         """
@@ -147,13 +180,13 @@ class CvxpySolver(SolverInterface):
         
         try:
             cvx_problem.solve(
-                solver=getattr(cp, self.backend_solver),
+                solver=getattr(cp, self.backend),
                 **solver_options
             )
         except Exception as e:
             # Handle solver-specific errors
             solve_time = time.time() - start_time
-            error_msg = f"Backend solver {self.backend_solver} failed: {str(e)}"
+            error_msg = f"Backend solver {self.backend} failed: {str(e)}"
             self.logger.error(error_msg)
             
             return SolverResult(
@@ -182,7 +215,7 @@ class CvxpySolver(SolverInterface):
         # Extract solver-specific information
         solver_info = {
             "cvxpy_status": cvx_problem.status,
-            "backend_solver": self.backend_solver,
+            "backend_solver": self.backend,
             "solver_stats": cvx_problem.solver_stats.__dict__ if cvx_problem.solver_stats else None,
             "cvxpy_version": cp.__version__
         }
@@ -277,13 +310,13 @@ class CvxpySolver(SolverInterface):
         
         try:
             cvx_problem.solve(
-                solver=getattr(cp, self.backend_solver),
+                solver=getattr(cp, self.backend),
                 **solver_options
             )
         except Exception as e:
             # Handle solver-specific errors
             solve_time = time.time() - start_time
-            error_msg = f"Backend solver {self.backend_solver} failed: {str(e)}"
+            error_msg = f"Backend solver {self.backend} failed: {str(e)}"
             self.logger.error(error_msg)
             
             return SolverResult(
@@ -312,7 +345,7 @@ class CvxpySolver(SolverInterface):
         # Extract solver-specific information
         solver_info = {
             "cvxpy_status": cvx_problem.status,
-            "backend_solver": self.backend_solver,
+            "backend_solver": self.backend,
             "solver_stats": cvx_problem.solver_stats.__dict__ if cvx_problem.solver_stats else None,
             "cvxpy_version": cp.__version__
         }
@@ -347,34 +380,55 @@ class CvxpySolver(SolverInterface):
         """Get solver information."""
         base_info = super().get_info()
         base_info.update({
-            "backend_solver": self.backend_solver,
-            "available_solvers": cp.installed_solvers(),
+            "backend_solver": self.backend,
+            "available_backends": cp.installed_solvers(),
             "cvxpy_version": cp.__version__,
-            "supported_problem_types": ["LP", "QP"],
-            "solver_options": self.solver_options
+            "supported_problem_types": self.backend_capabilities["supported_problem_types"],
+            "solver_options": self.solver_options,
+            "backend_capabilities": self.backend_capabilities
         })
         return base_info
 
 # Utility function to create solvers with different backends
-def create_cvxpy_solvers() -> List[CvxpySolver]:
-    """Create CVXPY solver instances for different backends."""
-    available_solvers = cp.installed_solvers()
-    solvers = []
+def create_cvxpy_solvers(timeout: float = 300.0, verbose: bool = False) -> List[CvxpySolver]:
+    """Create CVXPY solver instances for different available backends."""
+    available_backends = cp.installed_solvers()
+    solver_instances = []
     
-    # Preferred solver order for different problem types
-    preferred_solvers = ["CLARABEL", "OSQP", "SCS", "ECOS", "CVXOPT"]
+    # Define open-source backends in order of preference
+    open_source_backends = {
+        # General purpose solvers
+        "CLARABEL": {},
+        "SCS": {},
+        "ECOS": {},
+        
+        # QP specialists  
+        "OSQP": {},
+        "QSQP": {},
+        
+        # LP specialists
+        "CBC": {},
+        "GLOP": {},
+        "SCIP": {},
+        
+        # Other open-source
+        "CVXOPT": {}
+    }
     
-    for backend in preferred_solvers:
-        if backend in available_solvers:
-            solver_name = f"CVXPY-{backend}"
-            solver = CvxpySolver(
-                name=solver_name,
-                solver=backend,
-                timeout=300.0
-            )
-            solvers.append(solver)
+    for backend_name, options in open_source_backends.items():
+        if backend_name in available_backends:
+            try:
+                solver_instance = CvxpySolver(
+                    backend=backend_name,
+                    timeout=timeout,
+                    verbose=verbose,
+                    solver_options=options
+                )
+                solver_instances.append(solver_instance)
+            except Exception as e:
+                logger.warning(f"Failed to create solver for backend {backend_name}: {e}")
     
-    return solvers
+    return solver_instances
 
 if __name__ == "__main__":
     # Test script to verify CVXPY solver
@@ -392,7 +446,7 @@ if __name__ == "__main__":
         for backend in ["CLARABEL", "OSQP", "SCS"]:
             if backend in cp.installed_solvers():
                 try:
-                    solver = CvxpySolver(name=f"CVXPY-{backend}", solver=backend)
+                    solver = CvxpySolver(backend=backend)
                     print(f"✓ {solver.name} initialized")
                     print(f"  Version: {solver.get_version()}")
                     
@@ -400,6 +454,7 @@ if __name__ == "__main__":
                     info = solver.get_info()
                     print(f"  Backend: {info['backend_solver']}")
                     print(f"  CVXPY version: {info['cvxpy_version']}")
+                    print(f"  Supported types: {info['supported_problem_types']}")
                     
                 except Exception as e:
                     print(f"✗ Failed to initialize {backend}: {e}")
@@ -444,7 +499,7 @@ if __name__ == "__main__":
         for backend in ["CLARABEL", "OSQP", "SCS"]:
             if backend in cp.installed_solvers():
                 try:
-                    backend_solver = CvxpySolver(name=f"CVXPY-{backend}", solver=backend)
+                    backend_solver = CvxpySolver(backend=backend)
                     result = backend_solver.solve(lp_problem)
                     print(f"  {backend}: {result.status} in {result.solve_time:.3f}s "
                           f"(obj={result.objective_value})")

@@ -10,16 +10,67 @@ solvers:
     timeout: 300  # seconds
     enabled: true
     
-  cvxpy:
-    name: "CVXPY"
+  # CVXPY with multiple backends - each backend registered as separate solver
+  clarabel_cvxpy:
+    name: "CLARABEL (via CVXPY)"
     environment: "python"
-    version: "auto"  # will be detected at runtime
-    backends:
-      - "CLARABEL"
-      - "OSQP"
-      - "SCS"
-    supported_types:
-      - "LP"  # Linear Programming
-      - "QP"  # Quadratic Programming
-    timeout: 300  # seconds
+    backend: "CLARABEL"
+    supported_types: ["LP", "QP", "SOCP", "SDP"]
+    timeout: 300
+    enabled: true
+    
+  scs_cvxpy:
+    name: "SCS (via CVXPY)"
+    environment: "python"
+    backend: "SCS"
+    supported_types: ["LP", "QP", "SOCP", "SDP"]
+    timeout: 300
+    enabled: true
+    
+  ecos_cvxpy:
+    name: "ECOS (via CVXPY)"
+    environment: "python"
+    backend: "ECOS"
+    supported_types: ["LP", "QP", "SOCP"]
+    timeout: 300
+    enabled: true
+    
+  osqp_cvxpy:
+    name: "OSQP (via CVXPY)"
+    environment: "python"
+    backend: "OSQP"
+    supported_types: ["QP", "SOCP"]
+    timeout: 300
+    enabled: true
+    
+  qsqp_cvxpy:
+    name: "QSQP (via CVXPY)"
+    environment: "python"
+    backend: "QSQP"
+    supported_types: ["QP"]
+    timeout: 300
+    enabled: true
+    
+  cbc_cvxpy:
+    name: "CBC (via CVXPY)"
+    environment: "python"
+    backend: "CBC"
+    supported_types: ["LP"]
+    timeout: 300
+    enabled: true
+    
+  glop_cvxpy:
+    name: "GLOP (via CVXPY)"
+    environment: "python"
+    backend: "GLOP"
+    supported_types: ["LP"]
+    timeout: 300
+    enabled: true
+    
+  cvxopt_cvxpy:
+    name: "CVXOPT (via CVXPY)"
+    environment: "python"
+    backend: "CVXOPT"
+    supported_types: ["LP", "QP", "SOCP"]
+    timeout: 300
     enabled: true

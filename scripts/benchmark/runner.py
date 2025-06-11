@@ -13,6 +13,7 @@ from scripts.benchmark.problem_loader import load_problem, load_problem_registry
 from scripts.benchmark.solver_interface import SolverInterface, SolverResult
 from scripts.benchmark.result_collector import ResultCollector
 from scripts.benchmark.environment_info import collect_environment_info
+from scripts.utils.config_loader import load_config
 from scripts.solvers.python.scipy_runner import ScipySolver
 from scripts.solvers.python.cvxpy_runner import CvxpySolver, create_cvxpy_solvers
 from scripts.utils.config_loader import load_benchmark_config, load_solvers_config
@@ -58,65 +59,84 @@ class BenchmarkRunner:
         self.logger.info("Benchmark runner initialized")
     
     def setup_solvers(self) -> None:
-        """Initialize configured solvers."""
+        """Initialize configured solvers from configuration file."""
         self.logger.info("Setting up solvers...")
+        
+        # Load solver configuration
+        try:
+            solver_config = load_config("solvers.yaml")
+            solver_definitions = solver_config.get("solvers", {})
+        except Exception as e:
+            self.logger.error(f"Failed to load solver configuration: {e}")
+            raise
         
         timeout = self.benchmark_config.get('solver_timeout', 300.0)
         
-        # Initialize SciPy solver
-        try:
-            scipy_solver = ScipySolver(
-                name="SciPy",
-                timeout=timeout
-            )
-            self.solvers["scipy"] = scipy_solver
-            self.logger.info(f"Initialized solver: {scipy_solver.name}")
-            
-            # Store solver info in database
-            solver_info = scipy_solver.get_info()
-            self.result_collector.store_solver_info(
-                name=scipy_solver.name,
-                version=scipy_solver.get_version(),
-                environment="python",
-                metadata=solver_info
-            )
-            
-        except Exception as e:
-            self.logger.error(f"Failed to initialize SciPy solver: {e}")
-        
-        # Initialize CVXPY solvers
-        try:
-            # Add default CVXPY solver
-            cvxpy_solver = CvxpySolver(
-                name="CVXPY",
-                timeout=timeout
-            )
-            self.solvers["cvxpy"] = cvxpy_solver
-            self.logger.info(f"Initialized solver: {cvxpy_solver.name}")
-            
-            # Store solver info in database
-            solver_info = cvxpy_solver.get_info()
-            self.result_collector.store_solver_info(
-                name=cvxpy_solver.name,
-                version=cvxpy_solver.get_version(),
-                environment="python",
-                metadata=solver_info
-            )
-            
-            # Optionally add multiple CVXPY backends as separate solvers
-            # cvxpy_variants = create_cvxpy_solvers()
-            # for variant in cvxpy_variants:
-            #     if variant.name not in [s.name for s in self.solvers.values()]:
-            #         self.solvers[variant.name.lower().replace('-', '_')] = variant
-            #         self.logger.info(f"Initialized solver: {variant.name}")
-            
-        except Exception as e:
-            self.logger.error(f"Failed to initialize CVXPY solver: {e}")
+        # Initialize each configured solver
+        for solver_id, config in solver_definitions.items():
+            if not config.get('enabled', True):
+                self.logger.info(f"Skipping disabled solver: {solver_id}")
+                continue
+                
+            try:
+                solver_instance = self._create_solver_instance(solver_id, config, timeout)
+                if solver_instance:
+                    self.solvers[solver_id] = solver_instance
+                    self.logger.info(f"Initialized solver: {solver_instance.name}")
+                    
+                    # Store solver info in database
+                    solver_info = solver_instance.get_info()
+                    self.result_collector.store_solver_info(
+                        name=solver_instance.name,
+                        version=solver_instance.get_version(),
+                        environment=config.get('environment', 'unknown'),
+                        metadata=solver_info
+                    )
+                    
+            except Exception as e:
+                self.logger.error(f"Failed to initialize solver {solver_id}: {e}")
         
         if not self.solvers:
             raise RuntimeError("No solvers were successfully initialized")
         
         self.logger.info(f"Successfully initialized {len(self.solvers)} solvers")
+    
+    def _create_solver_instance(self, solver_id: str, config: dict, timeout: float):
+        """Create a solver instance based on configuration."""
+        environment = config.get('environment', 'python')
+        
+        if environment == 'python':
+            if 'backend' in config:
+                # CVXPY backend solver
+                backend = config['backend']
+                solver_name = config.get('name', f"{backend} (via CVXPY)")
+                
+                # Check if backend is available
+                import cvxpy as cp
+                available_backends = cp.installed_solvers()
+                if backend not in available_backends:
+                    self.logger.warning(f"Backend {backend} not available. Skipping {solver_id}")
+                    return None
+                
+                solver_instance = CvxpySolver(
+                    name=solver_name,
+                    backend=backend,
+                    timeout=config.get('timeout', timeout),
+                    verbose=False,
+                    solver_options=config.get('solver_options', {})
+                )
+                return solver_instance
+                
+            elif solver_id == 'scipy':
+                # SciPy solver
+                solver_instance = ScipySolver(
+                    name=config.get('name', 'SciPy'),
+                    timeout=config.get('timeout', timeout)
+                )
+                return solver_instance
+                
+        self.logger.warning(f"Unknown solver configuration for {solver_id}")
+        return None
     
     def load_problems(self, problem_set: str = "light_set") -> None:
         """Load problems from the registry."""
