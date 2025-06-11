@@ -140,3 +140,38 @@ solvers:
     
     timeout: 300
     enabled: true
+    
+  # Octave Environment Solvers
+  octave_linprog:
+    name: "Octave LinProg"
+    environment: "octave"
+    solver_type: "linprog"
+    supported_types: ["LP"]
+    
+    # Octave-specific configuration
+    octave_path: null  # Auto-detect if null
+    options:
+      method: "interior-point"
+      display: "off"
+      max_iterations: 1000
+      tolerance: 1e-8
+    
+    timeout: 300
+    enabled: true
+    
+  octave_quadprog:
+    name: "Octave QuadProg"
+    environment: "octave"
+    solver_type: "quadprog"
+    supported_types: ["QP"]
+    
+    # Octave-specific configuration
+    octave_path: null  # Auto-detect if null
+    options:
+      method: "interior-point"
+      display: "off"
+      max_iterations: 1000
+      tolerance: 1e-8
+    
+    timeout: 300
+    enabled: false  # Disabled by default until Octave is installed
