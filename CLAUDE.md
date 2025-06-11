@@ -101,17 +101,20 @@ The system operates under GitHub Actions constraints:
 The project follows a staged development approach:
 1. **Phase 1 (MVP)**: ✅ COMPLETED - Python solvers, lightweight problems, basic reporting (Tasks 1-20)
 2. **Phase 2**: 🚧 IN PROGRESS - Multi-backend CVXPY, SOCP/SDP support, advanced analytics (Tasks 21-35)
+   - ✅ Tasks 21-24: Multi-backend CVXPY support with SOCP implementation
+   - 🚧 Tasks 25-35: SDP support, problem classification, advanced analytics
 3. **Phase 3**: PLANNED - Octave support, external storage, advanced problem types
 4. **Phase 4**: PLANNED - Production features, cloud deployment, enterprise capabilities
 
 ## Important Implementation Notes
 
+- **Minimal Configuration Principle**: Solver configurations use minimal parameters (primarily `verbose: false`) to ensure fair baseline comparison without optimization bias
 - Configuration is externalized to YAML files for easy modification
 - All database operations should be atomic and include proper error handling
 - System must gracefully handle solver failures without stopping execution
 - Results require validation (positive solve times, valid status codes)
 - Logging is structured with appropriate levels (DEBUG, INFO, WARNING, ERROR)
-- Problem files use standard formats (MPS for LP, QPS for QP, SDPA for SDP)
+- Problem files use standard formats (MPS for LP, QPS for QP, Python modules for SOCP/SDP)
 
 ## CODING PROTOCOL
 
