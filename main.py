@@ -48,6 +48,12 @@ class BenchmarkOrchestrator:
             config_path: Path to the configuration file
         """
         self.config_path = config_path
+        
+        # Support environment variable overrides for CI/CD
+        self.ci_mode = os.getenv('GITHUB_ACTIONS', '').lower() == 'true'
+        
+        if self.ci_mode:
+            print("Running in GitHub Actions mode")
         self.config = None
         self.logger = None
         
