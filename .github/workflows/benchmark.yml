@@ -48,6 +48,9 @@ jobs:
       with:
         python-version: ${{ env.PYTHON_VERSION }}
         cache: 'pip'
+        cache-dependency-path: |
+          requirements/base.txt
+          requirements/python.txt
         
     - name: Create virtual environment
       run: |
@@ -189,6 +192,9 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }}
         cache: 'pip'
+        cache-dependency-path: |
+          requirements/base.txt
+          requirements/python.txt
         
     - name: Create virtual environment (Unix)
       if: runner.os != 'Windows'
