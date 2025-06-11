@@ -437,6 +437,7 @@ class StatisticsCalculator:
             'solver_rankings': solver_rankings,
             'problem_rankings': problem_rankings,
             'backend_comparison': self.calculate_backend_comparison(),
+            'advanced_analytics': self.calculate_advanced_analytics(),
             'generated_at': datetime.now().isoformat()
         }
     
@@ -510,6 +511,77 @@ class StatisticsCalculator:
             backend_analysis["recommendations"][problem_type.value] = recommended
         
         return backend_analysis
+    
+    def calculate_advanced_analytics(self) -> Dict[str, Any]:
+        """Calculate advanced analytics using the statistical analysis module."""
+        logger.info("Calculating advanced analytics...")
+        
+        try:
+            # Import here to avoid circular dependencies
+            from scripts.analytics.statistical_analysis import AdvancedStatisticalAnalyzer
+            
+            analyzer = AdvancedStatisticalAnalyzer(self.database_path)
+            
+            # Load benchmark data
+            df = analyzer.load_benchmark_data()
+            if df.empty:
+                return {'error': 'No benchmark data available for advanced analytics'}
+            
+            # Get unique solvers
+            solvers = df['solver_name'].unique()
+            
+            # Calculate performance metrics for each solver
+            solver_analytics = {}
+            for solver in solvers:
+                metrics = analyzer.calculate_performance_metrics(df, solver)
+                if metrics:
+                    solver_analytics[solver] = {
+                        'success_rate': metrics.success_rate,
+                        'geometric_mean_time': metrics.geometric_mean_time,
+                        'coefficient_of_variation': metrics.coefficient_of_variation,
+                        'p95_solve_time': metrics.p95_solve_time,
+                        'constraint_violation_rate': metrics.constraint_violation_rate,
+                        'problems_per_second': metrics.problems_per_second
+                    }
+                
+                # Add scaling analysis
+                scaling = analyzer.analyze_solver_scaling(df, solver)
+                if scaling.get('scaling_analysis_valid'):
+                    solver_analytics[solver]['scaling'] = {
+                        'power_law_exponent': scaling.get('power_law_fit', {}).get('exponent'),
+                        'size_correlation': scaling.get('size_correlation', {}).get('correlation'),
+                        'scaling_interpretation': scaling.get('power_law_fit', {}).get('scaling_interpretation')
+                    }
+            
+            # Perform key pairwise comparisons
+            pairwise_comparisons = {}
+            solver_list = list(solvers)
+            for i in range(min(3, len(solver_list))):  # Limit to top 3 comparisons
+                for j in range(i+1, min(3, len(solver_list))):
+                    solver1, solver2 = solver_list[i], solver_list[j]
+                    comparison = analyzer.perform_pairwise_comparison(df, solver1, solver2)
+                    if comparison.get('comparison_valid'):
+                        key = f"{solver1}_vs_{solver2}"
+                        pairwise_comparisons[key] = {
+                            'statistically_significant': comparison.get('wilcoxon_test', {}).get('significant', False),
+                            'effect_size': comparison.get('effect_size', {}).get('cohens_d'),
+                            'performance_ratio': comparison.get('performance_ratio', {}).get('geometric_mean_ratio'),
+                            'winner': solver1 if comparison.get('win_loss_tie', {}).get(f'{solver1}_win_rate', 0) > 0.5 else solver2
+                        }
+            
+            return {
+                'solver_analytics': solver_analytics,
+                'pairwise_comparisons': pairwise_comparisons,
+                'summary': {
+                    'total_solvers_analyzed': len(solver_analytics),
+                    'total_pairwise_comparisons': len(pairwise_comparisons),
+                    'analysis_timestamp': datetime.now().isoformat()
+                }
+            }
+            
+        except Exception as e:
+            logger.error(f"Failed to calculate advanced analytics: {e}")
+            return {'error': f'Advanced analytics failed: {str(e)}'}
     
     def _calculate_backend_performance_from_db(self) -> Dict[str, Any]:
         """Calculate backend performance statistics from database results."""
