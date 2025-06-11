@@ -101,8 +101,8 @@ The system operates under GitHub Actions constraints:
 The project follows a staged development approach:
 1. **Phase 1 (MVP)**: ✅ COMPLETED - Python solvers, lightweight problems, basic reporting (Tasks 1-20)
 2. **Phase 2**: 🚧 IN PROGRESS - Multi-backend CVXPY, SOCP/SDP support, advanced analytics (Tasks 21-35)
-   - ✅ Tasks 21-24: Multi-backend CVXPY support with SOCP implementation
-   - 🚧 Tasks 25-35: SDP support, problem classification, advanced analytics
+   - ✅ Tasks 21-25: Multi-backend CVXPY support with SOCP and SDP implementation
+   - 🚧 Tasks 26-35: Problem classification, external storage, advanced analytics
 3. **Phase 3**: PLANNED - Octave support, external storage, advanced problem types
 4. **Phase 4**: PLANNED - Production features, cloud deployment, enterprise capabilities
 
