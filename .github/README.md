@@ -40,6 +40,7 @@ When triggering the workflow manually, you can customize:
 - **benchmark-results**: SQLite database and log files (30-day retention)
 - **benchmark-reports**: Generated HTML reports (30-day retention)
 - **Cross-platform results**: Results from different OS/Python combinations (7-day retention)
+- **GitHub Pages**: Automatic deployment of HTML reports (accessible via repository GitHub Pages URL)
 
 ### Environment Variables
 
