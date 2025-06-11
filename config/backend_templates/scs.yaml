@@ -16,40 +16,46 @@ scs_cvxpy:
     stability: "mature"
     recommended_for: ["robust_solving", "mixed_problems", "research_applications"]
   
-  # Backend-specific parameters
+  # MINIMAL CONFIGURATION (for fair baseline comparison)
+  # Recommended for initial benchmarking to establish baseline performance
   solver_options:
-    # Convergence tolerances
-    eps: 1.0e-5             # Convergence tolerance
-    
-    # Iteration limits
-    max_iters: 100000       # Maximum iterations
-    
-    # Algorithm parameters
-    alpha: 1.5              # Relaxation parameter
-    rho_x: 1.0e-6          # Primal proximal penalty
-    
-    # Scaling and normalization
-    normalize: true         # Normalize problem data
-    scale: 1.0             # Scaling factor
-    
-    # Adaptive restart
-    adaptive_scale: true    # Enable adaptive scaling
-    
-    # Linear system solver
-    use_indirect: true      # Use indirect method for linear systems
-    
-    # Acceleration
-    acceleration_lookback: 10  # Lookback for acceleration
-    acceleration_interval: 10 # Acceleration interval
-    
-    # Verbosity
-    verbose: false          # Enable verbose output
-    
-    # Write data (for debugging)
-    write_data_filename: null  # Write problem data to file
-    
-    # Warm starting  
-    warm_start: false       # Enable warm starting
+    verbose: false          # Disable verbose output (essential for clean benchmarking)
+  
+  # ADVANCED CONFIGURATION OPTIONS (commented out for minimal baseline)
+  # Uncomment and adjust these parameters for performance tuning:
+  # solver_options:
+  #   # Convergence tolerances
+  #   eps: 1.0e-5             # Convergence tolerance
+  #   
+  #   # Iteration limits
+  #   max_iters: 100000       # Maximum iterations
+  #   
+  #   # Algorithm parameters
+  #   alpha: 1.5              # Relaxation parameter
+  #   rho_x: 1.0e-6          # Primal proximal penalty
+  #   
+  #   # Scaling and normalization
+  #   normalize: true         # Normalize problem data
+  #   scale: 1.0             # Scaling factor
+  #   
+  #   # Adaptive restart
+  #   adaptive_scale: true    # Enable adaptive scaling
+  #   
+  #   # Linear system solver
+  #   use_indirect: true      # Use indirect method for linear systems
+  #   
+  #   # Acceleration
+  #   acceleration_lookback: 10  # Lookback for acceleration
+  #   acceleration_interval: 10 # Acceleration interval
+  #   
+  #   # Verbosity
+  #   verbose: false          # Enable verbose output
+  #   
+  #   # Write data (for debugging)
+  #   write_data_filename: null  # Write problem data to file
+  #   
+  #   # Warm starting  
+  #   warm_start: false       # Enable warm starting
     
   # Installation requirements
   installation:
@@ -59,32 +65,36 @@ scs_cvxpy:
     conda_install: "conda install -c conda-forge scs"
     notes: "General-purpose conic solver, very robust and stable"
   
-  # Problem-specific optimizations
-  problem_optimizations:
-    LP:
-      # Linear programming optimizations
-      eps: 1.0e-6
-      normalize: true
-      use_indirect: false
-      
-    QP:
-      # Quadratic programming optimizations  
-      alpha: 1.6
-      rho_x: 1.0e-6
-      adaptive_scale: true
-      
-    SOCP:
-      # Second-order cone programming optimizations
-      eps: 1.0e-6
-      max_iters: 50000
-      acceleration_lookback: 20
-      
-    SDP:
-      # Semidefinite programming optimizations
-      eps: 1.0e-4
-      max_iters: 25000
-      use_indirect: true
-      normalize: false
+  # MINIMAL CONFIGURATION: Empty problem optimizations for baseline comparison
+  problem_optimizations: {}
+  
+  # ADVANCED PROBLEM-SPECIFIC OPTIMIZATIONS (commented out for minimal baseline)
+  # Uncomment and adjust these for performance tuning:
+  # problem_optimizations:
+  #   LP:
+  #     # Linear programming optimizations
+  #     eps: 1.0e-6
+  #     normalize: true
+  #     use_indirect: false
+  #     
+  #   QP:
+  #     # Quadratic programming optimizations  
+  #     alpha: 1.6
+  #     rho_x: 1.0e-6
+  #     adaptive_scale: true
+  #     
+  #   SOCP:
+  #     # Second-order cone programming optimizations
+  #     eps: 1.0e-6
+  #     max_iters: 50000
+  #     acceleration_lookback: 20
+  #     
+  #   SDP:
+  #     # Semidefinite programming optimizations
+  #     eps: 1.0e-4
+  #     max_iters: 25000
+  #     use_indirect: true
+  #     normalize: false
   
   # Timeout and resource limits
   timeout: 300

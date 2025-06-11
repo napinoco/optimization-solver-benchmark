@@ -1,6 +1,6 @@
-# Enhanced Solver Configuration System
-# Comprehensive backend-specific parameter management with validation
-# Templates available in: config/backend_templates/
+# Minimal Solver Configuration for Fair Baseline Benchmarking
+# Uses native solver defaults with only essential parameters
+# Comprehensive parameter templates available in: config/backend_templates/
 
 # Configuration schema version
 schema_version: "2.0"
@@ -12,7 +12,7 @@ global_settings:
   parameter_validation: true
   performance_monitoring: true
 
-# Solver definitions
+# Solver definitions - minimal configuration for fair comparison
 solvers:
   scipy:
     name: "SciPy"
@@ -24,51 +24,19 @@ solvers:
     timeout: 300  # seconds
     enabled: true
     
-  # CVXPY with multiple backends - each backend registered as separate solver
+  # CVXPY backends - using native defaults for fair baseline comparison
   clarabel_cvxpy:
     name: "CLARABEL (via CVXPY)"
     environment: "python"
     backend: "CLARABEL"
     supported_types: ["LP", "QP", "SOCP", "SDP"]
     
-    # Enhanced backend-specific configuration
+    # Minimal configuration - let solver use native defaults
     solver_options:
-      # Convergence tolerances
-      feastol: 1.0e-8          # Feasibility tolerance
-      abstol: 1.0e-8           # Absolute tolerance  
-      reltol: 1.0e-8           # Relative tolerance
-      
-      # Iteration limits
-      max_iter: 50000          # Maximum iterations
-      
-      # Algorithm options
-      equilibrate_enable: true   # Enable equilibration
-      presolve_enable: true     # Enable presolving
-      
-      # Verbosity
-      verbose: false           # Enable verbose output
+      verbose: false           # Disable verbose output
     
-    # Problem-specific parameter overrides
-    problem_optimizations:
-      LP:
-        presolve_enable: true
-        equilibrate_enable: true
-      QP:
-        sigma: 1.0
-        alpha: 1.4
-      SOCP:
-        reduced_tol_enable: true
-        max_iter: 25000
-      SDP:
-        chordal_decomposition_enable: true
-        feastol: 1.0e-6
-    
-    # Diagnostics configuration
-    diagnostics:
-      enabled: true
-      parameter_validation: true
-      performance_benchmarking: true
-      installation_verification: true
+    # No problem-specific optimizations for baseline
+    problem_optimizations: {}
     
     timeout: 300
     enabled: true
@@ -79,45 +47,12 @@ solvers:
     backend: "SCS"
     supported_types: ["LP", "QP", "SOCP", "SDP"]
     
-    # SCS-specific configuration
+    # Minimal configuration - let solver use native defaults
     solver_options:
-      # Convergence tolerance
-      eps: 1.0e-5             # Convergence tolerance
-      
-      # Iteration limits
-      max_iters: 100000       # Maximum iterations
-      
-      # Algorithm parameters
-      alpha: 1.5              # Relaxation parameter
-      
-      # Scaling and normalization
-      normalize: true         # Normalize problem data
-      
-      # Verbosity
-      verbose: false          # Enable verbose output
+      verbose: false          # Disable verbose output
     
-    # Problem-specific optimizations
-    problem_optimizations:
-      LP:
-        eps: 1.0e-6
-        normalize: true
-        use_indirect: false
-      QP:
-        alpha: 1.6
-        adaptive_scale: true
-      SOCP:
-        eps: 1.0e-6
-        max_iters: 50000
-      SDP:
-        eps: 1.0e-4
-        max_iters: 25000
-        use_indirect: true
-    
-    # Diagnostics configuration
-    diagnostics:
-      enabled: true
-      parameter_validation: true
-      performance_benchmarking: true
+    # No problem-specific optimizations for baseline
+    problem_optimizations: {}
     
     timeout: 300
     enabled: true
@@ -128,39 +63,12 @@ solvers:
     backend: "ECOS"
     supported_types: ["LP", "QP", "SOCP"]
     
-    # ECOS-specific configuration
+    # Minimal configuration - let solver use native defaults
     solver_options:
-      # Convergence tolerances
-      feastol: 1.0e-8         # Feasibility tolerance
-      abstol: 1.0e-8          # Absolute tolerance
-      reltol: 1.0e-8          # Relative tolerance
-      
-      # Iteration limits
-      max_iters: 100          # Maximum iterations
-      
-      # Verbosity
-      verbose: false          # Enable verbose output
+      verbose: false          # Disable verbose output
     
-    # Problem-specific optimizations
-    problem_optimizations:
-      LP:
-        feastol: 1.0e-9
-        abstol: 1.0e-9
-        max_iters: 200
-      QP:
-        feastol: 1.0e-8
-        reltol: 1.0e-8
-        nitref: 5
-      SOCP:
-        feastol: 1.0e-7
-        abstol: 1.0e-7
-        max_iters: 100
-    
-    # Diagnostics configuration
-    diagnostics:
-      enabled: true
-      parameter_validation: true
-      performance_benchmarking: true
+    # No problem-specific optimizations for baseline
+    problem_optimizations: {}
     
     timeout: 300
     enabled: true
@@ -171,43 +79,12 @@ solvers:
     backend: "OSQP"
     supported_types: ["QP", "SOCP"]
     
-    # OSQP-specific configuration
+    # Minimal configuration - let solver use native defaults
     solver_options:
-      # Convergence tolerances
-      eps_abs: 1.0e-6         # Absolute tolerance
-      eps_rel: 1.0e-6         # Relative tolerance
-      
-      # Iteration limits
-      max_iter: 10000         # Maximum iterations
-      
-      # ADMM parameters
-      rho: 0.1                # ADMM step size
-      alpha: 1.6              # Relaxation parameter
-      
-      # Solution polishing
-      polish: true            # Polish solution at the end
-      
-      # Verbosity
-      verbose: false          # Enable verbose output
+      verbose: false          # Disable verbose output
     
-    # Problem-specific optimizations
-    problem_optimizations:
-      QP:
-        rho: 0.1
-        alpha: 1.6
-        polish: true
-        adaptive_rho: true
-      SOCP:
-        rho: 0.05
-        eps_abs: 1.0e-7
-        max_iter: 25000
-        polish: false
-    
-    # Diagnostics configuration
-    diagnostics:
-      enabled: true
-      parameter_validation: true
-      performance_benchmarking: true
+    # No problem-specific optimizations for baseline
+    problem_optimizations: {}
     
     timeout: 300
     enabled: true
@@ -217,6 +94,11 @@ solvers:
     environment: "python"
     backend: "QSQP"
     supported_types: ["QP"]
+    
+    # Minimal configuration - let solver use native defaults
+    solver_options:
+      verbose: false          # Disable verbose output
+    
     timeout: 300
     enabled: true
     
@@ -225,6 +107,11 @@ solvers:
     environment: "python"
     backend: "CBC"
     supported_types: ["LP"]
+    
+    # Minimal configuration - let solver use native defaults
+    solver_options:
+      verbose: false          # Disable verbose output
+    
     timeout: 300
     enabled: true
     
@@ -233,6 +120,11 @@ solvers:
     environment: "python"
     backend: "GLOP"
     supported_types: ["LP"]
+    
+    # Minimal configuration - let solver use native defaults
+    solver_options:
+      verbose: false          # Disable verbose output
+    
     timeout: 300
     enabled: true
     
@@ -241,5 +133,10 @@ solvers:
     environment: "python"
     backend: "CVXOPT"
     supported_types: ["LP", "QP", "SOCP"]
+    
+    # Minimal configuration - let solver use native defaults
+    solver_options:
+      verbose: false          # Disable verbose output
+    
     timeout: 300
     enabled: true
