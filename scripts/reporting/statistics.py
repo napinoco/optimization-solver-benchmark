@@ -3,15 +3,22 @@ Statistics Calculation Module
 
 Provides comprehensive statistical analysis functions for benchmark results.
 Calculates performance metrics, trends, and comparative statistics.
+Enhanced with backend comparison and validation reporting.
 """
 
 import sqlite3
 import logging
+import sys
+from pathlib import Path
 from typing import Dict, List, Any, Tuple, Optional
 from dataclasses import dataclass
 # Use manual statistics calculations to avoid import conflicts
 from datetime import datetime, timedelta
 import math
+
+# Add project root to path for imports
+project_root = Path(__file__).parent.parent.parent
+sys.path.insert(0, str(project_root))
 
 # Configure logging
 logger = logging.getLogger(__name__)
@@ -429,8 +436,167 @@ class StatisticsCalculator:
             'benchmark_summary': summary,
             'solver_rankings': solver_rankings,
             'problem_rankings': problem_rankings,
+            'backend_comparison': self.calculate_backend_comparison(),
             'generated_at': datetime.now().isoformat()
         }
+    
+    def calculate_backend_comparison(self) -> Dict[str, Any]:
+        """Calculate comprehensive backend comparison statistics."""
+        logger.info("Calculating backend comparison statistics...")
+        
+        try:
+            from scripts.utils.solver_validation import SolverValidator, ProblemType
+            from scripts.benchmark.backend_selector import BackendSelector
+        except ImportError:
+            logger.warning("Backend validation modules not available, skipping backend comparison")
+            return {}
+        
+        # Initialize backend analysis components
+        validator = SolverValidator()
+        selector = BackendSelector(validator)
+        
+        # Get validation results
+        validation_results = validator.validate_all_backends()
+        available_backends = [k for k, v in validation_results.items() if v.available]
+        
+        # Calculate backend performance from database
+        backend_performance = self._calculate_backend_performance_from_db()
+        
+        # Generate comprehensive backend analysis
+        backend_analysis = {
+            "validation_summary": {
+                "total_backends": len(validation_results),
+                "available_backends": len(available_backends),
+                "unavailable_backends": len(validation_results) - len(available_backends),
+                "availability_percentage": len(available_backends) / len(validation_results) * 100 if validation_results else 0
+            },
+            "available_backends": available_backends,
+            "backend_capabilities": {},
+            "performance_comparison": backend_performance,
+            "problem_type_coverage": {},
+            "recommendations": {}
+        }
+        
+        # Add capability information for available backends
+        for backend_name, result in validation_results.items():
+            if result.available and result.capabilities:
+                backend_analysis["backend_capabilities"][backend_name] = {
+                    "supported_types": [pt.value for pt in result.capabilities.supported_types],
+                    "performance_tier": result.capabilities.performance_tier,
+                    "memory_efficiency": result.capabilities.memory_efficiency,
+                    "stability": result.capabilities.stability,
+                    "installation_notes": result.capabilities.installation_notes
+                }
+        
+        # Analyze problem type coverage
+        for problem_type in ProblemType:
+            compatible_backends = validator.get_backends_for_problem_type(problem_type)
+            available_compatible = [b for b in compatible_backends if b in available_backends]
+            selection = selector.select_backend_for_problem(problem_type)
+            recommended = selection.selected_backend
+            
+            backend_analysis["problem_type_coverage"][problem_type.value] = {
+                "total_compatible": len(compatible_backends),
+                "available_compatible": len(available_compatible),
+                "coverage_percentage": len(available_compatible) / len(compatible_backends) * 100 if compatible_backends else 0,
+                "available_backends": available_compatible,
+                "recommended_backend": recommended
+            }
+        
+        # Add recommendations for each problem type
+        for problem_type in ProblemType:
+            selection = selector.select_backend_for_problem(problem_type)
+            recommended = selection.selected_backend
+            backend_analysis["recommendations"][problem_type.value] = recommended
+        
+        return backend_analysis
+    
+    def _calculate_backend_performance_from_db(self) -> Dict[str, Any]:
+        """Calculate backend performance statistics from database results."""
+        
+        with self._get_database_connection() as conn:
+            cursor = conn.cursor()
+            
+            # Get results grouped by solver and problem type  
+            cursor.execute("""
+                SELECT 
+                    r.solver_name,
+                    p.problem_class,
+                    r.status,
+                    r.solve_time,
+                    r.objective_value,
+                    r.iterations
+                FROM results r
+                JOIN problems p ON r.problem_name = p.name
+                WHERE r.solver_name LIKE '% (via CVXPY)'
+                ORDER BY r.solver_name, p.problem_class
+            """)
+            
+            # Group results by backend and problem type
+            backend_results = {}
+            for row in cursor.fetchall():
+                solver_name = row['solver_name']
+                problem_type = row['problem_class'] or 'Unknown'
+                
+                if solver_name not in backend_results:
+                    backend_results[solver_name] = {}
+                if problem_type not in backend_results[solver_name]:
+                    backend_results[solver_name][problem_type] = []
+                
+                backend_results[solver_name][problem_type].append({
+                    'status': row['status'],
+                    'solve_time': row['solve_time'],
+                    'objective_value': row['objective_value'],
+                    'iterations': row['iterations']
+                })
+        
+        # Calculate performance metrics for each backend
+        performance_analysis = {}
+        
+        for backend_name, problem_types in backend_results.items():
+            backend_metrics = {
+                "total_problems_attempted": 0,
+                "total_successful": 0,
+                "overall_success_rate": 0.0,
+                "average_solve_time": 0.0,
+                "problem_type_performance": {}
+            }
+            
+            all_times = []
+            total_attempts = 0
+            total_successful = 0
+            
+            # Analyze performance by problem type
+            for problem_type, results in problem_types.items():
+                successful_results = [r for r in results if r['status'] == 'optimal']
+                solve_times = [r['solve_time'] for r in successful_results]
+                
+                type_metrics = {
+                    "attempts": len(results),
+                    "successful": len(successful_results),
+                    "success_rate": len(successful_results) / len(results) * 100 if results else 0,
+                    "avg_solve_time": calculate_mean(solve_times),
+                    "min_solve_time": min(solve_times) if solve_times else None,
+                    "max_solve_time": max(solve_times) if solve_times else None,
+                    "std_dev_solve_time": calculate_stdev(solve_times)
+                }
+                
+                backend_metrics["problem_type_performance"][problem_type] = type_metrics
+                
+                # Accumulate overall statistics
+                total_attempts += len(results)
+                total_successful += len(successful_results)
+                all_times.extend(solve_times)
+            
+            # Calculate overall metrics
+            backend_metrics["total_problems_attempted"] = total_attempts
+            backend_metrics["total_successful"] = total_successful
+            backend_metrics["overall_success_rate"] = total_successful / total_attempts * 100 if total_attempts else 0
+            backend_metrics["average_solve_time"] = calculate_mean(all_times)
+            
+            performance_analysis[backend_name] = backend_metrics
+        
+        return performance_analysis
 
 
 def main():
