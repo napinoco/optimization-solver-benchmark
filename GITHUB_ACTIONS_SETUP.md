@@ -53,14 +53,14 @@ Ensure your repository has these settings:
 To enable automatic report publishing:
 
 1. Go to repository **Settings** → **Pages**
-2. Under **Source**, select "Deploy from a branch"
-3. Choose branch: **gh-pages**
-4. Choose folder: **/ (root)**
-5. Click **Save**
+2. Under **Source**, select "GitHub Actions"
+3. Click **Save**
 
-The workflow will automatically create the `gh-pages` branch and deploy reports after each successful benchmark run.
+The workflow will automatically deploy reports using GitHub Pages Actions after each successful benchmark run.
 
 After setup, reports will be available at: `https://YOUR_USERNAME.github.io/optimization-solver-benchmark/`
+
+**Note**: The first deployment may take a few minutes to become available. Subsequent deployments are typically faster.
 
 ### Environment Secrets
 
