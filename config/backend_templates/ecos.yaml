@@ -16,28 +16,34 @@ ecos_cvxpy:
     stability: "mature"
     recommended_for: ["embedded_systems", "real_time_applications", "small_to_medium_problems"]
   
-  # Backend-specific parameters
+  # MINIMAL CONFIGURATION (for fair baseline comparison)
+  # Recommended for initial benchmarking to establish baseline performance
   solver_options:
-    # Convergence tolerances
-    feastol: 1.0e-8         # Feasibility tolerance
-    abstol: 1.0e-8          # Absolute tolerance
-    reltol: 1.0e-8          # Relative tolerance
-    feastol_inacc: 1.0e-4   # Inaccurate feasibility tolerance
-    abstol_inacc: 5.0e-5    # Inaccurate absolute tolerance
-    reltol_inacc: 5.0e-5    # Inaccurate relative tolerance
-    
-    # Iteration limits
-    max_iters: 100          # Maximum iterations
-    
-    # Verbosity
-    verbose: false          # Enable verbose output
-    
-    # Numerical stability
-    nitref: 9               # Number of iterative refinement steps
-    
-    # Interior point method parameters
-    mi: 0.99                # Barrier parameter decrease factor
-    delta: 2.0e-7          # Regularization parameter
+    verbose: false          # Disable verbose output (essential for clean benchmarking)
+  
+  # ADVANCED CONFIGURATION OPTIONS (commented out for minimal baseline)
+  # Uncomment and adjust these parameters for performance tuning:
+  # solver_options:
+  #   # Convergence tolerances
+  #   feastol: 1.0e-8         # Feasibility tolerance
+  #   abstol: 1.0e-8          # Absolute tolerance
+  #   reltol: 1.0e-8          # Relative tolerance
+  #   feastol_inacc: 1.0e-4   # Inaccurate feasibility tolerance
+  #   abstol_inacc: 5.0e-5    # Inaccurate absolute tolerance
+  #   reltol_inacc: 5.0e-5    # Inaccurate relative tolerance
+  #   
+  #   # Iteration limits
+  #   max_iters: 100          # Maximum iterations
+  #   
+  #   # Verbosity
+  #   verbose: false          # Enable verbose output
+  #   
+  #   # Numerical stability
+  #   nitref: 9               # Number of iterative refinement steps
+  #   
+  #   # Interior point method parameters
+  #   mi: 0.99                # Barrier parameter decrease factor
+  #   delta: 2.0e-7          # Regularization parameter
     
   # Installation requirements
   installation:
@@ -47,26 +53,30 @@ ecos_cvxpy:
     conda_install: "conda install -c conda-forge ecos"
     notes: "Lightweight solver, excellent for embedded applications and real-time use"
   
-  # Problem-specific optimizations
-  problem_optimizations:
-    LP:
-      # Linear programming optimizations
-      feastol: 1.0e-9
-      abstol: 1.0e-9
-      max_iters: 200
-      
-    QP:
-      # Quadratic programming optimizations
-      feastol: 1.0e-8
-      reltol: 1.0e-8
-      nitref: 5
-      
-    SOCP:
-      # Second-order cone programming optimizations
-      feastol: 1.0e-7
-      abstol: 1.0e-7
-      max_iters: 100
-      mi: 0.95
+  # MINIMAL CONFIGURATION: Empty problem optimizations for baseline comparison
+  problem_optimizations: {}
+  
+  # ADVANCED PROBLEM-SPECIFIC OPTIMIZATIONS (commented out for minimal baseline)
+  # Uncomment and adjust these for performance tuning:
+  # problem_optimizations:
+  #   LP:
+  #     # Linear programming optimizations
+  #     feastol: 1.0e-9
+  #     abstol: 1.0e-9
+  #     max_iters: 200
+  #     
+  #   QP:
+  #     # Quadratic programming optimizations
+  #     feastol: 1.0e-8
+  #     reltol: 1.0e-8
+  #     nitref: 5
+  #     
+  #   SOCP:
+  #     # Second-order cone programming optimizations
+  #     feastol: 1.0e-7
+  #     abstol: 1.0e-7
+  #     max_iters: 100
+  #     mi: 0.95
   
   # Timeout and resource limits
   timeout: 300
