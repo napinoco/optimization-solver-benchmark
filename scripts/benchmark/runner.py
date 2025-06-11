@@ -202,7 +202,9 @@ class BenchmarkRunner:
                     backend=backend,
                     timeout=config.get('timeout', timeout),
                     verbose=False,
-                    solver_options=config.get('solver_options', {})
+                    solver_options=config.get('solver_options', {}),
+                    problem_optimizations=config.get('problem_optimizations', {}),
+                    enable_diagnostics=config.get('diagnostics', {}).get('enabled', True)
                 )
                 return solver_instance
                 

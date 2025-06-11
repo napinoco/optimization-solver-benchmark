@@ -1,3 +1,17 @@
+# Enhanced Solver Configuration System
+# Comprehensive backend-specific parameter management with validation
+# Templates available in: config/backend_templates/
+
+# Configuration schema version
+schema_version: "2.0"
+
+# Global solver settings
+global_settings:
+  default_timeout: 300
+  enable_diagnostics: true
+  parameter_validation: true
+  performance_monitoring: true
+
 # Solver definitions
 solvers:
   scipy:
@@ -16,6 +30,46 @@ solvers:
     environment: "python"
     backend: "CLARABEL"
     supported_types: ["LP", "QP", "SOCP", "SDP"]
+    
+    # Enhanced backend-specific configuration
+    solver_options:
+      # Convergence tolerances
+      feastol: 1.0e-8          # Feasibility tolerance
+      abstol: 1.0e-8           # Absolute tolerance  
+      reltol: 1.0e-8           # Relative tolerance
+      
+      # Iteration limits
+      max_iter: 50000          # Maximum iterations
+      
+      # Algorithm options
+      equilibrate_enable: true   # Enable equilibration
+      presolve_enable: true     # Enable presolving
+      
+      # Verbosity
+      verbose: false           # Enable verbose output
+    
+    # Problem-specific parameter overrides
+    problem_optimizations:
+      LP:
+        presolve_enable: true
+        equilibrate_enable: true
+      QP:
+        sigma: 1.0
+        alpha: 1.4
+      SOCP:
+        reduced_tol_enable: true
+        max_iter: 25000
+      SDP:
+        chordal_decomposition_enable: true
+        feastol: 1.0e-6
+    
+    # Diagnostics configuration
+    diagnostics:
+      enabled: true
+      parameter_validation: true
+      performance_benchmarking: true
+      installation_verification: true
+    
     timeout: 300
     enabled: true
     
@@ -24,6 +78,47 @@ solvers:
     environment: "python"
     backend: "SCS"
     supported_types: ["LP", "QP", "SOCP", "SDP"]
+    
+    # SCS-specific configuration
+    solver_options:
+      # Convergence tolerance
+      eps: 1.0e-5             # Convergence tolerance
+      
+      # Iteration limits
+      max_iters: 100000       # Maximum iterations
+      
+      # Algorithm parameters
+      alpha: 1.5              # Relaxation parameter
+      
+      # Scaling and normalization
+      normalize: true         # Normalize problem data
+      
+      # Verbosity
+      verbose: false          # Enable verbose output
+    
+    # Problem-specific optimizations
+    problem_optimizations:
+      LP:
+        eps: 1.0e-6
+        normalize: true
+        use_indirect: false
+      QP:
+        alpha: 1.6
+        adaptive_scale: true
+      SOCP:
+        eps: 1.0e-6
+        max_iters: 50000
+      SDP:
+        eps: 1.0e-4
+        max_iters: 25000
+        use_indirect: true
+    
+    # Diagnostics configuration
+    diagnostics:
+      enabled: true
+      parameter_validation: true
+      performance_benchmarking: true
+    
     timeout: 300
     enabled: true
     
@@ -32,6 +127,41 @@ solvers:
     environment: "python"
     backend: "ECOS"
     supported_types: ["LP", "QP", "SOCP"]
+    
+    # ECOS-specific configuration
+    solver_options:
+      # Convergence tolerances
+      feastol: 1.0e-8         # Feasibility tolerance
+      abstol: 1.0e-8          # Absolute tolerance
+      reltol: 1.0e-8          # Relative tolerance
+      
+      # Iteration limits
+      max_iters: 100          # Maximum iterations
+      
+      # Verbosity
+      verbose: false          # Enable verbose output
+    
+    # Problem-specific optimizations
+    problem_optimizations:
+      LP:
+        feastol: 1.0e-9
+        abstol: 1.0e-9
+        max_iters: 200
+      QP:
+        feastol: 1.0e-8
+        reltol: 1.0e-8
+        nitref: 5
+      SOCP:
+        feastol: 1.0e-7
+        abstol: 1.0e-7
+        max_iters: 100
+    
+    # Diagnostics configuration
+    diagnostics:
+      enabled: true
+      parameter_validation: true
+      performance_benchmarking: true
+    
     timeout: 300
     enabled: true
     
@@ -40,6 +170,45 @@ solvers:
     environment: "python"
     backend: "OSQP"
     supported_types: ["QP", "SOCP"]
+    
+    # OSQP-specific configuration
+    solver_options:
+      # Convergence tolerances
+      eps_abs: 1.0e-6         # Absolute tolerance
+      eps_rel: 1.0e-6         # Relative tolerance
+      
+      # Iteration limits
+      max_iter: 10000         # Maximum iterations
+      
+      # ADMM parameters
+      rho: 0.1                # ADMM step size
+      alpha: 1.6              # Relaxation parameter
+      
+      # Solution polishing
+      polish: true            # Polish solution at the end
+      
+      # Verbosity
+      verbose: false          # Enable verbose output
+    
+    # Problem-specific optimizations
+    problem_optimizations:
+      QP:
+        rho: 0.1
+        alpha: 1.6
+        polish: true
+        adaptive_rho: true
+      SOCP:
+        rho: 0.05
+        eps_abs: 1.0e-7
+        max_iter: 25000
+        polish: false
+    
+    # Diagnostics configuration
+    diagnostics:
+      enabled: true
+      parameter_validation: true
+      performance_benchmarking: true
+    
     timeout: 300
     enabled: true
     

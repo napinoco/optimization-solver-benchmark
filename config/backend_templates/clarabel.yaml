@@ -1,0 +1,87 @@
+# CLARABEL Backend Configuration Template
+# High-performance Rust-based conic solver for LP, QP, SOCP, SDP problems
+
+clarabel_cvxpy:
+  name: "CLARABEL (via CVXPY)"
+  environment: "python"
+  backend: "CLARABEL"
+  
+  # Problem type support
+  supported_types: ["LP", "QP", "SOCP", "SDP"]
+  
+  # Performance characteristics
+  performance:
+    tier: "high"
+    memory_efficiency: "high"
+    stability: "stable"
+    recommended_for: ["general_purpose", "large_scale", "high_accuracy"]
+  
+  # Backend-specific parameters
+  solver_options:
+    # Convergence tolerances
+    feastol: 1.0e-8          # Feasibility tolerance
+    abstol: 1.0e-8           # Absolute tolerance
+    reltol: 1.0e-8           # Relative tolerance
+    
+    # Iteration limits
+    max_iter: 50000          # Maximum iterations
+    time_limit: 300.0        # Time limit in seconds
+    
+    # Algorithm options
+    equilibrate_enable: true   # Enable equilibration
+    presolve_enable: true     # Enable presolving
+    reduced_tol_enable: true  # Enable reduced tolerance
+    
+    # Verbosity and output
+    verbose: false           # Enable verbose output
+    
+    # Advanced settings
+    sigma: 1.0              # Penalty parameter
+    alpha: 1.6              # Relaxation parameter
+    
+    # SDP-specific settings (when applicable)
+    chordal_decomposition_enable: true  # Enable chordal decomposition for SDP
+    
+  # Installation requirements
+  installation:
+    package: "clarabel"
+    min_version: "0.5.0"
+    pip_install: "clarabel>=0.5.0"
+    conda_install: "conda install -c conda-forge clarabel"
+    notes: "Rust-based solver, fast compilation, excellent for all problem types"
+  
+  # Problem-specific optimizations
+  problem_optimizations:
+    LP:
+      # Linear programming specific settings
+      presolve_enable: true
+      equilibrate_enable: true
+      
+    QP:
+      # Quadratic programming specific settings
+      sigma: 1.0
+      alpha: 1.4
+      
+    SOCP:
+      # Second-order cone programming settings
+      reduced_tol_enable: true
+      max_iter: 25000
+      
+    SDP:
+      # Semidefinite programming settings
+      chordal_decomposition_enable: true
+      feastol: 1.0e-6
+      max_iter: 10000
+  
+  # Timeout and resource limits
+  timeout: 300             # Default timeout in seconds
+  memory_limit: null       # Memory limit (null = no limit)
+  
+  # Diagnostics and monitoring
+  diagnostics:
+    enabled: true
+    track_iterations: true
+    track_objective_progress: true
+    track_dual_gap: true
+  
+  enabled: true

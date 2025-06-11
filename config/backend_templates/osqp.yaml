@@ -1,0 +1,93 @@
+# OSQP Backend Configuration Template  
+# Operator Splitting Quadratic Program solver optimized for QP and SOCP problems
+
+osqp_cvxpy:
+  name: "OSQP (via CVXPY)"
+  environment: "python"
+  backend: "OSQP"
+  
+  # Problem type support
+  supported_types: ["QP", "SOCP"]
+  
+  # Performance characteristics
+  performance:
+    tier: "high"
+    memory_efficiency: "high"
+    stability: "mature"
+    recommended_for: ["quadratic_programming", "control_applications", "portfolio_optimization"]
+  
+  # Backend-specific parameters
+  solver_options:
+    # Convergence tolerances
+    eps_abs: 1.0e-6         # Absolute tolerance
+    eps_rel: 1.0e-6         # Relative tolerance
+    eps_prim_inf: 1.0e-4    # Primal infeasibility tolerance
+    eps_dual_inf: 1.0e-4    # Dual infeasibility tolerance
+    
+    # Iteration limits
+    max_iter: 10000         # Maximum iterations
+    time_limit: 300.0       # Time limit in seconds
+    
+    # Algorithm parameters
+    rho: 0.1                # ADMM step size
+    sigma: 1.0e-6           # Proximal penalty parameter  
+    alpha: 1.6              # Relaxation parameter
+    
+    # Adaptive parameters
+    adaptive_rho: true      # Enable adaptive rho updates
+    rho_update_interval: 25 # Rho update interval
+    
+    # Linear system solver
+    linsys_solver: 'auto'   # Linear system solver: 'auto', 'direct', 'indirect'
+    
+    # Scaling and preconditioning
+    scaled_termination: false  # Use scaled termination criteria
+    check_termination: 25      # Check termination every N iterations
+    
+    # Warm starting
+    warm_start: true        # Enable warm starting
+    
+    # Verbosity
+    verbose: false          # Enable verbose output
+    
+    # Polish solution
+    polish: true            # Polish solution at the end
+    polish_refine_iter: 3   # Refinement iterations in polish
+    
+  # Installation requirements
+  installation:
+    package: "osqp"
+    min_version: "0.6.0"
+    pip_install: "osqp>=0.6.0"
+    conda_install: "conda install -c conda-forge osqp"
+    notes: "Excellent for QP problems, widely used in control and ML applications"
+  
+  # Problem-specific optimizations
+  problem_optimizations:
+    QP:
+      # Quadratic programming optimizations
+      rho: 0.1
+      alpha: 1.6
+      polish: true
+      adaptive_rho: true
+      
+    SOCP:
+      # Second-order cone programming optimizations
+      rho: 0.05
+      eps_abs: 1.0e-7
+      max_iter: 25000
+      polish: false
+  
+  # Timeout and resource limits
+  timeout: 300
+  memory_limit: null
+  
+  # Diagnostics and monitoring
+  diagnostics:
+    enabled: true
+    track_iterations: true
+    track_objective_progress: true
+    track_rho_updates: true
+    track_polish_time: true
+  
+  enabled: true
