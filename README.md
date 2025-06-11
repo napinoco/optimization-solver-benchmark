@@ -65,11 +65,15 @@ This approach ensures that benchmarking results reflect genuine solver capabilit
 - **LP**: Linear Programming (.mps format)
 - **QP**: Quadratic Programming (.qps format)
 
-**Phase 2 ✅ SOCP Support Added:**
+**Phase 2 ✅ SOCP & SDP Support Added:**
 - **SOCP**: Second-Order Cone Programming with three example problems:
   - Portfolio optimization (Markowitz risk minimization)
   - Robust optimization with ellipsoidal uncertainty
-  - Facility location with Euclidean distance constraints  
+  - Facility location with Euclidean distance constraints
+- **SDP**: Semidefinite Programming with three example problems:
+  - Matrix completion (nuclear norm minimization)
+  - Control theory (Lyapunov stability analysis via LMI)
+  - Combinatorial optimization (Max Cut relaxation)  
 
 ### Features
 - **Automated Benchmarking**: GitHub Actions CI/CD with manual triggers
@@ -89,7 +93,7 @@ This approach ensures that benchmarking results reflect genuine solver capabilit
 
 ### Expanded Problem Types
 - **SOCP** ✅: Second-Order Cone Programming with portfolio optimization, robust optimization, and facility location examples
-- **SDP** 🚧: Semidefinite Programming with matrix completion examples
+- **SDP** ✅: Semidefinite Programming with matrix completion, control theory, and combinatorial optimization examples
 - **Problem Classification** 🚧: Automatic type detection and difficulty estimation
 
 ### Advanced Features
