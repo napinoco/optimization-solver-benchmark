@@ -38,15 +38,38 @@ python main.py --report
 python main.py --validate
 ```
 
-## 📊 Current Capabilities (Phase 1 ✅)
+## 🎯 Design Philosophy: Minimal Configuration for Fair Benchmarking
+
+This system prioritizes **fair, unbiased solver comparison** through minimal configuration:
+
+- **Solver Defaults**: Uses each solver's default parameters to avoid optimization bias
+- **Baseline Performance**: Establishes "out of the box" performance baselines
+- **Transparent Comparison**: Prevents inadvertent parameter tuning that favors specific solvers
+- **Future Extensibility**: Advanced parameter optimization available but clearly separated from baseline benchmarks
+
+This approach ensures that benchmarking results reflect genuine solver capabilities rather than configuration expertise.
+
+## 📊 Current Capabilities
 
 ### Solvers Supported
+**Phase 1 ✅ Completed:**
 - **SciPy**: `linprog` for LP, `quadprog` for QP
 - **CVXPY**: Default backends for LP/QP problems
 
+**Phase 2 🚧 In Progress:**
+- **CVXPY Multi-Backend**: CLARABEL, SCS, ECOS, OSQP for expanded solver coverage
+- **Minimal Configuration**: Fair baseline comparison using solver defaults for unbiased benchmarking
+
 ### Problem Types
+**Phase 1 ✅ Completed:**
 - **LP**: Linear Programming (.mps format)
-- **QP**: Quadratic Programming (.qps format)  
+- **QP**: Quadratic Programming (.qps format)
+
+**Phase 2 ✅ SOCP Support Added:**
+- **SOCP**: Second-Order Cone Programming with three example problems:
+  - Portfolio optimization (Markowitz risk minimization)
+  - Robust optimization with ellipsoidal uncertainty
+  - Facility location with Euclidean distance constraints  
 
 ### Features
 - **Automated Benchmarking**: GitHub Actions CI/CD with manual triggers
@@ -55,6 +78,7 @@ python main.py --validate
 - **Validation Framework**: Data quality checks and error detection
 - **Comprehensive Logging**: Structured logging with multiple levels
 - **Flexible Configuration**: YAML-based solver and benchmark settings
+- **Fair Baseline Benchmarking**: Minimal configuration approach using solver defaults for unbiased comparison
 
 ## 🎯 Phase 2 Roadmap (In Progress 🚧)
 
@@ -64,9 +88,9 @@ python main.py --validate
 - **Solver Capability Matrix**: Comprehensive compatibility mapping
 
 ### Expanded Problem Types
-- **SOCP**: Second-Order Cone Programming with portfolio optimization examples
-- **SDP**: Semidefinite Programming with matrix completion examples
-- **Problem Classification**: Automatic type detection and difficulty estimation
+- **SOCP** ✅: Second-Order Cone Programming with portfolio optimization, robust optimization, and facility location examples
+- **SDP** 🚧: Semidefinite Programming with matrix completion examples
+- **Problem Classification** 🚧: Automatic type detection and difficulty estimation
 
 ### Advanced Features
 - **External Storage**: Support for large problem sets via GitHub releases/URLs
