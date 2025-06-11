@@ -125,6 +125,20 @@ class CvxpySolver(SolverInterface):
         
         return options
     
+    def _map_cvxpy_status(self, cvxpy_status: str) -> str:
+        """Map CVXPY status to our standardized status format."""
+        status_mapping = {
+            "optimal": "optimal",
+            "optimal_inaccurate": "optimal",
+            "infeasible": "infeasible",
+            "infeasible_inaccurate": "infeasible",
+            "unbounded": "unbounded",
+            "unbounded_inaccurate": "unbounded",
+            "solver_error": "error",
+            "unknown": "unknown"
+        }
+        return status_mapping.get(cvxpy_status, "unknown")
+    
     def solve(self, problem: ProblemData) -> SolverResult:
         """
         Solve optimization problem using CVXPY.
@@ -144,6 +158,10 @@ class CvxpySolver(SolverInterface):
                 return self._solve_lp(problem, start_time)
             elif problem.problem_class == "QP":
                 return self._solve_qp(problem, start_time)
+            elif problem.problem_class == "SOCP":
+                return self._solve_socp(problem, start_time)
+            elif problem.problem_class == "SDP":
+                return self._solve_sdp(problem, start_time)
             else:
                 raise ValueError(f"Unsupported problem class: {problem.problem_class}")
                 
@@ -398,6 +416,176 @@ class CvxpySolver(SolverInterface):
             iterations = cvx_problem.solver_stats.num_iters
         
         self.logger.debug(f"QP solve completed: status={status}, "
+                         f"objective={objective_value}, time={solve_time:.3f}s")
+        
+        return SolverResult(
+            solver_name=self.name,
+            problem_name=problem.name,
+            solve_time=solve_time,
+            status=status,
+            objective_value=objective_value,
+            iterations=iterations,
+            solver_info=solver_info
+        )
+    
+    def _solve_socp(self, problem: ProblemData, start_time: float) -> SolverResult:
+        """Solve Second-Order Cone Programming problem using CVXPY."""
+        
+        # For SOCP problems, we use the pre-built CVXPY problem from the problem data
+        if problem.cvxpy_problem is None:
+            raise ValueError("SOCP problem must include a pre-built CVXPY problem")
+        
+        cvx_problem = problem.cvxpy_problem
+        
+        # Get problem dimensions for logging
+        try:
+            n_vars = cvx_problem.size_metrics.num_scalar_variables
+        except AttributeError:
+            n_vars = len([v for v in cvx_problem.variables() if v.is_scalar()]) if hasattr(cvx_problem, 'variables') else 0
+        
+        try:
+            n_constraints = cvx_problem.size_metrics.num_scalar_eq_constraints + cvx_problem.size_metrics.num_scalar_leq_constraints
+        except AttributeError:
+            n_constraints = len(cvx_problem.constraints) if hasattr(cvx_problem, 'constraints') else 0
+        
+        self.logger.debug(f"SOCP problem: {n_vars} variables, {n_constraints} constraints")
+        
+        # Check if backend supports SOCP
+        if "SOCP" not in self.backend_capabilities["supported_problem_types"]:
+            raise ValueError(f"Backend {self.backend} does not support SOCP problems")
+        
+        # Get optimized solver options for SOCP
+        solver_options = self._get_optimized_options(problem.problem_class)
+        
+        try:
+            cvx_problem.solve(
+                solver=getattr(cp, self.backend),
+                **solver_options
+            )
+        except Exception as e:
+            solve_time = time.time() - start_time
+            error_msg = f"Backend solver failed: {str(e)}"
+            self.logger.error(error_msg)
+            
+            return SolverResult(
+                solver_name=self.name,
+                problem_name=problem.name,
+                solve_time=solve_time,
+                status='error',
+                error_message=error_msg
+            )
+        
+        solve_time = time.time() - start_time
+        
+        # Map CVXPY status to our status format
+        status = self._map_cvxpy_status(cvx_problem.status)
+        
+        # Extract solution info
+        objective_value = cvx_problem.value if cvx_problem.value is not None else None
+        
+        # Get solver statistics
+        solver_info = {
+            "backend_solver": self.backend,
+            "cvxpy_status": cvx_problem.status,
+            "solver_stats": cvx_problem.solver_stats.__dict__ if cvx_problem.solver_stats else {},
+            "problem_size": {
+                "variables": n_vars,
+                "constraints": n_constraints,
+                "socp_constraints": len([c for c in cvx_problem.constraints if hasattr(c, 'cone_type') and c.cone_type == 'SOC'])
+            }
+        }
+        
+        # Get iteration count if available
+        iterations = None
+        if cvx_problem.solver_stats and hasattr(cvx_problem.solver_stats, 'num_iters'):
+            iterations = cvx_problem.solver_stats.num_iters
+        
+        self.logger.debug(f"SOCP solve completed: status={status}, "
+                         f"objective={objective_value}, time={solve_time:.3f}s")
+        
+        return SolverResult(
+            solver_name=self.name,
+            problem_name=problem.name,
+            solve_time=solve_time,
+            status=status,
+            objective_value=objective_value,
+            iterations=iterations,
+            solver_info=solver_info
+        )
+    
+    def _solve_sdp(self, problem: ProblemData, start_time: float) -> SolverResult:
+        """Solve Semidefinite Programming problem using CVXPY."""
+        
+        # For SDP problems, we use the pre-built CVXPY problem from the problem data
+        if problem.cvxpy_problem is None:
+            raise ValueError("SDP problem must include a pre-built CVXPY problem")
+        
+        cvx_problem = problem.cvxpy_problem
+        
+        # Get problem dimensions for logging
+        try:
+            n_vars = cvx_problem.size_metrics.num_scalar_variables
+        except AttributeError:
+            n_vars = len([v for v in cvx_problem.variables() if v.is_scalar()]) if hasattr(cvx_problem, 'variables') else 0
+        
+        try:
+            n_constraints = cvx_problem.size_metrics.num_scalar_eq_constraints + cvx_problem.size_metrics.num_scalar_leq_constraints
+        except AttributeError:
+            n_constraints = len(cvx_problem.constraints) if hasattr(cvx_problem, 'constraints') else 0
+        
+        self.logger.debug(f"SDP problem: {n_vars} variables, {n_constraints} constraints")
+        
+        # Check if backend supports SDP
+        if "SDP" not in self.backend_capabilities["supported_problem_types"]:
+            raise ValueError(f"Backend {self.backend} does not support SDP problems")
+        
+        # Get optimized solver options for SDP
+        solver_options = self._get_optimized_options(problem.problem_class)
+        
+        try:
+            cvx_problem.solve(
+                solver=getattr(cp, self.backend),
+                **solver_options
+            )
+        except Exception as e:
+            solve_time = time.time() - start_time
+            error_msg = f"Backend solver failed: {str(e)}"
+            self.logger.error(error_msg)
+            
+            return SolverResult(
+                solver_name=self.name,
+                problem_name=problem.name,
+                solve_time=solve_time,
+                status='error',
+                error_message=error_msg
+            )
+        
+        solve_time = time.time() - start_time
+        
+        # Map CVXPY status to our status format
+        status = self._map_cvxpy_status(cvx_problem.status)
+        
+        # Extract solution info
+        objective_value = cvx_problem.value if cvx_problem.value is not None else None
+        
+        # Get solver statistics
+        solver_info = {
+            "backend_solver": self.backend,
+            "cvxpy_status": cvx_problem.status,
+            "solver_stats": cvx_problem.solver_stats.__dict__ if cvx_problem.solver_stats else {},
+            "problem_size": {
+                "variables": n_vars,
+                "constraints": n_constraints,
+                "sdp_constraints": len([c for c in cvx_problem.constraints if hasattr(c, 'cone_type') and c.cone_type == 'PSD'])
+            }
+        }
+        
+        # Get iteration count if available
+        iterations = None
+        if cvx_problem.solver_stats and hasattr(cvx_problem.solver_stats, 'num_iters'):
+            iterations = cvx_problem.solver_stats.num_iters
+        
+        self.logger.debug(f"SDP solve completed: status={status}, "
                          f"objective={objective_value}, time={solve_time:.3f}s")
         
         return SolverResult(

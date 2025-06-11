@@ -15,3 +15,25 @@ problems:
         description: "Simple 2-variable quadratic program: min x1^2 + x2^2 s.t. x1 + x2 <= 1, x1,x2 >= 0"
         variables: 2
         constraints: 1
+    socp:
+      - name: "portfolio_optimization"
+        file_path: "problems/light_set/socp/portfolio_optimization.py"
+        problem_class: "SOCP"
+        description: "Markowitz portfolio optimization with risk minimization and norm regularization"
+        variables: 7
+        constraints: 5
+        soc_constraints: 2
+      - name: "robust_optimization"
+        file_path: "problems/light_set/socp/robust_optimization.py"
+        problem_class: "SOCP"
+        description: "Robust linear programming with ellipsoidal uncertainty sets"
+        variables: 10
+        constraints: 10
+        soc_constraints: 3
+      - name: "facility_location"
+        file_path: "problems/light_set/socp/facility_location.py"
+        problem_class: "SOCP"
+        description: "Capacitated facility location with Euclidean distance constraints"
+        variables: 33
+        constraints: 23
+        soc_constraints: 15
