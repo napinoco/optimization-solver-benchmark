@@ -50,17 +50,23 @@ Ensure your repository has these settings:
 
 ### GitHub Pages Setup
 
+**IMPORTANT**: You must enable GitHub Pages manually before the workflow can deploy reports.
+
 To enable automatic report publishing:
 
 1. Go to repository **Settings** → **Pages**
-2. Under **Source**, select "GitHub Actions"
+2. Under **Source**, select "GitHub Actions" 
 3. Click **Save**
+4. Wait for GitHub to confirm Pages is enabled (you should see a green checkmark)
 
-The workflow will automatically deploy reports using GitHub Pages Actions after each successful benchmark run.
+After enabling Pages, push any changes to trigger the workflow. The workflow will then automatically deploy reports after each successful benchmark run.
 
-After setup, reports will be available at: `https://YOUR_USERNAME.github.io/optimization-solver-benchmark/`
+Reports will be available at: `https://YOUR_USERNAME.github.io/optimization-solver-benchmark/`
 
-**Note**: The first deployment may take a few minutes to become available. Subsequent deployments are typically faster.
+**Troubleshooting**: If you get a "Pages site failed" error:
+- Verify Pages is enabled in repository Settings → Pages
+- Ensure "GitHub Actions" is selected as the source
+- The repository must be public, or you need GitHub Pro/Team for private repository Pages
 
 ### Environment Secrets
 

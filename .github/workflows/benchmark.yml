@@ -179,17 +179,33 @@ jobs:
     - name: Setup Pages
       if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
       uses: actions/configure-pages@v4
+      continue-on-error: true
+      id: pages-setup
       
     - name: Upload pages artifact
-      if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+      if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request' && steps.pages-setup.outcome == 'success'
       uses: actions/upload-pages-artifact@v3
       with:
         path: ./docs
         
     - name: Deploy to GitHub Pages
-      if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+      if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request' && steps.pages-setup.outcome == 'success'
       id: deployment
       uses: actions/deploy-pages@v4
+      
+    - name: Pages deployment status
+      if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+      run: |
+        if [ "${{ steps.pages-setup.outcome }}" = "success" ]; then
+          echo "✅ Reports deployed to GitHub Pages successfully!" >> $GITHUB_STEP_SUMMARY
+          echo "📄 View at: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/" >> $GITHUB_STEP_SUMMARY
+        else
+          echo "⚠️ GitHub Pages deployment skipped" >> $GITHUB_STEP_SUMMARY
+          echo "To enable Pages deployment:" >> $GITHUB_STEP_SUMMARY
+          echo "1. Go to repository Settings → Pages" >> $GITHUB_STEP_SUMMARY
+          echo "2. Select 'GitHub Actions' as source" >> $GITHUB_STEP_SUMMARY
+          echo "3. Re-run this workflow" >> $GITHUB_STEP_SUMMARY
+        fi
 
   # Job to run on different OS for broader compatibility testing
   benchmark-cross-platform:
