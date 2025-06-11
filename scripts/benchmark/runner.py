@@ -18,6 +18,8 @@ from scripts.solvers.python.scipy_runner import ScipySolver
 from scripts.solvers.python.cvxpy_runner import CvxpySolver, create_cvxpy_solvers
 from scripts.utils.config_loader import load_benchmark_config, load_solvers_config
 from scripts.utils.logger import get_logger
+from scripts.utils.solver_validation import SolverValidator, ProblemType
+from scripts.benchmark.backend_selector import BackendSelector, SelectionStrategy
 from scripts.database.models import create_database
 
 logger = get_logger("benchmark_runner")
@@ -47,6 +49,11 @@ class BenchmarkRunner:
         self.solvers = {}
         self.problems = {}
         
+        # Backend validation and selection
+        self.validator = SolverValidator()
+        self.backend_selector = BackendSelector(self.validator)
+        self.validation_results = None
+        
         # Benchmark session tracking
         self.current_benchmark_id = None
         self.execution_stats = {
@@ -58,9 +65,72 @@ class BenchmarkRunner:
         
         self.logger.info("Benchmark runner initialized")
     
-    def setup_solvers(self) -> None:
+    def validate_backends(self) -> Dict[str, Any]:
+        """Validate all available CVXPY backends and return validation report."""
+        self.logger.info("Validating CVXPY backends...")
+        
+        # Perform validation and cache results
+        self.validation_results = self.validator.validate_all_backends()
+        
+        # Generate comprehensive validation report
+        validation_report = self.validator.generate_validation_report(self.validation_results)
+        
+        # Log validation summary
+        available_count = validation_report['summary']['available_backends']
+        total_count = validation_report['summary']['total_backends']
+        availability_pct = validation_report['summary']['availability_percentage']
+        
+        self.logger.info(f"Backend validation complete: {available_count}/{total_count} available ({availability_pct:.1f}%)")
+        
+        # Log problem type coverage
+        for problem_type, coverage in validation_report['problem_type_coverage'].items():
+            available_backends = coverage['available_backends']
+            coverage_pct = coverage['coverage_percentage']
+            recommended = coverage['recommended']
+            backend_count = len(available_backends) if isinstance(available_backends, list) else available_backends
+            self.logger.info(f"  {problem_type}: {backend_count} backends ({coverage_pct:.1f}%), recommended: {recommended}")
+        
+        return validation_report
+    
+    def select_optimal_backends(self, strategy: SelectionStrategy = SelectionStrategy.BALANCED) -> Dict[str, Any]:
+        """Select optimal backends for comprehensive benchmarking."""
+        self.logger.info(f"Selecting optimal backends using {strategy.value} strategy...")
+        
+        # Ensure validation is complete
+        if self.validation_results is None:
+            self.validate_backends()
+        
+        # Select backends for all problem types
+        problem_types = [ProblemType.LP, ProblemType.QP, ProblemType.SOCP, ProblemType.SDP]
+        selections = self.backend_selector.select_backends_for_benchmark(
+            problem_types, strategy=strategy, max_backends_per_type=3
+        )
+        
+        # Generate selection report
+        selection_report = self.backend_selector.generate_selection_report(selections)
+        
+        # Log selection summary
+        total_selections = selection_report['summary']['total_selections']
+        unique_backends = selection_report['summary']['unique_backends_selected']
+        selected_backends = selection_report['summary']['selected_backends']
+        
+        self.logger.info(f"Backend selection complete: {total_selections} selections, {unique_backends} unique backends")
+        self.logger.info(f"Selected backends: {selected_backends}")
+        
+        return {
+            'selections': selections,
+            'report': selection_report,
+            'strategy': strategy.value
+        }
+    
+    def setup_solvers(self, use_validation: bool = True) -> None:
         """Initialize configured solvers from configuration file."""
         self.logger.info("Setting up solvers...")
+        
+        # Perform backend validation if requested
+        if use_validation:
+            validation_report = self.validate_backends()
+            self.logger.info("Using backend validation for solver setup")
         
         # Load solver configuration
         try:
@@ -111,12 +181,21 @@ class BenchmarkRunner:
                 backend = config['backend']
                 solver_name = config.get('name', f"{backend} (via CVXPY)")
                 
-                # Check if backend is available
-                import cvxpy as cp
-                available_backends = cp.installed_solvers()
-                if backend not in available_backends:
-                    self.logger.warning(f"Backend {backend} not available. Skipping {solver_id}")
-                    return None
+                # Check if backend is available using validation results
+                if self.validation_results and backend in self.validation_results:
+                    validation_result = self.validation_results[backend]
+                    if not validation_result.available:
+                        self.logger.warning(f"Backend {backend} not available (validation: {validation_result.error_message}). Skipping {solver_id}")
+                        return None
+                    else:
+                        self.logger.debug(f"Backend {backend} validated successfully")
+                else:
+                    # Fallback to direct CVXPY check if validation not available
+                    import cvxpy as cp
+                    available_backends = cp.installed_solvers()
+                    if backend not in available_backends:
+                        self.logger.warning(f"Backend {backend} not available. Skipping {solver_id}")
+                        return None
                 
                 solver_instance = CvxpySolver(
                     name=solver_name,
