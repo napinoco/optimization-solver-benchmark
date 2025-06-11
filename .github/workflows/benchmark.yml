@@ -1,0 +1,244 @@
+name: Optimization Solver Benchmark
+
+on:
+  # Run on push to main branch
+  push:
+    branches: [ main ]
+  
+  # Run on pull requests to main
+  pull_request:
+    branches: [ main ]
+  
+  # Allow manual trigger
+  workflow_dispatch:
+    inputs:
+      solvers:
+        description: 'Comma-separated list of solvers to run (e.g., scipy,cvxpy)'
+        required: false
+        default: 'scipy,cvxpy'
+        type: string
+      problem_set:
+        description: 'Problem set to use for benchmarks'
+        required: false
+        default: 'light_set'
+        type: choice
+        options:
+          - light_set
+          - medium_set
+          - large_set
+      timeout:
+        description: 'Solver timeout in seconds'
+        required: false
+        default: '300'
+        type: string
+
+env:
+  PYTHON_VERSION: '3.12'
+
+jobs:
+  benchmark:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+        cache: 'pip'
+        
+    - name: Create virtual environment
+      run: |
+        python -m venv venv
+        source venv/bin/activate
+        echo "VIRTUAL_ENV=${VIRTUAL_ENV}" >> $GITHUB_ENV
+        echo "${VIRTUAL_ENV}/bin" >> $GITHUB_PATH
+        
+    - name: Install dependencies
+      run: |
+        source venv/bin/activate
+        pip install --upgrade pip
+        pip install -r requirements/base.txt
+        pip install -r requirements/python.txt
+        
+    - name: Verify installation
+      run: |
+        source venv/bin/activate
+        python --version
+        pip list
+        
+    - name: Validate environment
+      run: |
+        source venv/bin/activate
+        python main.py --validate
+        
+    - name: Run benchmarks
+      run: |
+        source venv/bin/activate
+        # Determine which solvers to run
+        if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+          SOLVERS="${{ github.event.inputs.solvers }}"
+          PROBLEM_SET="${{ github.event.inputs.problem_set }}"
+          TIMEOUT="${{ github.event.inputs.timeout }}"
+        else
+          SOLVERS="scipy,cvxpy"
+          PROBLEM_SET="light_set"
+          TIMEOUT="300"
+        fi
+        
+        echo "Running benchmarks with:"
+        echo "  Solvers: $SOLVERS"
+        echo "  Problem set: $PROBLEM_SET"
+        echo "  Timeout: $TIMEOUT"
+        
+        # Update timeout in config if needed
+        if [ "$TIMEOUT" != "300" ]; then
+          sed -i "s/timeout: [0-9]*/timeout: $TIMEOUT/" config/benchmark_config.yaml
+        fi
+        
+        # Run the benchmark
+        python main.py --benchmark --solvers "$SOLVERS" --problem-set "$PROBLEM_SET"
+        
+    - name: Generate reports
+      run: |
+        source venv/bin/activate
+        python main.py --report
+        
+    - name: Upload benchmark results
+      uses: actions/upload-artifact@v3
+      with:
+        name: benchmark-results
+        path: |
+          database/results.db
+          logs/benchmark.log
+        retention-days: 30
+        
+    - name: Upload generated reports
+      uses: actions/upload-artifact@v3
+      with:
+        name: benchmark-reports
+        path: docs/
+        retention-days: 30
+        
+    - name: Display benchmark summary
+      run: |
+        source venv/bin/activate
+        echo "## Benchmark Summary" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        
+        # Extract summary from logs
+        if [ -f logs/benchmark.log ]; then
+          echo "### Results" >> $GITHUB_STEP_SUMMARY
+          echo "```" >> $GITHUB_STEP_SUMMARY
+          grep -E "(Success rate|Total results|Benchmark completed)" logs/benchmark.log | tail -10 >> $GITHUB_STEP_SUMMARY
+          echo "```" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+        fi
+        
+        # Show artifacts
+        echo "### Generated Artifacts" >> $GITHUB_STEP_SUMMARY
+        echo "- **benchmark-results**: Database and logs" >> $GITHUB_STEP_SUMMARY
+        echo "- **benchmark-reports**: HTML reports" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        
+        # Show environment info
+        echo "### Environment" >> $GITHUB_STEP_SUMMARY
+        echo "- **OS**: Ubuntu (GitHub Actions)" >> $GITHUB_STEP_SUMMARY
+        echo "- **Python**: ${{ env.PYTHON_VERSION }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **Solvers**: $(echo "${{ github.event.inputs.solvers || 'scipy,cvxpy' }}")" >> $GITHUB_STEP_SUMMARY
+        
+    - name: Check for validation errors
+      run: |
+        source venv/bin/activate
+        # Check if there were any validation errors in the logs
+        if grep -q "Validation errors" logs/benchmark.log; then
+          echo "⚠️ Validation errors detected in benchmark results!" >> $GITHUB_STEP_SUMMARY
+          echo "### Validation Errors" >> $GITHUB_STEP_SUMMARY
+          echo "```" >> $GITHUB_STEP_SUMMARY
+          grep "Validation errors" logs/benchmark.log >> $GITHUB_STEP_SUMMARY
+          echo "```" >> $GITHUB_STEP_SUMMARY
+        fi
+        
+        if grep -q "Validation warnings" logs/benchmark.log; then
+          echo "### Validation Warnings" >> $GITHUB_STEP_SUMMARY
+          echo "```" >> $GITHUB_STEP_SUMMARY
+          grep "Validation warnings" logs/benchmark.log >> $GITHUB_STEP_SUMMARY
+          echo "```" >> $GITHUB_STEP_SUMMARY
+        fi
+
+  # Job to run on different OS for broader compatibility testing
+  benchmark-cross-platform:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        python-version: ['3.10', '3.11', '3.12']
+      fail-fast: false
+      
+    # Only run cross-platform testing on manual trigger or scheduled runs
+    if: github.event_name == 'workflow_dispatch' || github.event_name == 'schedule'
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+        cache: 'pip'
+        
+    - name: Create virtual environment (Unix)
+      if: runner.os != 'Windows'
+      run: |
+        python -m venv venv
+        source venv/bin/activate
+        echo "VIRTUAL_ENV=${VIRTUAL_ENV}" >> $GITHUB_ENV
+        echo "${VIRTUAL_ENV}/bin" >> $GITHUB_PATH
+        
+    - name: Create virtual environment (Windows)
+      if: runner.os == 'Windows'
+      run: |
+        python -m venv venv
+        venv\Scripts\activate
+        echo "VIRTUAL_ENV=$env:VIRTUAL_ENV" >> $env:GITHUB_ENV
+        echo "$env:VIRTUAL_ENV\Scripts" >> $env:GITHUB_PATH
+        
+    - name: Install dependencies (Unix)
+      if: runner.os != 'Windows'
+      run: |
+        source venv/bin/activate
+        pip install --upgrade pip
+        pip install -r requirements/base.txt
+        pip install -r requirements/python.txt
+        
+    - name: Install dependencies (Windows)
+      if: runner.os == 'Windows'
+      run: |
+        venv\Scripts\activate
+        pip install --upgrade pip
+        pip install -r requirements/base.txt
+        pip install -r requirements/python.txt
+        
+    - name: Run quick benchmark (Unix)
+      if: runner.os != 'Windows'
+      run: |
+        source venv/bin/activate
+        python main.py --benchmark --solvers scipy --problem-set light_set
+        
+    - name: Run quick benchmark (Windows)
+      if: runner.os == 'Windows'
+      run: |
+        venv\Scripts\activate
+        python main.py --benchmark --solvers scipy --problem-set light_set
+        
+    - name: Upload cross-platform results
+      uses: actions/upload-artifact@v3
+      with:
+        name: benchmark-results-${{ matrix.os }}-py${{ matrix.python-version }}
+        path: |
+          database/results.db
+          logs/benchmark.log
+        retention-days: 7
