@@ -1,0 +1,113 @@
+name: Octave Solver Tests
+
+on:
+  push:
+    branches: [ main, develop ]
+    paths: 
+      - 'scripts/solvers/octave/**'
+      - 'config/octave_config.yaml'
+      - '.github/workflows/octave_test.yml'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'scripts/solvers/octave/**' 
+      - 'config/octave_config.yaml'
+      - '.github/workflows/octave_test.yml'
+
+jobs:
+  test-octave:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+    
+    - name: Install GNU Octave
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y octave octave-optim
+        octave --version
+    
+    - name: Install Python dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements/python.txt
+    
+    - name: Verify Octave installation
+      run: |
+        octave --eval "printf('Octave verification: OK\\n');"
+        octave --eval "pkg load optim; printf('Optim package: OK\\n');"
+    
+    - name: Test Octave solver
+      run: |
+        python scripts/solvers/octave/test_octave.py
+    
+    - name: Run integration tests
+      run: |
+        python -m pytest tests/integration/test_octave_integration.py -v
+      continue-on-error: true
+    
+    - name: Test with sample problems
+      run: |
+        python scripts/benchmark/benchmark_runner.py --solver octave --problem SIMPLE_LP --timeout 60
+      continue-on-error: true
+
+  test-octave-macos:
+    runs-on: macos-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+    
+    - name: Install GNU Octave (macOS)
+      run: |
+        brew install octave
+        octave --version
+    
+    - name: Install Python dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements/python.txt
+    
+    - name: Test Octave solver (macOS)
+      run: |
+        python scripts/solvers/octave/test_octave.py
+      continue-on-error: true
+
+  test-octave-windows:
+    runs-on: windows-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+    
+    - name: Install GNU Octave (Windows)
+      run: |
+        choco install octave.portable
+        octave --version
+      continue-on-error: true
+    
+    - name: Install Python dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements/python.txt
+    
+    - name: Test Octave solver (Windows)  
+      run: |
+        python scripts/solvers/octave/test_octave.py
+      continue-on-error: true
