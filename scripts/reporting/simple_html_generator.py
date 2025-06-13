@@ -7,6 +7,7 @@ Focuses on clean data presentation rather than complex dashboards.
 """
 
 import json
+import yaml
 from pathlib import Path
 from typing import Dict, List, Any, Optional
 from datetime import datetime
@@ -40,6 +41,7 @@ class SimpleHTMLGenerator:
         self.data_dir = Path(data_dir)
         self.output_dir = Path(output_dir)
         self.logger = get_logger("simple_html_generator")
+        self.author_config = self._load_author_config()
     
     def generate_all_html(self) -> bool:
         """
@@ -92,6 +94,75 @@ class SimpleHTMLGenerator:
         except Exception as e:
             self.logger.error(f"Failed to load {filename}: {e}")
             return None
+    
+    def _load_author_config(self) -> Dict:
+        """Load site configuration from YAML file."""
+        
+        config_path = project_root / "config" / "site_config.yaml"
+        
+        try:
+            if config_path.exists():
+                with open(config_path, 'r') as f:
+                    return yaml.safe_load(f)
+            else:
+                self.logger.warning(f"Site config file not found: {config_path}")
+                # Return default configuration
+                return {
+                    'author': {
+                        'name': 'Naoki Ito',
+                        'email': 'napinoco@gmail.com',
+                        'url': 'https://napinoco.github.io',
+                        'github_url': 'https://github.com/napinoco/optimization-solver-benchmark'
+                    },
+                    'project': {
+                        'license_year': '2025',
+                        'license_holder': 'napinoco'
+                    },
+                    'display': {
+                        'show_author_in_footer': True,
+                        'show_github_link': True,
+                        'show_contact_email': True
+                    }
+                }
+        except Exception as e:
+            self.logger.error(f"Failed to load author config: {e}")
+            return {}
+    
+    def _generate_footer(self, data_link: str, link_text: str) -> str:
+        """Generate HTML footer with author information."""
+        
+        author_info = self.author_config.get('author', {})
+        project_info = self.author_config.get('project', {})
+        display_prefs = self.author_config.get('display', {})
+        
+        footer_html = f"""    <footer>
+        <div class="footer-content">
+            <div class="footer-info">
+                <p>Generated automatically from benchmark results • <a href="{data_link}">{link_text}</a></p>"""
+        
+        # Add author information if enabled
+        if display_prefs.get('show_author_in_footer', True):
+            author_name = author_info.get('name', 'Unknown Author')
+            license_year = project_info.get('license_year', '2025')
+            
+            author_line = f"© {license_year} {author_name}"
+            
+            # Add contact links if enabled
+            if display_prefs.get('show_contact_email', True) and author_info.get('email'):
+                author_line += f" • <a href=\"mailto:{author_info['email']}\">Contact</a>"
+            
+            if display_prefs.get('show_github_link', True) and author_info.get('github_url'):
+                author_line += f" • <a href=\"{author_info['github_url']}\">View on GitHub</a>"
+            
+            footer_html += f"""
+                <p class="author-info">{author_line}</p>"""
+        
+        footer_html += """
+            </div>
+        </div>
+    </footer>"""
+        
+        return footer_html
     
     def _generate_index_page(self, summary_data: Dict, metadata: Dict) -> None:
         """Generate main index page with overview."""
@@ -193,14 +264,13 @@ class SimpleHTMLGenerator:
         </section>
     </main>
     
-    <footer>
-        <p>Generated automatically from benchmark results • <a href="data/results.json">Download Raw Data</a></p>
-    </footer>
+{footer}
 </body>
 </html>""".format(
             last_updated=summary_data.get('summary', {}).get('last_updated', 'Unknown'),
             version=summary_data.get('metadata', {}).get('format_version', '1.0'),
-            environment=metadata.get('environments', {}).get('platform', 'Unknown')
+            environment=metadata.get('environments', {}).get('platform', 'Unknown'),
+            footer=self._generate_footer("data/results.json", "Download Raw Data")
         )
         
         output_file = self.output_dir / "index.html"
@@ -299,11 +369,9 @@ class SimpleHTMLGenerator:
         </section>
     </main>
     
-    <footer>
-        <p>Generated automatically from benchmark results • <a href="data/summary.json">Download Summary Data</a></p>
-    </footer>
+{footer}
 </body>
-</html>"""
+</html>""".format(footer=self._generate_footer("data/summary.json", "Download Summary Data"))
         
         output_file = self.output_dir / "solver_comparison.html"
         with open(output_file, 'w') as f:
@@ -410,11 +478,9 @@ class SimpleHTMLGenerator:
         </section>
     </main>
     
-    <footer>
-        <p>Generated automatically from benchmark results • <a href="data/results.json">Download Complete Results</a></p>
-    </footer>
+{footer}
 </body>
-</html>"""
+</html>""".format(footer=self._generate_footer("data/results.json", "Download Complete Results"))
         
         output_file = self.output_dir / "problem_analysis.html"
         with open(output_file, 'w') as f:
@@ -609,11 +675,9 @@ class SimpleHTMLGenerator:
         </section>
     </main>
     
-    <footer>
-        <p>Generated automatically from benchmark results • <a href="data/results.json">Download Complete Results</a></p>
-    </footer>
+{footer}
 </body>
-</html>"""
+</html>""".format(footer=self._generate_footer("data/results.json", "Download Complete Results"))
         
         output_file = self.output_dir / "results_matrix.html"
         with open(output_file, 'w') as f:
@@ -750,11 +814,9 @@ class SimpleHTMLGenerator:
         </section>
     </main>
     
-    <footer>
-        <p>Generated automatically from benchmark results • <a href="data/metadata.json">Download Metadata</a></p>
-    </footer>
+{footer}
 </body>
-</html>"""
+</html>""".format(footer=self._generate_footer("data/metadata.json", "Download Metadata"))
         
         output_file = self.output_dir / "environment_info.html"
         with open(output_file, 'w') as f:
@@ -1034,11 +1096,9 @@ class SimpleHTMLGenerator:
         html_content += """
     </main>
     
-    <footer>
-        <p>Generated automatically from statistical analysis • <a href="data/statistical_analysis_report.json">Download Report Data</a></p>
-    </footer>
+{footer}
 </body>
-</html>"""
+</html>""".format(footer=self._generate_footer("data/statistical_analysis_report.json", "Download Report Data"))
         
         output_file = self.output_dir / "statistical_analysis.html"
         with open(output_file, 'w') as f:
@@ -1340,11 +1400,10 @@ class SimpleHTMLGenerator:
         </section>
     </main>
     
-    <footer>
-        <p>Generated automatically from performance profiling • <a href="data/performance_profiling_report.json">Download Report Data</a></p>
-    </footer>
+{footer}
 </body>
 </html>""".format(
+            footer=self._generate_footer("data/performance_profiling_report.json", "Download Report Data"),
             excellent_count=scalability.get('distribution', {}).get('Excellent', 0),
             good_count=scalability.get('distribution', {}).get('Good', 0),
             avg_time_complexity=scalability.get('average_time_complexity', 0),
@@ -1557,6 +1616,20 @@ footer a {
 
 footer a:hover {
     text-decoration: underline;
+}
+
+.footer-content {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.footer-info p {
+    margin-bottom: 0.5rem;
+}
+
+.author-info {
+    font-size: 0.9rem;
+    color: #95a5a6;
 }
 
 @media (max-width: 768px) {
