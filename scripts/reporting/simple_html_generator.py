@@ -477,6 +477,14 @@ class SimpleHTMLGenerator:
                         <td>{env_info.get('memory_info', {}).get('total_gb', 'Unknown')} GB total, {env_info.get('memory_info', {}).get('available_gb', 'Unknown')} GB available</td>
                     </tr>
                     <tr>
+                        <td>Timezone</td>
+                        <td>{(env_info.get('timezone_info', {}).get('system_timezone') or env_info.get('timezone_info', {}).get('timedatectl_timezone') or env_info.get('timezone_info', {}).get('timezone_name') or 'Unknown')} {('(UTC{:+.1f})'.format(env_info.get('timezone_info', {}).get('utc_offset_hours')) if env_info.get('timezone_info', {}).get('utc_offset_hours') is not None else '')}</td>
+                    </tr>
+                    <tr>
+                        <td>Local Time at Collection</td>
+                        <td>{env_info.get('timezone_info', {}).get('current_time_local') or 'Not available'}</td>
+                    </tr>
+                    <tr>
                         <td>Primary Framework</td>
                         <td>{env_info.get('primary_solver_framework', 'Unknown')}</td>
                     </tr>

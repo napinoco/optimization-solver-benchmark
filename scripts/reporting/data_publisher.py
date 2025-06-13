@@ -482,6 +482,15 @@ class DataPublisher:
                             "total_gb": env_data.get('memory', {}).get('total_gb'),
                             "available_gb": env_data.get('memory', {}).get('available_gb')
                         },
+                        "timezone_info": {
+                            "timezone_name": env_data.get('timezone', {}).get('timezone_name'),
+                            "system_timezone": env_data.get('timezone', {}).get('system_timezone'),
+                            "timedatectl_timezone": env_data.get('timezone', {}).get('timedatectl_timezone'),
+                            "utc_offset_hours": env_data.get('timezone', {}).get('utc_offset_hours'),
+                            "current_time_utc": env_data.get('timezone', {}).get('current_time_utc'),
+                            "current_time_local": env_data.get('timezone', {}).get('current_time_local'),
+                            "daylight_saving": env_data.get('timezone', {}).get('daylight_saving')
+                        },
                         "primary_solver_framework": "CVXPY",
                         "supported_problem_types": ["LP", "QP", "SOCP", "SDP"],
                         "last_updated": result[1],

@@ -195,12 +195,15 @@ jobs:
         echo "- **benchmark-reports**: HTML reports" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
         
-        # Show environment info with detailed Ubuntu version
+        # Show environment info with detailed Ubuntu version and timezone
         echo "### Environment" >> $GITHUB_STEP_SUMMARY
         UBUNTU_VERSION=$(cat /etc/os-release | grep PRETTY_NAME | cut -d'"' -f2)
         echo "- **OS**: $UBUNTU_VERSION (ubuntu-latest resolved)" >> $GITHUB_STEP_SUMMARY
         echo "- **Kernel**: $(uname -r)" >> $GITHUB_STEP_SUMMARY
         echo "- **Python**: ${{ env.PYTHON_VERSION }}" >> $GITHUB_STEP_SUMMARY
+        TIMEZONE_INFO=$(cat /etc/timezone 2>/dev/null || timedatectl show --property=Timezone --value 2>/dev/null || echo "UTC")
+        echo "- **Server Timezone**: $TIMEZONE_INFO" >> $GITHUB_STEP_SUMMARY
+        echo "- **Current Time**: $(date '+%Y-%m-%d %H:%M:%S %Z (UTC%z)')" >> $GITHUB_STEP_SUMMARY
         echo "- **Solvers**: $(echo "${{ github.event.inputs.solvers || 'scipy,cvxpy' }}")" >> $GITHUB_STEP_SUMMARY
         
     - name: Check for validation errors
