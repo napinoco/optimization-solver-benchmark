@@ -150,3 +150,68 @@ After each completed task:
   
   Co-Authored-By: Claude <noreply@anthropic.com>
   ```
+
+---
+
+## 📘 Final Release Preparation Instructions
+
+This section outlines the final tasks to be completed before the first release of the phase2 branch. The instructions are divided into two main phases: **Task Structuring** and **Task Execution**.
+
+**📋 IMPORTANT**: The complete task breakdown with detailed implementation plans and test criteria is documented in **[FINAL_RELEASE_TASKS.md](./FINAL_RELEASE_TASKS.md)**. All developers and LLM agents must refer to this file for the specific task execution workflow.
+
+### 🔧 Phase 1: Task Decomposition
+
+The following issues have been identified and must be converted into fine-grained, independently testable tasks:
+
+#### Dependency and Package Management Issues
+- **QSQP Package Cleanup**: Remove all references to the non-existent `qsqp>=0.1.0` package from requirements and codebase (likely typo for `osqp`)
+- **Python Version Standardization**: Align Python versions between `octave_test.yml` and `benchmark.yml` workflows
+- **Workflow Consistency**: Design `octave_test.yml` with the same controllable arguments pattern as `benchmark.yml`
+
+#### Configuration and Performance Issues  
+- **Parallel Jobs Assessment**: Evaluate if `parallel_jobs: 2` in `benchmark_config.yaml` causes resource contention; consider setting to `1` for fair comparison
+- **Ubuntu Version Specification**: Replace "Ubuntu Latest" with explicit Ubuntu version in system environment
+- **Timezone Information**: Add timezone data to recorded timestamps
+
+#### Reporting and Documentation Issues
+- **HTML Table Generation**: Create wide HTML table with problems (vertical) × solvers (horizontal), showing runtime/objective/dual gap per cell
+- **Statistical Reports Publishing**: Convert `statistical_analysis_report` and `performance_profiling_report` to HTML format
+- **Page Attribution**: Add author information (Naoki Ito, napinoco@gmail.com, https://napinoco.github.io) to all GitHub Pages
+- **File Organization**: Reorganize root Markdown files and align `CLAUDE.md`/`architecture.md` with current structure
+- **License Verification**: Confirm MIT license appropriateness for this benchmarking framework
+
+#### CI/CD and Preview Features
+- **Preview Hosting**: Implement temporary hosting (Vercel/Surge/pages-preview) during CI for HTML preview before live deployment
+
+### ⚙️ Phase 2: Development Workflow
+
+1. **Read Architecture Documents**: Study `architecture.md` and `basic_design.md` for complete understanding
+2. **Sequential Task Execution**: Complete one task at a time following the todo list
+3. **Review and Test Cycle**: After each task completion:
+   - Stop and wait for user review
+   - Test functionality thoroughly  
+   - Commit changes only after confirmation
+   - Proceed to next task
+
+### 📋 Task Requirements
+
+Each task must be:
+- **Extremely small and focused**: Address a single specific concern
+- **Independently testable**: Can be verified in isolation
+- **Clear boundaries**: Defined start and end conditions
+- **Non-breaking**: Maintain existing functionality while adding improvements
+
+### 🔄 Commit Protocol for Final Tasks
+
+Follow the established commit message format:
+```
+Fix Issue: Brief description
+
+- Specific changes made
+- Files modified
+- Impact on system functionality
+
+🤖 Generated with [Claude Code](https://claude.ai/code)
+
+Co-Authored-By: Claude <noreply@anthropic.com>
+```

@@ -91,7 +91,6 @@ class CvxpySolver(SolverInterface):
             "SCS": ["LP", "QP", "SOCP", "SDP"],
             "ECOS": ["LP", "QP", "SOCP"],
             "OSQP": ["QP", "SOCP"],
-            "QSQP": ["QP"],
             "CBC": ["LP"],
             "GLOP": ["LP"],
             "GLOP_MI": ["LP"],
@@ -630,7 +629,6 @@ def create_cvxpy_solvers(timeout: float = 300.0, verbose: bool = False) -> List[
         
         # QP specialists  
         "OSQP": {},
-        "QSQP": {},
         
         # LP specialists
         "CBC": {},

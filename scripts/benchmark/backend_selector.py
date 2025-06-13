@@ -87,12 +87,6 @@ class BackendSelector:
                 "reliability_score": 0.88,
                 "accuracy_score": 0.85,
                 "memory_efficiency": 0.80
-            },
-            "QSQP": {
-                "speed_rank": {"QP": 4},
-                "reliability_score": 0.75,  # Experimental
-                "accuracy_score": 0.82,
-                "memory_efficiency": 0.78
             }
         }
     

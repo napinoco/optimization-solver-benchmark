@@ -3,13 +3,9 @@ numpy>=1.21.0
 cvxpy>=1.3.0
 pandas>=1.5.0
 pyyaml>=6.0
-# CVXPY backend solvers
+# Essential CVXPY backend solvers (reliable across platforms)
 clarabel>=0.5.0
 scs>=3.2.0
 ecos>=2.0.0
 osqp>=0.6.0
-qsqp>=0.1.0
-# LP-specialized solvers
-cylp>=0.91.0  # CBC interface
-ortools>=9.4.0  # GLOP
-highspy>=1.5.0  # HiGHS
+cvxopt>=1.3.0
