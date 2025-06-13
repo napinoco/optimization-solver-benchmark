@@ -431,15 +431,75 @@ class DataPublisher:
             return []
     
     def _get_environment_info(self) -> Dict[str, Any]:
-        """Get environment information."""
+        """Get environment information from latest benchmark session."""
         
+        try:
+            with sqlite3.connect(self.db_path) as conn:
+                cursor = conn.cursor()
+                
+                # Get environment info from the most recent benchmark
+                cursor.execute("""
+                    SELECT environment_info, timestamp
+                    FROM benchmarks
+                    ORDER BY timestamp DESC
+                    LIMIT 1
+                """)
+                
+                result = cursor.fetchone()
+                if result and result[0]:
+                    # Parse the JSON environment info
+                    env_data = json.loads(result[0])
+                    
+                    # Extract key information for metadata
+                    os_info = env_data.get('os', {})
+                    python_info = env_data.get('python', {})
+                    
+                    # Create enhanced OS description with Ubuntu version
+                    os_description = os_info.get('ubuntu_version', 
+                                               os_info.get('lsb_description',
+                                                         f"{os_info.get('system', 'Linux')} {os_info.get('release', 'Unknown')}"))
+                    
+                    return {
+                        "platform": os_info.get('platform', 'Unknown'),
+                        "operating_system": os_description,
+                        "operating_system_details": {
+                            "system": os_info.get('system'),
+                            "release": os_info.get('release'),
+                            "version": os_info.get('version'),
+                            "machine": os_info.get('machine'),
+                            "architecture": os_info.get('architecture'),
+                            "ubuntu_version": os_info.get('ubuntu_version'),
+                            "version_id": os_info.get('version_id')
+                        },
+                        "python_version": python_info.get('version', 'Unknown'),
+                        "python_implementation": python_info.get('implementation', 'Unknown'),
+                        "cpu_info": {
+                            "processor": env_data.get('cpu', {}).get('processor'),
+                            "cpu_count": env_data.get('cpu', {}).get('cpu_count'),
+                            "cpu_count_physical": env_data.get('cpu', {}).get('cpu_count_physical')
+                        },
+                        "memory_info": {
+                            "total_gb": env_data.get('memory', {}).get('total_gb'),
+                            "available_gb": env_data.get('memory', {}).get('available_gb')
+                        },
+                        "primary_solver_framework": "CVXPY",
+                        "supported_problem_types": ["LP", "QP", "SOCP", "SDP"],
+                        "last_updated": result[1],
+                        "collection_timestamp": datetime.now().isoformat()
+                    }
+                    
+        except Exception as e:
+            self.logger.warning(f"Could not load environment info from database: {e}")
+        
+        # Fallback to basic info if database lookup fails
         return {
             "platform": "GitHub Actions",
-            "operating_system": "Ubuntu Latest",
-            "python_version": "3.9+",
-            "primary_solver_framework": "CVXPY",
+            "operating_system": "Ubuntu (version not available)",
+            "python_version": "3.12",
+            "primary_solver_framework": "CVXPY", 
             "supported_problem_types": ["LP", "QP", "SOCP", "SDP"],
-            "last_updated": datetime.now().isoformat()
+            "last_updated": datetime.now().isoformat(),
+            "note": "Environment details not available - using fallback values"
         }
 
 

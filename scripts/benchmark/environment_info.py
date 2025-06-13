@@ -1,6 +1,8 @@
 import platform
 import psutil
 import sys
+import subprocess
+import os
 from pathlib import Path
 from typing import Dict, Any
 import json
@@ -14,8 +16,8 @@ from scripts.utils.logger import get_logger
 logger = get_logger("environment_info")
 
 def get_os_info() -> Dict[str, str]:
-    """Get operating system information."""
-    return {
+    """Get operating system information with enhanced Ubuntu detection."""
+    os_info = {
         "system": platform.system(),
         "release": platform.release(),
         "version": platform.version(),
@@ -23,6 +25,36 @@ def get_os_info() -> Dict[str, str]:
         "architecture": platform.architecture()[0],
         "platform": platform.platform()
     }
+    
+    # Enhanced Ubuntu version detection
+    if platform.system() == "Linux":
+        try:
+            # Try to get Ubuntu version from /etc/os-release
+            if os.path.exists("/etc/os-release"):
+                with open("/etc/os-release", "r") as f:
+                    os_release = f.read()
+                    for line in os_release.split('\n'):
+                        if line.startswith('PRETTY_NAME='):
+                            os_info["ubuntu_version"] = line.split('=')[1].strip('"')
+                            break
+                        elif line.startswith('VERSION='):
+                            os_info["version_number"] = line.split('=')[1].strip('"')
+                        elif line.startswith('VERSION_ID='):
+                            os_info["version_id"] = line.split('=')[1].strip('"')
+            
+            # Try lsb_release as fallback
+            try:
+                result = subprocess.run(['lsb_release', '-d'], 
+                                      capture_output=True, text=True, timeout=5)
+                if result.returncode == 0:
+                    os_info["lsb_description"] = result.stdout.strip().split('\t')[1]
+            except (subprocess.TimeoutExpired, FileNotFoundError, IndexError):
+                pass
+                
+        except Exception as e:
+            logger.debug(f"Could not get detailed Ubuntu version: {e}")
+    
+    return os_info
 
 def get_cpu_info() -> Dict[str, Any]:
     """Get CPU information."""
@@ -89,8 +121,15 @@ def get_environment_summary() -> str:
     """Get a human-readable summary of the environment."""
     env_info = collect_environment_info()
     
+    # Enhanced OS description
+    os_desc = f"{env_info['os']['system']} {env_info['os']['release']}"
+    if 'ubuntu_version' in env_info['os']:
+        os_desc = env_info['os']['ubuntu_version']
+    elif 'lsb_description' in env_info['os']:
+        os_desc = env_info['os']['lsb_description']
+    
     summary = f"""Environment Summary:
-OS: {env_info['os']['system']} {env_info['os']['release']} ({env_info['os']['machine']})
+OS: {os_desc} ({env_info['os']['machine']})
 CPU: {env_info['cpu']['processor']} ({env_info['cpu']['cpu_count']} cores)
 Memory: {env_info['memory']['total_gb']} GB total, {env_info['memory']['available_gb']} GB available
 Python: {env_info['python']['version']} ({env_info['python']['implementation']})

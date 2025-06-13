@@ -457,8 +457,24 @@ class SimpleHTMLGenerator:
                         <td>{env_info.get('operating_system', 'Unknown')}</td>
                     </tr>
                     <tr>
+                        <td>OS Architecture</td>
+                        <td>{env_info.get('operating_system_details', {}).get('architecture', 'Unknown')} ({env_info.get('operating_system_details', {}).get('machine', 'Unknown')})</td>
+                    </tr>
+                    <tr>
+                        <td>Kernel Version</td>
+                        <td>{env_info.get('operating_system_details', {}).get('release', 'Unknown')}</td>
+                    </tr>
+                    <tr>
                         <td>Python Version</td>
-                        <td>{env_info.get('python_version', 'Unknown')}</td>
+                        <td>{env_info.get('python_version', 'Unknown')} ({env_info.get('python_implementation', 'CPython')})</td>
+                    </tr>
+                    <tr>
+                        <td>CPU Information</td>
+                        <td>{env_info.get('cpu_info', {}).get('cpu_count', 'Unknown')} cores ({env_info.get('cpu_info', {}).get('cpu_count_physical', 'Unknown')} physical)</td>
+                    </tr>
+                    <tr>
+                        <td>Memory</td>
+                        <td>{env_info.get('memory_info', {}).get('total_gb', 'Unknown')} GB total, {env_info.get('memory_info', {}).get('available_gb', 'Unknown')} GB available</td>
                     </tr>
                     <tr>
                         <td>Primary Framework</td>

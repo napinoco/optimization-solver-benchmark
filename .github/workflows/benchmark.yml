@@ -52,7 +52,7 @@ permissions:
 
 jobs:
   benchmark:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     
     steps:
     - name: Checkout repository
@@ -195,9 +195,11 @@ jobs:
         echo "- **benchmark-reports**: HTML reports" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
         
-        # Show environment info
+        # Show environment info with detailed Ubuntu version
         echo "### Environment" >> $GITHUB_STEP_SUMMARY
-        echo "- **OS**: Ubuntu (GitHub Actions)" >> $GITHUB_STEP_SUMMARY
+        UBUNTU_VERSION=$(cat /etc/os-release | grep PRETTY_NAME | cut -d'"' -f2)
+        echo "- **OS**: $UBUNTU_VERSION (ubuntu-latest resolved)" >> $GITHUB_STEP_SUMMARY
+        echo "- **Kernel**: $(uname -r)" >> $GITHUB_STEP_SUMMARY
         echo "- **Python**: ${{ env.PYTHON_VERSION }}" >> $GITHUB_STEP_SUMMARY
         echo "- **Solvers**: $(echo "${{ github.event.inputs.solvers || 'scipy,cvxpy' }}")" >> $GITHUB_STEP_SUMMARY
         
@@ -257,7 +259,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
+        os: [ubuntu-22.04, macos-latest, windows-latest]
         python-version: ['3.10', '3.11', '3.12']
       fail-fast: false
       
