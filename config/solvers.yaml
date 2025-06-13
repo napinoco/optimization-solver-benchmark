@@ -100,7 +100,7 @@ solvers:
       verbose: false          # Disable verbose output
     
     timeout: 300
-    enabled: true
+    enabled: false  # Disabled due to platform compatibility issues with qsqp package
     
   cbc_cvxpy:
     name: "CBC (via CVXPY)"

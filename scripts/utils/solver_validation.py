@@ -93,15 +93,6 @@ class SolverValidator:
                 stability="mature",
                 installation_notes="Operator Splitting QP solver, excellent for QP problems"
             ),
-            "QSQP": BackendCapability(
-                name="QSQP",
-                supported_types=[ProblemType.QP],
-                installation_status=False,
-                performance_tier="medium",
-                memory_efficiency="medium",
-                stability="experimental",
-                installation_notes="Quantum-inspired QP solver, experimental"
-            ),
             
             # LP specialists  
             "CBC": BackendCapability(
@@ -328,7 +319,7 @@ class SolverValidator:
         # Define preference order based on problem type and performance
         recommendations = {
             ProblemType.LP: ["CLARABEL", "GLOP", "CBC", "ECOS", "SCS", "CVXOPT", "SCIP"],
-            ProblemType.QP: ["CLARABEL", "OSQP", "SCS", "ECOS", "CVXOPT", "SCIP", "QSQP"],
+            ProblemType.QP: ["CLARABEL", "OSQP", "SCS", "ECOS", "CVXOPT", "SCIP"],
             ProblemType.SOCP: ["CLARABEL", "SCS", "ECOS", "OSQP", "CVXOPT"],
             ProblemType.SDP: ["CLARABEL", "SCS"]
         }
