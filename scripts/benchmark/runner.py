@@ -1,5 +1,6 @@
 import sys
 import time
+import os
 from pathlib import Path
 from typing import List, Dict, Any, Optional, Tuple
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -64,6 +65,30 @@ class BenchmarkRunner:
         }
         
         self.logger.info("Benchmark runner initialized")
+    
+    def _get_optimal_parallel_jobs(self) -> int:
+        """Determine optimal number of parallel jobs based on configuration and system."""
+        config_value = self.benchmark_config.get('parallel_jobs', 2)
+        
+        # If explicitly set to an integer, use it
+        if isinstance(config_value, int):
+            return max(1, min(config_value, 8))  # Clamp to reasonable range
+        
+        # If set to "auto", detect based on system
+        if config_value == "auto":
+            try:
+                cpu_count = os.cpu_count() or 2
+                # Use conservative strategy: min(cpu_count, 4) to avoid resource contention
+                optimal = min(cpu_count, 4)
+                self.logger.info(f"Auto-detected {optimal} parallel workers based on {cpu_count} CPU cores")
+                return optimal
+            except Exception as e:
+                self.logger.warning(f"Failed to auto-detect CPU count: {e}. Using default of 2")
+                return 2
+        
+        # Fallback to default
+        self.logger.warning(f"Invalid parallel_jobs setting: {config_value}. Using default of 2")
+        return 2
     
     def validate_backends(self) -> Dict[str, Any]:
         """Validate all available CVXPY backends and return validation report."""
@@ -406,7 +431,7 @@ class BenchmarkRunner:
             problem_names = list(self.problems.keys())
         
         if max_workers is None:
-            max_workers = self.benchmark_config.get('parallel_jobs', 2)
+            max_workers = self._get_optimal_parallel_jobs()
         
         # Create list of all (solver, problem) combinations
         benchmark_tasks = []
