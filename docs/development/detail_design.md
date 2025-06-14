@@ -53,7 +53,8 @@ optimization-solver-benchmark/
 │   └── workflows/
 │       ├── benchmark.yml         # Main benchmark execution
 │       ├── octave_test.yml       # Octave solver testing
-│       └── pages-deploy.yml      # GitHub Pages deployment
+│       ├── deploy-pages.yml      # Auto-deploy main branch to GitHub Pages
+│       └── pr-preview.yml        # PR preview deployment
 │
 ├── config/
 │   ├── benchmark_config.yaml    # Benchmark execution settings
@@ -192,6 +193,26 @@ optimization-solver-benchmark/
 # - Octave package installation and testing
 # - Integration with Python benchmark system
 # - Controllable arguments matching benchmark.yml pattern
+```
+
+#### deploy-pages.yml - Main Branch Auto-Deployment
+```yaml
+# Key features:
+# - Triggers on push to main branch
+# - Manual workflow_dispatch with configurable parameters
+# - Deploys to gh-pages root (main site)
+# - Preserves PR preview subdirectories with clean: false
+# - Comprehensive deployment summary with direct links
+```
+
+#### pr-preview.yml - Pull Request Preview System
+```yaml
+# Key features:
+# - Auto-deploy PR previews to gh-pages/pr-preview/pr-{number}/
+# - Lightweight benchmark with scipy,cvxpy and light_set
+# - Auto-cleanup when PR closed
+# - Preview banners and metadata injection
+# - Comments with preview URLs on PRs
 ```
 
 ### 2. Configuration Management
