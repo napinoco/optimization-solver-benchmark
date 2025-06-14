@@ -160,7 +160,21 @@ jobs:
           VERBOSE_FLAG=""
         fi
         
-        python scripts/benchmark/benchmark_runner.py --solver octave --problem "$TEST_PROBLEM_SET" --timeout "$TEST_TIMEOUT" $VERBOSE_FLAG
+        # Test Octave solver directly using the test script
+        python scripts/solvers/octave/test_octave.py $VERBOSE_FLAG
+      continue-on-error: true
+      
+    - name: Run integration test
+      if: env.RUN_INTEGRATION_TESTS == 'true'
+      run: |
+        echo "Running integration test with main.py..."
+        
+        # Test Octave solver through main interface with minimal problem set
+        if [ "$VERBOSE_TESTING" = "true" ]; then
+          python main.py --benchmark --solvers "octave" --problem-set "light_set" --verbose
+        else
+          python main.py --benchmark --solvers "octave" --problem-set "light_set"
+        fi
       continue-on-error: true
       
     - name: Display test summary
