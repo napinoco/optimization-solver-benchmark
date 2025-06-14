@@ -100,8 +100,8 @@ function obj = parse_object(json_str)
         % Parse value
         value = parse_json_basic(value_str);
         
-        % Store in struct (convert invalid field names)
-        key = matlab.lang.makeValidName(key);
+        % Store in struct (convert invalid field names for Octave compatibility)
+        key = makeValidName(key);
         obj.(key) = value;
     end
 end
@@ -197,5 +197,23 @@ function parts = split_by_comma(str)
     
     if ~isempty(current)
         parts{end+1} = current;
+    end
+end
+
+function valid_name = makeValidName(name)
+% Make a valid Octave variable name
+% Simple implementation for Octave compatibility
+    
+    % Remove invalid characters and replace with underscore
+    valid_name = regexprep(name, '[^a-zA-Z0-9_]', '_');
+    
+    % Ensure it starts with a letter
+    if ~isempty(valid_name) && ~isstrprop(valid_name(1), 'alpha')
+        valid_name = ['x' valid_name];
+    end
+    
+    % Ensure it's not empty
+    if isempty(valid_name)
+        valid_name = 'x';
     end
 end
