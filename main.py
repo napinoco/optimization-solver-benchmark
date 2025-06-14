@@ -28,7 +28,7 @@ sys.path.append(str(Path(__file__).parent / "scripts"))
 
 try:
     from benchmark.runner import BenchmarkRunner
-    from reporting.html_generator import HTMLReportGenerator
+    from reporting.simple_html_generator import SimpleHTMLGenerator
     from utils.config_loader import load_config
     from utils.logger import setup_logger
 except ImportError as e:
@@ -140,7 +140,6 @@ class BenchmarkOrchestrator:
             
             # Get paths from config
             database_path = self.config.get('database', {}).get('path', 'database/results.db')
-            templates_dir = 'templates'
             output_dir = self.config.get('output', {}).get('reports_dir', 'docs')
             
             # Verify database exists
@@ -150,21 +149,27 @@ class BenchmarkOrchestrator:
                 return False
             
             # Create HTML generator
-            generator = HTMLReportGenerator(
-                database_path=database_path,
-                templates_dir=templates_dir,
-                output_dir=output_dir
+            data_dir = Path(output_dir) / "data"
+            generator = SimpleHTMLGenerator(
+                data_dir=str(data_dir),
+                output_dir=str(output_dir)
             )
             
             # Generate all reports
             start_time = time.time()
-            saved_files = generator.generate_all_reports()
+            success = generator.generate_all_html()
             duration = time.time() - start_time
             
             # Log results
-            self.logger.info(f"Reports generated successfully in {duration:.2f}s")
-            for report_type, file_path in saved_files.items():
-                self.logger.info(f"  {report_type}: {file_path}")
+            if success:
+                self.logger.info(f"Reports generated successfully in {duration:.2f}s")
+                self.logger.info(f"  dashboard: {output_dir}/index.html")
+                self.logger.info(f"  solver_comparison: {output_dir}/solver_comparison.html")
+                self.logger.info(f"  problem_analysis: {output_dir}/problem_analysis.html")
+                self.logger.info(f"  environment_info: {output_dir}/environment_info.html")
+            else:
+                self.logger.error("Failed to generate reports")
+                return False
             
             return True
             
@@ -211,7 +216,7 @@ class BenchmarkOrchestrator:
         issues = []
         
         # Check for required directories
-        required_dirs = ['config', 'scripts', 'templates', 'problems']
+        required_dirs = ['config', 'scripts', 'problems']
         for dir_name in required_dirs:
             if not Path(dir_name).exists():
                 issues.append(f"Missing directory: {dir_name}")
