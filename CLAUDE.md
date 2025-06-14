@@ -119,9 +119,9 @@ The project follows a staged development approach:
 ## CODING PROTOCOL
 
 ### Task Development Workflow
-**Phase 1**: ✅ COMPLETED (tasks.md → PHASE1_HISTORY.md)
-**Phase 2**: Follow PHASE2_TASKS.md sequentially, completing one task at a time:
-1. **Complete the task** following its specific requirements in PHASE2_TASKS.md
+**Phase 1**: ✅ COMPLETED (docs/development/tasks.md → docs/development/PHASE1_HISTORY.md)
+**Phase 2**: Follow docs/development/PHASE2_TASKS.md sequentially, completing one task at a time:
+1. **Complete the task** following its specific requirements in docs/development/PHASE2_TASKS.md
 2. **Test the implementation** using the provided test criteria  
 3. **COMMIT THE CHANGES** immediately after successful completion
 4. **Stop and wait** for user approval before proceeding to next task
@@ -157,7 +157,7 @@ After each completed task:
 
 This section outlines the final tasks to be completed before the first release of the phase2 branch. The instructions are divided into two main phases: **Task Structuring** and **Task Execution**.
 
-**📋 IMPORTANT**: The complete task breakdown with detailed implementation plans and test criteria is documented in **[FINAL_RELEASE_TASKS.md](./FINAL_RELEASE_TASKS.md)**. All developers and LLM agents must refer to this file for the specific task execution workflow.
+**📋 IMPORTANT**: The complete task breakdown with detailed implementation plans and test criteria is documented in **[FINAL_RELEASE_TASKS.md](docs/development/FINAL_RELEASE_TASKS.md)**. All developers and LLM agents must refer to this file for the specific task execution workflow.
 
 ### 🔧 Phase 1: Task Decomposition
 
@@ -185,7 +185,7 @@ The following issues have been identified and must be converted into fine-graine
 
 ### ⚙️ Phase 2: Development Workflow
 
-1. **Read Architecture Documents**: Study `architecture.md` and `basic_design.md` for complete understanding
+1. **Read Architecture Documents**: Study `architecture.md` and `docs/development/basic_design.md` for complete understanding
 2. **Sequential Task Execution**: Complete one task at a time following the todo list
 3. **Review and Test Cycle**: After each task completion:
    - Stop and wait for user review

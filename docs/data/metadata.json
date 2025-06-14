@@ -1,6 +1,6 @@
 {
   "metadata": {
-    "generated_at": "2025-06-11T20:13:59.766677",
+    "generated_at": "2025-06-13T23:32:34.668872",
     "format_version": "1.0",
     "description": "Problem and solver metadata"
   },
@@ -84,9 +84,37 @@
     }
   ],
   "environments": {
-    "platform": "GitHub Actions",
-    "operating_system": "Ubuntu Latest",
-    "python_version": "3.9+",
+    "platform": "macOS-14.5-arm64-arm-64bit",
+    "operating_system": "Darwin 23.5.0",
+    "operating_system_details": {
+      "system": "Darwin",
+      "release": "23.5.0",
+      "version": "Darwin Kernel Version 23.5.0: Wed May  1 20:19:05 PDT 2024; root:xnu-10063.121.3~5/RELEASE_ARM64_T8112",
+      "machine": "arm64",
+      "architecture": "64bit",
+      "ubuntu_version": null,
+      "version_id": null
+    },
+    "python_version": "3.12.2",
+    "python_implementation": "CPython",
+    "cpu_info": {
+      "processor": "arm",
+      "cpu_count": 8,
+      "cpu_count_physical": 8
+    },
+    "memory_info": {
+      "total_gb": 24.0,
+      "available_gb": 7.76
+    },
+    "timezone_info": {
+      "timezone_name": "JST",
+      "system_timezone": null,
+      "timedatectl_timezone": null,
+      "utc_offset_hours": 9.0,
+      "current_time_utc": "2025-06-13T14:32:27.362883+00:00",
+      "current_time_local": "2025-06-13T23:32:27.363024",
+      "daylight_saving": false
+    },
     "primary_solver_framework": "CVXPY",
     "supported_problem_types": [
       "LP",
@@ -94,6 +122,7 @@
       "SOCP",
       "SDP"
     ],
-    "last_updated": "2025-06-11T20:13:59.766909"
+    "last_updated": "2025-06-13 14:32:27",
+    "collection_timestamp": "2025-06-13T23:32:34.669242"
   }
 }

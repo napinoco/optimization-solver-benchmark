@@ -106,12 +106,14 @@ This approach ensures that benchmarking results reflect genuine solver capabilit
 
 ```
 optimization-solver-benchmark/
-├── 📋 Documentation
-│   ├── README.md                 # This file
-│   ├── ROADMAP.md               # Development roadmap
-│   ├── PHASE1_HISTORY.md        # Completed MVP tasks
-│   ├── PHASE2_TASKS.md          # Current development plan
-│   └── MANUAL_TRIGGER_GUIDE.md  # GitHub Actions usage
+├── 📋 Core Documentation
+│   ├── README.md                # This file
+│   ├── architecture.md          # System architecture 
+│   └── CLAUDE.md               # AI development context
+│
+├── 📚 Extended Documentation
+│   ├── docs/guides/             # Setup and usage guides
+│   └── docs/development/        # Development roadmap and history
 │
 ├── ⚙️  Configuration
 │   ├── config/
@@ -240,7 +242,7 @@ SDP          | 2 solvers    | CLARABEL, SCS
 ## 🤝 Contributing
 
 ### Development Process
-1. **Follow task-based development** from `PHASE2_TASKS.md`
+1. **Follow task-based development** from `docs/development/PHASE2_TASKS.md`
 2. **Test thoroughly** before submitting changes
 3. **Update documentation** for new features
 4. **Maintain backward compatibility** with Phase 1
@@ -253,11 +255,24 @@ SDP          | 2 solvers    | CLARABEL, SCS
 
 ## 📚 Documentation
 
-- **[ROADMAP.md](ROADMAP.md)**: Complete development roadmap (Phases 1-4)
-- **[PHASE1_HISTORY.md](PHASE1_HISTORY.md)**: Completed MVP development history
-- **[PHASE2_TASKS.md](PHASE2_TASKS.md)**: Current development plan (Tasks 21-35)
-- **[MANUAL_TRIGGER_GUIDE.md](MANUAL_TRIGGER_GUIDE.md)**: GitHub Actions usage guide
-- **[GITHUB_ACTIONS_SETUP.md](GITHUB_ACTIONS_SETUP.md)**: CI/CD setup instructions
+### Core Documentation
+- **[README.md](README.md)**: Project overview and quick start guide
+- **[architecture.md](architecture.md)**: System architecture and design decisions
+- **[CLAUDE.md](CLAUDE.md)**: AI assistant integration and development context
+
+### Setup & Usage Guides
+- **[MANUAL_TRIGGER_GUIDE.md](docs/guides/MANUAL_TRIGGER_GUIDE.md)**: GitHub Actions usage guide
+- **[GITHUB_ACTIONS_SETUP.md](docs/guides/GITHUB_ACTIONS_SETUP.md)**: CI/CD setup instructions
+- **[EXPORT_GUIDE.md](docs/guides/EXPORT_GUIDE.md)**: Data export and integration guide
+- **[EXTERNAL_STORAGE.md](docs/guides/EXTERNAL_STORAGE.md)**: External storage configuration
+- **[OCTAVE_INTEGRATION.md](docs/guides/OCTAVE_INTEGRATION.md)**: Octave solver integration
+
+### Development Documentation
+- **[ROADMAP.md](docs/development/ROADMAP.md)**: Complete development roadmap (Phases 1-4)
+- **[PHASE1_HISTORY.md](docs/development/PHASE1_HISTORY.md)**: Completed MVP development history
+- **[PHASE2_TASKS.md](docs/development/PHASE2_TASKS.md)**: Current development plan
+- **[FINAL_RELEASE_TASKS.md](docs/development/FINAL_RELEASE_TASKS.md)**: Final release preparation tasks
+- **[basic_design.md](docs/development/basic_design.md)**: Basic system design and concepts
 
 ## 🏆 Achievements & Recognition
 
