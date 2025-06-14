@@ -1,0 +1,1063 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Problem Analysis - Optimization Solver Benchmark</title>
+    
+    <!-- Bootstrap CSS for responsive design -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Chart.js for visualizations -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- Custom CSS -->
+    <style>
+        .navbar-brand {
+            font-weight: bold;
+        }
+        
+        .metric-card {
+            transition: transform 0.2s;
+        }
+        
+        .metric-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .result-table {
+            font-size: 0.9rem;
+        }
+        
+        .status-optimal {
+            color: #28a745;
+            font-weight: bold;
+        }
+        
+        .status-error {
+            color: #dc3545;
+            font-weight: bold;
+        }
+        
+        .status-timeout {
+            color: #ffc107;
+            font-weight: bold;
+        }
+        
+        .status-infeasible {
+            color: #6c757d;
+            font-weight: bold;
+        }
+        
+        .solver-comparison {
+            margin-top: 2rem;
+        }
+        
+        .chart-container {
+            position: relative;
+            height: 400px;
+            margin: 2rem 0;
+        }
+        
+        .performance-badge {
+            font-size: 0.8rem;
+        }
+        
+        .footer {
+            margin-top: 3rem;
+            padding: 2rem 0;
+            background-color: #f8f9fa;
+            border-top: 1px solid #e9ecef;
+        }
+        
+        .timestamp {
+            color: #6c757d;
+            font-size: 0.85rem;
+        }
+        
+        .problem-info {
+            background-color: #f8f9fa;
+            border-left: 4px solid #007bff;
+        }
+        
+        .solver-info {
+            background-color: #e8f4f8;
+            border-left: 4px solid #17a2b8;
+        }
+    </style>
+    
+    
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="#">
+                <i class="fas fa-chart-bar me-2"></i>
+                Optimization Solver Benchmark
+            </a>
+            
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">
+                            <i class="fas fa-home me-1"></i>Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">
+                            <i class="fas fa-balance-scale me-1"></i>Solver Comparison
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">
+                            <i class="fas fa-puzzle-piece me-1"></i>Problem Analysis
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">
+                            <i class="fas fa-info-circle me-1"></i>Environment
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="container mt-4">
+        
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="#">Dashboard</a></li>
+        <li class="breadcrumb-item active">Problem Analysis</li>
+    </ol>
+</nav>
+
+        
+        
+        <!-- Alert messages can be added here -->
+        
+        
+        
+<div class="row mb-4">
+    <div class="col-12">
+        <h2>
+            <i class="fas fa-puzzle-piece me-2"></i>Problem Analysis
+        </h2>
+        <p class="text-muted">Analyze solver performance across different optimization problem types and characteristics.</p>
+    </div>
+</div>
+
+<!-- Problem Type Overview -->
+
+<div class="row mb-4">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-chart-pie me-2"></i>Problem Type Distribution
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="chart-container" style="height: 300px;">
+                    <canvas id="problemTypeChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h6 class="card-title mb-0">
+                    <i class="fas fa-info-circle me-2"></i>Problem Statistics
+                </h6>
+            </div>
+            <div class="card-body">
+                
+                
+                    
+                    
+                        
+                    
+                
+                    
+                    
+                        
+                    
+                
+                    
+                    
+                        
+                    
+                
+                    
+                    
+                        
+                    
+                
+                    
+                    
+                        
+                    
+                
+                
+                <dl class="row mb-0">
+                    <dt class="col-sm-6">Total Problems:</dt>
+                    <dd class="col-sm-6">5</dd>
+                    
+                    
+                    <dt class="col-sm-6">Unknown:</dt>
+                    <dd class="col-sm-6">5</dd>
+                    
+                    
+                    <dt class="col-sm-6">Avg Success Rate:</dt>
+                    <dd class="col-sm-6">
+                        
+                        58.5%
+                    </dd>
+                </dl>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Problem Difficulty Analysis -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-chart-bar me-2"></i>Problem Difficulty Analysis
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="chart-container">
+                    <canvas id="difficultyChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Detailed Problem Results -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-table me-2"></i>Problem Performance Details
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped" id="problemTable">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Problem</th>
+                                <th>Type</th>
+                                <th>Attempts</th>
+                                <th>Success Rate</th>
+                                <th>Best Time</th>
+                                <th>Worst Time</th>
+                                <th>Best Solver</th>
+                                <th>Difficulty</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            
+                            <tr>
+                                <td>
+                                    <strong class="text-primary">SIMPLE_LP</strong>
+                                    
+                                </td>
+                                <td>
+                                    <span class="badge bg-secondary">Unknown</span>
+                                </td>
+                                <td>32</td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <span class="text-success fw-bold">
+                                            96.9%
+                                        </span>
+                                        <div class="progress ms-2" style="width: 50px; height: 6px;">
+                                            <div class="progress-bar bg-success" 
+                                                 style="width: 96.875%"></div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    
+                                    0.002s
+                                </td>
+                                <td>
+                                    
+                                    0.008s
+                                </td>
+                                <td>
+                                    
+                                    
+                                    
+                                        
+                                            
+                                            
+                                        
+                                    
+                                        
+                                            
+                                            
+                                        
+                                    
+                                        
+                                            
+                                            
+                                        
+                                    
+                                        
+                                            
+                                            
+                                        
+                                    
+                                        
+                                            
+                                            
+                                        
+                                    
+                                        
+                                            
+                                            
+                                        
+                                    
+                                    
+                                        <span class="text-muted">None</span>
+                                    
+                                </td>
+                                <td>
+                                    
+                                        <span class="badge bg-success">Easy</span>
+                                    
+                                </td>
+                            </tr>
+                            
+                            <tr>
+                                <td>
+                                    <strong class="text-primary">SIMPLE_QP</strong>
+                                    
+                                </td>
+                                <td>
+                                    <span class="badge bg-secondary">Unknown</span>
+                                </td>
+                                <td>23</td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <span class="text-success fw-bold">
+                                            95.7%
+                                        </span>
+                                        <div class="progress ms-2" style="width: 50px; height: 6px;">
+                                            <div class="progress-bar bg-success" 
+                                                 style="width: 95.65217391304348%"></div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    
+                                    0.003s
+                                </td>
+                                <td>
+                                    
+                                    0.019s
+                                </td>
+                                <td>
+                                    
+                                    
+                                    
+                                        
+                                            
+                                            
+                                        
+                                    
+                                        
+                                            
+                                            
+                                        
+                                    
+                                        
+                                            
+                                            
+                                        
+                                    
+                                        
+                                            
+                                            
+                                        
+                                    
+                                        
+                                            
+                                            
+                                        
+                                    
+                                        
+                                            
+                                            
+                                        
+                                    
+                                    
+                                        <span class="text-muted">None</span>
+                                    
+                                </td>
+                                <td>
+                                    
+                                        <span class="badge bg-success">Easy</span>
+                                    
+                                </td>
+                            </tr>
+                            
+                            <tr>
+                                <td>
+                                    <strong class="text-primary">simple_lp</strong>
+                                    
+                                </td>
+                                <td>
+                                    <span class="badge bg-secondary">Unknown</span>
+                                </td>
+                                <td>5</td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <span class="text-danger fw-bold">
+                                            0.0%
+                                        </span>
+                                        <div class="progress ms-2" style="width: 50px; height: 6px;">
+                                            <div class="progress-bar bg-danger" 
+                                                 style="width: 0.0%"></div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    
+                                    N/A
+                                </td>
+                                <td>
+                                    
+                                    N/A
+                                </td>
+                                <td>
+                                    
+                                    
+                                    
+                                        
+                                    
+                                    
+                                        <span class="text-muted">None</span>
+                                    
+                                </td>
+                                <td>
+                                    
+                                        <span class="badge bg-dark">Very Hard</span>
+                                    
+                                </td>
+                            </tr>
+                            
+                            <tr>
+                                <td>
+                                    <strong class="text-primary">simple_qp</strong>
+                                    
+                                </td>
+                                <td>
+                                    <span class="badge bg-secondary">Unknown</span>
+                                </td>
+                                <td>5</td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <span class="text-danger fw-bold">
+                                            0.0%
+                                        </span>
+                                        <div class="progress ms-2" style="width: 50px; height: 6px;">
+                                            <div class="progress-bar bg-danger" 
+                                                 style="width: 0.0%"></div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    
+                                    N/A
+                                </td>
+                                <td>
+                                    
+                                    N/A
+                                </td>
+                                <td>
+                                    
+                                    
+                                    
+                                        
+                                    
+                                    
+                                        <span class="text-muted">None</span>
+                                    
+                                </td>
+                                <td>
+                                    
+                                        <span class="badge bg-dark">Very Hard</span>
+                                    
+                                </td>
+                            </tr>
+                            
+                            <tr>
+                                <td>
+                                    <strong class="text-primary">test_problem</strong>
+                                    
+                                </td>
+                                <td>
+                                    <span class="badge bg-secondary">Unknown</span>
+                                </td>
+                                <td>1</td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <span class="text-success fw-bold">
+                                            100.0%
+                                        </span>
+                                        <div class="progress ms-2" style="width: 50px; height: 6px;">
+                                            <div class="progress-bar bg-success" 
+                                                 style="width: 100.0%"></div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    
+                                    0.005s
+                                </td>
+                                <td>
+                                    
+                                    0.005s
+                                </td>
+                                <td>
+                                    
+                                    
+                                    
+                                        
+                                            
+                                            
+                                        
+                                    
+                                    
+                                        <span class="text-muted">None</span>
+                                    
+                                </td>
+                                <td>
+                                    
+                                        <span class="badge bg-success">Easy</span>
+                                    
+                                </td>
+                            </tr>
+                            
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Solver Performance on Each Problem -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-heatmap me-2"></i>Solver-Problem Performance Matrix
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="chart-container">
+                    <canvas id="heatmapChart"></canvas>
+                </div>
+                
+                <div class="mt-3">
+                    <small class="text-muted">
+                        <strong>Legend:</strong> 
+                        <span class="badge bg-success me-2">Optimal</span>
+                        <span class="badge bg-warning me-2">Suboptimal</span>
+                        <span class="badge bg-danger me-2">Failed</span>
+                        Color intensity represents relative solve time.
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Problem Characteristics -->
+
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-cogs me-2"></i>Problem Characteristics
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    
+                    <div class="col-md-6 col-lg-4 mb-3">
+                        <div class="card border-light h-100">
+                            <div class="card-body">
+                                <h6 class="card-title text-primary">SIMPLE_LP</h6>
+                                <dl class="row mb-0 small">
+                                    <dt class="col-sm-6">Type:</dt>
+                                    <dd class="col-sm-6">LP</dd>
+                                    
+                                    <dt class="col-sm-6">Variables:</dt>
+                                    <dd class="col-sm-6">N/A</dd>
+                                    
+                                    <dt class="col-sm-6">Constraints:</dt>
+                                    <dd class="col-sm-6">N/A</dd>
+                                    
+                                    
+                                </dl>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6 col-lg-4 mb-3">
+                        <div class="card border-light h-100">
+                            <div class="card-body">
+                                <h6 class="card-title text-primary">SIMPLE_QP</h6>
+                                <dl class="row mb-0 small">
+                                    <dt class="col-sm-6">Type:</dt>
+                                    <dd class="col-sm-6">QP</dd>
+                                    
+                                    <dt class="col-sm-6">Variables:</dt>
+                                    <dd class="col-sm-6">N/A</dd>
+                                    
+                                    <dt class="col-sm-6">Constraints:</dt>
+                                    <dd class="col-sm-6">N/A</dd>
+                                    
+                                    
+                                </dl>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6 col-lg-4 mb-3">
+                        <div class="card border-light h-100">
+                            <div class="card-body">
+                                <h6 class="card-title text-primary">simple_lp</h6>
+                                <dl class="row mb-0 small">
+                                    <dt class="col-sm-6">Type:</dt>
+                                    <dd class="col-sm-6">Unknown</dd>
+                                    
+                                    <dt class="col-sm-6">Variables:</dt>
+                                    <dd class="col-sm-6">N/A</dd>
+                                    
+                                    <dt class="col-sm-6">Constraints:</dt>
+                                    <dd class="col-sm-6">N/A</dd>
+                                    
+                                    
+                                </dl>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6 col-lg-4 mb-3">
+                        <div class="card border-light h-100">
+                            <div class="card-body">
+                                <h6 class="card-title text-primary">simple_qp</h6>
+                                <dl class="row mb-0 small">
+                                    <dt class="col-sm-6">Type:</dt>
+                                    <dd class="col-sm-6">Unknown</dd>
+                                    
+                                    <dt class="col-sm-6">Variables:</dt>
+                                    <dd class="col-sm-6">N/A</dd>
+                                    
+                                    <dt class="col-sm-6">Constraints:</dt>
+                                    <dd class="col-sm-6">N/A</dd>
+                                    
+                                    
+                                </dl>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6 col-lg-4 mb-3">
+                        <div class="card border-light h-100">
+                            <div class="card-body">
+                                <h6 class="card-title text-primary">test_problem</h6>
+                                <dl class="row mb-0 small">
+                                    <dt class="col-sm-6">Type:</dt>
+                                    <dd class="col-sm-6">LP</dd>
+                                    
+                                    <dt class="col-sm-6">Variables:</dt>
+                                    <dd class="col-sm-6">N/A</dd>
+                                    
+                                    <dt class="col-sm-6">Constraints:</dt>
+                                    <dd class="col-sm-6">N/A</dd>
+                                    
+                                    
+                                </dl>
+                            </div>
+                        </div>
+                    </div>
+                    
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- No Data Message -->
+
+
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <h6>Optimization Solver Benchmark</h6>
+                    <p class="text-muted small">
+                        Automated benchmarking system for optimization solvers.
+                        Compare performance across different problem types and solver implementations.
+                    </p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <p class="text-muted small mb-2">
+                        <i class="fas fa-clock me-1"></i>
+                        Last updated: 2025-06-14 04:47:52
+                    </p>
+                    <p class="text-muted small mb-0">
+                        <i class="fas fa-code me-1"></i>
+                        Generated automatically by the benchmark system
+                    </p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Font Awesome for icons -->
+    <script src="https://kit.fontawesome.com/your-fontawesome-kit.js" crossorigin="anonymous"></script>
+    
+    <!-- Custom JavaScript -->
+    <script>
+        // Utility functions for the benchmark dashboard
+        
+        // Format time duration
+        function formatTime(seconds) {
+            if (seconds < 0.001) {
+                return (seconds * 1000000).toFixed(0) + 'μs';
+            } else if (seconds < 1) {
+                return (seconds * 1000).toFixed(1) + 'ms';
+            } else {
+                return seconds.toFixed(3) + 's';
+            }
+        }
+        
+        // Format large numbers with appropriate units
+        function formatNumber(num) {
+            if (num >= 1000000) {
+                return (num / 1000000).toFixed(1) + 'M';
+            } else if (num >= 1000) {
+                return (num / 1000).toFixed(1) + 'K';
+            } else {
+                return num.toString();
+            }
+        }
+        
+        // Get status badge class
+        function getStatusClass(status) {
+            switch(status.toLowerCase()) {
+                case 'optimal': return 'status-optimal';
+                case 'error': return 'status-error';
+                case 'timeout': return 'status-timeout';
+                case 'infeasible': return 'status-infeasible';
+                case 'unbounded': return 'status-infeasible';
+                default: return 'text-secondary';
+            }
+        }
+        
+        // Initialize tooltips
+        document.addEventListener('DOMContentLoaded', function() {
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+        });
+        
+        // Auto-refresh functionality (if enabled)
+        
+    </script>
+    
+    
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const problemNames = ["SIMPLE_LP", "SIMPLE_QP", "simple_lp", "simple_qp", "test_problem"];
+    const successRates = [
+        
+        96.875,
+        
+        95.65217391304348,
+        
+        0.0,
+        
+        0.0,
+        
+        100.0
+        
+    ];
+    
+    // Get problem types for color coding
+    const problemTypes = problemNames.map(name => {
+        const stats = {"SIMPLE_LP": {"avg_solve_time": 0.002534089549895256, "difficulty_score": 0.025050681790997908, "fastest_solver": "SciPy", "max_solve_time": 0.008412837982177734, "min_solve_time": 0.0008800029754638672, "name": "SIMPLE_LP", "problem_type": "LP", "slowest_solver": "CLARABEL (via CVXPY)", "solver_results": {"CLARABEL (via CVXPY)": {"objective_value": 5.982995652060769e-10, "solve_time": 0.008412837982177734, "status": "optimal"}, "CVXPY": {"objective_value": 5.982995652060769e-10, "solve_time": 0.005861043930053711, "status": "optimal"}, "ECOS (via CVXPY)": {"objective_value": 7.282221611127361e-10, "solve_time": 0.0020868778228759766, "status": "optimal"}, "OSQP (via CVXPY)": {"objective_value": 7.772266847585254e-23, "solve_time": 0.004646778106689453, "status": "optimal"}, "SCS (via CVXPY)": {"objective_value": 4.1243945965732264e-13, "solve_time": 0.0018768310546875, "status": "optimal"}, "SciPy": {"objective_value": 0.0, "solve_time": 0.007433891296386719, "status": "optimal"}}, "success_rate": 0.96875, "successful_attempts": 31, "total_attempts": 32}, "SIMPLE_QP": {"avg_solve_time": 0.007472211664373224, "difficulty_score": 0.03493205292893962, "fastest_solver": "SCS (via CVXPY)", "max_solve_time": 0.01923370361328125, "min_solve_time": 0.002335071563720703, "name": "SIMPLE_QP", "problem_type": "QP", "slowest_solver": "ECOS (via CVXPY)", "solver_results": {"CLARABEL (via CVXPY)": {"objective_value": 7.286774213686732e-10, "solve_time": 0.0032248497009277344, "status": "optimal"}, "CVXPY": {"objective_value": 7.286774213686732e-10, "solve_time": 0.004508018493652344, "status": "optimal"}, "ECOS (via CVXPY)": {"objective_value": 3.677641468288498e-10, "solve_time": 0.01923370361328125, "status": "optimal"}, "OSQP (via CVXPY)": {"objective_value": 0.0, "solve_time": 0.002650022506713867, "status": "optimal"}, "SCS (via CVXPY)": {"objective_value": 7.793750593888364e-11, "solve_time": 0.002535104751586914, "status": "optimal"}, "SciPy": {"objective_value": 5.135527253823579e-06, "solve_time": 0.016376018524169922, "status": "optimal"}}, "success_rate": 0.9565217391304348, "successful_attempts": 22, "total_attempts": 23}, "simple_lp": {"avg_solve_time": 0.0, "difficulty_score": 0.8, "fastest_solver": null, "max_solve_time": 0.0, "min_solve_time": 0.0, "name": "simple_lp", "problem_type": "Unknown", "slowest_solver": null, "solver_results": {"scipy": {"objective_value": null, "solve_time": 0.0001862049102783203, "status": "error"}}, "success_rate": 0.0, "successful_attempts": 0, "total_attempts": 5}, "simple_qp": {"avg_solve_time": 0.0, "difficulty_score": 0.8, "fastest_solver": null, "max_solve_time": 0.0, "min_solve_time": 0.0, "name": "simple_qp", "problem_type": "Unknown", "slowest_solver": null, "solver_results": {"scipy": {"objective_value": null, "solve_time": 0.00013113021850585938, "status": "error"}}, "success_rate": 0.0, "successful_attempts": 0, "total_attempts": 5}, "test_problem": {"avg_solve_time": 0.005, "difficulty_score": 0.0001, "fastest_solver": "TestSolver", "max_solve_time": 0.005, "min_solve_time": 0.005, "name": "test_problem", "problem_type": "LP", "slowest_solver": "TestSolver", "solver_results": {"TestSolver": {"objective_value": 2.5, "solve_time": 0.005, "status": "optimal"}}, "success_rate": 1.0, "successful_attempts": 1, "total_attempts": 1}};
+        return stats[name].type || 'Unknown';
+    });
+    
+    const typeColors = {
+        'LP': 'rgba(255, 99, 132, 0.8)',
+        'QP': 'rgba(54, 162, 235, 0.8)',
+        'SDP': 'rgba(255, 205, 86, 0.8)',
+        'SOCP': 'rgba(75, 192, 192, 0.8)',
+        'Unknown': 'rgba(153, 102, 255, 0.8)'
+    };
+    
+    // Problem Type Distribution Chart
+    const typeCtx = document.getElementById('problemTypeChart').getContext('2d');
+    const typeCounts = {};
+    problemTypes.forEach(type => {
+        typeCounts[type] = (typeCounts[type] || 0) + 1;
+    });
+    
+    new Chart(typeCtx, {
+        type: 'doughnut',
+        data: {
+            labels: Object.keys(typeCounts),
+            datasets: [{
+                data: Object.values(typeCounts),
+                backgroundColor: Object.keys(typeCounts).map(type => typeColors[type] || typeColors['Unknown']),
+                borderWidth: 2
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                },
+                title: {
+                    display: true,
+                    text: 'Distribution by Problem Type'
+                }
+            }
+        }
+    });
+    
+    // Difficulty Analysis Chart
+    const diffCtx = document.getElementById('difficultyChart').getContext('2d');
+    const avgTimes = problemNames.map(name => {
+        const stats = {"SIMPLE_LP": {"avg_solve_time": 0.002534089549895256, "difficulty_score": 0.025050681790997908, "fastest_solver": "SciPy", "max_solve_time": 0.008412837982177734, "min_solve_time": 0.0008800029754638672, "name": "SIMPLE_LP", "problem_type": "LP", "slowest_solver": "CLARABEL (via CVXPY)", "solver_results": {"CLARABEL (via CVXPY)": {"objective_value": 5.982995652060769e-10, "solve_time": 0.008412837982177734, "status": "optimal"}, "CVXPY": {"objective_value": 5.982995652060769e-10, "solve_time": 0.005861043930053711, "status": "optimal"}, "ECOS (via CVXPY)": {"objective_value": 7.282221611127361e-10, "solve_time": 0.0020868778228759766, "status": "optimal"}, "OSQP (via CVXPY)": {"objective_value": 7.772266847585254e-23, "solve_time": 0.004646778106689453, "status": "optimal"}, "SCS (via CVXPY)": {"objective_value": 4.1243945965732264e-13, "solve_time": 0.0018768310546875, "status": "optimal"}, "SciPy": {"objective_value": 0.0, "solve_time": 0.007433891296386719, "status": "optimal"}}, "success_rate": 0.96875, "successful_attempts": 31, "total_attempts": 32}, "SIMPLE_QP": {"avg_solve_time": 0.007472211664373224, "difficulty_score": 0.03493205292893962, "fastest_solver": "SCS (via CVXPY)", "max_solve_time": 0.01923370361328125, "min_solve_time": 0.002335071563720703, "name": "SIMPLE_QP", "problem_type": "QP", "slowest_solver": "ECOS (via CVXPY)", "solver_results": {"CLARABEL (via CVXPY)": {"objective_value": 7.286774213686732e-10, "solve_time": 0.0032248497009277344, "status": "optimal"}, "CVXPY": {"objective_value": 7.286774213686732e-10, "solve_time": 0.004508018493652344, "status": "optimal"}, "ECOS (via CVXPY)": {"objective_value": 3.677641468288498e-10, "solve_time": 0.01923370361328125, "status": "optimal"}, "OSQP (via CVXPY)": {"objective_value": 0.0, "solve_time": 0.002650022506713867, "status": "optimal"}, "SCS (via CVXPY)": {"objective_value": 7.793750593888364e-11, "solve_time": 0.002535104751586914, "status": "optimal"}, "SciPy": {"objective_value": 5.135527253823579e-06, "solve_time": 0.016376018524169922, "status": "optimal"}}, "success_rate": 0.9565217391304348, "successful_attempts": 22, "total_attempts": 23}, "simple_lp": {"avg_solve_time": 0.0, "difficulty_score": 0.8, "fastest_solver": null, "max_solve_time": 0.0, "min_solve_time": 0.0, "name": "simple_lp", "problem_type": "Unknown", "slowest_solver": null, "solver_results": {"scipy": {"objective_value": null, "solve_time": 0.0001862049102783203, "status": "error"}}, "success_rate": 0.0, "successful_attempts": 0, "total_attempts": 5}, "simple_qp": {"avg_solve_time": 0.0, "difficulty_score": 0.8, "fastest_solver": null, "max_solve_time": 0.0, "min_solve_time": 0.0, "name": "simple_qp", "problem_type": "Unknown", "slowest_solver": null, "solver_results": {"scipy": {"objective_value": null, "solve_time": 0.00013113021850585938, "status": "error"}}, "success_rate": 0.0, "successful_attempts": 0, "total_attempts": 5}, "test_problem": {"avg_solve_time": 0.005, "difficulty_score": 0.0001, "fastest_solver": "TestSolver", "max_solve_time": 0.005, "min_solve_time": 0.005, "name": "test_problem", "problem_type": "LP", "slowest_solver": "TestSolver", "solver_results": {"TestSolver": {"objective_value": 2.5, "solve_time": 0.005, "status": "optimal"}}, "success_rate": 1.0, "successful_attempts": 1, "total_attempts": 1}};
+        const solverResults = Object.values(stats[name].solver_results);
+        const optimalResults = solverResults.filter(r => r.status === 'optimal');
+        if (optimalResults.length === 0) return 0;
+        return optimalResults.reduce((sum, r) => sum + r.solve_time, 0) / optimalResults.length;
+    });
+    
+    new Chart(diffCtx, {
+        type: 'scatter',
+        data: {
+            datasets: [{
+                label: 'Problems',
+                data: problemNames.map((name, i) => ({
+                    x: avgTimes[i],
+                    y: successRates[i],
+                    problemName: name,
+                    problemType: problemTypes[i]
+                })),
+                backgroundColor: problemNames.map((name, i) => typeColors[problemTypes[i]] || typeColors['Unknown']),
+                borderColor: problemNames.map((name, i) => typeColors[problemTypes[i]]?.replace('0.8', '1') || typeColors['Unknown'].replace('0.8', '1')),
+                borderWidth: 2,
+                pointRadius: 8
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                },
+                title: {
+                    display: true,
+                    text: 'Problem Difficulty: Success Rate vs Average Solve Time'
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            const point = context.raw;
+                            return [
+                                `Problem: ${point.problemName}`,
+                                `Type: ${point.problemType}`,
+                                `Success Rate: ${point.y.toFixed(1)}%`,
+                                `Avg Time: ${point.x.toFixed(3)}s`
+                            ];
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Average Solve Time (seconds)'
+                    },
+                    beginAtZero: true
+                },
+                y: {
+                    title: {
+                        display: true,
+                        text: 'Success Rate (%)'
+                    },
+                    beginAtZero: true,
+                    max: 100
+                }
+            }
+        }
+    });
+    
+    // Performance Matrix (simplified visualization)
+    const heatmapCtx = document.getElementById('heatmapChart').getContext('2d');
+    
+    // Get all solver names
+    const allSolvers = new Set();
+    Object.values({"SIMPLE_LP": {"avg_solve_time": 0.002534089549895256, "difficulty_score": 0.025050681790997908, "fastest_solver": "SciPy", "max_solve_time": 0.008412837982177734, "min_solve_time": 0.0008800029754638672, "name": "SIMPLE_LP", "problem_type": "LP", "slowest_solver": "CLARABEL (via CVXPY)", "solver_results": {"CLARABEL (via CVXPY)": {"objective_value": 5.982995652060769e-10, "solve_time": 0.008412837982177734, "status": "optimal"}, "CVXPY": {"objective_value": 5.982995652060769e-10, "solve_time": 0.005861043930053711, "status": "optimal"}, "ECOS (via CVXPY)": {"objective_value": 7.282221611127361e-10, "solve_time": 0.0020868778228759766, "status": "optimal"}, "OSQP (via CVXPY)": {"objective_value": 7.772266847585254e-23, "solve_time": 0.004646778106689453, "status": "optimal"}, "SCS (via CVXPY)": {"objective_value": 4.1243945965732264e-13, "solve_time": 0.0018768310546875, "status": "optimal"}, "SciPy": {"objective_value": 0.0, "solve_time": 0.007433891296386719, "status": "optimal"}}, "success_rate": 0.96875, "successful_attempts": 31, "total_attempts": 32}, "SIMPLE_QP": {"avg_solve_time": 0.007472211664373224, "difficulty_score": 0.03493205292893962, "fastest_solver": "SCS (via CVXPY)", "max_solve_time": 0.01923370361328125, "min_solve_time": 0.002335071563720703, "name": "SIMPLE_QP", "problem_type": "QP", "slowest_solver": "ECOS (via CVXPY)", "solver_results": {"CLARABEL (via CVXPY)": {"objective_value": 7.286774213686732e-10, "solve_time": 0.0032248497009277344, "status": "optimal"}, "CVXPY": {"objective_value": 7.286774213686732e-10, "solve_time": 0.004508018493652344, "status": "optimal"}, "ECOS (via CVXPY)": {"objective_value": 3.677641468288498e-10, "solve_time": 0.01923370361328125, "status": "optimal"}, "OSQP (via CVXPY)": {"objective_value": 0.0, "solve_time": 0.002650022506713867, "status": "optimal"}, "SCS (via CVXPY)": {"objective_value": 7.793750593888364e-11, "solve_time": 0.002535104751586914, "status": "optimal"}, "SciPy": {"objective_value": 5.135527253823579e-06, "solve_time": 0.016376018524169922, "status": "optimal"}}, "success_rate": 0.9565217391304348, "successful_attempts": 22, "total_attempts": 23}, "simple_lp": {"avg_solve_time": 0.0, "difficulty_score": 0.8, "fastest_solver": null, "max_solve_time": 0.0, "min_solve_time": 0.0, "name": "simple_lp", "problem_type": "Unknown", "slowest_solver": null, "solver_results": {"scipy": {"objective_value": null, "solve_time": 0.0001862049102783203, "status": "error"}}, "success_rate": 0.0, "successful_attempts": 0, "total_attempts": 5}, "simple_qp": {"avg_solve_time": 0.0, "difficulty_score": 0.8, "fastest_solver": null, "max_solve_time": 0.0, "min_solve_time": 0.0, "name": "simple_qp", "problem_type": "Unknown", "slowest_solver": null, "solver_results": {"scipy": {"objective_value": null, "solve_time": 0.00013113021850585938, "status": "error"}}, "success_rate": 0.0, "successful_attempts": 0, "total_attempts": 5}, "test_problem": {"avg_solve_time": 0.005, "difficulty_score": 0.0001, "fastest_solver": "TestSolver", "max_solve_time": 0.005, "min_solve_time": 0.005, "name": "test_problem", "problem_type": "LP", "slowest_solver": "TestSolver", "solver_results": {"TestSolver": {"objective_value": 2.5, "solve_time": 0.005, "status": "optimal"}}, "success_rate": 1.0, "successful_attempts": 1, "total_attempts": 1}}).forEach(stats => {
+        Object.keys(stats.solver_results).forEach(solver => allSolvers.add(solver));
+    });
+    const solverNames = Array.from(allSolvers);
+    
+    // Create matrix data
+    const matrixData = [];
+    problemNames.forEach((problemName, pIndex) => {
+        solverNames.forEach((solverName, sIndex) => {
+            const stats = {"SIMPLE_LP": {"avg_solve_time": 0.002534089549895256, "difficulty_score": 0.025050681790997908, "fastest_solver": "SciPy", "max_solve_time": 0.008412837982177734, "min_solve_time": 0.0008800029754638672, "name": "SIMPLE_LP", "problem_type": "LP", "slowest_solver": "CLARABEL (via CVXPY)", "solver_results": {"CLARABEL (via CVXPY)": {"objective_value": 5.982995652060769e-10, "solve_time": 0.008412837982177734, "status": "optimal"}, "CVXPY": {"objective_value": 5.982995652060769e-10, "solve_time": 0.005861043930053711, "status": "optimal"}, "ECOS (via CVXPY)": {"objective_value": 7.282221611127361e-10, "solve_time": 0.0020868778228759766, "status": "optimal"}, "OSQP (via CVXPY)": {"objective_value": 7.772266847585254e-23, "solve_time": 0.004646778106689453, "status": "optimal"}, "SCS (via CVXPY)": {"objective_value": 4.1243945965732264e-13, "solve_time": 0.0018768310546875, "status": "optimal"}, "SciPy": {"objective_value": 0.0, "solve_time": 0.007433891296386719, "status": "optimal"}}, "success_rate": 0.96875, "successful_attempts": 31, "total_attempts": 32}, "SIMPLE_QP": {"avg_solve_time": 0.007472211664373224, "difficulty_score": 0.03493205292893962, "fastest_solver": "SCS (via CVXPY)", "max_solve_time": 0.01923370361328125, "min_solve_time": 0.002335071563720703, "name": "SIMPLE_QP", "problem_type": "QP", "slowest_solver": "ECOS (via CVXPY)", "solver_results": {"CLARABEL (via CVXPY)": {"objective_value": 7.286774213686732e-10, "solve_time": 0.0032248497009277344, "status": "optimal"}, "CVXPY": {"objective_value": 7.286774213686732e-10, "solve_time": 0.004508018493652344, "status": "optimal"}, "ECOS (via CVXPY)": {"objective_value": 3.677641468288498e-10, "solve_time": 0.01923370361328125, "status": "optimal"}, "OSQP (via CVXPY)": {"objective_value": 0.0, "solve_time": 0.002650022506713867, "status": "optimal"}, "SCS (via CVXPY)": {"objective_value": 7.793750593888364e-11, "solve_time": 0.002535104751586914, "status": "optimal"}, "SciPy": {"objective_value": 5.135527253823579e-06, "solve_time": 0.016376018524169922, "status": "optimal"}}, "success_rate": 0.9565217391304348, "successful_attempts": 22, "total_attempts": 23}, "simple_lp": {"avg_solve_time": 0.0, "difficulty_score": 0.8, "fastest_solver": null, "max_solve_time": 0.0, "min_solve_time": 0.0, "name": "simple_lp", "problem_type": "Unknown", "slowest_solver": null, "solver_results": {"scipy": {"objective_value": null, "solve_time": 0.0001862049102783203, "status": "error"}}, "success_rate": 0.0, "successful_attempts": 0, "total_attempts": 5}, "simple_qp": {"avg_solve_time": 0.0, "difficulty_score": 0.8, "fastest_solver": null, "max_solve_time": 0.0, "min_solve_time": 0.0, "name": "simple_qp", "problem_type": "Unknown", "slowest_solver": null, "solver_results": {"scipy": {"objective_value": null, "solve_time": 0.00013113021850585938, "status": "error"}}, "success_rate": 0.0, "successful_attempts": 0, "total_attempts": 5}, "test_problem": {"avg_solve_time": 0.005, "difficulty_score": 0.0001, "fastest_solver": "TestSolver", "max_solve_time": 0.005, "min_solve_time": 0.005, "name": "test_problem", "problem_type": "LP", "slowest_solver": "TestSolver", "solver_results": {"TestSolver": {"objective_value": 2.5, "solve_time": 0.005, "status": "optimal"}}, "success_rate": 1.0, "successful_attempts": 1, "total_attempts": 1}};
+            const result = stats[problemName].solver_results[solverName];
+            
+            if (result) {
+                let value = 0;
+                if (result.status === 'optimal') {
+                    // Normalize time to 0-1 scale (inverted so faster = higher value)
+                    const maxTime = Math.max(...Object.values(stats[problemName].solver_results)
+                        .filter(r => r.status === 'optimal')
+                        .map(r => r.solve_time));
+                    value = maxTime > 0 ? 1 - (result.solve_time / maxTime) : 1;
+                }
+                
+                matrixData.push({
+                    x: sIndex,
+                    y: pIndex,
+                    v: value,
+                    status: result.status,
+                    time: result.solve_time,
+                    solver: solverName,
+                    problem: problemName
+                });
+            }
+        });
+    });
+    
+    new Chart(heatmapCtx, {
+        type: 'scatter',
+        data: {
+            datasets: [{
+                label: 'Performance',
+                data: matrixData,
+                backgroundColor: function(context) {
+                    const point = context.raw;
+                    if (point.status === 'optimal') {
+                        const intensity = point.v;
+                        return `rgba(40, 167, 69, ${0.3 + intensity * 0.7})`;
+                    } else if (point.status === 'error') {
+                        return 'rgba(220, 53, 69, 0.8)';
+                    } else {
+                        return 'rgba(255, 193, 7, 0.8)';
+                    }
+                },
+                pointRadius: 15
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                },
+                title: {
+                    display: true,
+                    text: 'Solver Performance Matrix'
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            const point = context.raw;
+                            return [
+                                `Solver: ${point.solver}`,
+                                `Problem: ${point.problem}`,
+                                `Status: ${point.status}`,
+                                `Time: ${point.time.toFixed(3)}s`
+                            ];
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    type: 'linear',
+                    position: 'bottom',
+                    title: {
+                        display: true,
+                        text: 'Solvers'
+                    },
+                    ticks: {
+                        callback: function(value) {
+                            return solverNames[Math.round(value)] || '';
+                        },
+                        stepSize: 1
+                    },
+                    min: -0.5,
+                    max: solverNames.length - 0.5
+                },
+                y: {
+                    title: {
+                        display: true,
+                        text: 'Problems'
+                    },
+                    ticks: {
+                        callback: function(value) {
+                            return problemNames[Math.round(value)] || '';
+                        },
+                        stepSize: 1
+                    },
+                    min: -0.5,
+                    max: problemNames.length - 0.5
+                }
+            }
+        }
+    });
+});
+</script>
+
+
+</body>
+</html>
