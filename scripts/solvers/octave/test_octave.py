@@ -29,19 +29,18 @@ def create_simple_lp():
     #      x1, x2 >= 0
     
     c = np.array([1.0, 2.0])
-    A_ineq = np.array([[-1.0, -1.0]])  # Convert >= to <= by negating
-    b_ineq = np.array([-1.0])
+    A_ub = np.array([[-1.0, -1.0]])  # Convert >= to <= by negating
+    b_ub = np.array([-1.0])
     bounds = [(0, None), (0, None)]
     
     return ProblemData(
         name="simple_lp_test",
         problem_class="LP",
         c=c,
-        A_ineq=A_ineq,
-        b_ineq=b_ineq,
+        A_ub=A_ub,
+        b_ub=b_ub,
         bounds=bounds,
-        n_variables=2,
-        n_constraints=1
+        metadata={'n_variables': 2, 'n_constraints': 1}
     )
 
 
@@ -52,7 +51,7 @@ def create_simple_qp():
     # s.t. x1 + x2 = 1
     #      x1, x2 >= 0
     
-    Q = np.array([[1.0, 0.0], [0.0, 1.0]])
+    P = np.array([[1.0, 0.0], [0.0, 1.0]])  # Quadratic matrix
     c = np.array([1.0, 0.0])
     A_eq = np.array([[1.0, 1.0]])
     b_eq = np.array([1.0])
@@ -61,13 +60,12 @@ def create_simple_qp():
     return ProblemData(
         name="simple_qp_test",
         problem_class="QP",
-        Q=Q,
+        P=P,
         c=c,
         A_eq=A_eq,
         b_eq=b_eq,
         bounds=bounds,
-        n_variables=2,
-        n_constraints=1
+        metadata={'n_variables': 2, 'n_constraints': 1}
     )
 
 
@@ -207,5 +205,14 @@ def main():
 
 
 if __name__ == "__main__":
+    import argparse
+    
+    parser = argparse.ArgumentParser(description='Test Octave solver functionality')
+    parser.add_argument('--verbose', '-v', action='store_true', 
+                       help='Enable verbose output')
+    args = parser.parse_args()
+    
+    # Note: Verbose mode is currently the default behavior
+    # This flag is kept for future extensibility
     success = main()
     sys.exit(0 if success else 1)
