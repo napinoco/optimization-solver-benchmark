@@ -21,7 +21,7 @@ env:
   PYTHON_VERSION: '3.12'
 
 permissions:
-  contents: read
+  contents: write  # Allow pushing to gh-pages branch
   pages: write
   id-token: write
   pull-requests: write
@@ -121,12 +121,30 @@ jobs:
         EOF
         
     - name: Deploy PR preview
-      uses: rossjrw/pr-preview-action@v1
+      if: github.event.action != 'closed'
+      uses: JamesIves/github-pages-deploy-action@v4
       with:
-        source-dir: ./docs/
-        preview-branch: gh-pages
-        umbrella-dir: pr-preview
-        action: auto
+        branch: gh-pages
+        folder: docs
+        target-folder: pr-preview/pr-${{ github.event.number }}
+        token: ${{ secrets.GITHUB_TOKEN }}
+        clean: false
+        
+    - name: Clean up PR preview
+      if: github.event.action == 'closed'
+      run: |
+        # Create a temporary empty directory for cleanup
+        mkdir -p /tmp/empty-cleanup
+        
+    - name: Remove PR preview directory
+      if: github.event.action == 'closed'
+      uses: JamesIves/github-pages-deploy-action@v4
+      with:
+        branch: gh-pages
+        folder: /tmp/empty-cleanup
+        target-folder: pr-preview/pr-${{ github.event.number }}
+        token: ${{ secrets.GITHUB_TOKEN }}
+        clean: true
         
     - name: Comment preview URL
       if: github.event.action != 'closed'
