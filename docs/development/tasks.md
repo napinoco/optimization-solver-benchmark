@@ -87,7 +87,7 @@ This document contains the active tasks for the current development phase. Tasks
 - ✅ Aligns with open science principles and research community needs
 - ✅ LICENSE file is properly formatted with standard MIT License text
 
-**Documentation**: Complete analysis available in [license_analysis.md](license_analysis.md)
+**Documentation**: MIT license verified as appropriate for open-source benchmark framework
 
 ### Task 64: Implement Preview Hosting for CI ✅ COMPLETED
 **Status**: ✅ Completed  
@@ -95,11 +95,13 @@ This document contains the active tasks for the current development phase. Tasks
 
 **Implementation Results**:
 - ✅ Created `.github/workflows/pr-preview.yml` for automated PR preview deployment
-- ✅ Integrated `rossjrw/pr-preview-action` for GitHub Pages preview hosting
+- ✅ Replaced with `JamesIves/github-pages-deploy-action@v4` for reliable deployment
+- ✅ Added explicit GITHUB_TOKEN for permission issues resolution
 - ✅ Automatic PR comments with preview links and report navigation
 - ✅ Preview environment indicators and metadata for clear identification
 - ✅ Auto-cleanup when PR is closed to maintain repository hygiene
 - ✅ Lightweight benchmark configuration for fast preview generation
+- ✅ Created `.github/workflows/deploy-pages.yml` for main branch auto-deployment
 - ✅ Comprehensive documentation in [PR_PREVIEW_GUIDE.md](../guides/PR_PREVIEW_GUIDE.md)
 
 **Features Implemented**:
@@ -111,10 +113,13 @@ This document contains the active tasks for the current development phase. Tasks
 - 🔗 Preview URLs: `https://[owner].github.io/[repo]/pr-preview/pr-[number]/`
 
 **Technical Details**:
-- Uses GitHub Pages gh-pages branch for hosting
-- Lightweight benchmark (scipy,cvxpy with light_set) for fast execution
-- Proper permissions for GitHub Pages and PR commenting
-- Error handling and status reporting in workflow
+- **Deployment Method**: GitHub Pages with "Deploy from a branch" (gh-pages)
+- **Main Site**: Auto-deploys from main branch to gh-pages root via deploy-pages.yml
+- **PR Previews**: Deploy to gh-pages/pr-preview/pr-{number}/ via pr-preview.yml
+- **Benchmark Config**: Lightweight (scipy,cvxpy with light_set) for fast preview execution
+- **Main Config**: Full benchmark (scipy,cvxpy,highs,osqp with standard_set) for production
+- **Permissions**: contents: write for gh-pages push, explicit GITHUB_TOKEN usage
+- **Error Handling**: Comprehensive status reporting and debugging in workflows
 
 ---
 
