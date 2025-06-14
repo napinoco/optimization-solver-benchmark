@@ -257,22 +257,22 @@ SDP          | 2 solvers    | CLARABEL, SCS
 
 ### Core Documentation
 - **[README.md](README.md)**: Project overview and quick start guide
-- **[architecture.md](architecture.md)**: System architecture and design decisions
 - **[CLAUDE.md](CLAUDE.md)**: AI assistant integration and development context
 
 ### Setup & Usage Guides
 - **[MANUAL_TRIGGER_GUIDE.md](docs/guides/MANUAL_TRIGGER_GUIDE.md)**: GitHub Actions usage guide
 - **[GITHUB_ACTIONS_SETUP.md](docs/guides/GITHUB_ACTIONS_SETUP.md)**: CI/CD setup instructions
+- **[PR_PREVIEW_GUIDE.md](docs/guides/PR_PREVIEW_GUIDE.md)**: Pull request preview system usage
 - **[EXPORT_GUIDE.md](docs/guides/EXPORT_GUIDE.md)**: Data export and integration guide
 - **[EXTERNAL_STORAGE.md](docs/guides/EXTERNAL_STORAGE.md)**: External storage configuration
 - **[OCTAVE_INTEGRATION.md](docs/guides/OCTAVE_INTEGRATION.md)**: Octave solver integration
 
 ### Development Documentation
-- **[ROADMAP.md](docs/development/ROADMAP.md)**: Complete development roadmap (Phases 1-4)
-- **[PHASE1_HISTORY.md](docs/development/PHASE1_HISTORY.md)**: Completed MVP development history
-- **[PHASE2_TASKS.md](docs/development/PHASE2_TASKS.md)**: Current development plan
-- **[FINAL_RELEASE_TASKS.md](docs/development/FINAL_RELEASE_TASKS.md)**: Final release preparation tasks
-- **[basic_design.md](docs/development/basic_design.md)**: Basic system design and concepts
+- **[basic_design.md](docs/development/basic_design.md)**: High-level concepts and project vision
+- **[detail_design.md](docs/development/detail_design.md)**: Technical architecture and implementation
+- **[conventions.md](docs/development/conventions.md)**: Coding standards and development protocols  
+- **[history.md](docs/development/history.md)**: Complete development history (Phases 1-2)
+- **[tasks.md](docs/development/tasks.md)**: Current development tasks
 
 ## 🏆 Achievements & Recognition
 
