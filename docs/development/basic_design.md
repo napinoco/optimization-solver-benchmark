@@ -1,272 +1,230 @@
-# Optimization Solver Benchmark System - Complete Requirements Document
+# Optimization Solver Benchmark System - Basic Design
 
-## Project Overview
-An automated system for executing, collecting, and publishing performance benchmark results for optimization solvers (SDP, SOCP, LP, QP).
+## Project Vision
+Create the leading open-source platform for benchmarking optimization solvers across multiple problem types, providing researchers and practitioners with comprehensive performance insights through automated execution, transparent reporting, and fair baseline comparisons.
 
-## Technical Requirements
+---
 
-### Target Solver Environments
-- **Python**: CVXPY, Gurobi, MOSEK, SCS, etc.
-- **Octave**: Optimization toolbox equivalent (MATLAB-compatible, free)
-- **Future Extension**: MATLAB support (requires license purchase or Batch Licensing Pilot application)
+## Core Mission
+**"Regularly benchmark publicly available solvers and publish the results as data"**
 
-### Data Storage Schema
-```json
-{
-  "solver": "Solver name",
-  "version": "Version string",
-  "timestamp": "Execution datetime",
-  "environment": {
-    "os": "Operating system information",
-    "cpu": "CPU information", 
-    "memory": "Memory capacity"
-  },
-  "problem": {
-    "name": "Problem name",
-    "class": "Problem class (SDP/SOCP/LP/QP)",
-    "source": "Problem source URL"
-  },
-  "results": {
-    "solve_time": "Computation time (seconds)",
-    "duality_gap": "Duality gap",
-    "status": "Solution status"
-  }
-}
+This system prioritizes unbiased solver comparison through minimal configuration, establishing "out of the box" performance baselines rather than optimized configurations.
+
+---
+
+## Design Philosophy
+
+### Fair Baseline Benchmarking Principles
+- **Solver Defaults**: Uses each solver's default parameters to avoid optimization bias
+- **Baseline Performance**: Establishes genuine "out of the box" capabilities
+- **Transparent Comparison**: Prevents inadvertent parameter tuning favoring specific solvers
+- **Reproducible Results**: Standardized environments ensure consistent benchmarking
+- **Open Data**: Results published as accessible JSON/CSV for research use
+
+### Technical Principles
+1. **Minimal Configuration**: Fair comparison using solver defaults for unbiased benchmarking
+2. **Modular Design**: Independent addition of solvers, problems, and environments
+3. **Configuration-Driven**: Manage benchmark content via YAML configuration
+4. **Result Standardization**: Common data format across different solver environments
+5. **Error Resilience**: System continues despite individual solver failures
+6. **Automated Operation**: GitHub Actions enables hands-off execution and deployment
+
+---
+
+## System Overview
+
+### Core Architecture
+```
+┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐
+│   GitHub Repo   │    │  GitHub Actions  │    │  GitHub Pages   │
+│                 │    │                  │    │                 │
+│ ┌─────────────┐ │    │ ┌──────────────┐ │    │ ┌─────────────┐ │
+│ │Config Files │ │───▶│ │Benchmark     │ │───▶│ │Static Site  │ │
+│ │Problems     │ │    │ │Execution     │ │    │ │Dashboard    │ │
+│ │Scripts      │ │    │ │Environment   │ │    │ │Reports      │ │
+│ └─────────────┘ │    │ └──────────────┘ │    │ └─────────────┘ │
+└─────────────────┘    └──────────────────┘    └─────────────────┘
+                                │
+                                ▼
+                       ┌──────────────────┐
+                       │   SQLite DB      │
+                       │   (results.db)   │
+                       └──────────────────┘
 ```
 
-## Infrastructure and Constraint Analysis
+### Target Environments
+- **Python**: CVXPY multi-backend, SciPy optimization suite
+- **Octave**: MATLAB-compatible optimization (free alternative)
+- **Future**: MATLAB Optimization Toolbox (license-dependent)
 
-### GitHub Actions Constraints and Solutions
-- **Time Limit**: 6 hours per job (start within this limit, expand later if needed)
-- **Public Repository**: Unlimited execution (private repos have 2,000 minutes/month limit)
-- **Extension Options**: Self-hosted runners, external CI integration, manual execution + result upload
+### Supported Problem Types
+- **LP**: Linear Programming (.mps format)
+- **QP**: Quadratic Programming (.qps format)  
+- **SOCP**: Second-Order Cone Programming (Python modules)
+- **SDP**: Semidefinite Programming (Python modules)
 
-### File Storage Strategy
+---
 
-#### GitHub File Size Limitations
-- **Single File**: 100MB limit
-- **Repository Total**: 1GB recommended, 5GB warning, 100GB block
-- **Git LFS**: 1GB free, additional storage at $5/month/50GB
+## Infrastructure Constraints & Solutions
 
-#### Benchmark Problem File Handling
-**Problem Size Estimation:**
-- SDPLIB: 92 problems total, estimated several GB (large problems are 10-100MB class)
-- MIPLIB/NETLIB: Usually several KB to MB
-- Total could be several GB to several tens of GB
+### GitHub Actions Platform
+- **Advantages**: Free for public repos, integrated CI/CD, standardized environments
+- **Constraints**: 6-hour execution limit, 20 parallel jobs max
+- **Solutions**: Staged problem sets, efficient parallel execution
 
-**Adoption Strategy (Staged):**
+### Storage Strategy
 ```yaml
 Phase 1: Lightweight Problem Set
   - Direct GitHub storage (<100MB)
-  - Start with small standard problems
-  - Verify operation and complete prototype
-
-Phase 2: Large Problem Support  
-  - External storage utilization (AWS S3, Google Cloud Storage)
-  - GitHub Releases utilization (up to 2GB per single file)
-  - URL management via configuration files
+  - Small standard problems for rapid prototyping
   
-Phase 3: Complete Version
-  - Reference to official URLs of existing benchmark collections
-  - Utilize NETLIB, MIPLIB, SDPLIB, etc.
-  - Cost optimization
+Phase 2: Large Problem Support  
+  - External storage via GitHub releases (2GB per file)
+  - URL-based problem management
+  - Automatic downloading and caching
+  
+Future: Complete Problem Libraries
+  - Reference to NETLIB, MIPLIB, SDPLIB official URLs
+  - Cost-optimized external storage
 ```
 
-## Architecture Design
+---
 
-### System Configuration
+## Development Roadmap
+
+### Phase 1: MVP Foundation ✅ COMPLETED
+**Goal**: Verify basic functionality with minimal viable system
+
+**Achievements**:
+- Python solvers (SciPy, CVXPY default backends)
+- GitHub Actions CI/CD with manual triggers
+- Interactive HTML reports via GitHub Pages
+- SQLite storage with structured schema
+- Comprehensive validation framework
+
+### Phase 2: Data Publishing Platform 🚧 IN PROGRESS
+**Goal**: Robust data publishing with expanded solver ecosystem
+
+**Current Focus**:
+- Multi-backend CVXPY (CLARABEL, SCS, ECOS, OSQP, etc.)
+- SOCP/SDP problem support with example implementations
+- Clean JSON/CSV data exports for research use
+- Octave integration for MATLAB compatibility
+- External storage framework for large problem sets
+
+**Expected Solver Coverage**:
 ```
-GitHub Actions (6-hour limit)
-├── Environment Setup (Python + Octave)
-├── Benchmark Problem Acquisition (URL/Local)
-├── Solver Execution (parallelization support)
-├── Result Collection & Validation (JSON format)
-├── SQLite Database Update
-├── Static Site Generation (HTML/CSS/JS)
-└── GitHub Pages Auto-Deploy
+Problem Type | Solver Count | Backends
+LP          | 7            | SciPy + CLARABEL + SCS + ECOS + OSQP + CBC + GLOP + HiGHS
+QP          | 6            | SciPy + CLARABEL + SCS + ECOS + OSQP + (CVXPY default)
+SOCP        | 4            | CLARABEL + SCS + ECOS + OSQP
+SDP         | 2            | CLARABEL + SCS
 ```
 
-### Extensibility Design Principles
-1. **Modular Design** - Independent addition of solvers, problems, and environments
-2. **Configuration-Driven** - Manage benchmark content via YAML/JSON configuration
-3. **Result Standardization** - Integrate results from different environments using common data format
-4. **Error Resilience** - Design that doesn't halt entire system due to partial failures
+### Phase 3: Advanced Ecosystem ⏳ PLANNED
+**Goal**: Enhanced analysis capabilities and broader solver support
 
-## Staged Development Plan
+**Planned Features**:
+- MATLAB Optimization Toolbox integration
+- Commercial solver support (Gurobi, CPLEX) via user licenses
+- Mixed-Integer Programming (MIP) and Nonlinear Programming (NLP)
+- Advanced statistical analysis and performance profiling
+- Community problem sharing and solver recommendations
 
-### Phase 1: MVP (Minimum Viable Product)
-**Goal**: Verify basic functionality
-- **Lightweight Problem Set** - Within GitHub limits (tens of MB)
-- **Python Environment Only** - CVXPY + basic solvers
-- **SQLite Storage** - Local file-based
-- **Basic HTML Display** - Tabular result display
+### Phase 4: Production Platform ⏳ PLANNED  
+**Goal**: Scalable cloud deployment with enterprise features
 
-### Phase 2: Data Publishing Platform
-**Goal**: Reliable data publishing system
-- **Octave Support** - MATLAB-compatible optimization environment
-- **Data Publishing** - Clean JSON/CSV exports for research use
-- **External Storage** - Basic support for large problem sets
-- **Essential Production** - Testing, monitoring, and reliability features
+**Planned Features**:
+- Cloud-native deployment (AWS/GCP/Azure)
+- Auto-scaling based on benchmark workload
+- API with authentication and quotas
+- Real-time performance monitoring
+- Academic institution partnerships
 
-### Phase 3: Advanced Features (Optional)
-**Goal**: Enhanced analysis capabilities
-- **Advanced Analytics** - Statistical analysis and performance profiling
-- **Interactive Dashboards** - Complex visualizations and trends
-- **Solver Recommendations** - AI-powered solver selection
-- **MATLAB Integration** - Support for commercial solver environments
-
-## Technical Choice Rationale
-
-### GitHub Actions Adoption Reasons
-- **Rich Free Tier** (public repositories)
-- **CI/CD Integration** (code changes → automatic execution)
-- **Environment Standardization** (reproducible benchmarks)
-- **Extensibility** (self-hosted runners, etc.)
-
-### Octave Adoption Reasons
-- **MATLAB Compatibility** (can reuse existing code)
-- **Free** (no license fees)
-- **CI Support** (executable in GitHub Actions)
-- **Easy Migration** (can switch to MATLAB in the future)
-
-### SQLite + Static Site Adoption Reasons
-- **Simple** (serverless, maintenance-free)
-- **Free** (GitHub Pages free hosting)
-- **Fast** (static sites display quickly)
-- **Easy Migration** (can change DB or move to dynamic sites later)
-
-## Detailed Consideration Results
-
-### Environment Compatibility
-**GitHub Actions + Python/Octave:**
-- ✅ Python: Full support - standard availability
-- ✅ Octave: Executable - dedicated actions available
-- ❌ MATLAB: Technically possible but requires expensive licensing
-
-**MATLAB Licensing Options:**
-- Batch Licensing Pilot application required
-- High license costs
-- Commercial use restrictions possible
-
-### File Storage Solutions Evaluated
-**GitHub Direct Storage:**
-- Pros: Simple, version controlled, free
-- Cons: 100MB single file limit, 1GB repository limit
-- Use Case: Phase 1 lightweight problems
-
-**External Storage (S3, GCS):**
-- Pros: No size limits, reasonable costs
-- Cons: Additional complexity, ongoing costs
-- Use Case: Phase 2+ large problems
-
-**Git LFS:**
-- Pros: Integrated with Git workflow
-- Cons: Limited free tier, can become expensive
-- Use Case: Medium-sized problems (Phase 1.5)
-
-**GitHub Releases:**
-- Pros: 2GB single file limit, free
-- Cons: Manual process, not version controlled
-- Use Case: Problem set distribution
-
-### CI/CD Platform Comparison
-**GitHub Actions (Selected):**
-- Pros: Free for public repos, integrated, standardized environments
-- Cons: 6-hour time limit, limited to GitHub ecosystem
-
-**Alternatives Considered:**
-- CircleCI: 2,500 credits/month free
-- GitLab CI: Good free tier but requires GitLab
-- Self-hosted: Maximum control but requires infrastructure
-
-## System Constraints and Limitations
-
-### Current Limitations
-1. **Execution Time**: 6 hours maximum per GitHub Actions job
-2. **File Storage**: 100MB per file for direct GitHub storage
-3. **Concurrent Jobs**: 20 maximum parallel jobs
-4. **Solver Licensing**: Commercial solvers require separate licensing
-
-### Scaling Solutions
-1. **Time Constraints**: Problem set partitioning, parallel execution, self-hosted runners
-2. **Storage Constraints**: External storage, problem URL referencing
-3. **Licensing**: Community solvers first, commercial solver support via external execution
-
-## Security and Compliance
-
-### Data Protection
-- No sensitive data in benchmark problems
-- Environment information anonymization options
-- Public result publishing with privacy controls
-
-### License Compliance
-- Open-source solver prioritization
-- Clear licensing documentation for all components
-- Commercial solver integration via user-provided licenses
-
-### Execution Security
-- Sandboxed execution environments
-- Input validation for problem files
-- Secure credential management for external services
-
-## Quality Assurance
-
-### Testing Strategy
-- Unit tests for each component
-- Integration tests for complete workflows
-- End-to-end tests including GitHub Actions
-- Performance regression testing
-
-### Monitoring and Alerting
-- Execution failure notifications
-- Performance degradation alerts
-- Resource usage monitoring
-- Automated issue creation for failures
-
-### Documentation Requirements
-- API documentation for extensibility
-- User guides for adding new solvers/problems
-- Deployment and maintenance documentation
-- Troubleshooting guides
+---
 
 ## Success Metrics
 
 ### Functional Metrics
-- Number of supported solvers
-- Number of benchmark problems
-- Execution success rate
-- Report generation reliability
+- **Solver Coverage**: Target 10+ open-source solvers across 4 problem types
+- **Execution Reliability**: 99%+ successful benchmark completion rate
+- **Data Quality**: Comprehensive validation with error detection
+- **Report Generation**: Automated HTML/JSON/CSV output
 
 ### Performance Metrics
-- Average execution time per problem
-- System throughput (problems/hour)
-- Resource utilization efficiency
-- Error recovery time
+- **Execution Speed**: <5 minutes for light problem sets
+- **System Throughput**: Efficient parallel solver execution
+- **Resource Utilization**: Optimal GitHub Actions usage
 
 ### Adoption Metrics
-- Number of users/viewers
-- Community contributions (new solvers/problems)
-- External citations/references
-- Feature requests and feedback
+- **Community Usage**: Active viewers and data consumers
+- **Research Impact**: Citations and academic references
+- **Contribution Rate**: Community-submitted problems and solvers
 
-## Future Roadmap
+---
 
-### Short-term (3-6 months)
-- Complete MVP implementation
-- Add Octave support
-- Implement external storage
-- Optimize GitHub Actions workflows
+## Quality Assurance
 
-### Medium-term (6-12 months)
-- Add MATLAB support
-- Implement advanced analytics
-- Support custom problem uploads
-- Add solver comparison tools
+### Testing Strategy
+- **Unit Tests**: Individual component validation
+- **Integration Tests**: Complete workflow testing
+- **End-to-End Tests**: GitHub Actions simulation
+- **Performance Regression**: Continuous performance monitoring
 
-### Long-term (1-2 years)
-- Multi-cloud deployment options
-- Real-time execution monitoring
-- API for external integrations
-- Community solver marketplace
+### Validation Framework
+- **Input Validation**: Problem file format verification
+- **Result Validation**: Solver output consistency checks
+- **Environment Validation**: System specification recording
+- **Configuration Validation**: YAML syntax and semantic validation
 
-This comprehensive requirements document provides the foundation for building a robust, scalable optimization solver benchmark system that can evolve from a simple MVP to a full-featured platform serving the optimization research community.
+---
+
+## Security & Compliance
+
+### Data Protection
+- **Public Data Only**: No sensitive information in benchmark problems
+- **Environment Anonymization**: Optional system information privacy
+- **Result Transparency**: Open publishing with privacy controls
+
+### License Compliance
+- **Open-Source First**: Prioritize freely available solvers
+- **Clear Documentation**: License information for all components
+- **Commercial Integration**: Support user-provided commercial licenses
+
+---
+
+## Future Vision
+
+### Long-term Goals (2-3 years)
+- **Leading Platform**: Recognized standard for optimization solver benchmarking
+- **Research Community**: 1000+ active users, 500+ contributed problems
+- **Academic Impact**: 100+ citations, integration with research workflows
+- **Industry Adoption**: Enterprise use cases and professional references
+
+### Technology Evolution
+- **Multi-language Support**: Python, Julia, MATLAB, C++ solver integration
+- **Advanced Analytics**: Machine learning for solver performance prediction
+- **Real-time Monitoring**: Live performance tracking and alerting
+- **Cloud Deployment**: Scalable infrastructure with global availability
+
+---
+
+## Project Values
+
+### Open Source Commitment
+- **Transparent Development**: Public development process
+- **Community-Driven**: User feedback shapes feature development
+- **Open Data**: All results publicly available for research
+- **Free Access**: Core functionality available without cost
+
+### Scientific Rigor
+- **Reproducible Results**: Consistent, repeatable benchmarking methodology
+- **Fair Comparison**: Unbiased evaluation using solver defaults
+- **Statistical Validity**: Proper performance analysis and reporting
+- **Documentation**: Comprehensive methodology and implementation details
+
+---
+
+*This basic design document establishes the high-level vision, principles, and roadmap for the optimization solver benchmark system. For detailed implementation specifications, see [detail_design.md](detail_design.md).*
+
+*Last Updated: December 2025*

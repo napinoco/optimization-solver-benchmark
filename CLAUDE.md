@@ -1,48 +1,83 @@
-# CLAUDE.md
+# CLAUDE.md - AI Development Context
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+> **⚠️ CRITICAL INSTRUCTION FOR LLM AGENTS:**  
+> **You MUST read the linked documentation below BEFORE starting any development work.**  
+> This file serves as a dispatching hub - the actual implementation details, coding standards, and development context are in the linked documents.
+
+---
 
 ## Project Overview
 
-This is an automated benchmark system for optimization solvers (SDP, SOCP, LP, QP) that runs on GitHub Actions, stores results in SQLite, and publishes reports via GitHub Pages.
+This is an automated benchmark system for optimization solvers (LP, QP, SOCP, SDP) that runs on GitHub Actions, stores results in SQLite, and publishes reports via GitHub Pages.
 
-## Architecture
+**Core Mission**: *"Regularly benchmark publicly available solvers and publish the results as data"*
 
-The system follows a modular architecture with these key components:
-- **Benchmark Runner**: Orchestrates solver execution across problems
-- **Solver Interface**: Abstraction layer for different solvers (Python/CVXPY, SciPy, Octave)
-- **Database Layer**: SQLite storage with structured schema for results
-- **Reporting System**: HTML generation with Jinja2 templates
-- **GitHub Actions**: Automated CI/CD for benchmark execution and deployment
+---
 
-## Key Directories Structure
+## 🔗 Essential Documentation Links
 
+### **REQUIRED READING** (Read these documents carefully before any development):
+
+1. **[📋 Basic Design](docs/development/basic_design.md)** - High-level concepts, project vision, and development roadmap
+2. **[🏗️ Detailed Design](docs/development/detail_design.md)** - Complete technical architecture and implementation specifications  
+3. **[📝 Development Conventions](docs/development/conventions.md)** - Coding standards, git protocols, and engineering guidelines
+4. **[✅ Current Tasks](docs/development/tasks.md)** - Active development tasks for current phase
+5. **[📚 Development History](docs/development/history.md)** - Complete record of completed development phases
+
+### **Quick Reference**:
+- **[🚀 Setup Guides](docs/guides/)** - Installation and configuration guides
+- **[📊 README.md](README.md)** - Project overview and quick start
+
+---
+
+## 🎯 Current Development Status
+
+**Phase**: Phase 2 Final Release Preparation  
+**Current Task**: Documentation restructuring and final polish  
+**Priority**: Complete remaining tasks before Phase 2 release
+
+**Key Achievement**: Successfully expanded from 2 to 8+ solvers with multi-backend CVXPY support, SOCP/SDP problem types, and comprehensive data publishing infrastructure.
+
+---
+
+## 🔧 Development Environment Context
+
+### Core Architecture
+- **Platform**: GitHub Actions CI/CD with GitHub Pages deployment
+- **Languages**: Python 3.12+, Octave (MATLAB-compatible)
+- **Storage**: SQLite database with structured schema
+- **Reporting**: Bootstrap 5 + Chart.js interactive dashboards
+
+### Key Directories
 ```
-├── config/                    # YAML configuration files
-│   ├── benchmark_config.yaml  # Benchmark execution settings
-│   ├── solvers.yaml           # Solver definitions and parameters
-│   └── environments.yaml      # Environment configurations
-├── scripts/
-│   ├── benchmark/             # Core benchmark execution engine
-│   ├── solvers/               # Solver-specific implementations
-│   │   ├── python/            # Python solvers (CVXPY, SciPy, Gurobi)
-│   │   └── octave/            # Octave/MATLAB-compatible solvers
-│   ├── database/              # Database models and operations
-│   ├── reporting/             # HTML/chart generation
-│   └── utils/                 # Configuration loading, logging, validation
-├── problems/                  # Benchmark problem files
-│   ├── light_set/             # Phase 1: Small problems for GitHub storage
-│   └── standard_set/          # Phase 2: References to external storage
-├── templates/                 # Jinja2 HTML templates
-├── database/                  # SQLite database files
-└── docs/                      # Generated static site for GitHub Pages
+├── config/          # YAML configuration files
+├── scripts/         # Core system implementation
+│   ├── benchmark/   # Benchmark execution engine
+│   ├── solvers/     # Solver implementations (Python, Octave)
+│   ├── database/    # Data models and storage
+│   └── reporting/   # HTML generation and data publishing
+├── problems/        # Benchmark problem files
+├── docs/           # Generated reports (GitHub Pages)
+└── requirements/   # Python dependencies
 ```
 
-## Development Commands
+### Current Solver Coverage
+```
+Problem Type | Solver Count | Backends
+LP          | 6            | SciPy + CLARABEL + SCS + ECOS + OSQP + (CVXPY default)
+QP          | 6            | SciPy + CLARABEL + SCS + ECOS + OSQP + (CVXPY default)
+SOCP        | 4            | CLARABEL + SCS + ECOS + OSQP
+SDP         | 2            | CLARABEL + SCS
+```
 
-Based on the task structure, the primary development workflow is:
+---
+
+## 🚀 Quick Development Commands
 
 ```bash
+# Validate environment and configuration
+python main.py --validate
+
 # Run complete benchmark and reporting
 python main.py --all
 
@@ -54,164 +89,95 @@ python main.py --report
 
 # Install dependencies
 pip install -r requirements/base.txt
-pip install -r requirements/python.txt  # For Python solvers
-pip install -r requirements/dev.txt     # For development
+pip install -r requirements/python.txt
 ```
-
-## Database Schema
-
-The system uses SQLite with these core tables:
-- `benchmarks`: Execution metadata (timestamp, environment_info)
-- `results`: Individual solver results (solve_time, status, objective_value)
-- `problems`: Problem metadata (name, class, file_path)
-- `solvers`: Solver information (name, version, environment)
-
-## Configuration System
-
-All configuration is YAML-based:
-- **benchmark_config.yaml**: Timeout, parallel execution settings
-- **solvers.yaml**: Solver definitions with installation and execution parameters
-- Problem registry files define available benchmark problems
-
-## Solver Integration
-
-New solvers implement the `SolverInterface` abstract base class:
-- Must return standardized `SolverResult` objects
-- Should handle timeouts and exceptions gracefully
-- Results include: solve_time, status, objective_value, duality_gap
-
-## Testing Strategy
-
-Each component should be independently testable:
-- Unit tests for individual modules
-- Integration tests for complete workflows
-- Manual testing steps provided in tasks.md
-- End-to-end testing before GitHub Actions deployment
-
-## GitHub Actions Workflow
-
-The system operates under GitHub Actions constraints:
-- 6-hour execution limit per job
-- Staged development approach (lightweight → full problem sets)
-- Artifact handling for database and report files
-- Automatic deployment to GitHub Pages
-
-## Development Phases
-
-The project follows a staged development approach:
-1. **Phase 1 (MVP)**: ✅ COMPLETED - Python solvers, lightweight problems, basic reporting (Tasks 1-20)
-2. **Phase 2**: 🚧 IN PROGRESS - Multi-backend CVXPY, SOCP/SDP support, advanced analytics (Tasks 21-35)
-   - ✅ Tasks 21-25: Multi-backend CVXPY support with SOCP and SDP implementation
-   - 🚧 Tasks 26-35: Problem classification, external storage, advanced analytics
-3. **Phase 3**: PLANNED - Octave support, external storage, advanced problem types
-4. **Phase 4**: PLANNED - Production features, cloud deployment, enterprise capabilities
-
-## Important Implementation Notes
-
-- **Minimal Configuration Principle**: Solver configurations use minimal parameters (primarily `verbose: false`) to ensure fair baseline comparison without optimization bias
-- Configuration is externalized to YAML files for easy modification
-- All database operations should be atomic and include proper error handling
-- System must gracefully handle solver failures without stopping execution
-- Results require validation (positive solve times, valid status codes)
-- Logging is structured with appropriate levels (DEBUG, INFO, WARNING, ERROR)
-- Problem files use standard formats (MPS for LP, QPS for QP, Python modules for SOCP/SDP)
-
-## CODING PROTOCOL
-
-### Task Development Workflow
-**Phase 1**: ✅ COMPLETED (docs/development/tasks.md → docs/development/PHASE1_HISTORY.md)
-**Phase 2**: Follow docs/development/PHASE2_TASKS.md sequentially, completing one task at a time:
-1. **Complete the task** following its specific requirements in docs/development/PHASE2_TASKS.md
-2. **Test the implementation** using the provided test criteria  
-3. **COMMIT THE CHANGES** immediately after successful completion
-4. **Stop and wait** for user approval before proceeding to next task
-
-### Coding Instructions
-- Write the absolute minimum code required
-- No sweeping changes
-- No unrelated edits - focus on just the task you're on
-- Make code precise, modular, testable
-- Don't break existing functionality
-- If I need to do anything (e.g. Supabase/AWS config), tell me clearly
-
-### Git Commit Protocol
-After each completed task:
-- Run `git status` and `git diff` to review changes
-- Add relevant files with `git add`
-- Create descriptive commit message following the pattern:
-  ```
-  Complete Task X: Brief description
-  
-  - Bullet points of what was implemented
-  - Key functionality added
-  - Any important technical details
-  
-  🤖 Generated with [Claude Code](https://claude.ai/code)
-  
-  Co-Authored-By: Claude <noreply@anthropic.com>
-  ```
 
 ---
 
-## 📘 Final Release Preparation Instructions
+## 🔄 Development Workflow
 
-This section outlines the final tasks to be completed before the first release of the phase2 branch. The instructions are divided into two main phases: **Task Structuring** and **Task Execution**.
+### **MANDATORY WORKFLOW** (Follow exactly):
+1. **Read Documentation**: Study [basic_design.md](docs/development/basic_design.md), [detail_design.md](docs/development/detail_design.md), and [conventions.md](docs/development/conventions.md)
+2. **Check Current Tasks**: Review [tasks.md](docs/development/tasks.md) for active development tasks
+3. **Follow Task Protocol**: Complete one task at a time following priority order
+4. **Test Implementation**: Validate using task-specific test criteria
+5. **Commit Changes**: Use established git commit protocol after user confirmation
 
-**📋 IMPORTANT**: The complete task breakdown with detailed implementation plans and test criteria is documented in **[FINAL_RELEASE_TASKS.md](docs/development/FINAL_RELEASE_TASKS.md)**. All developers and LLM agents must refer to this file for the specific task execution workflow.
+### Task-Based Development
+- **Sequential Execution**: Complete one task at a time
+- **Test-Driven Validation**: Each task includes specific test criteria  
+- **Documentation-First**: Update docs for all features
+- **User Review**: Stop and wait for approval after each task
 
-### 🔧 Phase 1: Task Decomposition
+---
 
-The following issues have been identified and must be converted into fine-grained, independently testable tasks:
+## 🎯 Design Philosophy
 
-#### Dependency and Package Management Issues
-- **QSQP Package Cleanup**: Remove all references to the non-existent `qsqp>=0.1.0` package from requirements and codebase (likely typo for `osqp`)
-- **Python Version Standardization**: Align Python versions between `octave_test.yml` and `benchmark.yml` workflows
-- **Workflow Consistency**: Design `octave_test.yml` with the same controllable arguments pattern as `benchmark.yml`
+### Fair Baseline Benchmarking
+- **Minimal Configuration**: Use solver defaults to avoid optimization bias
+- **Transparent Comparison**: Prevent parameter tuning favoring specific solvers
+- **Open Data**: Publish results as accessible JSON/CSV for research use
+- **Reproducible Results**: Standardized environments ensure consistency
 
-#### Configuration and Performance Issues  
-- **Parallel Jobs Assessment**: Evaluate if `parallel_jobs: 2` in `benchmark_config.yaml` causes resource contention; consider setting to `1` for fair comparison
-- **Ubuntu Version Specification**: Replace "Ubuntu Latest" with explicit Ubuntu version in system environment
-- **Timezone Information**: Add timezone data to recorded timestamps
+### Technical Principles
+- **Modular Design**: Independent solver/problem additions
+- **Configuration-Driven**: YAML-based management
+- **Error Resilience**: Continue despite individual failures
+- **Automated Operation**: GitHub Actions enables hands-off execution
 
-#### Reporting and Documentation Issues
-- **HTML Table Generation**: Create wide HTML table with problems (vertical) × solvers (horizontal), showing runtime/objective/dual gap per cell
-- **Statistical Reports Publishing**: Convert `statistical_analysis_report` and `performance_profiling_report` to HTML format
-- **Page Attribution**: Add author information (Naoki Ito, napinoco@gmail.com, https://napinoco.github.io) to all GitHub Pages
-- **File Organization**: Reorganize root Markdown files and align `CLAUDE.md`/`architecture.md` with current structure
-- **License Verification**: Confirm MIT license appropriateness for this benchmarking framework
+---
 
-#### CI/CD and Preview Features
-- **Preview Hosting**: Implement temporary hosting (Vercel/Surge/pages-preview) during CI for HTML preview before live deployment
+## ⚠️ Important Implementation Notes
 
-### ⚙️ Phase 2: Development Workflow
+- **Solver Configurations**: Use minimal parameters (primarily `verbose: false`) for fair comparison
+- **Database Operations**: Must be atomic with proper error handling
+- **Result Validation**: Positive solve times, valid status codes required
+- **Logging**: Structured with appropriate levels (DEBUG, INFO, WARNING, ERROR)
+- **Problem Formats**: MPS (LP), QPS (QP), Python modules (SOCP/SDP)
 
-1. **Read Architecture Documents**: Study `architecture.md` and `docs/development/basic_design.md` for complete understanding
-2. **Sequential Task Execution**: Complete one task at a time following the todo list
-3. **Review and Test Cycle**: After each task completion:
-   - Stop and wait for user review
-   - Test functionality thoroughly  
-   - Commit changes only after confirmation
-   - Proceed to next task
+---
 
-### 📋 Task Requirements
+## 🛠️ Extension Points
 
-Each task must be:
-- **Extremely small and focused**: Address a single specific concern
-- **Independently testable**: Can be verified in isolation
-- **Clear boundaries**: Defined start and end conditions
-- **Non-breaking**: Maintain existing functionality while adding improvements
+### Adding New Solvers
+1. Implement `SolverInterface` abstract base class
+2. Add configuration to `config/solvers.yaml`
+3. Add dependencies to appropriate requirements file
+4. Test with validation framework
 
-### 🔄 Commit Protocol for Final Tasks
+### Adding New Problems
+1. Place files in appropriate `problems/*/type/` directory
+2. Update `problems/problem_registry.yaml`
+3. Validate with `python main.py --validate`
 
-Follow the established commit message format:
-```
-Fix Issue: Brief description
+---
 
-- Specific changes made
-- Files modified
-- Impact on system functionality
+## 📋 For LLM Agents: Pre-Development Checklist
 
-🤖 Generated with [Claude Code](https://claude.ai/code)
+**BEFORE starting any coding task, confirm you have:**
 
-Co-Authored-By: Claude <noreply@anthropic.com>
-```
+- [ ] Read [basic_design.md](docs/development/basic_design.md) for project vision and goals
+- [ ] Read [detail_design.md](docs/development/detail_design.md) for technical architecture
+- [ ] Read [conventions.md](docs/development/conventions.md) for coding standards and protocols
+- [ ] Reviewed [tasks.md](docs/development/tasks.md) for current development context
+- [ ] Understood the fair benchmarking philosophy and minimal configuration approach
+- [ ] Familiarized yourself with the modular architecture and extension points
+
+**Failure to read these documents will result in implementation that doesn't align with project standards and philosophy.**
+
+---
+
+## 🤝 Integration Context
+
+This system prioritizes:
+- **Fair, unbiased solver comparison** through minimal configuration
+- **Open data publishing** for research community use  
+- **Transparent methodologies** with comprehensive documentation
+- **Modular extension** for community contributions
+- **Production reliability** with comprehensive testing
+
+---
+
+*This dispatch document provides entry point context only. All implementation details, coding standards, and development protocols are documented in the linked files above.*
+
+*Last Updated: December 2025*
