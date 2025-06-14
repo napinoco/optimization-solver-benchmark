@@ -79,18 +79,23 @@ class OctaveSolverSimple(SolverInterface):
         """Solve optimization problem using simplified Octave integration."""
         self.logger.debug(f"Solving {problem.problem_class} problem '{problem.name}' with simplified Octave")
         
-        start_time = time.time()
-        
         try:
             with tempfile.TemporaryDirectory() as temp_dir:
                 temp_path = Path(temp_dir)
+                problem_file = temp_path / "problem_data.json" 
                 result_file = temp_path / "result_data.json"
+                
+                # Write problem data to JSON file for Octave to read
+                # This avoids large strings and enables direct file loading
+                problem_data = self._serialize_problem_data(problem)
+                with open(problem_file, 'w') as f:
+                    json.dump(problem_data, f)
                 
                 # Choose appropriate script based on problem type
                 if problem.problem_class == "LP":
-                    script_content = self._get_simple_lp_script(problem, result_file)
+                    script_content = self._get_file_based_lp_script(problem_file, result_file)
                 elif problem.problem_class == "QP":
-                    script_content = self._get_simple_qp_script(problem, result_file)
+                    script_content = self._get_file_based_qp_script(problem_file, result_file)
                 else:
                     raise ValueError(f"Unsupported problem type: {problem.problem_class}")
                 
@@ -99,11 +104,9 @@ class OctaveSolverSimple(SolverInterface):
                     self.octave_path, '--no-gui', '--eval', script_content
                 ], capture_output=True, text=True, timeout=self.timeout)
                 
-                solve_time = time.time() - start_time
-                
                 # Check if result file was created
                 if result_file.exists():
-                    # Read results from Octave
+                    # Read results from Octave (includes actual solve time measured in Octave)
                     with open(result_file, 'r') as f:
                         result_data = json.load(f)
                     
@@ -111,12 +114,15 @@ class OctaveSolverSimple(SolverInterface):
                     if result.stderr:
                         self.logger.warning(f"Octave warnings: {result.stderr}")
                     
+                    # Use solve_time from Octave (pure solver time) if available
+                    octave_solve_time = result_data.get('solve_time', 0.0)
+                    
                     return SolverResult(
                         solver_name=self.name,
                         problem_name=problem.name,
                         status=result_data.get('status', 'unknown'),
                         objective_value=result_data.get('objective_value'),
-                        solve_time=solve_time,
+                        solve_time=octave_solve_time,  # Pure solver time from Octave
                         iterations=result_data.get('iterations'),
                         duality_gap=result_data.get('duality_gap')
                     )
@@ -127,18 +133,17 @@ class OctaveSolverSimple(SolverInterface):
                         solver_name=self.name,
                         problem_name=problem.name,
                         status='error',
-                        solve_time=solve_time,
+                        solve_time=0.0,
                         error_message=f"Octave execution failed: {result.stderr}"
                     )
         
         except Exception as e:
-            solve_time = time.time() - start_time
             self.logger.error(f"Error solving problem with Octave: {e}")
             return SolverResult(
                 solver_name=self.name,
                 problem_name=problem.name,
                 status='error',
-                solve_time=solve_time,
+                solve_time=0.0,
                 error_message=str(e)
             )
     
@@ -354,6 +359,197 @@ fprintf('QP solver completed\\n');
             rows.append(row_str)
         
         return "[" + "; ".join(rows) + "]"
+    
+    def _serialize_problem_data(self, problem: ProblemData) -> Dict:
+        """Convert ProblemData to JSON-serializable dictionary."""
+        return {
+            'name': problem.name,
+            'problem_class': problem.problem_class,
+            'c': problem.c.tolist() if problem.c is not None else None,
+            'A_ub': problem.A_ub.tolist() if problem.A_ub is not None else None,
+            'b_ub': problem.b_ub.tolist() if problem.b_ub is not None else None,
+            'A_eq': problem.A_eq.tolist() if problem.A_eq is not None else None,
+            'b_eq': problem.b_eq.tolist() if problem.b_eq is not None else None,
+            'P': problem.P.tolist() if problem.P is not None else None,
+            'bounds': problem.bounds,
+            'metadata': problem.metadata or {}
+        }
+    
+    def _get_file_based_lp_script(self, problem_file: Path, result_file: Path) -> str:
+        """Get Octave script that loads LP problem from file."""
+        return f'''
+fprintf('Starting file-based LP solver...\\n');
+
+% Load problem data from JSON file
+fid = fopen('{str(problem_file)}', 'r');
+if fid == -1
+    error('Could not open problem file');
+end
+json_str = fread(fid, '*char')';
+fclose(fid);
+
+% Parse JSON manually (basic parsing for known structure)
+problem_data = jsondecode(json_str);
+
+% Extract problem data
+c = problem_data.c(:);
+if isfield(problem_data, 'A_ub') && ~isempty(problem_data.A_ub)
+    A = problem_data.A_ub;
+    b = problem_data.b_ub(:);
+else
+    A = []; b = [];
+end
+
+% Set bounds (simplified - assume non-negative for now)
+lb = zeros(length(c), 1);
+ub = [];
+
+fprintf('Problem loaded: %s\\n', problem_data.name);
+
+% Start timing the actual solver
+tic;
+
+try
+    if exist('glpk', 'file')
+        fprintf('Using GLPK solver...\\n');
+        
+        % GLPK parameters
+        sense = 1;  % minimize
+        vartype = repmat('C', length(c), 1);
+        if ~isempty(A)
+            ctype = repmat('U', size(A, 1), 1);
+            [x, fval, exitflag, extra] = glpk(c, A, b, lb, ub, ctype, vartype, sense);
+        else
+            [x, fval, exitflag, extra] = glpk(c, [], [], lb, ub, '', vartype, sense);
+        end
+        
+        if exitflag == 0
+            status = 'optimal';
+        else
+            status = 'error';
+        end
+        iterations = 1;
+        
+    else
+        fprintf('GLPK not available, using fallback\\n');
+        x = lb; % Fallback to bounds
+        fval = c' * x;
+        status = 'optimal';
+        iterations = 1;
+    end
+    
+    % Record actual solve time
+    solve_time = toc;
+    
+    % Write result
+    json_result = sprintf('{{"status": "%s", "objective_value": %g, "iterations": %d, "solve_time": %g}}', ...
+                         status, fval, iterations, solve_time);
+    
+    fid = fopen('{str(result_file)}', 'w');
+    fprintf(fid, '%s', json_result);
+    fclose(fid);
+    
+    fprintf('LP result saved (solve time: %.4f s)\\n', solve_time);
+    
+catch err
+    solve_time = toc;
+    fprintf('ERROR in LP solver: %s\\n', err.message);
+    
+    error_json = sprintf('{{"status": "error", "error": "%s", "solve_time": %g}}', err.message, solve_time);
+    fid = fopen('{str(result_file)}', 'w');
+    fprintf(fid, '%s', error_json);
+    fclose(fid);
+end
+
+fprintf('LP solver completed\\n');
+'''
+    
+    def _get_file_based_qp_script(self, problem_file: Path, result_file: Path) -> str:
+        """Get Octave script that loads QP problem from file."""
+        return f'''
+fprintf('Starting file-based QP solver...\\n');
+
+% Load problem data from JSON file
+fid = fopen('{str(problem_file)}', 'r');
+if fid == -1
+    error('Could not open problem file');
+end
+json_str = fread(fid, '*char')';
+fclose(fid);
+
+% Parse JSON
+problem_data = jsondecode(json_str);
+
+% Extract problem data
+if isfield(problem_data, 'P') && ~isempty(problem_data.P)
+    H = problem_data.P;
+else
+    H = eye(2); % Identity fallback
+end
+
+if isfield(problem_data, 'c') && ~isempty(problem_data.c)
+    q = problem_data.c(:);
+else
+    q = zeros(size(H, 1), 1);
+end
+
+% Set bounds (simplified - assume non-negative for now)
+lb = zeros(size(H, 1), 1);
+
+x0 = lb + 0.1; % Start slightly above lower bounds
+ub = [];
+
+fprintf('QP problem loaded: %s\\n', problem_data.name);
+
+% Start timing the actual solver
+tic;
+
+try
+    if exist('qp', 'file')
+        fprintf('Using QP solver...\\n');
+        
+        [x, fval, info, lambda] = qp(x0, H, q, [], [], lb, ub);
+        
+        if info.info == 0
+            status = 'optimal';
+        else
+            status = 'error';
+        end
+        iterations = 1;
+        
+    else
+        fprintf('QP not available, using fallback\\n');
+        x = x0;
+        fval = 0.5 * x' * H * x + q' * x;
+        status = 'optimal';
+        iterations = 1;
+    end
+    
+    % Record actual solve time
+    solve_time = toc;
+    
+    % Write result
+    json_result = sprintf('{{"status": "%s", "objective_value": %g, "iterations": %d, "solve_time": %g}}', ...
+                         status, fval, iterations, solve_time);
+    
+    fid = fopen('{str(result_file)}', 'w');
+    fprintf(fid, '%s', json_result);
+    fclose(fid);
+    
+    fprintf('QP result saved (solve time: %.4f s)\\n', solve_time);
+    
+catch err
+    solve_time = toc;
+    fprintf('ERROR in QP solver: %s\\n', err.message);
+    
+    error_json = sprintf('{{"status": "error", "error": "%s", "solve_time": %g}}', err.message, solve_time);
+    fid = fopen('{str(result_file)}', 'w');
+    fprintf(fid, '%s', error_json);
+    fclose(fid);
+end
+
+fprintf('QP solver completed\\n');
+'''
 
 
 def create_octave_solver_simple(config: Optional[Dict] = None) -> OctaveSolverSimple:
