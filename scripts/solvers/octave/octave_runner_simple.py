@@ -95,7 +95,8 @@ class OctaveSolverSimple(SolverInterface):
                 if problem.problem_class == "LP":
                     script_content = self._get_file_based_lp_script(problem_file, result_file)
                 elif problem.problem_class == "QP":
-                    script_content = self._get_file_based_qp_script(problem_file, result_file)
+                    # QP support disabled - focus on GLPK LP solver only
+                    raise ValueError(f"QP problems not supported by Octave solver (use GLPK LP only)")
                 else:
                     raise ValueError(f"Unsupported problem type: {problem.problem_class}")
                 
@@ -388,8 +389,101 @@ end
 json_str = fread(fid, '*char')';
 fclose(fid);
 
-% Parse JSON manually (basic parsing for known structure)
-problem_data = jsondecode(json_str);
+% Parse JSON with compatibility for older Octave versions
+try
+    if exist('jsondecode', 'file')
+        problem_data = jsondecode(json_str);
+    else
+        % Simple JSON parsing for older Octave versions using string operations
+        fprintf('jsondecode not available, using simple string parsing\\n');
+        
+        % Initialize problem_data struct
+        problem_data = struct();
+        
+        % Extract name using simple string operations
+        name_start = strfind(json_str, '"name": "');
+        if ~isempty(name_start)
+            name_start = name_start(1) + 9;  % After '"name": "'
+            name_end = strfind(json_str(name_start:end), '"');
+            if ~isempty(name_end)
+                problem_data.name = json_str(name_start:name_start + name_end(1) - 2);
+            end
+        end
+        
+        % Extract c vector
+        c_start = strfind(json_str, '"c": [');
+        if ~isempty(c_start)
+            c_start = c_start(1) + 6;  % After '"c": ['
+            c_end = strfind(json_str(c_start:end), ']');
+            if ~isempty(c_end)
+                c_str = json_str(c_start:c_start + c_end(1) - 2);
+                problem_data.c = str2num(['[' c_str ']']);
+            end
+        end
+        
+        % Extract A_ub matrix (single row format)
+        A_ub_start = strfind(json_str, '"A_ub": [[');
+        if ~isempty(A_ub_start)
+            A_ub_start = A_ub_start(1) + 10;  % After '"A_ub": [['
+            A_ub_end = strfind(json_str(A_ub_start:end), ']]');
+            if ~isempty(A_ub_end)
+                A_str = json_str(A_ub_start:A_ub_start + A_ub_end(1) - 2);
+                problem_data.A_ub = str2num(['[' A_str ']']);
+            end
+        end
+        
+        % Extract b_ub vector
+        b_ub_start = strfind(json_str, '"b_ub": [');
+        if ~isempty(b_ub_start)
+            b_ub_start = b_ub_start(1) + 9;  % After '"b_ub": ['
+            b_ub_end = strfind(json_str(b_ub_start:end), ']');
+            if ~isempty(b_ub_end)
+                b_str = json_str(b_ub_start:b_ub_start + b_ub_end(1) - 2);
+                problem_data.b_ub = str2num(['[' b_str ']']);
+            end
+        end
+        
+        % Extract A_eq matrix if present (handle whitespace and newlines)
+        A_eq_start = strfind(json_str, '"A_eq":');
+        if ~isempty(A_eq_start)
+            % Find the opening bracket after "A_eq":
+            search_start = A_eq_start(1) + 7;  % After '"A_eq":'
+            bracket_start = strfind(json_str(search_start:end), '[[');
+            if ~isempty(bracket_start)
+                bracket_start = search_start + bracket_start(1) + 1;  % After '[['
+                bracket_end = strfind(json_str(bracket_start:end), ']]');
+                if ~isempty(bracket_end)
+                    A_eq_str = json_str(bracket_start:bracket_start + bracket_end(1) - 2);
+                    % Remove whitespace and newlines
+                    A_eq_str = strrep(A_eq_str, sprintf('\\n'), '');
+                    A_eq_str = strrep(A_eq_str, ' ', '');
+                    problem_data.A_eq = str2num(['[' A_eq_str ']']);
+                end
+            end
+        end
+        
+        % Extract b_eq vector if present (handle whitespace)
+        b_eq_start = strfind(json_str, '"b_eq":');
+        if ~isempty(b_eq_start)
+            % Find the opening bracket after "b_eq":
+            search_start = b_eq_start(1) + 7;  % After '"b_eq":'
+            bracket_start = strfind(json_str(search_start:end), '[');
+            if ~isempty(bracket_start)
+                bracket_start = search_start + bracket_start(1);  % After '['
+                bracket_end = strfind(json_str(bracket_start:end), ']');
+                if ~isempty(bracket_end)
+                    b_eq_str = json_str(bracket_start:bracket_start + bracket_end(1) - 2);
+                    % Remove whitespace and newlines
+                    b_eq_str = strrep(b_eq_str, sprintf('\\n'), '');
+                    b_eq_str = strrep(b_eq_str, ' ', '');
+                    problem_data.b_eq = str2num(['[' b_eq_str ']']);
+                end
+            end
+        end
+    end
+catch parse_err
+    error(['Failed to parse problem data: ' parse_err.message]);
+end
 
 % Extract problem data
 c = problem_data.c(:);
@@ -477,8 +571,119 @@ end
 json_str = fread(fid, '*char')';
 fclose(fid);
 
-% Parse JSON
-problem_data = jsondecode(json_str);
+% Parse JSON with compatibility for older Octave versions
+try
+    if exist('jsondecode', 'file')
+        problem_data = jsondecode(json_str);
+    else
+        % Simple JSON parsing for older Octave versions using string operations
+        fprintf('jsondecode not available, using simple string parsing\\n');
+        
+        % Initialize problem_data struct
+        problem_data = struct();
+        
+        % Extract name using simple string operations
+        name_start = strfind(json_str, '"name": "');
+        if ~isempty(name_start)
+            name_start = name_start(1) + 9;  % After '"name": "'
+            name_end = strfind(json_str(name_start:end), '"');
+            if ~isempty(name_end)
+                problem_data.name = json_str(name_start:name_start + name_end(1) - 2);
+            end
+        end
+        
+        % Extract P matrix (quadratic matrix) - handle 2x2 matrix format
+        P_start = strfind(json_str, '"P": [[');
+        if ~isempty(P_start)
+            P_start = P_start(1) + 7;  % After '"P": [['
+            % Find the end of the matrix (closing ]]
+            P_end = strfind(json_str(P_start:end), ']]');
+            if ~isempty(P_end)
+                P_str = json_str(P_start:P_start + P_end(1) - 2);
+                % Convert [[1.0, 0.0], [0.0, 1.0]] format to Octave matrix
+                % Replace ], [ with ; to separate rows
+                P_str = strrep(P_str, '], [', '; ');
+                % Remove remaining brackets
+                P_str = strrep(P_str, '[', '');
+                P_str = strrep(P_str, ']', '');
+                problem_data.P = str2num(['[' P_str ']']);
+            end
+        end
+        
+        % Extract c vector
+        c_start = strfind(json_str, '"c": [');
+        if ~isempty(c_start)
+            c_start = c_start(1) + 6;  % After '"c": ['
+            c_end = strfind(json_str(c_start:end), ']');
+            if ~isempty(c_end)
+                c_str = json_str(c_start:c_start + c_end(1) - 2);
+                problem_data.c = str2num(['[' c_str ']']);
+            end
+        end
+        
+        % Extract A_eq matrix if present (handle whitespace and newlines)
+        A_eq_start = strfind(json_str, '"A_eq":');
+        if ~isempty(A_eq_start)
+            % Find the opening bracket after "A_eq":
+            search_start = A_eq_start(1) + 7;  % After '"A_eq":'
+            bracket_start = strfind(json_str(search_start:end), '[[');
+            if ~isempty(bracket_start)
+                bracket_start = search_start + bracket_start(1) + 1;  % After '[['
+                bracket_end = strfind(json_str(bracket_start:end), ']]');
+                if ~isempty(bracket_end)
+                    A_eq_str = json_str(bracket_start:bracket_start + bracket_end(1) - 2);
+                    % Remove whitespace and newlines
+                    A_eq_str = strrep(A_eq_str, sprintf('\\n'), '');
+                    A_eq_str = strrep(A_eq_str, ' ', '');
+                    problem_data.A_eq = str2num(['[' A_eq_str ']']);
+                end
+            end
+        end
+        
+        % Extract b_eq vector if present (handle whitespace)
+        b_eq_start = strfind(json_str, '"b_eq":');
+        if ~isempty(b_eq_start)
+            % Find the opening bracket after "b_eq":
+            search_start = b_eq_start(1) + 7;  % After '"b_eq":'
+            bracket_start = strfind(json_str(search_start:end), '[');
+            if ~isempty(bracket_start)
+                bracket_start = search_start + bracket_start(1);  % After '['
+                bracket_end = strfind(json_str(bracket_start:end), ']');
+                if ~isempty(bracket_end)
+                    b_eq_str = json_str(bracket_start:bracket_start + bracket_end(1) - 2);
+                    % Remove whitespace and newlines
+                    b_eq_str = strrep(b_eq_str, sprintf('\\n'), '');
+                    b_eq_str = strrep(b_eq_str, ' ', '');
+                    problem_data.b_eq = str2num(['[' b_eq_str ']']);
+                end
+            end
+        end
+        
+        % Extract A_ub matrix if present  
+        A_ub_start = strfind(json_str, '"A_ub": [[');
+        if ~isempty(A_ub_start)
+            A_ub_start = A_ub_start(1) + 10;  % After '"A_ub": [['
+            A_ub_end = strfind(json_str(A_ub_start:end), ']]');
+            if ~isempty(A_ub_end)
+                A_str = json_str(A_ub_start:A_ub_start + A_ub_end(1) - 2);
+                problem_data.A_ub = str2num(['[' A_str ']']);
+            end
+        end
+        
+        % Extract b_ub vector if present
+        b_ub_start = strfind(json_str, '"b_ub": [');
+        if ~isempty(b_ub_start)
+            b_ub_start = b_ub_start(1) + 9;  % After '"b_ub": ['
+            b_ub_end = strfind(json_str(b_ub_start:end), ']');
+            if ~isempty(b_ub_end)
+                b_str = json_str(b_ub_start:b_ub_start + b_ub_end(1) - 2);
+                problem_data.b_ub = str2num(['[' b_str ']']);
+            end
+        end
+    end
+catch parse_err
+    error(['Failed to parse problem data: ' parse_err.message]);
+end
 
 % Extract problem data
 if isfield(problem_data, 'P') && ~isempty(problem_data.P)
@@ -508,7 +713,8 @@ try
     if exist('qp', 'file')
         fprintf('Using QP solver...\\n');
         
-        [x, fval, info, lambda] = qp(x0, H, q, [], [], lb, ub);
+        % QP support is disabled - this code should not be reached
+        error('QP support is disabled in this version');
         
         if info.info == 0
             status = 'optimal';
