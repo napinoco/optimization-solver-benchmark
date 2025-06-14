@@ -1,6 +1,6 @@
 {
   "metadata": {
-    "generated_at": "2025-06-11T20:13:59.765799",
+    "generated_at": "2025-06-13T23:32:34.667994",
     "format_version": "1.0",
     "description": "Summary statistics and solver comparison"
   },
@@ -20,7 +20,7 @@
       "QP": 23,
       "Unknown": 11
     },
-    "last_updated": "2025-06-11T20:13:59.766059"
+    "last_updated": "2025-06-13T23:32:34.668258"
   },
   "solver_comparison": {
     "solvers": [
