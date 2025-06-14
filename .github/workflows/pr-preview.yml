@@ -95,6 +95,14 @@ jobs:
                 <a href="https://github.com/${{ github.repository }}/pull/${{ github.event.number }}">View Pull Request →</a>\
             </div>' {} \;
         
+        # Verify index.html exists in docs directory
+        if [ ! -f "docs/index.html" ]; then
+          echo "Warning: No index.html found in docs directory"
+          ls -la docs/
+        else
+          echo "✅ index.html found in docs directory"
+        fi
+        
     - name: Create preview metadata
       if: github.event.action != 'closed'
       run: |
@@ -119,6 +127,16 @@ jobs:
         console.log('Preview Info:', $(cat docs/preview-info.json));
         </script>
         EOF
+        
+    - name: Debug deployment contents
+      if: github.event.action != 'closed'
+      run: |
+        echo "📁 Contents of docs directory before deployment:"
+        find docs -type f -name "*.html" | head -10
+        echo "📊 Total HTML files: $(find docs -name "*.html" | wc -l)"
+        echo "📄 Main index.html exists: $(test -f docs/index.html && echo "✅ YES" || echo "❌ NO")"
+        echo ""
+        echo "💡 Note: If PR preview shows 404, check that GitHub Pages is set to 'Deploy from a branch' (gh-pages)"
         
     - name: Deploy PR preview
       if: github.event.action != 'closed'
