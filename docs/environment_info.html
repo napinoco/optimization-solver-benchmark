@@ -3,617 +3,149 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Environment Information - Optimization Solver Benchmark</title>
-    
-    <!-- Bootstrap CSS for responsive design -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    
-    <!-- Chart.js for visualizations -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    
-    <!-- Custom CSS -->
-    <style>
-        .navbar-brand {
-            font-weight: bold;
-        }
-        
-        .metric-card {
-            transition: transform 0.2s;
-        }
-        
-        .metric-card:hover {
-            transform: translateY(-2px);
-        }
-        
-        .result-table {
-            font-size: 0.9rem;
-        }
-        
-        .status-optimal {
-            color: #28a745;
-            font-weight: bold;
-        }
-        
-        .status-error {
-            color: #dc3545;
-            font-weight: bold;
-        }
-        
-        .status-timeout {
-            color: #ffc107;
-            font-weight: bold;
-        }
-        
-        .status-infeasible {
-            color: #6c757d;
-            font-weight: bold;
-        }
-        
-        .solver-comparison {
-            margin-top: 2rem;
-        }
-        
-        .chart-container {
-            position: relative;
-            height: 400px;
-            margin: 2rem 0;
-        }
-        
-        .performance-badge {
-            font-size: 0.8rem;
-        }
-        
-        .footer {
-            margin-top: 3rem;
-            padding: 2rem 0;
-            background-color: #f8f9fa;
-            border-top: 1px solid #e9ecef;
-        }
-        
-        .timestamp {
-            color: #6c757d;
-            font-size: 0.85rem;
-        }
-        
-        .problem-info {
-            background-color: #f8f9fa;
-            border-left: 4px solid #007bff;
-        }
-        
-        .solver-info {
-            background-color: #e8f4f8;
-            border-left: 4px solid #17a2b8;
-        }
-    </style>
-    
-    
+    <title>Environment Info - Optimization Benchmark</title>
+    <link rel="stylesheet" href="assets/css/style.css">
 </head>
 <body>
-    <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-        <div class="container">
-            <a class="navbar-brand" href="#">
-                <i class="fas fa-chart-bar me-2"></i>
-                Optimization Solver Benchmark
-            </a>
-            
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">
-                            <i class="fas fa-home me-1"></i>Dashboard
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">
-                            <i class="fas fa-balance-scale me-1"></i>Solver Comparison
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">
-                            <i class="fas fa-puzzle-piece me-1"></i>Problem Analysis
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">
-                            <i class="fas fa-info-circle me-1"></i>Environment
-                        </a>
-                    </li>
-                </ul>
-            </div>
-        </div>
+    <header>
+        <h1>🖥️ Environment Information</h1>
+        <p>Technical details about the benchmark execution environment</p>
+    </header>
+    
+    <nav>
+        <a href="index.html">Overview</a>
+        <a href="solver_comparison.html">Solver Comparison</a>
+        <a href="problem_analysis.html">Problem Analysis</a>
+        <a href="results_matrix.html">Results Matrix</a>
+        <a href="statistical_analysis.html">Statistical Analysis</a>
+        <a href="performance_profiling.html">Performance Profiling</a>
+        <a href="environment_info.html">Environment Info</a>
+        <a href="data/">Raw Data</a>
     </nav>
-
-    <!-- Main Content -->
-    <main class="container mt-4">
-        
-<nav aria-label="breadcrumb">
-    <ol class="breadcrumb">
-        <li class="breadcrumb-item"><a href="#">Dashboard</a></li>
-        <li class="breadcrumb-item active">Environment Information</li>
-    </ol>
-</nav>
-
-        
-        
-        <!-- Alert messages can be added here -->
-        
-        
-        
-<div class="row mb-4">
-    <div class="col-12">
-        <h2>
-            <i class="fas fa-desktop me-2"></i>Environment Information
-        </h2>
-        <p class="text-muted">System specifications and environment details for benchmark execution.</p>
-    </div>
-</div>
-
-<!-- System Overview -->
-
-<div class="row mb-4">
-    <div class="col-md-6">
-        <div class="card problem-info h-100">
-            <div class="card-header">
-                <h5 class="card-title mb-0">
-                    <i class="fas fa-computer me-2"></i>System Information
-                </h5>
-            </div>
-            <div class="card-body">
-                <dl class="row mb-0">
-                    <dt class="col-sm-4">Operating System:</dt>
-                    <dd class="col-sm-8">
-                        Darwin
-                        
-                            23.5.0
-                        
-                    </dd>
-                    
-                    <dt class="col-sm-4">Architecture:</dt>
-                    <dd class="col-sm-8">arm64</dd>
-                    
-                    <dt class="col-sm-4">Platform:</dt>
-                    <dd class="col-sm-8">macOS-14.5-arm64-arm-64bit</dd>
-                    
-                    <dt class="col-sm-4">Hostname:</dt>
-                    <dd class="col-sm-8"></dd>
-                </dl>
-            </div>
-        </div>
-    </div>
     
-    <div class="col-md-6">
-        <div class="card solver-info h-100">
-            <div class="card-header">
-                <h5 class="card-title mb-0">
-                    <i class="fas fa-microchip me-2"></i>Hardware Specifications
-                </h5>
-            </div>
-            <div class="card-body">
-                <dl class="row mb-0">
-                    <dt class="col-sm-4">CPU Cores:</dt>
-                    <dd class="col-sm-8">
-                        8
-                        
-                    </dd>
-                    
-                    <dt class="col-sm-4">CPU Frequency:</dt>
-                    <dd class="col-sm-8">
-                        
-                            Unknown
-                        
-                    </dd>
-                    
-                    <dt class="col-sm-4">Total Memory:</dt>
-                    <dd class="col-sm-8">
-                        
-                            24.0 GB
-                        
-                    </dd>
-                    
-                    <dt class="col-sm-4">Available Memory:</dt>
-                    <dd class="col-sm-8">
-                        
-                            8.9 GB
-                            (37.0%)
-                        
-                    </dd>
-                </dl>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Python Environment -->
-<div class="row mb-4">
-    <div class="col-md-6">
-        <div class="card">
-            <div class="card-header">
-                <h5 class="card-title mb-0">
-                    <i class="fab fa-python me-2"></i>Python Environment
-                </h5>
-            </div>
-            <div class="card-body">
-                <dl class="row mb-0">
-                    <dt class="col-sm-4">Python Version:</dt>
-                    <dd class="col-sm-8">3.12.2</dd>
-                    
-                    <dt class="col-sm-4">Implementation:</dt>
-                    <dd class="col-sm-8">CPython</dd>
-                    
-                    <dt class="col-sm-4">Executable:</dt>
-                    <dd class="col-sm-8">
-                        <small class="text-muted">/Users/naoki/PycharmProjects/optimization-solver-benchmark/venv/bin/python</small>
-                    </dd>
-                    
-                    <dt class="col-sm-4">Virtual Env:</dt>
-                    <dd class="col-sm-8">
-                        
-                            <span class="badge bg-warning">None</span>
-                        
-                    </dd>
-                </dl>
-            </div>
-        </div>
-    </div>
-    
-    <div class="col-md-6">
-        <div class="card">
-            <div class="card-header">
-                <h5 class="card-title mb-0">
-                    <i class="fas fa-cogs me-2"></i>Solver Libraries
-                </h5>
-            </div>
-            <div class="card-body">
-                
-                <p class="text-muted mb-0">No package information available</p>
-                
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Performance Metrics -->
-<div class="row mb-4">
-    <div class="col-12">
-        <div class="card">
-            <div class="card-header">
-                <h5 class="card-title mb-0">
-                    <i class="fas fa-tachometer-alt me-2"></i>System Performance Metrics
-                </h5>
-            </div>
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-md-3">
-                        <div class="card border-light">
-                            <div class="card-body text-center">
-                                <h6 class="card-title text-primary">CPU Usage</h6>
-                                
-                                <h4 class="text-muted">N/A</h4>
-                                
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="col-md-3">
-                        <div class="card border-light">
-                            <div class="card-body text-center">
-                                <h6 class="card-title text-success">Memory Usage</h6>
-                                
-                                <h4 class="text-muted">N/A</h4>
-                                
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="col-md-3">
-                        <div class="card border-light">
-                            <div class="card-body text-center">
-                                <h6 class="card-title text-warning">Load Average</h6>
-                                
-                                <h4 class="text-muted">N/A</h4>
-                                
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="col-md-3">
-                        <div class="card border-light">
-                            <div class="card-body text-center">
-                                <h6 class="card-title text-info">Disk Usage</h6>
-                                
-                                <h4 class="text-muted">N/A</h4>
-                                
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Benchmark History -->
-
-<div class="row mb-4">
-    <div class="col-12">
-        <div class="card">
-            <div class="card-header">
-                <h5 class="card-title mb-0">
-                    <i class="fas fa-history me-2"></i>Recent Benchmark Sessions
-                </h5>
-            </div>
-            <div class="card-body">
-                <div class="table-responsive">
-                    <table class="table table-striped">
-                        <thead class="table-dark">
-                            <tr>
-                                <th>Session ID</th>
-                                <th>Timestamp</th>
-                                <th>Total Results</th>
-                                <th>Duration</th>
-                                <th>Environment</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            
-                            <tr>
-                                <td><strong>9</strong></td>
-                                <td class="timestamp">2025-06-11T01:05:13.032779</td>
-                                <td>4</td>
-                                <td>N/A</td>
-                                <td>
-                                    <small class="text-muted">
-                                        Python benchmark session
-                                    </small>
-                                </td>
-                            </tr>
-                            
-                            <tr>
-                                <td><strong>8</strong></td>
-                                <td class="timestamp">2025-06-11T01:05:13.019776</td>
-                                <td>2</td>
-                                <td>N/A</td>
-                                <td>
-                                    <small class="text-muted">
-                                        Python benchmark session
-                                    </small>
-                                </td>
-                            </tr>
-                            
-                            <tr>
-                                <td><strong>7</strong></td>
-                                <td class="timestamp">2025-06-11T01:05:12.995163</td>
-                                <td>2</td>
-                                <td>N/A</td>
-                                <td>
-                                    <small class="text-muted">
-                                        Python benchmark session
-                                    </small>
-                                </td>
-                            </tr>
-                            
-                            <tr>
-                                <td><strong>6</strong></td>
-                                <td class="timestamp">2025-06-11T01:05:12.983147</td>
-                                <td>1</td>
-                                <td>N/A</td>
-                                <td>
-                                    <small class="text-muted">
-                                        Python benchmark session
-                                    </small>
-                                </td>
-                            </tr>
-                            
-                            <tr>
-                                <td><strong>5</strong></td>
-                                <td class="timestamp">2025-06-11T00:57:54.918296</td>
-                                <td>2</td>
-                                <td>N/A</td>
-                                <td>
-                                    <small class="text-muted">
-                                        Python benchmark session
-                                    </small>
-                                </td>
-                            </tr>
-                            
-                            <tr>
-                                <td><strong>4</strong></td>
-                                <td class="timestamp">2025-06-11T00:57:54.909677</td>
-                                <td>2</td>
-                                <td>N/A</td>
-                                <td>
-                                    <small class="text-muted">
-                                        Python benchmark session
-                                    </small>
-                                </td>
-                            </tr>
-                            
-                            <tr>
-                                <td><strong>3</strong></td>
-                                <td class="timestamp">2025-06-11T00:57:54.884316</td>
-                                <td>2</td>
-                                <td>N/A</td>
-                                <td>
-                                    <small class="text-muted">
-                                        Python benchmark session
-                                    </small>
-                                </td>
-                            </tr>
-                            
-                            <tr>
-                                <td><strong>2</strong></td>
-                                <td class="timestamp">2025-06-11T00:57:54.870163</td>
-                                <td>1</td>
-                                <td>N/A</td>
-                                <td>
-                                    <small class="text-muted">
-                                        Python benchmark session
-                                    </small>
-                                </td>
-                            </tr>
-                            
-                            <tr>
-                                <td><strong>1</strong></td>
-                                <td class="timestamp">2025-06-11T00:53:48.908004</td>
-                                <td>4</td>
-                                <td>N/A</td>
-                                <td>
-                                    <small class="text-muted">
-                                        Python benchmark session
-                                    </small>
-                                </td>
-                            </tr>
-                            
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-
-<!-- System Recommendations -->
-<div class="row mb-4">
-    <div class="col-12">
-        <div class="card">
-            <div class="card-header">
-                <h5 class="card-title mb-0">
-                    <i class="fas fa-lightbulb me-2"></i>Performance Recommendations
-                </h5>
-            </div>
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-md-6">
-                        <h6 class="text-success">Strengths</h6>
-                        <ul class="list-unstyled">
-                            
-                            <li><i class="fas fa-check text-success me-2"></i>Multi-core CPU available for parallel benchmarks</li>
-                            
-                            
-                            <li><i class="fas fa-check text-success me-2"></i>Sufficient memory for large optimization problems</li>
-                            
-                            
-                        </ul>
-                    </div>
-                    <div class="col-md-6">
-                        <h6 class="text-warning">Considerations</h6>
-                        <ul class="list-unstyled">
-                            
-                            
-                            
-                            <li><i class="fas fa-info-circle text-info me-2"></i>Consider using a virtual environment</li>
-                            
-                        </ul>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-
-<!-- No Data Message -->
-
-
-
+    <main>
+        <section class="environment-details">
+            <h2>⚙️ System Environment</h2>
+            <table class="env-table">
+                <thead>
+                    <tr>
+                        <th>Property</th>
+                        <th>Value</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Platform</td>
+                        <td>macOS-14.5-arm64-arm-64bit</td>
+                    </tr>
+                    <tr>
+                        <td>Operating System</td>
+                        <td>Darwin 23.5.0</td>
+                    </tr>
+                    <tr>
+                        <td>OS Architecture</td>
+                        <td>64bit (arm64)</td>
+                    </tr>
+                    <tr>
+                        <td>Kernel Version</td>
+                        <td>23.5.0</td>
+                    </tr>
+                    <tr>
+                        <td>Python Version</td>
+                        <td>3.12.2 (CPython)</td>
+                    </tr>
+                    <tr>
+                        <td>CPU Information</td>
+                        <td>8 cores (8 physical)</td>
+                    </tr>
+                    <tr>
+                        <td>Memory</td>
+                        <td>24.0 GB total, 7.76 GB available</td>
+                    </tr>
+                    <tr>
+                        <td>Timezone</td>
+                        <td>JST (UTC+9.0)</td>
+                    </tr>
+                    <tr>
+                        <td>Local Time at Collection</td>
+                        <td>2025-06-13T23:32:27.363024</td>
+                    </tr>
+                    <tr>
+                        <td>Primary Framework</td>
+                        <td>CVXPY</td>
+                    </tr>
+                    <tr>
+                        <td>Last Updated</td>
+                        <td>2025-06-13 14:32:27</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+        
+        <section class="supported-types">
+            <h2>📋 Supported Problem Types</h2>
+            <ul class="problem-types-list">
+                <li>LP</li>
+                <li>QP</li>
+                <li>SOCP</li>
+                <li>SDP</li>
+            </ul>
+        </section>
+        
+        <section class="solver-overview">
+            <h2>🔧 Available Solvers</h2>
+            <table class="solver-table">
+                <thead>
+                    <tr>
+                        <th>Solver</th>
+                        <th>Type</th>
+                        <th>Backend</th>
+                        <th>Environment</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>CLARABEL (via CVXPY)</td>
+                        <td>CVXPY Backend</td>
+                        <td>CLARABEL</td>
+                        <td>Python</td>
+                    </tr>
+                    <tr>
+                        <td>ECOS (via CVXPY)</td>
+                        <td>CVXPY Backend</td>
+                        <td>ECOS</td>
+                        <td>Python</td>
+                    </tr>
+                    <tr>
+                        <td>OSQP (via CVXPY)</td>
+                        <td>CVXPY Backend</td>
+                        <td>OSQP</td>
+                        <td>Python</td>
+                    </tr>
+                    <tr>
+                        <td>SCS (via CVXPY)</td>
+                        <td>CVXPY Backend</td>
+                        <td>SCS</td>
+                        <td>Python</td>
+                    </tr>
+                    <tr>
+                        <td>SciPy</td>
+                        <td>SciPy Solver</td>
+                        <td>SciPy</td>
+                        <td>Python</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
     </main>
-
-    <!-- Footer -->
-    <footer class="footer">
-        <div class="container">
-            <div class="row">
-                <div class="col-md-6">
-                    <h6>Optimization Solver Benchmark</h6>
-                    <p class="text-muted small">
-                        Automated benchmarking system for optimization solvers.
-                        Compare performance across different problem types and solver implementations.
-                    </p>
-                </div>
-                <div class="col-md-6 text-md-end">
-                    <p class="text-muted small mb-2">
-                        <i class="fas fa-clock me-1"></i>
-                        Last updated: 2025-06-11 08:37:56
-                    </p>
-                    <p class="text-muted small mb-0">
-                        <i class="fas fa-code me-1"></i>
-                        Generated automatically by the benchmark system
-                    </p>
-                </div>
+    
+    <footer>
+        <div class="footer-content">
+            <div class="footer-info">
+                <p>Generated automatically from benchmark results • <a href="data/metadata.json">Download Metadata</a></p>
+                <p class="author-info">© 2025 Naoki Ito • <a href="mailto:napinoco@gmail.com">Contact</a> • <a href="https://github.com/napinoco/optimization-solver-benchmark">View on GitHub</a></p>
             </div>
         </div>
     </footer>
-
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    
-    <!-- Font Awesome for icons -->
-    <script src="https://kit.fontawesome.com/your-fontawesome-kit.js" crossorigin="anonymous"></script>
-    
-    <!-- Custom JavaScript -->
-    <script>
-        // Utility functions for the benchmark dashboard
-        
-        // Format time duration
-        function formatTime(seconds) {
-            if (seconds < 0.001) {
-                return (seconds * 1000000).toFixed(0) + 'μs';
-            } else if (seconds < 1) {
-                return (seconds * 1000).toFixed(1) + 'ms';
-            } else {
-                return seconds.toFixed(3) + 's';
-            }
-        }
-        
-        // Format large numbers with appropriate units
-        function formatNumber(num) {
-            if (num >= 1000000) {
-                return (num / 1000000).toFixed(1) + 'M';
-            } else if (num >= 1000) {
-                return (num / 1000).toFixed(1) + 'K';
-            } else {
-                return num.toString();
-            }
-        }
-        
-        // Get status badge class
-        function getStatusClass(status) {
-            switch(status.toLowerCase()) {
-                case 'optimal': return 'status-optimal';
-                case 'error': return 'status-error';
-                case 'timeout': return 'status-timeout';
-                case 'infeasible': return 'status-infeasible';
-                case 'unbounded': return 'status-infeasible';
-                default: return 'text-secondary';
-            }
-        }
-        
-        // Initialize tooltips
-        document.addEventListener('DOMContentLoaded', function() {
-            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-            var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-                return new bootstrap.Tooltip(tooltipTriggerEl);
-            });
-        });
-        
-        // Auto-refresh functionality (if enabled)
-        
-    </script>
-    
-    
-
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Auto-refresh environment info every 30 seconds if enabled
-    
-});
-</script>
-
-
 </body>
 </html>

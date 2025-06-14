@@ -1,5 +1,6 @@
 import sys
 import time
+import os
 from pathlib import Path
 from typing import List, Dict, Any, Optional, Tuple
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -13,10 +14,13 @@ from scripts.benchmark.problem_loader import load_problem, load_problem_registry
 from scripts.benchmark.solver_interface import SolverInterface, SolverResult
 from scripts.benchmark.result_collector import ResultCollector
 from scripts.benchmark.environment_info import collect_environment_info
+from scripts.utils.config_loader import load_config
 from scripts.solvers.python.scipy_runner import ScipySolver
 from scripts.solvers.python.cvxpy_runner import CvxpySolver, create_cvxpy_solvers
 from scripts.utils.config_loader import load_benchmark_config, load_solvers_config
 from scripts.utils.logger import get_logger
+from scripts.utils.solver_validation import SolverValidator, ProblemType
+from scripts.benchmark.backend_selector import BackendSelector, SelectionStrategy
 from scripts.database.models import create_database
 
 logger = get_logger("benchmark_runner")
@@ -46,6 +50,11 @@ class BenchmarkRunner:
         self.solvers = {}
         self.problems = {}
         
+        # Backend validation and selection
+        self.validator = SolverValidator()
+        self.backend_selector = BackendSelector(self.validator)
+        self.validation_results = None
+        
         # Benchmark session tracking
         self.current_benchmark_id = None
         self.execution_stats = {
@@ -57,66 +66,209 @@ class BenchmarkRunner:
         
         self.logger.info("Benchmark runner initialized")
     
-    def setup_solvers(self) -> None:
-        """Initialize configured solvers."""
+    def _get_optimal_parallel_jobs(self) -> int:
+        """Determine optimal number of parallel jobs based on configuration and system."""
+        config_value = self.benchmark_config.get('parallel_jobs', 2)
+        
+        # If explicitly set to an integer, use it
+        if isinstance(config_value, int):
+            return max(1, min(config_value, 8))  # Clamp to reasonable range
+        
+        # If set to "auto", detect based on system
+        if config_value == "auto":
+            try:
+                cpu_count = os.cpu_count() or 2
+                # Use conservative strategy: min(cpu_count, 4) to avoid resource contention
+                optimal = min(cpu_count, 4)
+                self.logger.info(f"Auto-detected {optimal} parallel workers based on {cpu_count} CPU cores")
+                return optimal
+            except Exception as e:
+                self.logger.warning(f"Failed to auto-detect CPU count: {e}. Using default of 2")
+                return 2
+        
+        # Fallback to default
+        self.logger.warning(f"Invalid parallel_jobs setting: {config_value}. Using default of 2")
+        return 2
+    
+    def validate_backends(self) -> Dict[str, Any]:
+        """Validate all available CVXPY backends and return validation report."""
+        self.logger.info("Validating CVXPY backends...")
+        
+        # Perform validation and cache results
+        self.validation_results = self.validator.validate_all_backends()
+        
+        # Generate comprehensive validation report
+        validation_report = self.validator.generate_validation_report(self.validation_results)
+        
+        # Log validation summary
+        available_count = validation_report['summary']['available_backends']
+        total_count = validation_report['summary']['total_backends']
+        availability_pct = validation_report['summary']['availability_percentage']
+        
+        self.logger.info(f"Backend validation complete: {available_count}/{total_count} available ({availability_pct:.1f}%)")
+        
+        # Log problem type coverage
+        for problem_type, coverage in validation_report['problem_type_coverage'].items():
+            available_backends = coverage['available_backends']
+            coverage_pct = coverage['coverage_percentage']
+            recommended = coverage['recommended']
+            backend_count = len(available_backends) if isinstance(available_backends, list) else available_backends
+            self.logger.info(f"  {problem_type}: {backend_count} backends ({coverage_pct:.1f}%), recommended: {recommended}")
+        
+        return validation_report
+    
+    def select_optimal_backends(self, strategy: SelectionStrategy = SelectionStrategy.BALANCED) -> Dict[str, Any]:
+        """Select optimal backends for comprehensive benchmarking."""
+        self.logger.info(f"Selecting optimal backends using {strategy.value} strategy...")
+        
+        # Ensure validation is complete
+        if self.validation_results is None:
+            self.validate_backends()
+        
+        # Select backends for all problem types
+        problem_types = [ProblemType.LP, ProblemType.QP, ProblemType.SOCP, ProblemType.SDP]
+        selections = self.backend_selector.select_backends_for_benchmark(
+            problem_types, strategy=strategy, max_backends_per_type=3
+        )
+        
+        # Generate selection report
+        selection_report = self.backend_selector.generate_selection_report(selections)
+        
+        # Log selection summary
+        total_selections = selection_report['summary']['total_selections']
+        unique_backends = selection_report['summary']['unique_backends_selected']
+        selected_backends = selection_report['summary']['selected_backends']
+        
+        self.logger.info(f"Backend selection complete: {total_selections} selections, {unique_backends} unique backends")
+        self.logger.info(f"Selected backends: {selected_backends}")
+        
+        return {
+            'selections': selections,
+            'report': selection_report,
+            'strategy': strategy.value
+        }
+    
+    def setup_solvers(self, use_validation: bool = True) -> None:
+        """Initialize configured solvers from configuration file."""
         self.logger.info("Setting up solvers...")
+        
+        # Perform backend validation if requested
+        if use_validation:
+            validation_report = self.validate_backends()
+            self.logger.info("Using backend validation for solver setup")
+        
+        # Load solver configuration
+        try:
+            solver_config = load_config("solvers.yaml")
+            solver_definitions = solver_config.get("solvers", {})
+        except Exception as e:
+            self.logger.error(f"Failed to load solver configuration: {e}")
+            raise
         
         timeout = self.benchmark_config.get('solver_timeout', 300.0)
         
-        # Initialize SciPy solver
-        try:
-            scipy_solver = ScipySolver(
-                name="SciPy",
-                timeout=timeout
-            )
-            self.solvers["scipy"] = scipy_solver
-            self.logger.info(f"Initialized solver: {scipy_solver.name}")
-            
-            # Store solver info in database
-            solver_info = scipy_solver.get_info()
-            self.result_collector.store_solver_info(
-                name=scipy_solver.name,
-                version=scipy_solver.get_version(),
-                environment="python",
-                metadata=solver_info
-            )
-            
-        except Exception as e:
-            self.logger.error(f"Failed to initialize SciPy solver: {e}")
-        
-        # Initialize CVXPY solvers
-        try:
-            # Add default CVXPY solver
-            cvxpy_solver = CvxpySolver(
-                name="CVXPY",
-                timeout=timeout
-            )
-            self.solvers["cvxpy"] = cvxpy_solver
-            self.logger.info(f"Initialized solver: {cvxpy_solver.name}")
-            
-            # Store solver info in database
-            solver_info = cvxpy_solver.get_info()
-            self.result_collector.store_solver_info(
-                name=cvxpy_solver.name,
-                version=cvxpy_solver.get_version(),
-                environment="python",
-                metadata=solver_info
-            )
-            
-            # Optionally add multiple CVXPY backends as separate solvers
-            # cvxpy_variants = create_cvxpy_solvers()
-            # for variant in cvxpy_variants:
-            #     if variant.name not in [s.name for s in self.solvers.values()]:
-            #         self.solvers[variant.name.lower().replace('-', '_')] = variant
-            #         self.logger.info(f"Initialized solver: {variant.name}")
-            
-        except Exception as e:
-            self.logger.error(f"Failed to initialize CVXPY solver: {e}")
+        # Initialize each configured solver
+        for solver_id, config in solver_definitions.items():
+            if not config.get('enabled', True):
+                self.logger.info(f"Skipping disabled solver: {solver_id}")
+                continue
+                
+            try:
+                solver_instance = self._create_solver_instance(solver_id, config, timeout)
+                if solver_instance:
+                    self.solvers[solver_id] = solver_instance
+                    self.logger.info(f"Initialized solver: {solver_instance.name}")
+                    
+                    # Store solver info in database
+                    solver_info = solver_instance.get_info()
+                    self.result_collector.store_solver_info(
+                        name=solver_instance.name,
+                        version=solver_instance.get_version(),
+                        environment=config.get('environment', 'unknown'),
+                        metadata=solver_info
+                    )
+                    
+            except Exception as e:
+                self.logger.error(f"Failed to initialize solver {solver_id}: {e}")
         
         if not self.solvers:
             raise RuntimeError("No solvers were successfully initialized")
         
         self.logger.info(f"Successfully initialized {len(self.solvers)} solvers")
+    
+    def _create_solver_instance(self, solver_id: str, config: dict, timeout: float):
+        """Create a solver instance based on configuration."""
+        environment = config.get('environment', 'python')
+        
+        if environment == 'python':
+            if 'backend' in config:
+                # CVXPY backend solver
+                backend = config['backend']
+                solver_name = config.get('name', f"{backend} (via CVXPY)")
+                
+                # Check if backend is available using validation results
+                if self.validation_results and backend in self.validation_results:
+                    validation_result = self.validation_results[backend]
+                    if not validation_result.available:
+                        self.logger.warning(f"Backend {backend} not available (validation: {validation_result.error_message}). Skipping {solver_id}")
+                        return None
+                    else:
+                        self.logger.debug(f"Backend {backend} validated successfully")
+                else:
+                    # Fallback to direct CVXPY check if validation not available
+                    import cvxpy as cp
+                    available_backends = cp.installed_solvers()
+                    if backend not in available_backends:
+                        self.logger.warning(f"Backend {backend} not available. Skipping {solver_id}")
+                        return None
+                
+                solver_instance = CvxpySolver(
+                    name=solver_name,
+                    backend=backend,
+                    timeout=config.get('timeout', timeout),
+                    verbose=False,
+                    solver_options=config.get('solver_options', {}),
+                    problem_optimizations=config.get('problem_optimizations', {}),
+                    enable_diagnostics=config.get('diagnostics', {}).get('enabled', True)
+                )
+                return solver_instance
+                
+            elif solver_id == 'scipy':
+                # SciPy solver
+                solver_instance = ScipySolver(
+                    name=config.get('name', 'SciPy'),
+                    timeout=config.get('timeout', timeout)
+                )
+                return solver_instance
+                
+        elif environment == 'octave':
+            # Octave solver
+            try:
+                from scripts.solvers.octave.octave_runner import OctaveSolver
+                
+                solver_instance = OctaveSolver(
+                    name=config.get('name', 'Octave'),
+                    timeout=config.get('timeout', timeout),
+                    octave_path=config.get('octave_path'),
+                    options=config.get('options', {})
+                )
+                
+                # Verify Octave is available before returning
+                if solver_instance.is_available():
+                    return solver_instance
+                else:
+                    self.logger.warning(f"Octave not available for solver {solver_id}")
+                    return None
+                    
+            except ImportError as e:
+                self.logger.warning(f"Could not import Octave solver: {e}")
+                return None
+            except Exception as e:
+                self.logger.error(f"Failed to create Octave solver {solver_id}: {e}")
+                return None
+                
+        self.logger.warning(f"Unknown solver configuration for {solver_id}")
+        return None
     
     def load_problems(self, problem_set: str = "light_set") -> None:
         """Load problems from the registry."""
@@ -279,7 +431,7 @@ class BenchmarkRunner:
             problem_names = list(self.problems.keys())
         
         if max_workers is None:
-            max_workers = self.benchmark_config.get('parallel_jobs', 2)
+            max_workers = self._get_optimal_parallel_jobs()
         
         # Create list of all (solver, problem) combinations
         benchmark_tasks = []

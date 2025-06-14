@@ -1,0 +1,234 @@
+{
+  "metadata": {
+    "report_date": "2025-06-11T19:28:47.538932",
+    "benchmark_id": "22",
+    "profiler_version": "1.0.0"
+  },
+  "benchmark_summary": {
+    "total_runtime": 0.23883318901062012,
+    "total_problems": 10,
+    "total_solvers": 5,
+    "overall_success_rate": 0.8,
+    "efficiency_score": 69.26457230750427
+  },
+  "solver_profiles": {
+    "SciPy": {
+      "performance_metrics": {
+        "total_time": 0.15030646324157715,
+        "avg_solve_time": 0.005182981491088867,
+        "throughput": 192.93914163484982,
+        "success_rate": 1.0
+      },
+      "resource_usage": {
+        "peak_memory_mb": 10.01937601852417,
+        "memory_efficiency": 2.8943918210459207,
+        "cpu_efficiency": 0.7052258280446234
+      },
+      "scalability": {
+        "time_complexity": 0.1,
+        "memory_complexity": 0.1,
+        "scalability_rating": "Excellent"
+      },
+      "quality": {
+        "solution_quality": 0.7275862068965517,
+        "numerical_stability": 0.03171697688147779,
+        "convergence_reliability": 0.7080902738519544
+      }
+    },
+    "CLARABEL (via CVXPY)": {
+      "performance_metrics": {
+        "total_time": 0.02532052993774414,
+        "avg_solve_time": 0.0042200883229573565,
+        "throughput": 236.96186512495058,
+        "success_rate": 0.6666666666666666
+      },
+      "resource_usage": {
+        "peak_memory_mb": 10.012412837982177,
+        "memory_efficiency": 0.5992561530462415,
+        "cpu_efficiency": 0.829366527937327
+      },
+      "scalability": {
+        "time_complexity": 2.1836922794099696,
+        "memory_complexity": 0.1,
+        "scalability_rating": "Good"
+      },
+      "quality": {
+        "solution_quality": 0.5346153846153847,
+        "numerical_stability": 0.4786003574286324,
+        "convergence_reliability": 0.6841081276888455
+      }
+    },
+    "SCS (via CVXPY)": {
+      "performance_metrics": {
+        "total_time": 0.01258087158203125,
+        "avg_solve_time": 0.0020968119303385415,
+        "throughput": 476.91449363250456,
+        "success_rate": 1.0
+      },
+      "resource_usage": {
+        "peak_memory_mb": 10.005876831054687,
+        "memory_efficiency": 0.5996475972378684,
+        "cpu_efficiency": 1.0
+      },
+      "scalability": {
+        "time_complexity": 0.1,
+        "memory_complexity": 0.1,
+        "scalability_rating": "Excellent"
+      },
+      "quality": {
+        "solution_quality": 0.525,
+        "numerical_stability": 0.8294201095622011,
+        "convergence_reliability": 0.8662605548057054
+      }
+    },
+    "ECOS (via CVXPY)": {
+      "performance_metrics": {
+        "total_time": 0.03206372261047363,
+        "avg_solve_time": 0.005343953768412272,
+        "throughput": 187.12736736439007,
+        "success_rate": 1.0
+      },
+      "resource_usage": {
+        "peak_memory_mb": 10.022233703613281,
+        "memory_efficiency": 0.5986689372287178,
+        "cpu_efficiency": 0.6549457857753652
+      },
+      "scalability": {
+        "time_complexity": 0.1,
+        "memory_complexity": 0.1,
+        "scalability_rating": "Excellent"
+      },
+      "quality": {
+        "solution_quality": 0.5282051282051283,
+        "numerical_stability": 0,
+        "convergence_reliability": 0.8624176663566748
+      }
+    },
+    "OSQP (via CVXPY)": {
+      "performance_metrics": {
+        "total_time": 0.018561601638793945,
+        "avg_solve_time": 0.0030936002731323242,
+        "throughput": 323.24796732303184,
+        "success_rate": 1.0
+      },
+      "resource_usage": {
+        "peak_memory_mb": 10.008646778106689,
+        "memory_efficiency": 0.5994816415266685,
+        "cpu_efficiency": 1.0
+      },
+      "scalability": {
+        "time_complexity": 1.1866947810953292,
+        "memory_complexity": 0.1,
+        "scalability_rating": "Excellent"
+      },
+      "quality": {
+        "solution_quality": 0.6435897435897436,
+        "numerical_stability": 0.7075763402223132,
+        "convergence_reliability": 0.7587003641966096
+      }
+    }
+  },
+  "performance_rankings": {
+    "fastest_solvers": [
+      [
+        "SCS (via CVXPY)",
+        0.0020968119303385415
+      ],
+      [
+        "OSQP (via CVXPY)",
+        0.0030936002731323242
+      ],
+      [
+        "CLARABEL (via CVXPY)",
+        0.0042200883229573565
+      ],
+      [
+        "SciPy",
+        0.005182981491088867
+      ],
+      [
+        "ECOS (via CVXPY)",
+        0.005343953768412272
+      ]
+    ],
+    "most_reliable": [
+      [
+        "SciPy",
+        1.0
+      ],
+      [
+        "SCS (via CVXPY)",
+        1.0
+      ],
+      [
+        "ECOS (via CVXPY)",
+        1.0
+      ],
+      [
+        "OSQP (via CVXPY)",
+        1.0
+      ],
+      [
+        "CLARABEL (via CVXPY)",
+        0.6666666666666666
+      ]
+    ],
+    "most_memory_efficient": [
+      [
+        "SciPy",
+        2.8943918210459207
+      ],
+      [
+        "SCS (via CVXPY)",
+        0.5996475972378684
+      ],
+      [
+        "OSQP (via CVXPY)",
+        0.5994816415266685
+      ],
+      [
+        "CLARABEL (via CVXPY)",
+        0.5992561530462415
+      ],
+      [
+        "ECOS (via CVXPY)",
+        0.5986689372287178
+      ]
+    ],
+    "best_scalability": [
+      [
+        "SciPy",
+        "Excellent"
+      ],
+      [
+        "SCS (via CVXPY)",
+        "Excellent"
+      ],
+      [
+        "ECOS (via CVXPY)",
+        "Excellent"
+      ],
+      [
+        "OSQP (via CVXPY)",
+        "Excellent"
+      ],
+      [
+        "CLARABEL (via CVXPY)",
+        "Good"
+      ]
+    ]
+  },
+  "scalability_analysis": {
+    "distribution": {
+      "Excellent": 4,
+      "Good": 1
+    },
+    "average_time_complexity": 0.7340774121010598,
+    "average_memory_complexity": 0.1
+  },
+  "resource_utilization": {
+    "total_memory_usage": 50.068546169281,
+    "average_cpu_efficiency": 0.8379076283514632,
+    "total_throughput": 1417.1908350797269
+  }
+}

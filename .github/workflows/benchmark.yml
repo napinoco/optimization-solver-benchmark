@@ -27,10 +27,20 @@ on:
           - medium_set
           - large_set
       timeout:
-        description: 'Solver timeout in seconds'
+        description: 'Solver timeout in seconds (10-3600)'
         required: false
         default: '300'
         type: string
+      skip_cross_platform:
+        description: 'Skip cross-platform testing to save CI minutes'
+        required: false
+        default: true
+        type: boolean
+      verbose_logging:
+        description: 'Enable verbose logging for debugging'
+        required: false
+        default: false
+        type: boolean
 
 env:
   PYTHON_VERSION: '3.12'
@@ -82,7 +92,7 @@ jobs:
         source venv/bin/activate
         python main.py --validate
         
-    - name: Run benchmarks
+    - name: Validate input parameters
       run: |
         source venv/bin/activate
         # Determine which solvers to run
@@ -90,24 +100,58 @@ jobs:
           SOLVERS="${{ github.event.inputs.solvers }}"
           PROBLEM_SET="${{ github.event.inputs.problem_set }}"
           TIMEOUT="${{ github.event.inputs.timeout }}"
+          VERBOSE="${{ github.event.inputs.verbose_logging }}"
         else
           SOLVERS="scipy,cvxpy"
           PROBLEM_SET="light_set"
           TIMEOUT="300"
+          VERBOSE="false"
         fi
         
+        echo "## Input Parameters" >> $GITHUB_STEP_SUMMARY
+        echo "- **Trigger**: ${{ github.event_name }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **Solvers**: $SOLVERS" >> $GITHUB_STEP_SUMMARY
+        echo "- **Problem Set**: $PROBLEM_SET" >> $GITHUB_STEP_SUMMARY
+        echo "- **Timeout**: ${TIMEOUT}s" >> $GITHUB_STEP_SUMMARY
+        echo "- **Verbose Logging**: $VERBOSE" >> $GITHUB_STEP_SUMMARY
+        echo "- **Skip Cross-Platform**: ${{ github.event.inputs.skip_cross_platform || 'false' }}" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        
+        # Validate timeout is numeric and reasonable
+        if ! [[ "$TIMEOUT" =~ ^[0-9]+$ ]] || [ "$TIMEOUT" -lt 10 ] || [ "$TIMEOUT" -gt 3600 ]; then
+          echo "❌ Invalid timeout: $TIMEOUT (must be 10-3600 seconds)" >> $GITHUB_STEP_SUMMARY
+          exit 1
+        fi
+        
+        # Export for next step
+        echo "BENCHMARK_SOLVERS=$SOLVERS" >> $GITHUB_ENV
+        echo "BENCHMARK_PROBLEM_SET=$PROBLEM_SET" >> $GITHUB_ENV
+        echo "BENCHMARK_TIMEOUT=$TIMEOUT" >> $GITHUB_ENV
+        echo "BENCHMARK_VERBOSE=$VERBOSE" >> $GITHUB_ENV
+        
+    - name: Run benchmarks
+      run: |
+        source venv/bin/activate
+        
         echo "Running benchmarks with:"
-        echo "  Solvers: $SOLVERS"
-        echo "  Problem set: $PROBLEM_SET"
-        echo "  Timeout: $TIMEOUT"
+        echo "  Solvers: $BENCHMARK_SOLVERS"
+        echo "  Problem set: $BENCHMARK_PROBLEM_SET"
+        echo "  Timeout: $BENCHMARK_TIMEOUT"
+        echo "  Verbose: $BENCHMARK_VERBOSE"
         
         # Update timeout in config if needed
-        if [ "$TIMEOUT" != "300" ]; then
-          sed -i "s/timeout: [0-9]*/timeout: $TIMEOUT/" config/benchmark_config.yaml
+        if [ "$BENCHMARK_TIMEOUT" != "300" ]; then
+          sed -i "s/timeout: [0-9]*/timeout: $BENCHMARK_TIMEOUT/" config/benchmark_config.yaml
+        fi
+        
+        # Build command with optional verbose flag
+        BENCHMARK_CMD="python main.py --benchmark --solvers \"$BENCHMARK_SOLVERS\" --problem-set \"$BENCHMARK_PROBLEM_SET\""
+        if [ "$BENCHMARK_VERBOSE" = "true" ]; then
+          BENCHMARK_CMD="$BENCHMARK_CMD --verbose"
         fi
         
         # Run the benchmark
-        python main.py --benchmark --solvers "$SOLVERS" --problem-set "$PROBLEM_SET"
+        eval $BENCHMARK_CMD
         
     - name: Generate reports
       run: |
@@ -151,10 +195,15 @@ jobs:
         echo "- **benchmark-reports**: HTML reports" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
         
-        # Show environment info
+        # Show environment info with detailed Ubuntu version and timezone
         echo "### Environment" >> $GITHUB_STEP_SUMMARY
-        echo "- **OS**: Ubuntu (GitHub Actions)" >> $GITHUB_STEP_SUMMARY
+        UBUNTU_VERSION=$(cat /etc/os-release | grep PRETTY_NAME | cut -d'"' -f2)
+        echo "- **OS**: $UBUNTU_VERSION (ubuntu-latest resolved)" >> $GITHUB_STEP_SUMMARY
+        echo "- **Kernel**: $(uname -r)" >> $GITHUB_STEP_SUMMARY
         echo "- **Python**: ${{ env.PYTHON_VERSION }}" >> $GITHUB_STEP_SUMMARY
+        TIMEZONE_INFO=$(cat /etc/timezone 2>/dev/null || timedatectl show --property=Timezone --value 2>/dev/null || echo "UTC")
+        echo "- **Server Timezone**: $TIMEZONE_INFO" >> $GITHUB_STEP_SUMMARY
+        echo "- **Current Time**: $(date '+%Y-%m-%d %H:%M:%S %Z (UTC%z)')" >> $GITHUB_STEP_SUMMARY
         echo "- **Solvers**: $(echo "${{ github.event.inputs.solvers || 'scipy,cvxpy' }}")" >> $GITHUB_STEP_SUMMARY
         
     - name: Check for validation errors
@@ -208,6 +257,7 @@ jobs:
         fi
 
   # Job to run on different OS for broader compatibility testing
+  # DISABLED BY DEFAULT to speed up CI runtime - only runs when manually triggered and explicitly enabled
   benchmark-cross-platform:
     runs-on: ${{ matrix.os }}
     strategy:
@@ -216,8 +266,8 @@ jobs:
         python-version: ['3.10', '3.11', '3.12']
       fail-fast: false
       
-    # Only run cross-platform testing on manual trigger or scheduled runs
-    if: github.event_name == 'workflow_dispatch' || github.event_name == 'schedule'
+    # Only run cross-platform testing when explicitly requested (skip_cross_platform defaults to true)
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.skip_cross_platform != 'true'
     
     steps:
     - name: Checkout repository

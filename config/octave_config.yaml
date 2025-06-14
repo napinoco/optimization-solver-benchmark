@@ -1,0 +1,155 @@
+# Octave Solver Configuration
+# ===========================
+# Configuration for GNU Octave optimization environment
+
+octave:
+  # Octave executable settings
+  executable_path: null  # Auto-detect if null
+  executable_names:
+    - "octave"
+    - "octave-cli"
+    - "octave.exe"
+  
+  # Common installation paths to check
+  search_paths:
+    - "/usr/bin/octave"
+    - "/usr/local/bin/octave" 
+    - "/opt/homebrew/bin/octave"
+    - "C:\\Program Files\\GNU Octave\\Octave-*\\mingw64\\bin\\octave.exe"
+  
+  # Solver configuration
+  solvers:
+    octave_linprog:
+      name: "Octave LinProg"
+      problem_types: ["LP"]
+      timeout: 300.0
+      options:
+        method: "interior-point"  # Octave linprog method
+        display: "off"
+        max_iterations: 1000
+    
+    octave_quadprog:
+      name: "Octave QuadProg" 
+      problem_types: ["QP"]
+      timeout: 300.0
+      options:
+        method: "interior-point"  # Octave quadprog method
+        display: "off"
+        max_iterations: 1000
+    
+    octave_fmincon:
+      name: "Octave fmincon"
+      problem_types: ["LP", "QP", "NLP"]
+      timeout: 600.0  # Longer timeout for general solver
+      options:
+        algorithm: "interior-point"
+        display: "off"
+        max_iterations: 1000
+        tolerance: 1e-8
+
+  # Environment settings
+  environment:
+    # Octave packages to check/install
+    required_packages:
+      - "optim"  # Optimization package
+      - "struct" # Structure manipulation
+    
+    # Octave settings
+    octave_options:
+      - "--silent"          # Suppress startup messages
+      - "--no-window-system" # Don't use GUI
+      - "--no-history"      # Don't save command history
+    
+    # Memory and performance settings
+    memory_limit_mb: 2048
+    warning_level: "error"  # Treat warnings as errors for robustness
+
+  # File and path settings
+  paths:
+    script_directory: "scripts/solvers/octave"
+    temp_directory: null  # Use system temp if null
+    cache_directory: "~/.optimization_benchmark_octave_cache"
+  
+  # Logging and debugging
+  logging:
+    level: "INFO"  # DEBUG, INFO, WARNING, ERROR
+    log_octave_output: true
+    save_intermediate_files: false  # Keep temp files for debugging
+  
+  # Integration settings
+  integration:
+    # How to register Octave solvers with benchmark system
+    auto_register: true
+    solver_priority: 50  # Priority when multiple solvers available
+    
+    # Compatibility checks
+    verify_installation: true
+    verify_packages: true
+    verify_functionality: true
+    
+    # Performance tuning
+    parallel_execution: false  # Octave doesn't support true parallelism
+    max_concurrent_jobs: 1
+
+# Problem-specific settings
+problem_handling:
+  # Problem conversion settings
+  matrix_format: "dense"  # dense or sparse
+  precision: "double"     # double or single
+  
+  # Constraint handling
+  equality_tolerance: 1e-8
+  inequality_tolerance: 1e-8
+  bounds_handling: "automatic"  # automatic, explicit, ignore
+  
+  # Problem size limits
+  max_variables: 10000
+  max_constraints: 10000
+  max_matrix_elements: 1000000
+
+# Error handling and recovery
+error_handling:
+  # What to do when Octave solver fails
+  fallback_to_python: true
+  retry_attempts: 2
+  timeout_handling: "terminate"  # terminate, extend, ignore
+  
+  # Common error patterns and responses
+  error_patterns:
+    "singular matrix":
+      action: "report_infeasible"
+      message: "Problem appears to be infeasible (singular constraint matrix)"
+    
+    "iteration limit":
+      action: "report_max_iter"
+      message: "Solver reached maximum iteration limit"
+    
+    "memory":
+      action: "report_error"
+      message: "Insufficient memory for problem size"
+
+# Testing and validation
+testing:
+  # Test problems for validating Octave installation
+  validation_problems:
+    simple_lp:
+      type: "LP"
+      description: "Simple 2-variable linear program"
+      variables: 2
+      constraints: 2
+      expected_status: "optimal"
+      expected_objective: 0.0
+    
+    simple_qp:
+      type: "QP" 
+      description: "Simple 2-variable quadratic program"
+      variables: 2
+      constraints: 1
+      expected_status: "optimal"
+      expected_objective: 0.5
+  
+  # Performance benchmarks
+  performance_tests:
+    enabled: true
+    timeout_per_test: 60.0
+    compare_with_python: true

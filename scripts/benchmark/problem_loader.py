@@ -19,7 +19,9 @@ class ProblemData:
     def __init__(self, name: str, problem_class: str, c: np.ndarray = None, 
                  A_eq: np.ndarray = None, b_eq: np.ndarray = None,
                  A_ub: np.ndarray = None, b_ub: np.ndarray = None,
-                 bounds: List[Tuple] = None, P: np.ndarray = None):
+                 bounds: List[Tuple] = None, P: np.ndarray = None,
+                 cvxpy_problem=None, variables=None, objective=None, 
+                 constraints=None, metadata=None):
         self.name = name
         self.problem_class = problem_class
         self.c = c  # objective coefficients
@@ -29,6 +31,13 @@ class ProblemData:
         self.b_ub = b_ub  # inequality constraint RHS
         self.bounds = bounds  # variable bounds
         self.P = P  # quadratic objective matrix for QP
+        
+        # Enhanced support for CVXPY problems (SOCP, SDP, etc.)
+        self.cvxpy_problem = cvxpy_problem  # CVXPY Problem object
+        self.variables = variables or {}  # Dict of CVXPY variables
+        self.objective = objective  # CVXPY objective
+        self.constraints = constraints or []  # List of CVXPY constraints
+        self.metadata = metadata or {}  # Additional problem metadata
         
     def __repr__(self):
         return f"ProblemData(name='{self.name}', class='{self.problem_class}')"
@@ -239,8 +248,108 @@ def load_problem_registry() -> Dict:
     with open(registry_path, 'r') as f:
         return yaml.safe_load(f)
 
+def load_python_problem(file_path: str, problem_class: str) -> ProblemData:
+    """Load a problem from a Python module (for SOCP, SDP, etc.)."""
+    logger.info(f"Loading Python problem: {file_path}")
+    
+    try:
+        import importlib.util
+        import sys
+        
+        # Load the module
+        spec = importlib.util.spec_from_file_location("problem_module", file_path)
+        module = importlib.util.module_from_spec(spec)
+        sys.modules["problem_module"] = module
+        spec.loader.exec_module(module)
+        
+        # Look for the main generation function based on problem class
+        if problem_class == "SOCP":
+            if hasattr(module, 'generate_portfolio_optimization_socp'):
+                problem_dict, problem_data = module.generate_portfolio_optimization_socp()
+            elif hasattr(module, 'generate_robust_optimization_socp'):
+                problem_dict, problem_data = module.generate_robust_optimization_socp()
+            elif hasattr(module, 'generate_facility_location_socp'):
+                problem_dict, problem_data = module.generate_facility_location_socp()
+            else:
+                raise ValueError(f"No suitable SOCP generation function found in {file_path}")
+        elif problem_class == "SDP":
+            if hasattr(module, 'generate_matrix_completion_sdp'):
+                problem_dict, problem_data = module.generate_matrix_completion_sdp()
+            elif hasattr(module, 'generate_control_lmi_sdp'):
+                problem_dict, problem_data = module.generate_control_lmi_sdp()
+            elif hasattr(module, 'generate_max_cut_sdp'):
+                problem_dict, problem_data = module.generate_max_cut_sdp()
+            else:
+                raise ValueError(f"No suitable SDP generation function found in {file_path}")
+        else:
+            raise ValueError(f"Unsupported Python problem class: {problem_class}")
+        
+        logger.info(f"Successfully loaded Python problem: {problem_data.name} ({problem_class})")
+        return problem_data
+        
+    except Exception as e:
+        logger.error(f"Failed to load Python problem {file_path}: {e}")
+        raise
+
+def load_external_problem_from_url(problem_name: str, problem_set: str) -> Optional[ProblemData]:
+    """Load a problem from external storage (medium_set or large_set)."""
+    try:
+        # Import external storage here to avoid circular imports
+        from scripts.storage.external_storage import ExternalProblemStorage, load_external_problem_registry
+        
+        # Load external problem registry
+        registry_file = project_root / "problems" / problem_set / "external_urls.yaml"
+        if not registry_file.exists():
+            logger.warning(f"External registry file not found: {registry_file}")
+            return None
+        
+        external_problems = load_external_problem_registry(str(registry_file))
+        if problem_name not in external_problems:
+            logger.warning(f"Problem '{problem_name}' not found in external registry")
+            return None
+        
+        # Download and cache the problem
+        storage = ExternalProblemStorage()
+        external_problem = external_problems[problem_name]
+        local_path = storage.get_problem(external_problem)
+        
+        if not local_path:
+            logger.error(f"Failed to download external problem: {problem_name}")
+            return None
+        
+        # Determine file type and load accordingly
+        file_path = Path(local_path)
+        if file_path.suffix.lower() in ['.mps', '.lp']:
+            return load_mps_file(local_path)
+        elif file_path.suffix.lower() in ['.qps']:
+            return load_qps_file(local_path)
+        elif file_path.suffix.lower() in ['.py']:
+            # Determine problem class from metadata
+            problem_class = external_problem.metadata.get('problem_type', 'LP')
+            if problem_class in ['SOCP', 'SDP']:
+                return load_python_problem(local_path, problem_class)
+            else:
+                return load_mps_file(local_path)  # Default to LP
+        else:
+            logger.warning(f"Unsupported file format for external problem: {file_path.suffix}")
+            return None
+            
+    except Exception as e:
+        logger.error(f"Failed to load external problem {problem_name}: {e}")
+        return None
+
 def load_problem(problem_name: str, problem_set: str = "light_set") -> ProblemData:
     """Load a specific problem by name from the registry."""
+    
+    # For external problem sets, use external storage
+    if problem_set in ["medium_set", "large_set"]:
+        problem_data = load_external_problem_from_url(problem_name, problem_set)
+        if problem_data:
+            return problem_data
+        else:
+            raise ValueError(f"Failed to load external problem '{problem_name}' from {problem_set}")
+    
+    # For local problems, use the standard registry
     registry = load_problem_registry()
     
     # Find the problem in the registry
@@ -265,6 +374,8 @@ def load_problem(problem_name: str, problem_set: str = "light_set") -> ProblemDa
         return load_mps_file(str(file_path))
     elif problem_info["problem_class"] == "QP":
         return load_qps_file(str(file_path))
+    elif problem_info["problem_class"] in ["SOCP", "SDP"]:
+        return load_python_problem(str(file_path), problem_info["problem_class"])
     else:
         raise ValueError(f"Unsupported problem class: {problem_info['problem_class']}")
 
