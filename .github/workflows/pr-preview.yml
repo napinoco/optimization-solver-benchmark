@@ -74,13 +74,13 @@ jobs:
         
         echo "## Preview Benchmark Configuration" >> $GITHUB_STEP_SUMMARY
         echo "- **Trigger**: Pull Request #${{ github.event.number }}" >> $GITHUB_STEP_SUMMARY
-        echo "- **Solvers**: scipy,cvxpy (limited for preview)" >> $GITHUB_STEP_SUMMARY
+        echo "- **Solvers**: scipy,clarabel_cvxpy,scs_cvxpy (limited for preview)" >> $GITHUB_STEP_SUMMARY
         echo "- **Problem Set**: light_set" >> $GITHUB_STEP_SUMMARY
         echo "- **Timeout**: 300s" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
         
         # Run lightweight benchmark for preview (fast execution)
-        python main.py --benchmark --solvers "scipy,cvxpy" --problem-set "light_set"
+        python main.py --benchmark --solvers "scipy,clarabel_cvxpy,scs_cvxpy" --problem-set "light_set"
         
     - name: Generate preview reports
       if: github.event.action != 'closed'
@@ -194,7 +194,7 @@ jobs:
           - [🖥️ Environment Info](${previewUrl}environment_info.html) - System specifications
           
           ### Notes
-          - Preview uses lightweight benchmark (scipy, cvxpy with light_set problems)
+          - Preview uses lightweight benchmark (scipy, clarabel_cvxpy, scs_cvxpy with light_set problems)
           - Preview will be updated automatically when you push new commits
           - Preview will be cleaned up automatically when the PR is closed
           
@@ -250,7 +250,7 @@ jobs:
         echo "- 💬 PR comment with preview links" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
         echo "### Technical Details" >> $GITHUB_STEP_SUMMARY
-        echo "- **Benchmark Configuration**: scipy,cvxpy with light_set problems" >> $GITHUB_STEP_SUMMARY
+        echo "- **Benchmark Configuration**: scipy,clarabel_cvxpy,scs_cvxpy with light_set problems" >> $GITHUB_STEP_SUMMARY
         echo "- **Deployment Method**: GitHub Pages via pr-preview-action" >> $GITHUB_STEP_SUMMARY
         echo "- **Branch**: gh-pages (pr-preview/pr-${{ github.event.number }})" >> $GITHUB_STEP_SUMMARY
         echo "- **Python Version**: ${{ env.PYTHON_VERSION }}" >> $GITHUB_STEP_SUMMARY

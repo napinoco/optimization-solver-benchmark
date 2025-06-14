@@ -124,13 +124,6 @@ optimization-solver-benchmark/
 │       ├── problem_classifier.py # Problem type classification
 │       └── solver_diagnostics.py # Solver capability detection
 │
-├── templates/                   # Jinja2 HTML templates
-│   ├── base.html                # Base template with common layout
-│   ├── dashboard.html           # Main dashboard template
-│   ├── solver_comparison.html   # Solver comparison template
-│   ├── problem_analysis.html    # Problem analysis template
-│   └── environment_info.html    # Environment information template
-│
 ├── docs/                        # GitHub Pages output (auto-generated)
 │   ├── index.html               # Main dashboard
 │   ├── solver_comparison.html   # Solver performance comparison
