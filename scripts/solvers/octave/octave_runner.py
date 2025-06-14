@@ -183,13 +183,13 @@ class OctaveSolver(SolverInterface):
             'problem_class': problem.problem_class,
             'A_eq': problem.A_eq.tolist() if problem.A_eq is not None else None,
             'b_eq': problem.b_eq.tolist() if problem.b_eq is not None else None,
-            'A_ineq': problem.A_ineq.tolist() if problem.A_ineq is not None else None,
-            'b_ineq': problem.b_ineq.tolist() if problem.b_ineq is not None else None,
+            'A_ineq': problem.A_ub.tolist() if problem.A_ub is not None else None,  # Use A_ub
+            'b_ineq': problem.b_ub.tolist() if problem.b_ub is not None else None,  # Use b_ub
             'c': problem.c.tolist() if problem.c is not None else None,
-            'Q': problem.Q.tolist() if problem.Q is not None else None,
+            'Q': problem.P.tolist() if problem.P is not None else None,  # Use P for quadratic matrix
             'bounds': problem.bounds,
-            'n_variables': problem.n_variables,
-            'n_constraints': problem.n_constraints
+            'n_variables': problem.metadata.get('n_variables') if problem.metadata else None,
+            'n_constraints': problem.metadata.get('n_constraints') if problem.metadata else None
         }
         
         with open(filename, 'w') as f:
