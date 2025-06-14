@@ -3,1011 +3,119 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard - Optimization Solver Benchmark</title>
-    
-    <!-- Bootstrap CSS for responsive design -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    
-    <!-- Chart.js for visualizations -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    
-    <!-- Custom CSS -->
-    <style>
-        .navbar-brand {
-            font-weight: bold;
-        }
-        
-        .metric-card {
-            transition: transform 0.2s;
-        }
-        
-        .metric-card:hover {
-            transform: translateY(-2px);
-        }
-        
-        .result-table {
-            font-size: 0.9rem;
-        }
-        
-        .status-optimal {
-            color: #28a745;
-            font-weight: bold;
-        }
-        
-        .status-error {
-            color: #dc3545;
-            font-weight: bold;
-        }
-        
-        .status-timeout {
-            color: #ffc107;
-            font-weight: bold;
-        }
-        
-        .status-infeasible {
-            color: #6c757d;
-            font-weight: bold;
-        }
-        
-        .solver-comparison {
-            margin-top: 2rem;
-        }
-        
-        .chart-container {
-            position: relative;
-            height: 400px;
-            margin: 2rem 0;
-        }
-        
-        .performance-badge {
-            font-size: 0.8rem;
-        }
-        
-        .footer {
-            margin-top: 3rem;
-            padding: 2rem 0;
-            background-color: #f8f9fa;
-            border-top: 1px solid #e9ecef;
-        }
-        
-        .timestamp {
-            color: #6c757d;
-            font-size: 0.85rem;
-        }
-        
-        .problem-info {
-            background-color: #f8f9fa;
-            border-left: 4px solid #007bff;
-        }
-        
-        .solver-info {
-            background-color: #e8f4f8;
-            border-left: 4px solid #17a2b8;
-        }
-    </style>
-    
-    
+    <title>Optimization Solver Benchmark Results</title>
+    <link rel="stylesheet" href="assets/css/style.css">
 </head>
 <body>
-    <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-        <div class="container">
-            <a class="navbar-brand" href="#">
-                <i class="fas fa-chart-bar me-2"></i>
-                Optimization Solver Benchmark
-            </a>
-            
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">
-                            <i class="fas fa-home me-1"></i>Dashboard
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">
-                            <i class="fas fa-balance-scale me-1"></i>Solver Comparison
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">
-                            <i class="fas fa-puzzle-piece me-1"></i>Problem Analysis
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">
-                            <i class="fas fa-info-circle me-1"></i>Environment
-                        </a>
-                    </li>
-                </ul>
-            </div>
-        </div>
+    <header>
+        <h1>🔬 Optimization Solver Benchmark</h1>
+        <p>Comprehensive benchmarking of optimization solvers on standard problems</p>
+    </header>
+    
+    <nav>
+        <a href="index.html">Overview</a>
+        <a href="solver_comparison.html">Solver Comparison</a>
+        <a href="problem_analysis.html">Problem Analysis</a>
+        <a href="results_matrix.html">Results Matrix</a>
+        <a href="statistical_analysis.html">Statistical Analysis</a>
+        <a href="performance_profiling.html">Performance Profiling</a>
+        <a href="environment_info.html">Environment Info</a>
+        <a href="data/">Raw Data</a>
     </nav>
-
-    <!-- Main Content -->
-    <main class="container mt-4">
-        
-<nav aria-label="breadcrumb">
-    <ol class="breadcrumb">
-        <li class="breadcrumb-item active">Dashboard</li>
-    </ol>
-</nav>
-
-        
-        
-        <!-- Alert messages can be added here -->
-        
-        
-        
-<!-- Summary Statistics -->
-<div class="row mb-4">
-    <div class="col-md-3">
-        <div class="card metric-card h-100">
-            <div class="card-body text-center">
-                <h5 class="card-title text-primary">
-                    <i class="fas fa-calculator me-2"></i>Total Runs
-                </h5>
-                <h2 class="text-primary">20</h2>
-                <p class="text-muted small mb-0">Benchmark executions</p>
-            </div>
-        </div>
-    </div>
     
-    <div class="col-md-3">
-        <div class="card metric-card h-100">
-            <div class="card-body text-center">
-                <h5 class="card-title text-success">
-                    <i class="fas fa-check-circle me-2"></i>Success Rate
-                </h5>
-                <h2 class="text-success">0.0%</h2>
-                <p class="text-muted small mb-0">Optimal solutions found</p>
-            </div>
-        </div>
-    </div>
-    
-    <div class="col-md-3">
-        <div class="card metric-card h-100">
-            <div class="card-body text-center">
-                <h5 class="card-title text-info">
-                    <i class="fas fa-tools me-2"></i>Active Solvers
-                </h5>
-                <h2 class="text-info">3</h2>
-                <p class="text-muted small mb-0">Available solvers</p>
-            </div>
-        </div>
-    </div>
-    
-    <div class="col-md-3">
-        <div class="card metric-card h-100">
-            <div class="card-body text-center">
-                <h5 class="card-title text-warning">
-                    <i class="fas fa-clock me-2"></i>Avg Time
-                </h5>
-                <h2 class="text-warning">N/A</h2>
-                <p class="text-muted small mb-0">Per benchmark run</p>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Solver Performance Comparison -->
-
-<div class="row mb-4">
-    <div class="col-12">
-        <div class="card">
-            <div class="card-header">
-                <h5 class="card-title mb-0">
-                    <i class="fas fa-chart-bar me-2"></i>Solver Performance Overview
-                </h5>
-            </div>
-            <div class="card-body">
-                <div class="chart-container">
-                    <canvas id="solverPerformanceChart"></canvas>
+    <main>
+        <section class="overview">
+            <h2>📊 Benchmark Overview</h2>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <h3>Total Results</h3>
+                    <span class="stat-value">53</span>
+                </div>
+                <div class="stat-card">
+                    <h3>Solvers Tested</h3>
+                    <span class="stat-value">5</span>
+                </div>
+                <div class="stat-card">
+                    <h3>Problems Solved</h3>
+                    <span class="stat-value">2</span>
+                </div>
+                <div class="stat-card">
+                    <h3>Success Rate</h3>
+                    <span class="stat-value">96.2%</span>
                 </div>
             </div>
-        </div>
-    </div>
-</div>
+        </section>
+        
+        <section class="top-performers">
+            <h2>🏆 Top Performing Solvers</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Rank</th>
+                        <th>Solver</th>
+                        <th>Success Rate</th>
+                        <th>Avg Time (s)</th>
+                        <th>Problems Solved</th>
+                    </tr>
+                </thead>
+                <tbody>
 
-
-<!-- Solver Statistics Table -->
-
-<div class="row mb-4">
-    <div class="col-12">
-        <div class="card">
-            <div class="card-header">
-                <h5 class="card-title mb-0">
-                    <i class="fas fa-table me-2"></i>Solver Statistics
-                </h5>
+                    <tr>
+                        <td>1</td>
+                        <td>CLARABEL (via CVXPY)</td>
+                        <td>66.7%</td>
+                        <td>0.0042</td>
+                        <td>4</td>
+                    </tr>
+                    <tr>
+                        <td>2</td>
+                        <td>ECOS (via CVXPY)</td>
+                        <td>100.0%</td>
+                        <td>0.0053</td>
+                        <td>6</td>
+                    </tr>
+                    <tr>
+                        <td>3</td>
+                        <td>SciPy</td>
+                        <td>100.0%</td>
+                        <td>0.0052</td>
+                        <td>29</td>
+                    </tr>
+                    <tr>
+                        <td>4</td>
+                        <td>OSQP (via CVXPY)</td>
+                        <td>100.0%</td>
+                        <td>0.0031</td>
+                        <td>6</td>
+                    </tr>
+                    <tr>
+                        <td>5</td>
+                        <td>SCS (via CVXPY)</td>
+                        <td>100.0%</td>
+                        <td>0.0021</td>
+                        <td>6</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+        
+        <section class="recent-updates">
+            <h2>📅 Latest Information</h2>
+            <div class="update-info">
+                <p><strong>Last Updated:</strong> 2025-06-14T20:23:08.304144</p>
+                <p><strong>Data Format Version:</strong> 1.0</p>
+                <p><strong>Environment:</strong> macOS-14.5-arm64-arm-64bit</p>
             </div>
-            <div class="card-body">
-                <div class="table-responsive">
-                    <table class="table table-striped result-table">
-                        <thead class="table-dark">
-                            <tr>
-                                <th>Solver</th>
-                                <th>Total Runs</th>
-                                <th>Success Rate</th>
-                                <th>Avg Time</th>
-                                <th>Min Time</th>
-                                <th>Max Time</th>
-                                <th>Problems Solved</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            
-                            <tr>
-                                <td>
-                                    <strong>CVXPY</strong>
-                                    
-                                        <span class="badge bg-success performance-badge ms-2">Perfect</span>
-                                    
-                                </td>
-                                <td>2</td>
-                                <td>
-                                    <span class="text-success">
-                                        100.0%
-                                    </span>
-                                </td>
-                                <td>0.005s</td>
-                                <td>0.005s</td>
-                                <td>0.006s</td>
-                                <td>2</td>
-                            </tr>
-                            
-                            <tr>
-                                <td>
-                                    <strong>SciPy</strong>
-                                    
-                                        <span class="badge bg-success performance-badge ms-2">Perfect</span>
-                                    
-                                </td>
-                                <td>14</td>
-                                <td>
-                                    <span class="text-success">
-                                        100.0%
-                                    </span>
-                                </td>
-                                <td>0.006s</td>
-                                <td>0.001s</td>
-                                <td>0.016s</td>
-                                <td>2</td>
-                            </tr>
-                            
-                            <tr>
-                                <td>
-                                    <strong>scipy</strong>
-                                    
-                                        <span class="badge bg-danger performance-badge ms-2">Issues</span>
-                                    
-                                </td>
-                                <td>4</td>
-                                <td>
-                                    <span class="text-danger">
-                                        0.0%
-                                    </span>
-                                </td>
-                                <td>0.000s</td>
-                                <td>0.000s</td>
-                                <td>0.000s</td>
-                                <td>0</td>
-                            </tr>
-                            
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-
-<!-- Recent Results -->
-
-<div class="row mb-4">
-    <div class="col-12">
-        <div class="card">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <h5 class="card-title mb-0">
-                    <i class="fas fa-history me-2"></i>Recent Results
-                </h5>
-                <small class="text-muted">Last 20 executions</small>
-            </div>
-            <div class="card-body">
-                <div class="table-responsive">
-                    <table class="table table-striped result-table">
-                        <thead class="table-dark">
-                            <tr>
-                                <th>Timestamp</th>
-                                <th>Solver</th>
-                                <th>Problem</th>
-                                <th>Status</th>
-                                <th>Time</th>
-                                <th>Objective</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            
-                            <tr>
-                                <td class="timestamp">
-                                    2025-06-11T01:05:13.032779
-                                </td>
-                                <td>
-                                    <span class="fw-bold">SciPy</span>
-                                </td>
-                                <td>SIMPLE_LP</td>
-                                <td>
-                                    <span class="status-optimal">
-                                        Optimal
-                                    </span>
-                                </td>
-                                <td>0.001s</td>
-                                <td>
-                                    
-                                        0.0
-                                    
-                                </td>
-                            </tr>
-                            
-                            <tr>
-                                <td class="timestamp">
-                                    2025-06-11T01:05:13.032779
-                                </td>
-                                <td>
-                                    <span class="fw-bold">SciPy</span>
-                                </td>
-                                <td>SIMPLE_QP</td>
-                                <td>
-                                    <span class="status-optimal">
-                                        Optimal
-                                    </span>
-                                </td>
-                                <td>0.013s</td>
-                                <td>
-                                    
-                                        5.14e-06
-                                    
-                                </td>
-                            </tr>
-                            
-                            <tr>
-                                <td class="timestamp">
-                                    2025-06-11T01:05:13.032779
-                                </td>
-                                <td>
-                                    <span class="fw-bold">CVXPY</span>
-                                </td>
-                                <td>SIMPLE_LP</td>
-                                <td>
-                                    <span class="status-optimal">
-                                        Optimal
-                                    </span>
-                                </td>
-                                <td>0.006s</td>
-                                <td>
-                                    
-                                        5.98e-10
-                                    
-                                </td>
-                            </tr>
-                            
-                            <tr>
-                                <td class="timestamp">
-                                    2025-06-11T01:05:13.032779
-                                </td>
-                                <td>
-                                    <span class="fw-bold">CVXPY</span>
-                                </td>
-                                <td>SIMPLE_QP</td>
-                                <td>
-                                    <span class="status-optimal">
-                                        Optimal
-                                    </span>
-                                </td>
-                                <td>0.005s</td>
-                                <td>
-                                    
-                                        7.29e-10
-                                    
-                                </td>
-                            </tr>
-                            
-                            <tr>
-                                <td class="timestamp">
-                                    2025-06-11T01:05:13.019776
-                                </td>
-                                <td>
-                                    <span class="fw-bold">scipy</span>
-                                </td>
-                                <td>simple_lp</td>
-                                <td>
-                                    <span class="status-error">
-                                        Error
-                                    </span>
-                                </td>
-                                <td>0.000s</td>
-                                <td>
-                                    
-                                        <span class="text-muted">N/A</span>
-                                    
-                                </td>
-                            </tr>
-                            
-                            <tr>
-                                <td class="timestamp">
-                                    2025-06-11T01:05:13.019776
-                                </td>
-                                <td>
-                                    <span class="fw-bold">scipy</span>
-                                </td>
-                                <td>simple_qp</td>
-                                <td>
-                                    <span class="status-error">
-                                        Error
-                                    </span>
-                                </td>
-                                <td>0.000s</td>
-                                <td>
-                                    
-                                        <span class="text-muted">N/A</span>
-                                    
-                                </td>
-                            </tr>
-                            
-                            <tr>
-                                <td class="timestamp">
-                                    2025-06-11T01:05:12.995163
-                                </td>
-                                <td>
-                                    <span class="fw-bold">SciPy</span>
-                                </td>
-                                <td>SIMPLE_LP</td>
-                                <td>
-                                    <span class="status-optimal">
-                                        Optimal
-                                    </span>
-                                </td>
-                                <td>0.001s</td>
-                                <td>
-                                    
-                                        0.0
-                                    
-                                </td>
-                            </tr>
-                            
-                            <tr>
-                                <td class="timestamp">
-                                    2025-06-11T01:05:12.995163
-                                </td>
-                                <td>
-                                    <span class="fw-bold">SciPy</span>
-                                </td>
-                                <td>SIMPLE_QP</td>
-                                <td>
-                                    <span class="status-optimal">
-                                        Optimal
-                                    </span>
-                                </td>
-                                <td>0.016s</td>
-                                <td>
-                                    
-                                        5.14e-06
-                                    
-                                </td>
-                            </tr>
-                            
-                            <tr>
-                                <td class="timestamp">
-                                    2025-06-11T01:05:12.983147
-                                </td>
-                                <td>
-                                    <span class="fw-bold">SciPy</span>
-                                </td>
-                                <td>SIMPLE_LP</td>
-                                <td>
-                                    <span class="status-optimal">
-                                        Optimal
-                                    </span>
-                                </td>
-                                <td>0.005s</td>
-                                <td>
-                                    
-                                        0.0
-                                    
-                                </td>
-                            </tr>
-                            
-                            <tr>
-                                <td class="timestamp">
-                                    2025-06-11T00:57:54.918296
-                                </td>
-                                <td>
-                                    <span class="fw-bold">SciPy</span>
-                                </td>
-                                <td>SIMPLE_LP</td>
-                                <td>
-                                    <span class="status-optimal">
-                                        Optimal
-                                    </span>
-                                </td>
-                                <td>0.001s</td>
-                                <td>
-                                    
-                                        0.0
-                                    
-                                </td>
-                            </tr>
-                            
-                            <tr>
-                                <td class="timestamp">
-                                    2025-06-11T00:57:54.918296
-                                </td>
-                                <td>
-                                    <span class="fw-bold">SciPy</span>
-                                </td>
-                                <td>SIMPLE_QP</td>
-                                <td>
-                                    <span class="status-optimal">
-                                        Optimal
-                                    </span>
-                                </td>
-                                <td>0.013s</td>
-                                <td>
-                                    
-                                        5.14e-06
-                                    
-                                </td>
-                            </tr>
-                            
-                            <tr>
-                                <td class="timestamp">
-                                    2025-06-11T00:57:54.909677
-                                </td>
-                                <td>
-                                    <span class="fw-bold">scipy</span>
-                                </td>
-                                <td>simple_lp</td>
-                                <td>
-                                    <span class="status-error">
-                                        Error
-                                    </span>
-                                </td>
-                                <td>0.000s</td>
-                                <td>
-                                    
-                                        <span class="text-muted">N/A</span>
-                                    
-                                </td>
-                            </tr>
-                            
-                            <tr>
-                                <td class="timestamp">
-                                    2025-06-11T00:57:54.909677
-                                </td>
-                                <td>
-                                    <span class="fw-bold">scipy</span>
-                                </td>
-                                <td>simple_qp</td>
-                                <td>
-                                    <span class="status-error">
-                                        Error
-                                    </span>
-                                </td>
-                                <td>0.000s</td>
-                                <td>
-                                    
-                                        <span class="text-muted">N/A</span>
-                                    
-                                </td>
-                            </tr>
-                            
-                            <tr>
-                                <td class="timestamp">
-                                    2025-06-11T00:57:54.884316
-                                </td>
-                                <td>
-                                    <span class="fw-bold">SciPy</span>
-                                </td>
-                                <td>SIMPLE_LP</td>
-                                <td>
-                                    <span class="status-optimal">
-                                        Optimal
-                                    </span>
-                                </td>
-                                <td>0.001s</td>
-                                <td>
-                                    
-                                        0.0
-                                    
-                                </td>
-                            </tr>
-                            
-                            <tr>
-                                <td class="timestamp">
-                                    2025-06-11T00:57:54.884316
-                                </td>
-                                <td>
-                                    <span class="fw-bold">SciPy</span>
-                                </td>
-                                <td>SIMPLE_QP</td>
-                                <td>
-                                    <span class="status-optimal">
-                                        Optimal
-                                    </span>
-                                </td>
-                                <td>0.016s</td>
-                                <td>
-                                    
-                                        5.14e-06
-                                    
-                                </td>
-                            </tr>
-                            
-                            <tr>
-                                <td class="timestamp">
-                                    2025-06-11T00:57:54.870163
-                                </td>
-                                <td>
-                                    <span class="fw-bold">SciPy</span>
-                                </td>
-                                <td>SIMPLE_LP</td>
-                                <td>
-                                    <span class="status-optimal">
-                                        Optimal
-                                    </span>
-                                </td>
-                                <td>0.007s</td>
-                                <td>
-                                    
-                                        0.0
-                                    
-                                </td>
-                            </tr>
-                            
-                            <tr>
-                                <td class="timestamp">
-                                    2025-06-11T00:53:48.908004
-                                </td>
-                                <td>
-                                    <span class="fw-bold">SciPy</span>
-                                </td>
-                                <td>SIMPLE_LP</td>
-                                <td>
-                                    <span class="status-optimal">
-                                        Optimal
-                                    </span>
-                                </td>
-                                <td>0.002s</td>
-                                <td>
-                                    
-                                        0.0
-                                    
-                                </td>
-                            </tr>
-                            
-                            <tr>
-                                <td class="timestamp">
-                                    2025-06-11T00:53:48.908004
-                                </td>
-                                <td>
-                                    <span class="fw-bold">SciPy</span>
-                                </td>
-                                <td>SIMPLE_LP</td>
-                                <td>
-                                    <span class="status-optimal">
-                                        Optimal
-                                    </span>
-                                </td>
-                                <td>0.001s</td>
-                                <td>
-                                    
-                                        0.0
-                                    
-                                </td>
-                            </tr>
-                            
-                            <tr>
-                                <td class="timestamp">
-                                    2025-06-11T00:53:48.908004
-                                </td>
-                                <td>
-                                    <span class="fw-bold">SciPy</span>
-                                </td>
-                                <td>SIMPLE_LP</td>
-                                <td>
-                                    <span class="status-optimal">
-                                        Optimal
-                                    </span>
-                                </td>
-                                <td>0.001s</td>
-                                <td>
-                                    
-                                        0.0
-                                    
-                                </td>
-                            </tr>
-                            
-                            <tr>
-                                <td class="timestamp">
-                                    2025-06-11T00:53:48.908004
-                                </td>
-                                <td>
-                                    <span class="fw-bold">SciPy</span>
-                                </td>
-                                <td>SIMPLE_LP</td>
-                                <td>
-                                    <span class="status-optimal">
-                                        Optimal
-                                    </span>
-                                </td>
-                                <td>0.001s</td>
-                                <td>
-                                    
-                                        0.0
-                                    
-                                </td>
-                            </tr>
-                            
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-
-<!-- System Information -->
-
-<div class="row mb-4">
-    <div class="col-md-6">
-        <div class="card problem-info">
-            <div class="card-header">
-                <h6 class="card-title mb-0">
-                    <i class="fas fa-desktop me-2"></i>System Information
-                </h6>
-            </div>
-            <div class="card-body">
-                <dl class="row mb-0">
-                    <dt class="col-sm-4">OS:</dt>
-                    <dd class="col-sm-8">Darwin 23.5.0</dd>
-                    
-                    <dt class="col-sm-4">CPU:</dt>
-                    <dd class="col-sm-8">8 cores</dd>
-                    
-                    <dt class="col-sm-4">Memory:</dt>
-                    <dd class="col-sm-8">24.0GB</dd>
-                    
-                    <dt class="col-sm-4">Python:</dt>
-                    <dd class="col-sm-8">3.12.2</dd>
-                </dl>
-            </div>
-        </div>
-    </div>
-    
-    <div class="col-md-6">
-        <div class="card solver-info">
-            <div class="card-header">
-                <h6 class="card-title mb-0">
-                    <i class="fas fa-cogs me-2"></i>Available Solvers
-                </h6>
-            </div>
-            <div class="card-body">
-                
-                <ul class="list-unstyled mb-0">
-                    
-                    <li class="mb-2">
-                        <strong>CVXPY</strong>
-                        <small class="text-muted d-block">
-                            2 runs, 100.0% success
-                        </small>
-                    </li>
-                    
-                    <li class="mb-2">
-                        <strong>SciPy</strong>
-                        <small class="text-muted d-block">
-                            14 runs, 100.0% success
-                        </small>
-                    </li>
-                    
-                    <li class="mb-2">
-                        <strong>scipy</strong>
-                        <small class="text-muted d-block">
-                            4 runs, 0.0% success
-                        </small>
-                    </li>
-                    
-                </ul>
-                
-            </div>
-        </div>
-    </div>
-</div>
-
-
-<!-- No Data Message -->
-
-
-
+        </section>
     </main>
-
-    <!-- Footer -->
-    <footer class="footer">
-        <div class="container">
-            <div class="row">
-                <div class="col-md-6">
-                    <h6>Optimization Solver Benchmark</h6>
-                    <p class="text-muted small">
-                        Automated benchmarking system for optimization solvers.
-                        Compare performance across different problem types and solver implementations.
-                    </p>
-                </div>
-                <div class="col-md-6 text-md-end">
-                    <p class="text-muted small mb-2">
-                        <i class="fas fa-clock me-1"></i>
-                        Last updated: 2025-06-11 08:37:56
-                    </p>
-                    <p class="text-muted small mb-0">
-                        <i class="fas fa-code me-1"></i>
-                        Generated automatically by the benchmark system
-                    </p>
-                </div>
+    
+    <footer>
+        <div class="footer-content">
+            <div class="footer-info">
+                <p>Generated automatically from benchmark results • <a href="data/results.json">Download Raw Data</a></p>
+                <p class="author-info">© 2025 Naoki Ito • <a href="mailto:napinoco@gmail.com">Contact</a> • <a href="https://github.com/napinoco/optimization-solver-benchmark">View on GitHub</a></p>
             </div>
         </div>
     </footer>
-
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    
-    <!-- Font Awesome for icons -->
-    <script src="https://kit.fontawesome.com/your-fontawesome-kit.js" crossorigin="anonymous"></script>
-    
-    <!-- Custom JavaScript -->
-    <script>
-        // Utility functions for the benchmark dashboard
-        
-        // Format time duration
-        function formatTime(seconds) {
-            if (seconds < 0.001) {
-                return (seconds * 1000000).toFixed(0) + 'μs';
-            } else if (seconds < 1) {
-                return (seconds * 1000).toFixed(1) + 'ms';
-            } else {
-                return seconds.toFixed(3) + 's';
-            }
-        }
-        
-        // Format large numbers with appropriate units
-        function formatNumber(num) {
-            if (num >= 1000000) {
-                return (num / 1000000).toFixed(1) + 'M';
-            } else if (num >= 1000) {
-                return (num / 1000).toFixed(1) + 'K';
-            } else {
-                return num.toString();
-            }
-        }
-        
-        // Get status badge class
-        function getStatusClass(status) {
-            switch(status.toLowerCase()) {
-                case 'optimal': return 'status-optimal';
-                case 'error': return 'status-error';
-                case 'timeout': return 'status-timeout';
-                case 'infeasible': return 'status-infeasible';
-                case 'unbounded': return 'status-infeasible';
-                default: return 'text-secondary';
-            }
-        }
-        
-        // Initialize tooltips
-        document.addEventListener('DOMContentLoaded', function() {
-            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-            var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-                return new bootstrap.Tooltip(tooltipTriggerEl);
-            });
-        });
-        
-        // Auto-refresh functionality (if enabled)
-        
-    </script>
-    
-    
-
-<script>
-// Solver Performance Chart
-document.addEventListener('DOMContentLoaded', function() {
-    const ctx = document.getElementById('solverPerformanceChart').getContext('2d');
-    
-    const solverNames = ["CVXPY", "SciPy", "scipy"];
-    const avgTimes = [
-        
-        0.005184531211853027,
-        
-        0.005756378173828125,
-        
-        0.0
-        
-    ];
-    const successRates = [
-        
-        100.0,
-        
-        100.0,
-        
-        0.0
-        
-    ];
-    
-    new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: solverNames,
-            datasets: [{
-                label: 'Average Time (seconds)',
-                data: avgTimes,
-                backgroundColor: 'rgba(54, 162, 235, 0.6)',
-                borderColor: 'rgba(54, 162, 235, 1)',
-                borderWidth: 1,
-                yAxisID: 'y'
-            }, {
-                label: 'Success Rate (%)',
-                data: successRates,
-                backgroundColor: 'rgba(255, 99, 132, 0.6)',
-                borderColor: 'rgba(255, 99, 132, 1)',
-                borderWidth: 1,
-                type: 'line',
-                yAxisID: 'y1'
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            interaction: {
-                mode: 'index',
-                intersect: false,
-            },
-            scales: {
-                y: {
-                    type: 'linear',
-                    display: true,
-                    position: 'left',
-                    title: {
-                        display: true,
-                        text: 'Average Time (seconds)'
-                    }
-                },
-                y1: {
-                    type: 'linear',
-                    display: true,
-                    position: 'right',
-                    title: {
-                        display: true,
-                        text: 'Success Rate (%)'
-                    },
-                    grid: {
-                        drawOnChartArea: false,
-                    },
-                }
-            },
-            plugins: {
-                title: {
-                    display: true,
-                    text: 'Solver Performance Comparison'
-                },
-                legend: {
-                    display: true
-                }
-            }
-        }
-    });
-});
-</script>
-
-
 </body>
 </html>
