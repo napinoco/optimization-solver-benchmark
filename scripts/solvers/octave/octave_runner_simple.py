@@ -60,7 +60,7 @@ class OctaveSolverSimple(SolverInterface):
         """Verify Octave installation and basic functionality."""
         try:
             result = subprocess.run(
-                [self.octave_path, '--eval', 'printf("Octave OK\\n");'],
+                [self.octave_path, '--no-gui', '--eval', 'printf("Octave OK\\n");'],
                 capture_output=True, text=True, timeout=10
             )
             
@@ -94,9 +94,9 @@ class OctaveSolverSimple(SolverInterface):
                 else:
                     raise ValueError(f"Unsupported problem type: {problem.problem_class}")
                 
-                # Execute Octave script
+                # Execute Octave script with --no-gui to avoid X11 display issues
                 result = subprocess.run([
-                    self.octave_path, '--eval', script_content
+                    self.octave_path, '--no-gui', '--eval', script_content
                 ], capture_output=True, text=True, timeout=self.timeout)
                 
                 solve_time = time.time() - start_time
@@ -145,20 +145,38 @@ class OctaveSolverSimple(SolverInterface):
     def _get_simple_lp_script(self, problem: ProblemData, result_file: Path) -> str:
         """Get simplified Octave script for linear programming."""
         
-        # Extract problem data
+        # Extract problem data from the actual problem
         c = problem.c.tolist() if problem.c is not None else [1.0, 2.0]
-        A = problem.A_ub.tolist() if problem.A_ub is not None else [[-1.0, -1.0]]
-        b = problem.b_ub.tolist() if problem.b_ub is not None else [-1.0]
+        
+        # Handle constraints
+        if problem.A_ub is not None:
+            A = problem.A_ub.tolist()
+            b = problem.b_ub.tolist() if problem.b_ub is not None else [0.0] * len(A)
+        else:
+            A = [[-1.0, -1.0]]  # Fallback for test
+            b = [-1.0]
+        
+        # Handle bounds - extract from problem.bounds if available
+        if problem.bounds and len(problem.bounds) > 0:
+            n_vars = len(c)
+            lb = []
+            for i in range(n_vars):
+                if i < len(problem.bounds) and problem.bounds[i] and len(problem.bounds[i]) > 0:
+                    lb.append(problem.bounds[i][0] if problem.bounds[i][0] is not None else 0.0)
+                else:
+                    lb.append(0.0)
+        else:
+            lb = [0.0] * len(c)
         
         return f'''
-fprintf('Starting simplified LP solver...\\n');
+fprintf('Starting LP solver for problem: {problem.name}\\n');
 
-% Problem data (extracted from Python)
+% Problem data extracted from: {problem.name}
 c = {c};
 A = {A};
 b = {b};
-lb = [0; 0];  % Non-negative bounds
-ub = [];      % No upper bounds
+lb = {lb};
+ub = [];  % No upper bounds for now
 
 fprintf('Problem data loaded\\n');
 
@@ -218,16 +236,34 @@ fprintf('LP solver completed\\n');
     def _get_simple_qp_script(self, problem: ProblemData, result_file: Path) -> str:
         """Get simplified Octave script for quadratic programming."""
         
-        # Extract problem data
-        P = problem.P.tolist() if problem.P is not None else [[1.0, 0.0], [0.0, 1.0]]
+        # Extract problem data from the actual problem
+        if problem.P is not None:
+            P_list = problem.P.tolist()
+            # Convert to Octave matrix format
+            P_octave = self._matrix_to_octave_format(P_list)
+        else:
+            P_octave = "[1.0, 0.0; 0.0, 1.0]"  # Identity matrix fallback
+        
         c = problem.c.tolist() if problem.c is not None else [1.0, 0.0]
         
+        # Handle bounds
+        if problem.bounds and len(problem.bounds) > 0:
+            n_vars = len(c)
+            lb = []
+            for i in range(n_vars):
+                if i < len(problem.bounds) and problem.bounds[i] and len(problem.bounds[i]) > 0:
+                    lb.append(problem.bounds[i][0] if problem.bounds[i][0] is not None else 0.0)
+                else:
+                    lb.append(0.0)
+        else:
+            lb = [0.0] * len(c)
+        
         return f'''
-fprintf('Starting simplified QP solver...\\n');
+fprintf('Starting QP solver for problem: {problem.name}\\n');
 
-% Problem data (extracted from Python)
-H = [1.0, 0.0; 0.0, 1.0];  % Quadratic matrix (hardcoded for now)
-q = [1.0; 0.0];            % Linear term (hardcoded for now)
+% Problem data extracted from: {problem.name}
+H = {P_octave};  % Quadratic matrix
+q = {c};         % Linear term
 x0 = [0.5; 0.5];  % Initial point
 lb = [0; 0];      % Lower bounds
 ub = [];          % No upper bounds
@@ -287,7 +323,7 @@ fprintf('QP solver completed\\n');
         """Get Octave version information."""
         try:
             result = subprocess.run(
-                [self.octave_path, '--version'],
+                [self.octave_path, '--no-gui', '--version'],
                 capture_output=True, text=True, timeout=10
             )
             
@@ -303,6 +339,21 @@ fprintf('QP solver completed\\n');
     def is_available(self) -> bool:
         """Check if Octave is available and working."""
         return self._verify_octave()
+    
+    def _matrix_to_octave_format(self, matrix_list) -> str:
+        """Convert Python matrix list to Octave matrix format."""
+        if not matrix_list:
+            return "[]"
+        
+        rows = []
+        for row in matrix_list:
+            if isinstance(row, list):
+                row_str = ", ".join(str(x) for x in row)
+            else:
+                row_str = str(row)
+            rows.append(row_str)
+        
+        return "[" + "; ".join(rows) + "]"
 
 
 def create_octave_solver_simple(config: Optional[Dict] = None) -> OctaveSolverSimple:
