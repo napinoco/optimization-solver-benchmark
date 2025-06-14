@@ -148,6 +148,21 @@ class BenchmarkOrchestrator:
                 self.logger.error("Please run benchmarks first to generate data.")
                 return False
             
+            # First publish data files (JSON exports) that HTML generator needs
+            from reporting.data_publisher import DataPublisher
+            
+            self.logger.info("📊 Publishing data files...")
+            data_publisher = DataPublisher(
+                db_path=database_path,
+                output_dir=str(Path(output_dir) / "data")
+            )
+            
+            if not data_publisher.publish_all_data():
+                self.logger.error("❌ Failed to publish data files - skipping HTML generation")
+                return False
+            
+            self.logger.info("✅ Data files published successfully")
+            
             # Create HTML generator
             data_dir = Path(output_dir) / "data"
             generator = SimpleHTMLGenerator(
