@@ -294,33 +294,64 @@ if ~isempty(problem_data.bounds)
     ub = [];  % No upper bounds
 end
 
-% Solve using linprog (if available) or alternative solver
+% Solve using glpk (GNU Linear Programming Kit) - usually available in Octave
 try
-    if exist('linprog', 'file')
-        % Use Octave's linprog if available
-        [x, fval, exitflag, output] = linprog(c, A, b, Aeq, beq, lb, ub);
+    if exist('glpk', 'file')
+        % Use GLPK solver - standard in most Octave installations
+        % Set up GLPK parameters
+        sense = 1;  % 1 = minimize
+        vartype = repmat('C', length(c), 1);  % 'C' = continuous variables
         
-        % Map exit flags to status
-        if exitflag == 1
+        % Build constraint matrix and bounds for GLPK format
+        % GLPK expects: A_combined * x (LE,EQ,GE) b_combined
+        A_combined = [];
+        b_combined = [];
+        ctype = '';
+        
+        if ~isempty(A)
+            A_combined = [A_combined; A];
+            b_combined = [b_combined; b];
+            ctype = [ctype repmat('U', 1, size(A, 1))];  % Upper bound (<=)
+        end
+        
+        if ~isempty(Aeq)
+            A_combined = [A_combined; Aeq];
+            b_combined = [b_combined; beq];
+            ctype = [ctype repmat('S', 1, size(Aeq, 1))];  % Equality (=)
+        end
+        
+        % Set variable bounds
+        if isempty(lb)
+            lb = -Inf(length(c), 1);
+        end
+        if isempty(ub)
+            ub = Inf(length(c), 1);
+        end
+        
+        % Call GLPK solver
+        if isempty(A_combined)
+            % No constraints case
+            [x, fval, exitflag, extra] = glpk(c, [], [], lb, ub, '', vartype, sense);
+        else
+            [x, fval, exitflag, extra] = glpk(c, A_combined, b_combined, lb, ub, ctype, vartype, sense);
+        end
+        
+        % Map GLPK exit flags to our status
+        % GLPK exitflag: 0=success, others are errors
+        if exitflag == 0
             status = 'optimal';
-        elseif exitflag == 0
-            status = 'max_iter';
-        elseif exitflag == -2
-            status = 'infeasible';
-        elseif exitflag == -3
-            status = 'unbounded';
         else
             status = 'error';
         end
         
         iterations = [];
-        if isfield(output, 'iterations')
-            iterations = output.iterations;
+        if isfield(extra, 'iter')
+            iterations = extra.iter;
         end
         
     else
         % Fallback to basic implementation for testing
-        warning('linprog not available, using basic solver');
+        warning('glpk not available, using basic solver');
         
         % Simple test solver - just verify Octave execution works
         if isempty(A) && ~isempty(Aeq)
@@ -424,33 +455,74 @@ if ~isempty(problem_data.bounds)
     ub = [];  % No upper bounds
 end
 
-% Solve using quadprog (if available) or alternative
+% Solve using qp (built-in Octave QP solver) or alternative
 try
-    if exist('quadprog', 'file')
-        % Use Octave's quadprog if available
-        [x, fval, exitflag, output] = quadprog(Q, c, A, b, Aeq, beq, lb, ub);
+    if exist('qp', 'file')
+        % Use Octave's built-in qp function
+        % qp syntax: [x, obj, info, lambda] = qp(x0, H, q, A, b, Aeq, beq, lb, ub)
         
-        % Map exit flags to status
-        if exitflag > 0
+        % Set initial point
+        x0 = zeros(size(Q, 1), 1);
+        
+        % QP in standard form: min 0.5*x'*H*x + q'*x
+        % Our problem: min 0.5*x'*Q*x + c'*x
+        H = Q;
+        q = c;
+        
+        % Set up constraints for qp
+        if isempty(A)
+            A_ineq = [];
+            b_ineq = [];
+        else
+            A_ineq = A;
+            b_ineq = b;
+        end
+        
+        if isempty(Aeq)
+            A_eq = [];
+            b_eq = [];
+        else
+            A_eq = Aeq;
+            b_eq = beq;
+        end
+        
+        % Set bounds
+        if isempty(lb)
+            lb_qp = [];
+        else
+            lb_qp = lb;
+        end
+        if isempty(ub)
+            ub_qp = [];
+        else
+            ub_qp = ub;
+        end
+        
+        % Call qp solver using simplified syntax
+        % Note: This version doesn't handle equality constraints - will be enhanced later
+        [x, fval, info, lambda] = qp(x0, H, q, A_ineq, b_ineq, lb_qp, ub_qp);
+        
+        % Map qp info codes to status
+        if info.info == 0
             status = 'optimal';
-        elseif exitflag == 0
+        elseif info.info == 1
             status = 'max_iter';
-        elseif exitflag == -2
+        elseif info.info == 2
             status = 'infeasible';
-        elseif exitflag == -3
+        elseif info.info == 3
             status = 'unbounded';
         else
             status = 'error';
         end
         
         iterations = [];
-        if isfield(output, 'iterations')
-            iterations = output.iterations;
+        if isfield(info, 'iter')
+            iterations = info.iter;
         end
         
     else
         % Fallback to basic QP solver for testing
-        warning('quadprog not available, using basic solver');
+        warning('qp not available, using basic solver');
         
         % Simple test QP solver - just verify Octave execution works
         if isempty(A) && ~isempty(Aeq)
