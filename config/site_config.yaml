@@ -1,0 +1,25 @@
+# Site Configuration
+# ==================
+# 
+# Contains site metadata, author information, and display preferences for HTML generation
+
+author:
+  name: "Naoki Ito"
+  email: "napinoco@gmail.com"
+  url: "https://napinoco.github.io"
+  github_url: "https://github.com/napinoco/optimization-solver-benchmark"
+  
+# Project information
+project:
+  title: "Optimization Solver Benchmark System"
+  description: "Comprehensive benchmarking platform for optimization solvers"
+  license: "MIT License"
+  license_year: "2025"
+  license_holder: "napinoco"
+
+# Display preferences for HTML pages
+display:
+  show_author_in_footer: true
+  show_github_link: true
+  show_contact_email: true
+  footer_format: "compact"  # Options: compact, detailed

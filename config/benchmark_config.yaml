@@ -1,4 +1,20 @@
 # Benchmark execution configuration
 timeout: 300  # seconds per problem
-parallel_jobs: 2  # number of parallel solver executions
+
+# Parallel execution settings
+# Options:
+# - 1: Sequential execution (recommended - prevents resource contention)
+# - Integer (2-4): Parallel workers (use only if solvers don't utilize multiple cores)
+# - "auto": Auto-detect optimal based on CPU cores
+# Note: Many optimization solvers internally use multiple CPU cores, so parallel_jobs: 1
+# often provides better overall performance by avoiding resource contention
+parallel_jobs: 1  # number of parallel solver executions ("auto" or integer)
+
 output_format: "json"  # output format for intermediate results
+
+# Notes on parallel_jobs setting:
+# - Value of 2: Conservative default, works well in constrained environments
+# - GitHub Actions runners have 2-4 CPU cores, so 2 workers is optimal
+# - Higher values may cause resource contention and slower overall performance
+# - Sequential execution (parallel_jobs: 1) is available for debugging
+# - For high-end machines, consider 4-8 workers for better throughput

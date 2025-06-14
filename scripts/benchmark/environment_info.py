@@ -1,6 +1,10 @@
 import platform
 import psutil
 import sys
+import subprocess
+import os
+import time
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Dict, Any
 import json
@@ -14,8 +18,8 @@ from scripts.utils.logger import get_logger
 logger = get_logger("environment_info")
 
 def get_os_info() -> Dict[str, str]:
-    """Get operating system information."""
-    return {
+    """Get operating system information with enhanced Ubuntu detection."""
+    os_info = {
         "system": platform.system(),
         "release": platform.release(),
         "version": platform.version(),
@@ -23,6 +27,36 @@ def get_os_info() -> Dict[str, str]:
         "architecture": platform.architecture()[0],
         "platform": platform.platform()
     }
+    
+    # Enhanced Ubuntu version detection
+    if platform.system() == "Linux":
+        try:
+            # Try to get Ubuntu version from /etc/os-release
+            if os.path.exists("/etc/os-release"):
+                with open("/etc/os-release", "r") as f:
+                    os_release = f.read()
+                    for line in os_release.split('\n'):
+                        if line.startswith('PRETTY_NAME='):
+                            os_info["ubuntu_version"] = line.split('=')[1].strip('"')
+                            break
+                        elif line.startswith('VERSION='):
+                            os_info["version_number"] = line.split('=')[1].strip('"')
+                        elif line.startswith('VERSION_ID='):
+                            os_info["version_id"] = line.split('=')[1].strip('"')
+            
+            # Try lsb_release as fallback
+            try:
+                result = subprocess.run(['lsb_release', '-d'], 
+                                      capture_output=True, text=True, timeout=5)
+                if result.returncode == 0:
+                    os_info["lsb_description"] = result.stdout.strip().split('\t')[1]
+            except (subprocess.TimeoutExpired, FileNotFoundError, IndexError):
+                pass
+                
+        except Exception as e:
+            logger.debug(f"Could not get detailed Ubuntu version: {e}")
+    
+    return os_info
 
 def get_cpu_info() -> Dict[str, Any]:
     """Get CPU information."""
@@ -67,6 +101,57 @@ def get_disk_info() -> Dict[str, Any]:
         "free_gb": round(disk_usage.free / (1024**3), 2)
     }
 
+def get_timezone_info() -> Dict[str, Any]:
+    """Get timezone and time information."""
+    
+    timezone_info = {
+        "current_time_utc": datetime.now(timezone.utc).isoformat(),
+        "current_time_local": datetime.now().isoformat(),
+        "utc_offset_seconds": time.timezone if time.daylight == 0 else time.altzone,
+        "utc_offset_hours": -(time.timezone if time.daylight == 0 else time.altzone) / 3600,
+        "timezone_name": time.tzname[0] if time.daylight == 0 else time.tzname[1],
+        "daylight_saving": bool(time.daylight and time.localtime().tm_isdst)
+    }
+    
+    # Try to get more detailed timezone info
+    try:
+        # Try to get timezone from TZ environment variable
+        tz_env = os.environ.get('TZ')
+        if tz_env:
+            timezone_info["tz_environment"] = tz_env
+            
+        # Try to read /etc/timezone (Linux/Ubuntu)
+        if os.path.exists('/etc/timezone'):
+            with open('/etc/timezone', 'r') as f:
+                system_timezone = f.read().strip()
+                timezone_info["system_timezone"] = system_timezone
+                
+        # Try to read timezone from timedatectl (systemd systems)
+        try:
+            result = subprocess.run(['timedatectl', 'show', '--property=Timezone', '--value'], 
+                                  capture_output=True, text=True, timeout=5)
+            if result.returncode == 0:
+                timezone_info["timedatectl_timezone"] = result.stdout.strip()
+        except (subprocess.TimeoutExpired, FileNotFoundError):
+            pass
+            
+        # For macOS, try to get timezone from systemsetup
+        if platform.system() == "Darwin":
+            try:
+                result = subprocess.run(['systemsetup', '-gettimezone'], 
+                                      capture_output=True, text=True, timeout=5)
+                if result.returncode == 0:
+                    tz_line = result.stdout.strip()
+                    if "Time Zone:" in tz_line:
+                        timezone_info["macos_timezone"] = tz_line.split("Time Zone:")[1].strip()
+            except (subprocess.TimeoutExpired, FileNotFoundError):
+                pass
+    
+    except Exception as e:
+        logger.debug(f"Could not get detailed timezone info: {e}")
+    
+    return timezone_info
+
 def collect_environment_info() -> Dict[str, Any]:
     """Collect all environment information for benchmark reproducibility."""
     logger.info("Collecting environment information...")
@@ -77,7 +162,8 @@ def collect_environment_info() -> Dict[str, Any]:
         "cpu": get_cpu_info(), 
         "memory": get_memory_info(),
         "python": get_python_info(),
-        "disk": get_disk_info()
+        "disk": get_disk_info(),
+        "timezone": get_timezone_info()
     }
     
     logger.info("Environment information collected successfully")
@@ -89,11 +175,30 @@ def get_environment_summary() -> str:
     """Get a human-readable summary of the environment."""
     env_info = collect_environment_info()
     
+    # Enhanced OS description
+    os_desc = f"{env_info['os']['system']} {env_info['os']['release']}"
+    if 'ubuntu_version' in env_info['os']:
+        os_desc = env_info['os']['ubuntu_version']
+    elif 'lsb_description' in env_info['os']:
+        os_desc = env_info['os']['lsb_description']
+    
+    # Enhanced timezone description
+    tz_info = env_info['timezone']
+    timezone_desc = f"UTC{tz_info['utc_offset_hours']:+.1f} ({tz_info['timezone_name']})"
+    if 'system_timezone' in tz_info:
+        timezone_desc = f"{tz_info['system_timezone']} (UTC{tz_info['utc_offset_hours']:+.1f})"
+    elif 'timedatectl_timezone' in tz_info:
+        timezone_desc = f"{tz_info['timedatectl_timezone']} (UTC{tz_info['utc_offset_hours']:+.1f})"
+    elif 'macos_timezone' in tz_info:
+        timezone_desc = f"{tz_info['macos_timezone']} (UTC{tz_info['utc_offset_hours']:+.1f})"
+    
     summary = f"""Environment Summary:
-OS: {env_info['os']['system']} {env_info['os']['release']} ({env_info['os']['machine']})
+OS: {os_desc} ({env_info['os']['machine']})
 CPU: {env_info['cpu']['processor']} ({env_info['cpu']['cpu_count']} cores)
 Memory: {env_info['memory']['total_gb']} GB total, {env_info['memory']['available_gb']} GB available
 Python: {env_info['python']['version']} ({env_info['python']['implementation']})
+Timezone: {timezone_desc}
+Local Time: {tz_info['current_time_local']}
 Disk: {env_info['disk']['free_gb']} GB free of {env_info['disk']['total_gb']} GB total"""
     
     return summary
