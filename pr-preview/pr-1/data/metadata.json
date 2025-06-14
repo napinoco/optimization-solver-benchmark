@@ -1,6 +1,6 @@
 {
   "metadata": {
-    "generated_at": "2025-06-14T11:40:22.516675",
+    "generated_at": "2025-06-14T12:00:43.717497",
     "format_version": "1.0",
     "description": "Problem and solver metadata"
   },
@@ -9,12 +9,6 @@
       "name": "CLARABEL (via CVXPY)",
       "type": "CVXPY Backend",
       "backend": "CLARABEL",
-      "environment": "Python"
-    },
-    {
-      "name": "CVXPY",
-      "type": "CVXPY Backend",
-      "backend": "CVXPY",
       "environment": "Python"
     },
     {
@@ -39,18 +33,6 @@
       "name": "SciPy",
       "type": "SciPy Solver",
       "backend": "SciPy",
-      "environment": "Python"
-    },
-    {
-      "name": "TestSolver",
-      "type": "Unknown",
-      "backend": "TestSolver",
-      "environment": "Python"
-    },
-    {
-      "name": "scipy",
-      "type": "SciPy Solver",
-      "backend": "scipy",
       "environment": "Python"
     }
   ],
@@ -177,6 +159,6 @@
       "SDP"
     ],
     "last_updated": "2025-06-13 14:32:27",
-    "collection_timestamp": "2025-06-14T11:40:22.517661"
+    "collection_timestamp": "2025-06-14T12:00:43.718489"
   }
 }

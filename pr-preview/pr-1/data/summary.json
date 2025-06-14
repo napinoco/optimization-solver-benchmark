@@ -1,26 +1,25 @@
 {
   "metadata": {
-    "generated_at": "2025-06-14T11:40:22.515054",
+    "generated_at": "2025-06-14T12:00:43.715975",
     "format_version": "1.0",
     "description": "Summary statistics and solver comparison"
   },
   "summary": {
     "overall": {
-      "total_results": 66,
-      "total_solvers": 8,
-      "total_problems": 5,
-      "total_benchmarks": 22,
-      "overall_success_rate": 0.8181818181818182,
-      "avg_solve_time": 0.0038658724409161194,
-      "min_solve_time": 4.100799560546875e-05,
+      "total_results": 53,
+      "total_solvers": 5,
+      "total_problems": 2,
+      "total_benchmarks": 16,
+      "overall_success_rate": 0.9622641509433962,
+      "avg_solve_time": 0.00450628658510604,
+      "min_solve_time": 0.0008800029754638672,
       "max_solve_time": 0.01923370361328125
     },
     "problem_type_distribution": {
-      "LP": 32,
-      "QP": 23,
-      "Unknown": 11
+      "LP": 31,
+      "QP": 22
     },
-    "last_updated": "2025-06-14T11:40:22.515644"
+    "last_updated": "2025-06-14T12:00:43.716577"
   },
   "solver_comparison": {
     "solvers": [
@@ -45,16 +44,6 @@
         "median_time": null
       },
       {
-        "solver_name": "TestSolver",
-        "problems_attempted": 1,
-        "problems_solved": 1,
-        "success_rate": 1.0,
-        "avg_solve_time": 0.005,
-        "best_time": 0.005,
-        "worst_time": 0.005,
-        "median_time": null
-      },
-      {
         "solver_name": "SciPy",
         "problems_attempted": 29,
         "problems_solved": 29,
@@ -62,16 +51,6 @@
         "avg_solve_time": 0.005182981491088867,
         "best_time": 0.0008800029754638672,
         "worst_time": 0.016376018524169922,
-        "median_time": null
-      },
-      {
-        "solver_name": "CVXPY",
-        "problems_attempted": 2,
-        "problems_solved": 2,
-        "success_rate": 1.0,
-        "avg_solve_time": 0.005184531211853027,
-        "best_time": 0.004508018493652344,
-        "worst_time": 0.005861043930053711,
         "median_time": null
       },
       {
@@ -93,39 +72,18 @@
         "best_time": 0.0025818347930908203,
         "worst_time": 0.008412837982177734,
         "median_time": null
-      },
-      {
-        "solver_name": "scipy",
-        "problems_attempted": 10,
-        "problems_solved": 0,
-        "success_rate": 0.0,
-        "avg_solve_time": 9.453296661376953e-05,
-        "best_time": 4.100799560546875e-05,
-        "worst_time": 0.0001862049102783203,
-        "median_time": null
       }
     ]
   },
   "problem_statistics": {
     "problems": [
       {
-        "problem_name": "test_problem",
-        "problem_type": "LP",
-        "solver_attempts": 1,
-        "successful_solves": 1,
-        "success_rate": 1.0,
-        "avg_solve_time": 0.005,
-        "n_variables": 0,
-        "n_constraints": 0,
-        "difficulty_level": "Unknown"
-      },
-      {
         "problem_name": "SIMPLE_LP",
         "problem_type": "LP",
-        "solver_attempts": 32,
-        "successful_solves": 31,
-        "success_rate": 0.96875,
-        "avg_solve_time": 0.002569742500782013,
+        "solver_attempts": 31,
+        "successful_solves": 30,
+        "success_rate": 0.967741935483871,
+        "avg_solve_time": 0.0024635714869345386,
         "n_variables": 2,
         "n_constraints": 2,
         "difficulty_level": "Trivial"
@@ -133,35 +91,13 @@
       {
         "problem_name": "SIMPLE_QP",
         "problem_type": "QP",
-        "solver_attempts": 23,
-        "successful_solves": 22,
-        "success_rate": 0.9565217391304348,
-        "avg_solve_time": 0.00725958658301312,
+        "solver_attempts": 22,
+        "successful_solves": 21,
+        "success_rate": 0.9545454545454546,
+        "avg_solve_time": 0.007384657859802246,
         "n_variables": 2,
         "n_constraints": 1,
         "difficulty_level": "Trivial"
-      },
-      {
-        "problem_name": "simple_qp",
-        "problem_type": "Unknown",
-        "solver_attempts": 5,
-        "successful_solves": 0,
-        "success_rate": 0.0,
-        "avg_solve_time": 7.586479187011718e-05,
-        "n_variables": 0,
-        "n_constraints": 0,
-        "difficulty_level": "Unknown"
-      },
-      {
-        "problem_name": "simple_lp",
-        "problem_type": "Unknown",
-        "solver_attempts": 5,
-        "successful_solves": 0,
-        "success_rate": 0.0,
-        "avg_solve_time": 0.00011320114135742188,
-        "n_variables": 0,
-        "n_constraints": 0,
-        "difficulty_level": "Unknown"
       }
     ]
   }
