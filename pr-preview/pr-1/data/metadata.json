@@ -1,6 +1,6 @@
 {
   "metadata": {
-    "generated_at": "2025-06-13T23:32:34.668872",
+    "generated_at": "2025-06-14T11:40:22.516675",
     "format_version": "1.0",
     "description": "Problem and solver metadata"
   },
@@ -74,6 +74,60 @@
       "complexity_score": 0.4741222431707704
     },
     {
+      "name": "control_lmi",
+      "class": "SDP",
+      "type": "SDP",
+      "n_variables": 9,
+      "n_constraints": 3,
+      "difficulty_level": "Trivial",
+      "complexity_score": 4.437227668892861
+    },
+    {
+      "name": "facility_location",
+      "class": "SOCP",
+      "type": "SOCP",
+      "n_variables": 0,
+      "n_constraints": 0,
+      "difficulty_level": "Trivial",
+      "complexity_score": 0.0
+    },
+    {
+      "name": "matrix_completion",
+      "class": "SDP",
+      "type": "SDP",
+      "n_variables": 48,
+      "n_constraints": 10,
+      "difficulty_level": "Easy",
+      "complexity_score": 8.211301289462735
+    },
+    {
+      "name": "max_cut_relaxation",
+      "class": "SDP",
+      "type": "SDP",
+      "n_variables": 25,
+      "n_constraints": 6,
+      "difficulty_level": "Easy",
+      "complexity_score": 6.684952347819054
+    },
+    {
+      "name": "portfolio_optimization",
+      "class": "SOCP",
+      "type": "SOCP",
+      "n_variables": 7,
+      "n_constraints": 5,
+      "difficulty_level": "Trivial",
+      "complexity_score": 3.3087172378934477
+    },
+    {
+      "name": "robust_optimization",
+      "class": "SOCP",
+      "type": "SOCP",
+      "n_variables": 13,
+      "n_constraints": 13,
+      "difficulty_level": "Easy",
+      "complexity_score": 4.901350750150082
+    },
+    {
       "name": "test_problem",
       "class": "LP",
       "type": "LP",
@@ -123,6 +177,6 @@
       "SDP"
     ],
     "last_updated": "2025-06-13 14:32:27",
-    "collection_timestamp": "2025-06-13T23:32:34.669242"
+    "collection_timestamp": "2025-06-14T11:40:22.517661"
   }
 }

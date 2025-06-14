@@ -3,954 +3,202 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Solver Comparison - Optimization Solver Benchmark</title>
-    
-    <!-- Bootstrap CSS for responsive design -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    
-    <!-- Chart.js for visualizations -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    
-    <!-- Custom CSS -->
-    <style>
-        .navbar-brand {
-            font-weight: bold;
-        }
-        
-        .metric-card {
-            transition: transform 0.2s;
-        }
-        
-        .metric-card:hover {
-            transform: translateY(-2px);
-        }
-        
-        .result-table {
-            font-size: 0.9rem;
-        }
-        
-        .status-optimal {
-            color: #28a745;
-            font-weight: bold;
-        }
-        
-        .status-error {
-            color: #dc3545;
-            font-weight: bold;
-        }
-        
-        .status-timeout {
-            color: #ffc107;
-            font-weight: bold;
-        }
-        
-        .status-infeasible {
-            color: #6c757d;
-            font-weight: bold;
-        }
-        
-        .solver-comparison {
-            margin-top: 2rem;
-        }
-        
-        .chart-container {
-            position: relative;
-            height: 400px;
-            margin: 2rem 0;
-        }
-        
-        .performance-badge {
-            font-size: 0.8rem;
-        }
-        
-        .footer {
-            margin-top: 3rem;
-            padding: 2rem 0;
-            background-color: #f8f9fa;
-            border-top: 1px solid #e9ecef;
-        }
-        
-        .timestamp {
-            color: #6c757d;
-            font-size: 0.85rem;
-        }
-        
-        .problem-info {
-            background-color: #f8f9fa;
-            border-left: 4px solid #007bff;
-        }
-        
-        .solver-info {
-            background-color: #e8f4f8;
-            border-left: 4px solid #17a2b8;
-        }
-    </style>
-    
-    
+    <title>Solver Comparison - Optimization Benchmark</title>
+    <link rel="stylesheet" href="assets/css/style.css">
 </head>
 <body>
-    <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-        <div class="container">
-            <a class="navbar-brand" href="#">
-                <i class="fas fa-chart-bar me-2"></i>
-                Optimization Solver Benchmark
-            </a>
-            
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">
-                            <i class="fas fa-home me-1"></i>Dashboard
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">
-                            <i class="fas fa-balance-scale me-1"></i>Solver Comparison
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">
-                            <i class="fas fa-puzzle-piece me-1"></i>Problem Analysis
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">
-                            <i class="fas fa-info-circle me-1"></i>Environment
-                        </a>
-                    </li>
-                </ul>
-            </div>
-        </div>
-    </nav>
-
-    <!-- Main Content -->
-    <main class="container mt-4">
-        
-<nav aria-label="breadcrumb">
-    <ol class="breadcrumb">
-        <li class="breadcrumb-item"><a href="#">Dashboard</a></li>
-        <li class="breadcrumb-item active">Solver Comparison</li>
-    </ol>
-</nav>
-
-        
-        
-        <!-- Alert messages can be added here -->
-        
-        
-        
-<div class="row mb-4">
-    <div class="col-12">
-        <h2>
-            <i class="fas fa-balance-scale me-2"></i>Solver Comparison
-        </h2>
-        <p class="text-muted">Compare performance characteristics across different optimization solvers.</p>
+    <header>
+    <div style="background: #fff3cd; border: 1px solid #ffeaa7; padding: 10px; margin: 10px 0; border-radius: 5px; text-align: center;">
+        <strong>🚧 Preview Environment</strong> - This is a preview of PR #1. 
+        <a href="https://github.com/napinoco/optimization-solver-benchmark/pull/1">View Pull Request →</a>
     </div>
-</div>
-
-<!-- Performance Comparison Charts -->
-
-<div class="row mb-4">
-    <div class="col-md-6">
-        <div class="card">
-            <div class="card-header">
-                <h5 class="card-title mb-0">
-                    <i class="fas fa-clock me-2"></i>Average Solve Time
-                </h5>
-            </div>
-            <div class="card-body">
-                <div class="chart-container" style="height: 300px;">
-                    <canvas id="timeComparisonChart"></canvas>
-                </div>
-            </div>
-        </div>
-    </div>
+        <h1>⚡ Solver Comparison</h1>
+        <p>Detailed performance comparison of optimization solvers</p>
+    </header>
     
-    <div class="col-md-6">
-        <div class="card">
-            <div class="card-header">
-                <h5 class="card-title mb-0">
-                    <i class="fas fa-check-circle me-2"></i>Success Rate
-                </h5>
-            </div>
-            <div class="card-body">
-                <div class="chart-container" style="height: 300px;">
-                    <canvas id="successRateChart"></canvas>
+    <nav>
+        <a href="index.html">Overview</a>
+        <a href="solver_comparison.html">Solver Comparison</a>
+        <a href="problem_analysis.html">Problem Analysis</a>
+        <a href="results_matrix.html">Results Matrix</a>
+        <a href="statistical_analysis.html">Statistical Analysis</a>
+        <a href="performance_profiling.html">Performance Profiling</a>
+        <a href="environment_info.html">Environment Info</a>
+        <a href="data/">Raw Data</a>
+    </nav>
+    
+    <main>
+        <section class="solver-comparison">
+            <h2>📊 Performance Comparison</h2>
+            <table class="comparison-table">
+                <thead>
+                    <tr>
+                        <th>Solver</th>
+                        <th>Type</th>
+                        <th>Backend</th>
+                        <th>Problems Attempted</th>
+                        <th>Problems Solved</th>
+                        <th>Success Rate</th>
+                        <th>Avg Time (s)</th>
+                        <th>Best Time (s)</th>
+                        <th>Worst Time (s)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>SCS (via CVXPY)</td>
+                        <td>CVXPY Backend</td>
+                        <td>SCS</td>
+                        <td>6</td>
+                        <td>6</td>
+                        <td>100.0%</td>
+                        <td>0.0021</td>
+                        <td>0.0017</td>
+                        <td>0.0025</td>
+                    </tr>
+                    <tr>
+                        <td>OSQP (via CVXPY)</td>
+                        <td>CVXPY Backend</td>
+                        <td>OSQP</td>
+                        <td>6</td>
+                        <td>6</td>
+                        <td>100.0%</td>
+                        <td>0.0031</td>
+                        <td>0.0024</td>
+                        <td>0.0046</td>
+                    </tr>
+                    <tr>
+                        <td>TestSolver</td>
+                        <td>Unknown</td>
+                        <td>TestSolver</td>
+                        <td>1</td>
+                        <td>1</td>
+                        <td>100.0%</td>
+                        <td>0.0050</td>
+                        <td>0.0050</td>
+                        <td>0.0050</td>
+                    </tr>
+                    <tr>
+                        <td>SciPy</td>
+                        <td>SciPy Solver</td>
+                        <td>SciPy</td>
+                        <td>29</td>
+                        <td>29</td>
+                        <td>100.0%</td>
+                        <td>0.0052</td>
+                        <td>0.0009</td>
+                        <td>0.0164</td>
+                    </tr>
+                    <tr>
+                        <td>CVXPY</td>
+                        <td>CVXPY Backend</td>
+                        <td>CVXPY</td>
+                        <td>2</td>
+                        <td>2</td>
+                        <td>100.0%</td>
+                        <td>0.0052</td>
+                        <td>0.0045</td>
+                        <td>0.0059</td>
+                    </tr>
+                    <tr>
+                        <td>ECOS (via CVXPY)</td>
+                        <td>CVXPY Backend</td>
+                        <td>ECOS</td>
+                        <td>6</td>
+                        <td>6</td>
+                        <td>100.0%</td>
+                        <td>0.0053</td>
+                        <td>0.0016</td>
+                        <td>0.0192</td>
+                    </tr>
+                    <tr>
+                        <td>CLARABEL (via CVXPY)</td>
+                        <td>CVXPY Backend</td>
+                        <td>CLARABEL</td>
+                        <td>6</td>
+                        <td>4</td>
+                        <td>66.7%</td>
+                        <td>0.0042</td>
+                        <td>0.0026</td>
+                        <td>0.0084</td>
+                    </tr>
+                    <tr>
+                        <td>scipy</td>
+                        <td>SciPy Solver</td>
+                        <td>scipy</td>
+                        <td>10</td>
+                        <td>0</td>
+                        <td>0.0%</td>
+                        <td>0.0001</td>
+                        <td>0.0000</td>
+                        <td>0.0002</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+        
+        <section class="solver-details">
+            <h2>🔧 Solver Information</h2>
+            <div class="solver-grid">
+                <div class="solver-card">
+                    <h3>CLARABEL (via CVXPY)</h3>
+                    <p><strong>Type:</strong> CVXPY Backend</p>
+                    <p><strong>Backend:</strong> CLARABEL</p>
+                    <p><strong>Environment:</strong> Python</p>
+                </div>
+                <div class="solver-card">
+                    <h3>CVXPY</h3>
+                    <p><strong>Type:</strong> CVXPY Backend</p>
+                    <p><strong>Backend:</strong> CVXPY</p>
+                    <p><strong>Environment:</strong> Python</p>
+                </div>
+                <div class="solver-card">
+                    <h3>ECOS (via CVXPY)</h3>
+                    <p><strong>Type:</strong> CVXPY Backend</p>
+                    <p><strong>Backend:</strong> ECOS</p>
+                    <p><strong>Environment:</strong> Python</p>
+                </div>
+                <div class="solver-card">
+                    <h3>OSQP (via CVXPY)</h3>
+                    <p><strong>Type:</strong> CVXPY Backend</p>
+                    <p><strong>Backend:</strong> OSQP</p>
+                    <p><strong>Environment:</strong> Python</p>
+                </div>
+                <div class="solver-card">
+                    <h3>SCS (via CVXPY)</h3>
+                    <p><strong>Type:</strong> CVXPY Backend</p>
+                    <p><strong>Backend:</strong> SCS</p>
+                    <p><strong>Environment:</strong> Python</p>
+                </div>
+                <div class="solver-card">
+                    <h3>SciPy</h3>
+                    <p><strong>Type:</strong> SciPy Solver</p>
+                    <p><strong>Backend:</strong> SciPy</p>
+                    <p><strong>Environment:</strong> Python</p>
+                </div>
+                <div class="solver-card">
+                    <h3>TestSolver</h3>
+                    <p><strong>Type:</strong> Unknown</p>
+                    <p><strong>Backend:</strong> TestSolver</p>
+                    <p><strong>Environment:</strong> Python</p>
+                </div>
+                <div class="solver-card">
+                    <h3>scipy</h3>
+                    <p><strong>Type:</strong> SciPy Solver</p>
+                    <p><strong>Backend:</strong> scipy</p>
+                    <p><strong>Environment:</strong> Python</p>
                 </div>
             </div>
-        </div>
-    </div>
-</div>
-
-<!-- Detailed Performance Table -->
-<div class="row mb-4">
-    <div class="col-12">
-        <div class="card">
-            <div class="card-header">
-                <h5 class="card-title mb-0">
-                    <i class="fas fa-table me-2"></i>Detailed Performance Metrics
-                </h5>
-            </div>
-            <div class="card-body">
-                <div class="table-responsive">
-                    <table class="table table-striped">
-                        <thead class="table-dark">
-                            <tr>
-                                <th>Solver</th>
-                                <th>Total Runs</th>
-                                <th>Success Rate</th>
-                                <th>Avg Time</th>
-                                <th>Min Time</th>
-                                <th>Max Time</th>
-                                <th>Std Dev</th>
-                                <th>Problems Solved</th>
-                                <th>Reliability Score</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            
-                            <tr>
-                                <td>
-                                    <strong class="text-primary">CLARABEL (via CVXPY)</strong>
-                                    <br>
-                                    <small class="text-muted">Python</small>
-                                </td>
-                                <td>6</td>
-                                <td>
-                                    <div class="d-flex align-items-center">
-                                        <span class="text-danger fw-bold">
-                                            66.7%
-                                        </span>
-                                        <div class="progress ms-2" style="width: 60px; height: 8px;">
-                                            <div class="progress-bar bg-danger" 
-                                                 style="width: 66.66666666666666%"></div>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td>
-                                    <span class="fw-bold">0.005s</span>
-                                    
-                                        <span class="badge bg-success ms-1">Fastest</span>
-                                    
-                                </td>
-                                <td>0.003s</td>
-                                <td>0.008s</td>
-                                <td>0.000s</td>
-                                <td>2</td>
-                                <td>
-                                    
-                                    <span class="text-danger fw-bold">
-                                        49.9
-                                    </span>
-                                </td>
-                            </tr>
-                            
-                            <tr>
-                                <td>
-                                    <strong class="text-primary">CVXPY</strong>
-                                    <br>
-                                    <small class="text-muted">Python</small>
-                                </td>
-                                <td>2</td>
-                                <td>
-                                    <div class="d-flex align-items-center">
-                                        <span class="text-success fw-bold">
-                                            100.0%
-                                        </span>
-                                        <div class="progress ms-2" style="width: 60px; height: 8px;">
-                                            <div class="progress-bar bg-success" 
-                                                 style="width: 100.0%"></div>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td>
-                                    <span class="fw-bold">0.005s</span>
-                                    
-                                </td>
-                                <td>0.005s</td>
-                                <td>0.006s</td>
-                                <td>0.000s</td>
-                                <td>2</td>
-                                <td>
-                                    
-                                    <span class="text-warning fw-bold">
-                                        70.9
-                                    </span>
-                                </td>
-                            </tr>
-                            
-                            <tr>
-                                <td>
-                                    <strong class="text-primary">ECOS (via CVXPY)</strong>
-                                    <br>
-                                    <small class="text-muted">Python</small>
-                                </td>
-                                <td>6</td>
-                                <td>
-                                    <div class="d-flex align-items-center">
-                                        <span class="text-success fw-bold">
-                                            100.0%
-                                        </span>
-                                        <div class="progress ms-2" style="width: 60px; height: 8px;">
-                                            <div class="progress-bar bg-success" 
-                                                 style="width: 100.0%"></div>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td>
-                                    <span class="fw-bold">0.005s</span>
-                                    
-                                </td>
-                                <td>0.002s</td>
-                                <td>0.019s</td>
-                                <td>0.000s</td>
-                                <td>2</td>
-                                <td>
-                                    
-                                    <span class="text-warning fw-bold">
-                                        70.0
-                                    </span>
-                                </td>
-                            </tr>
-                            
-                            <tr>
-                                <td>
-                                    <strong class="text-primary">OSQP (via CVXPY)</strong>
-                                    <br>
-                                    <small class="text-muted">Python</small>
-                                </td>
-                                <td>6</td>
-                                <td>
-                                    <div class="d-flex align-items-center">
-                                        <span class="text-success fw-bold">
-                                            100.0%
-                                        </span>
-                                        <div class="progress ms-2" style="width: 60px; height: 8px;">
-                                            <div class="progress-bar bg-success" 
-                                                 style="width: 100.0%"></div>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td>
-                                    <span class="fw-bold">0.003s</span>
-                                    
-                                </td>
-                                <td>0.002s</td>
-                                <td>0.005s</td>
-                                <td>0.000s</td>
-                                <td>2</td>
-                                <td>
-                                    
-                                    <span class="text-warning fw-bold">
-                                        82.6
-                                    </span>
-                                </td>
-                            </tr>
-                            
-                            <tr>
-                                <td>
-                                    <strong class="text-primary">SCS (via CVXPY)</strong>
-                                    <br>
-                                    <small class="text-muted">Python</small>
-                                </td>
-                                <td>6</td>
-                                <td>
-                                    <div class="d-flex align-items-center">
-                                        <span class="text-success fw-bold">
-                                            100.0%
-                                        </span>
-                                        <div class="progress ms-2" style="width: 60px; height: 8px;">
-                                            <div class="progress-bar bg-success" 
-                                                 style="width: 100.0%"></div>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td>
-                                    <span class="fw-bold">0.002s</span>
-                                    
-                                </td>
-                                <td>0.002s</td>
-                                <td>0.003s</td>
-                                <td>0.000s</td>
-                                <td>2</td>
-                                <td>
-                                    
-                                    <span class="text-warning fw-bold">
-                                        88.2
-                                    </span>
-                                </td>
-                            </tr>
-                            
-                            <tr>
-                                <td>
-                                    <strong class="text-primary">SciPy</strong>
-                                    <br>
-                                    <small class="text-muted">Python</small>
-                                </td>
-                                <td>29</td>
-                                <td>
-                                    <div class="d-flex align-items-center">
-                                        <span class="text-success fw-bold">
-                                            100.0%
-                                        </span>
-                                        <div class="progress ms-2" style="width: 60px; height: 8px;">
-                                            <div class="progress-bar bg-success" 
-                                                 style="width: 100.0%"></div>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td>
-                                    <span class="fw-bold">0.005s</span>
-                                    
-                                </td>
-                                <td>0.001s</td>
-                                <td>0.016s</td>
-                                <td>0.000s</td>
-                                <td>2</td>
-                                <td>
-                                    
-                                    <span class="text-warning fw-bold">
-                                        70.9
-                                    </span>
-                                </td>
-                            </tr>
-                            
-                            <tr>
-                                <td>
-                                    <strong class="text-primary">TestSolver</strong>
-                                    <br>
-                                    <small class="text-muted">Python</small>
-                                </td>
-                                <td>1</td>
-                                <td>
-                                    <div class="d-flex align-items-center">
-                                        <span class="text-success fw-bold">
-                                            100.0%
-                                        </span>
-                                        <div class="progress ms-2" style="width: 60px; height: 8px;">
-                                            <div class="progress-bar bg-success" 
-                                                 style="width: 100.0%"></div>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td>
-                                    <span class="fw-bold">0.005s</span>
-                                    
-                                </td>
-                                <td>0.005s</td>
-                                <td>0.005s</td>
-                                <td>0.000s</td>
-                                <td>1</td>
-                                <td>
-                                    
-                                    <span class="text-warning fw-bold">
-                                        71.9
-                                    </span>
-                                </td>
-                            </tr>
-                            
-                            <tr>
-                                <td>
-                                    <strong class="text-primary">scipy</strong>
-                                    <br>
-                                    <small class="text-muted">Python</small>
-                                </td>
-                                <td>10</td>
-                                <td>
-                                    <div class="d-flex align-items-center">
-                                        <span class="text-danger fw-bold">
-                                            0.0%
-                                        </span>
-                                        <div class="progress ms-2" style="width: 60px; height: 8px;">
-                                            <div class="progress-bar bg-danger" 
-                                                 style="width: 0.0%"></div>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td>
-                                    <span class="fw-bold">0.000s</span>
-                                    
-                                        <span class="badge bg-success ms-1">Fastest</span>
-                                    
-                                </td>
-                                <td>0.000s</td>
-                                <td>0.000s</td>
-                                <td>0.000s</td>
-                                <td>0</td>
-                                <td>
-                                    
-                                    <span class="text-danger fw-bold">
-                                        30.0
-                                    </span>
-                                </td>
-                            </tr>
-                            
-                        </tbody>
-                    </table>
-                </div>
-                
-                <div class="mt-3">
-                    <small class="text-muted">
-                        <strong>Reliability Score:</strong> Weighted combination of success rate (70%) and relative speed (30%).
-                        Higher scores indicate better overall performance.
-                    </small>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Problem-wise Performance -->
-
-<div class="row mb-4">
-    <div class="col-12">
-        <div class="card">
-            <div class="card-header">
-                <h5 class="card-title mb-0">
-                    <i class="fas fa-puzzle-piece me-2"></i>Performance by Problem Type
-                </h5>
-            </div>
-            <div class="card-body">
-                <div class="chart-container" style="height: 400px;">
-                    <canvas id="problemPerformanceChart"></canvas>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-
-<!-- Head-to-Head Comparison -->
-<div class="row mb-4">
-    <div class="col-12">
-        <div class="card">
-            <div class="card-header">
-                <h5 class="card-title mb-0">
-                    <i class="fas fa-vs me-2"></i>Head-to-Head Comparison
-                </h5>
-            </div>
-            <div class="card-body">
-                <div class="row">
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-
-<!-- No Data Message -->
-
-
-
+        </section>
     </main>
-
-    <!-- Footer -->
-    <footer class="footer">
-        <div class="container">
-            <div class="row">
-                <div class="col-md-6">
-                    <h6>Optimization Solver Benchmark</h6>
-                    <p class="text-muted small">
-                        Automated benchmarking system for optimization solvers.
-                        Compare performance across different problem types and solver implementations.
-                    </p>
-                </div>
-                <div class="col-md-6 text-md-end">
-                    <p class="text-muted small mb-2">
-                        <i class="fas fa-clock me-1"></i>
-                        Last updated: 2025-06-14 08:59:30
-                    </p>
-                    <p class="text-muted small mb-0">
-                        <i class="fas fa-code me-1"></i>
-                        Generated automatically by the benchmark system
-                    </p>
-                </div>
+    
+    <footer>
+        <div class="footer-content">
+            <div class="footer-info">
+                <p>Generated automatically from benchmark results • <a href="data/summary.json">Download Summary Data</a></p>
+                <p class="author-info">© 2025 Naoki Ito • <a href="mailto:napinoco@gmail.com">Contact</a> • <a href="https://github.com/napinoco/optimization-solver-benchmark">View on GitHub</a></p>
             </div>
         </div>
     </footer>
-
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    
-    <!-- Font Awesome for icons -->
-    <script src="https://kit.fontawesome.com/your-fontawesome-kit.js" crossorigin="anonymous"></script>
-    
-    <!-- Custom JavaScript -->
-    <script>
-        // Utility functions for the benchmark dashboard
-        
-        // Format time duration
-        function formatTime(seconds) {
-            if (seconds < 0.001) {
-                return (seconds * 1000000).toFixed(0) + 'μs';
-            } else if (seconds < 1) {
-                return (seconds * 1000).toFixed(1) + 'ms';
-            } else {
-                return seconds.toFixed(3) + 's';
-            }
-        }
-        
-        // Format large numbers with appropriate units
-        function formatNumber(num) {
-            if (num >= 1000000) {
-                return (num / 1000000).toFixed(1) + 'M';
-            } else if (num >= 1000) {
-                return (num / 1000).toFixed(1) + 'K';
-            } else {
-                return num.toString();
-            }
-        }
-        
-        // Get status badge class
-        function getStatusClass(status) {
-            switch(status.toLowerCase()) {
-                case 'optimal': return 'status-optimal';
-                case 'error': return 'status-error';
-                case 'timeout': return 'status-timeout';
-                case 'infeasible': return 'status-infeasible';
-                case 'unbounded': return 'status-infeasible';
-                default: return 'text-secondary';
-            }
-        }
-        
-        // Initialize tooltips
-        document.addEventListener('DOMContentLoaded', function() {
-            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-            var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-                return new bootstrap.Tooltip(tooltipTriggerEl);
-            });
-        });
-        
-        // Auto-refresh functionality (if enabled)
-        
-    </script>
-    
-    
-
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const solverNames = ["CLARABEL (via CVXPY)", "CVXPY", "ECOS (via CVXPY)", "OSQP (via CVXPY)", "SCS (via CVXPY)", "SciPy", "TestSolver", "scipy"];
-    const avgTimes = [
-        
-        0.004765927791595459,
-        
-        0.005184531211853027,
-        
-        0.005343953768412272,
-        
-        0.0030936002731323242,
-        
-        0.0020968119303385415,
-        
-        0.005182981491088867,
-        
-        0.005,
-        
-        0.0
-        
-    ];
-    const successRates = [
-        
-        66.66666666666666,
-        
-        100.0,
-        
-        100.0,
-        
-        100.0,
-        
-        100.0,
-        
-        100.0,
-        
-        100.0,
-        
-        0.0
-        
-    ];
-    
-    // Colors for different solvers
-    const colors = [
-        'rgba(255, 99, 132, 0.8)',
-        'rgba(54, 162, 235, 0.8)',
-        'rgba(255, 205, 86, 0.8)',
-        'rgba(75, 192, 192, 0.8)',
-        'rgba(153, 102, 255, 0.8)',
-        'rgba(255, 159, 64, 0.8)'
-    ];
-    
-    // Time Comparison Chart
-    const timeCtx = document.getElementById('timeComparisonChart').getContext('2d');
-    new Chart(timeCtx, {
-        type: 'bar',
-        data: {
-            labels: solverNames,
-            datasets: [{
-                label: 'Average Solve Time (seconds)',
-                data: avgTimes,
-                backgroundColor: colors.slice(0, solverNames.length),
-                borderColor: colors.slice(0, solverNames.length).map(c => c.replace('0.8', '1')),
-                borderWidth: 2
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    display: false
-                },
-                title: {
-                    display: true,
-                    text: 'Average Solve Time Comparison'
-                }
-            },
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    title: {
-                        display: true,
-                        text: 'Time (seconds)'
-                    }
-                }
-            }
-        }
-    });
-    
-    // Success Rate Chart
-    const successCtx = document.getElementById('successRateChart').getContext('2d');
-    new Chart(successCtx, {
-        type: 'doughnut',
-        data: {
-            labels: solverNames,
-            datasets: [{
-                data: successRates,
-                backgroundColor: colors.slice(0, solverNames.length),
-                borderColor: colors.slice(0, solverNames.length).map(c => c.replace('0.8', '1')),
-                borderWidth: 2
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    position: 'bottom'
-                },
-                title: {
-                    display: true,
-                    text: 'Success Rate Distribution'
-                }
-            }
-        }
-    });
-    
-    
-    // Problem Performance Chart
-    const problemCtx = document.getElementById('problemPerformanceChart').getContext('2d');
-    const problemNames = ["SIMPLE_LP", "SIMPLE_QP", "simple_lp", "simple_qp", "test_problem"];
-    
-    const datasets = solverNames.map((solverName, index) => ({
-        label: solverName,
-        data: problemNames.map(problemName => {
-            const problemData = {"SIMPLE_LP": {"avg_solve_time": 0.002534089549895256, "difficulty_score": 0.025050681790997908, "fastest_solver": "SciPy", "max_solve_time": 0.008412837982177734, "min_solve_time": 0.0008800029754638672, "name": "SIMPLE_LP", "problem_type": "LP", "slowest_solver": "CLARABEL (via CVXPY)", "success_rate": 0.96875, "successful_attempts": 31, "total_attempts": 32}, "SIMPLE_QP": {"avg_solve_time": 0.007472211664373224, "difficulty_score": 0.03493205292893962, "fastest_solver": "SCS (via CVXPY)", "max_solve_time": 0.01923370361328125, "min_solve_time": 0.002335071563720703, "name": "SIMPLE_QP", "problem_type": "QP", "slowest_solver": "ECOS (via CVXPY)", "success_rate": 0.9565217391304348, "successful_attempts": 22, "total_attempts": 23}, "simple_lp": {"avg_solve_time": 0.0, "difficulty_score": 0.8, "fastest_solver": null, "max_solve_time": 0.0, "min_solve_time": 0.0, "name": "simple_lp", "problem_type": "Unknown", "slowest_solver": null, "success_rate": 0.0, "successful_attempts": 0, "total_attempts": 5}, "simple_qp": {"avg_solve_time": 0.0, "difficulty_score": 0.8, "fastest_solver": null, "max_solve_time": 0.0, "min_solve_time": 0.0, "name": "simple_qp", "problem_type": "Unknown", "slowest_solver": null, "success_rate": 0.0, "successful_attempts": 0, "total_attempts": 5}, "test_problem": {"avg_solve_time": 0.005, "difficulty_score": 0.0001, "fastest_solver": "TestSolver", "max_solve_time": 0.005, "min_solve_time": 0.005, "name": "test_problem", "problem_type": "LP", "slowest_solver": "TestSolver", "success_rate": 1.0, "successful_attempts": 1, "total_attempts": 1}};
-            const solverResults = problemData[problemName].solver_results;
-            return solverResults[solverName] ? solverResults[solverName].solve_time : null;
-        }),
-        backgroundColor: colors[index],
-        borderColor: colors[index].replace('0.8', '1'),
-        borderWidth: 2
-    }));
-    
-    new Chart(problemCtx, {
-        type: 'bar',
-        data: {
-            labels: problemNames,
-            datasets: datasets
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    display: true
-                },
-                title: {
-                    display: true,
-                    text: 'Solve Time by Problem and Solver'
-                }
-            },
-            scales: {
-                x: {
-                    title: {
-                        display: true,
-                        text: 'Problems'
-                    }
-                },
-                y: {
-                    beginAtZero: true,
-                    title: {
-                        display: true,
-                        text: 'Time (seconds)'
-                    }
-                }
-            }
-        }
-    });
-    
-});
-</script>
-
-
 </body>
 </html>
