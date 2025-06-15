@@ -1,0 +1,209 @@
+name: Deploy Reports
+
+# Unified deployment for both production and PR previews
+on:
+  # Production deployment
+  push:
+    branches: [main]
+  
+  # PR preview deployment  
+  pull_request:
+    types: [opened, reopened, synchronize, closed]
+    
+  # Manual trigger
+  workflow_dispatch:
+
+# Prevent concurrent deployments
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+  pages: write  
+  id-token: write
+  pull-requests: write
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    # Skip everything for closed PRs except cleanup
+    - name: Verify pre-built reports exist
+      if: github.event.action != 'closed'
+      run: |
+        if [ ! -f "docs/index.html" ]; then
+          echo "❌ Error: No pre-built index.html found"
+          echo "Please run 'python main.py --all' locally and commit the generated files."
+          exit 1
+        fi
+        
+        if [ ! -d "docs/data" ]; then
+          echo "❌ Error: No pre-built data directory found"  
+          echo "Please run 'python main.py --all' locally and commit the generated files."
+          exit 1
+        fi
+        
+        echo "✅ Pre-built reports verified"
+        
+    - name: Add PR preview banner
+      if: github.event_name == 'pull_request' && github.event.action != 'closed'
+      run: |
+        # Add preview notice to all HTML files
+        find docs -name "*.html" -exec sed -i '/<header>/a\
+            <div style="background: #fff3cd; border: 1px solid #ffeaa7; padding: 10px; margin: 10px 0; border-radius: 5px; text-align: center;">\
+                <strong>🚧 Preview Environment</strong> - This is a preview of PR #${{ github.event.number }}. \
+                <a href="https://github.com/${{ github.repository }}/pull/${{ github.event.number }}">View Pull Request →</a>\
+            </div>' {} \;
+            
+        # Create preview metadata
+        cat > docs/preview-info.json << EOF
+        {
+          "pr_number": "${{ github.event.number }}",
+          "pr_title": "${{ github.event.pull_request.title }}",
+          "pr_author": "${{ github.event.pull_request.user.login }}",
+          "commit_sha": "${{ github.sha }}",
+          "generated_at": "$(date -Iseconds)",
+          "repository": "${{ github.repository }}",
+          "pr_url": "${{ github.event.pull_request.html_url }}"
+        }
+        EOF
+        
+    - name: Create deployment metadata
+      if: github.event.action != 'closed'
+      run: |
+        # Determine deployment type and target
+        if [ "${{ github.event_name }}" = "pull_request" ]; then
+          DEPLOY_TYPE="preview"
+          TARGET_DIR="pr-preview/pr-${{ github.event.number }}"
+        else
+          DEPLOY_TYPE="production"  
+          TARGET_DIR="."
+        fi
+        
+        cat > docs/deployment-info.json << EOF
+        {
+          "deployment_type": "$DEPLOY_TYPE",
+          "target_directory": "$TARGET_DIR",
+          "branch": "${{ github.ref_name }}",
+          "commit_sha": "${{ github.sha }}",
+          "deployed_at": "$(date -Iseconds)",
+          "repository": "${{ github.repository }}",
+          "workflow_run": "${{ github.run_id }}"
+        }
+        EOF
+        
+    - name: Deploy to production (main branch)
+      if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+      uses: JamesIves/github-pages-deploy-action@v4
+      with:
+        branch: gh-pages
+        folder: docs
+        token: ${{ secrets.GITHUB_TOKEN }}
+        clean: false  # Preserve PR preview subdirectories
+        
+    - name: Deploy PR preview
+      if: github.event_name == 'pull_request' && github.event.action != 'closed'
+      uses: JamesIves/github-pages-deploy-action@v4
+      with:
+        branch: gh-pages
+        folder: docs
+        target-folder: pr-preview/pr-${{ github.event.number }}
+        token: ${{ secrets.GITHUB_TOKEN }}
+        clean: false
+        
+    - name: Clean up closed PR preview
+      if: github.event.action == 'closed'
+      run: |
+        mkdir -p /tmp/empty-cleanup
+        
+    - name: Remove closed PR preview directory
+      if: github.event.action == 'closed'
+      uses: JamesIves/github-pages-deploy-action@v4
+      with:
+        branch: gh-pages
+        folder: /tmp/empty-cleanup
+        target-folder: pr-preview/pr-${{ github.event.number }}
+        token: ${{ secrets.GITHUB_TOKEN }}
+        clean: true
+        
+    - name: Comment preview URL on PR
+      if: github.event_name == 'pull_request' && github.event.action != 'closed'
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const prNumber = context.payload.pull_request.number;
+          const previewUrl = `https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/pr-preview/pr-${prNumber}/`;
+          
+          const comment = `## 📊 Preview Reports Ready!
+          
+          Your preview has been deployed and is available at:
+          
+          **🔗 [View Preview Reports](${previewUrl})**
+          
+          ### Preview Details
+          - **PR**: #${prNumber} - ${{ github.event.pull_request.title }}
+          - **Commit**: \`${{ github.sha }}\`
+          - **Author**: @${{ github.event.pull_request.user.login }}
+          - **Generated**: ${new Date().toISOString()}
+          
+          ### Available Reports
+          - [📊 Dashboard](${previewUrl}) - Main benchmark overview
+          - [⚡ Solver Comparison](${previewUrl}solver_comparison.html) - Performance comparison
+          - [📋 Problem Analysis](${previewUrl}problem_analysis.html) - Problem insights
+          - [📈 Results Matrix](${previewUrl}results_matrix.html) - Problems × Solvers matrix
+          - [📊 Statistical Analysis](${previewUrl}statistical_analysis.html) - Advanced analytics
+          - [⚡ Performance Profiling](${previewUrl}performance_profiling.html) - Performance metrics
+          - [🖥️ Environment Info](${previewUrl}environment_info.html) - System specifications
+          
+          ### Notes
+          - Preview uses the pre-built reports from your branch
+          - Preview will be updated automatically when you push new commits
+          - Preview will be cleaned up automatically when the PR is closed
+          
+          ---
+          *Preview deployment powered by GitHub Actions*`;
+          
+          github.rest.issues.createComment({
+            issue_number: prNumber,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: comment
+          });
+          
+    - name: Display deployment summary
+      if: github.event.action != 'closed'
+      run: |
+        if [ "${{ github.event_name }}" = "pull_request" ]; then
+          echo "## PR Preview Deployment Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "✅ **Preview deployed successfully!**" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Preview URL" >> $GITHUB_STEP_SUMMARY
+          echo "🔗 https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/pr-preview/pr-${{ github.event.number }}/" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Key Features" >> $GITHUB_STEP_SUMMARY
+          echo "- 🚧 Clear preview environment indicators" >> $GITHUB_STEP_SUMMARY
+          echo "- 📊 Uses pre-built reports from PR branch" >> $GITHUB_STEP_SUMMARY
+          echo "- 🔄 Auto-updates on new commits" >> $GITHUB_STEP_SUMMARY
+          echo "- 🧹 Auto-cleanup when PR is closed" >> $GITHUB_STEP_SUMMARY
+          echo "- 💬 PR comment with preview links" >> $GITHUB_STEP_SUMMARY
+        else
+          echo "## Production Deployment Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "✅ **Production site deployed successfully!**" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Production URL" >> $GITHUB_STEP_SUMMARY
+          echo "🔗 https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Deployment Details" >> $GITHUB_STEP_SUMMARY
+          echo "- **Type**: Static file deployment" >> $GITHUB_STEP_SUMMARY
+          echo "- **Source**: Pre-built docs/ directory" >> $GITHUB_STEP_SUMMARY
+          echo "- **Branch**: main" >> $GITHUB_STEP_SUMMARY
+          echo "- **Commit**: ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Deployed**: $(date -Iseconds)" >> $GITHUB_STEP_SUMMARY
+        fi

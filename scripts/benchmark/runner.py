@@ -241,31 +241,6 @@ class BenchmarkRunner:
                 )
                 return solver_instance
                 
-        elif environment == 'octave':
-            # Octave solver
-            try:
-                from scripts.solvers.octave.octave_runner import OctaveSolver
-                
-                solver_instance = OctaveSolver(
-                    name=config.get('name', 'Octave'),
-                    timeout=config.get('timeout', timeout),
-                    octave_path=config.get('octave_path'),
-                    options=config.get('options', {})
-                )
-                
-                # Verify Octave is available before returning
-                if solver_instance.is_available():
-                    return solver_instance
-                else:
-                    self.logger.warning(f"Octave not available for solver {solver_id}")
-                    return None
-                    
-            except ImportError as e:
-                self.logger.warning(f"Could not import Octave solver: {e}")
-                return None
-            except Exception as e:
-                self.logger.error(f"Failed to create Octave solver {solver_id}: {e}")
-                return None
                 
         self.logger.warning(f"Unknown solver configuration for {solver_id}")
         return None
