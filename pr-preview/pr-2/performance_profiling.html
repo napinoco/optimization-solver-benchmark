@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Performance Profiling - Optimization Benchmark</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+    <style>
+        .profile-card { 
+            background: #f8f9fa; 
+            padding: 1.5rem; 
+            margin-bottom: 1.5rem; 
+            border-radius: 8px; 
+            border-left: 4px solid #28a745;
+        }
+        .metrics-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); 
+            gap: 1rem; 
+            margin-bottom: 1rem;
+        }
+        .metric-box { 
+            background: white; 
+            padding: 1rem; 
+            border-radius: 4px; 
+            border: 1px solid #dee2e6;
+            text-align: center;
+        }
+        .metric-value { font-size: 1.5rem; font-weight: bold; color: #007bff; }
+        .metric-label { font-size: 0.9rem; color: #6c757d; }
+        .ranking-table { width: 100%; margin-bottom: 1.5rem; }
+        .ranking-table th, .ranking-table td { padding: 0.75rem; text-align: center; }
+        .ranking-table .solver-name { text-align: left; font-weight: bold; }
+        .rank-1 { background-color: #d4edda; }
+        .rank-2 { background-color: #f8f9fa; }
+        .rank-3 { background-color: #fff3cd; }
+        .scalability-excellent { color: #28a745; font-weight: bold; }
+        .scalability-good { color: #17a2b8; font-weight: bold; }
+        .scalability-poor { color: #dc3545; font-weight: bold; }
+        .quality-high { color: #28a745; }
+        .quality-medium { color: #ffc107; }
+        .quality-low { color: #dc3545; }
+    </style>
+</head>
+<body>
+    <header>
+    <div style="background: #fff3cd; border: 1px solid #ffeaa7; padding: 10px; margin: 10px 0; border-radius: 5px; text-align: center;">
+        <strong>🚧 Preview Environment</strong> - This is a preview of PR #2. 
+        <a href="https://github.com/napinoco/optimization-solver-benchmark/pull/2">View Pull Request →</a>
+    </div>
+        <h1>⚡ Performance Profiling</h1>
+        <p>Detailed performance analysis and resource utilization profiling</p>
+    </header>
+    
+    <nav>
+        <a href="index.html">Overview</a>
+        <a href="solver_comparison.html">Solver Comparison</a>
+        <a href="problem_analysis.html">Problem Analysis</a>
+        <a href="results_matrix.html">Results Matrix</a>
+        <a href="statistical_analysis.html">Statistical Analysis</a>
+        <a href="performance_profiling.html">Performance Profiling</a>
+        <a href="environment_info.html">Environment Info</a>
+        <a href="data/">Raw Data</a>
+    </nav>
+    
+    <main>
+        <section class="profiling-overview">
+            <h2>📊 Benchmark Summary</h2>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <h3>Total Runtime</h3>
+                    <span class="stat-value">0.2388s</span>
+                </div>
+                <div class="stat-card">
+                    <h3>Total Problems</h3>
+                    <span class="stat-value">10</span>
+                </div>
+                <div class="stat-card">
+                    <h3>Total Solvers</h3>
+                    <span class="stat-value">5</span>
+                </div>
+                <div class="stat-card">
+                    <h3>Overall Success Rate</h3>
+                    <span class="stat-value">80.0%</span>
+                </div>
+                <div class="stat-card">
+                    <h3>Efficiency Score</h3>
+                    <span class="stat-value">69.3/100</span>
+                </div>
+            </div>
+        </section>
+        
+        <section class="performance-rankings">
+            <h2>🏆 Performance Rankings</h2>
+            
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem;">
+                <div>
+                    <h3>⚡ Fastest Solvers</h3>
+                    <table class="ranking-table">
+                        <thead>
+                            <tr>
+                                <th>Rank</th>
+                                <th>Solver</th>
+                                <th>Avg Time (s)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="rank-1">
+                                <td>1</td>
+                                <td class="solver-name">SCS (via CVXPY)</td>
+                                <td>0.0021</td>
+                            </tr>
+                            <tr class="rank-2">
+                                <td>2</td>
+                                <td class="solver-name">OSQP (via CVXPY)</td>
+                                <td>0.0031</td>
+                            </tr>
+                            <tr class="rank-3">
+                                <td>3</td>
+                                <td class="solver-name">CLARABEL (via CVXPY)</td>
+                                <td>0.0042</td>
+                            </tr>
+                            <tr class="">
+                                <td>4</td>
+                                <td class="solver-name">SciPy</td>
+                                <td>0.0052</td>
+                            </tr>
+                            <tr class="">
+                                <td>5</td>
+                                <td class="solver-name">ECOS (via CVXPY)</td>
+                                <td>0.0053</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div>
+                    <h3>🎯 Most Reliable</h3>
+                    <table class="ranking-table">
+                        <thead>
+                            <tr>
+                                <th>Rank</th>
+                                <th>Solver</th>
+                                <th>Success Rate</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="rank-1">
+                                <td>1</td>
+                                <td class="solver-name">SciPy</td>
+                                <td>100.0%</td>
+                            </tr>
+                            <tr class="rank-2">
+                                <td>2</td>
+                                <td class="solver-name">SCS (via CVXPY)</td>
+                                <td>100.0%</td>
+                            </tr>
+                            <tr class="rank-3">
+                                <td>3</td>
+                                <td class="solver-name">ECOS (via CVXPY)</td>
+                                <td>100.0%</td>
+                            </tr>
+                            <tr class="">
+                                <td>4</td>
+                                <td class="solver-name">OSQP (via CVXPY)</td>
+                                <td>100.0%</td>
+                            </tr>
+                            <tr class="">
+                                <td>5</td>
+                                <td class="solver-name">CLARABEL (via CVXPY)</td>
+                                <td>66.7%</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+        
+        <section class="solver-profiles">
+            <h2>🔬 Detailed Solver Profiles</h2>
+            <div class="profile-card">
+                <h3>SCS (via CVXPY)</h3>
+                
+                <div class="metrics-grid">
+                    <div class="metric-box">
+                        <div class="metric-value">0.0021s</div>
+                        <div class="metric-label">Avg Solve Time</div>
+                    </div>
+                    <div class="metric-box">
+                        <div class="metric-value">476.9</div>
+                        <div class="metric-label">Problems/Second</div>
+                    </div>
+                    <div class="metric-box">
+                        <div class="metric-value">100.0%</div>
+                        <div class="metric-label">Success Rate</div>
+                    </div>
+                    <div class="metric-box">
+                        <div class="metric-value">10.0 MB</div>
+                        <div class="metric-label">Peak Memory</div>
+                    </div>
+                    <div class="metric-box">
+                        <div class="metric-value">1.000</div>
+                        <div class="metric-label">CPU Efficiency</div>
+                    </div>
+                    <div class="metric-box">
+                        <div class="metric-value scalability-excellent">Excellent</div>
+                        <div class="metric-label">Scalability</div>
+                    </div>
+                </div>
+                
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-top: 1rem;">
+                    <div>
+                        <h4>Quality Metrics</h4>
+                        <p><strong>Solution Quality:</strong> 0.525</p>
+                        <p><strong>Numerical Stability:</strong> 0.829</p>
+                        <p><strong>Convergence Reliability:</strong> 0.866</p>
+                    </div>
+                    <div>
+                        <h4>Scalability Analysis</h4>
+                        <p><strong>Time Complexity:</strong> 0.100</p>
+                        <p><strong>Memory Complexity:</strong> 0.100</p>
+                        <p><strong>Memory Efficiency:</strong> 0.600</p>
+                    </div>
+                </div>
+            </div>
+            <div class="profile-card">
+                <h3>OSQP (via CVXPY)</h3>
+                
+                <div class="metrics-grid">
+                    <div class="metric-box">
+                        <div class="metric-value">0.0031s</div>
+                        <div class="metric-label">Avg Solve Time</div>
+                    </div>
+                    <div class="metric-box">
+                        <div class="metric-value">323.2</div>
+                        <div class="metric-label">Problems/Second</div>
+                    </div>
+                    <div class="metric-box">
+                        <div class="metric-value">100.0%</div>
+                        <div class="metric-label">Success Rate</div>
+                    </div>
+                    <div class="metric-box">
+                        <div class="metric-value">10.0 MB</div>
+                        <div class="metric-label">Peak Memory</div>
+                    </div>
+                    <div class="metric-box">
+                        <div class="metric-value">1.000</div>
+                        <div class="metric-label">CPU Efficiency</div>
+                    </div>
+                    <div class="metric-box">
+                        <div class="metric-value scalability-excellent">Excellent</div>
+                        <div class="metric-label">Scalability</div>
+                    </div>
+                </div>
+                
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-top: 1rem;">
+                    <div>
+                        <h4>Quality Metrics</h4>
+                        <p><strong>Solution Quality:</strong> 0.644</p>
+                        <p><strong>Numerical Stability:</strong> 0.708</p>
+                        <p><strong>Convergence Reliability:</strong> 0.759</p>
+                    </div>
+                    <div>
+                        <h4>Scalability Analysis</h4>
+                        <p><strong>Time Complexity:</strong> 1.187</p>
+                        <p><strong>Memory Complexity:</strong> 0.100</p>
+                        <p><strong>Memory Efficiency:</strong> 0.599</p>
+                    </div>
+                </div>
+            </div>
+            <div class="profile-card">
+                <h3>CLARABEL (via CVXPY)</h3>
+                
+                <div class="metrics-grid">
+                    <div class="metric-box">
+                        <div class="metric-value">0.0042s</div>
+                        <div class="metric-label">Avg Solve Time</div>
+                    </div>
+                    <div class="metric-box">
+                        <div class="metric-value">237.0</div>
+                        <div class="metric-label">Problems/Second</div>
+                    </div>
+                    <div class="metric-box">
+                        <div class="metric-value">66.7%</div>
+                        <div class="metric-label">Success Rate</div>
+                    </div>
+                    <div class="metric-box">
+                        <div class="metric-value">10.0 MB</div>
+                        <div class="metric-label">Peak Memory</div>
+                    </div>
+                    <div class="metric-box">
+                        <div class="metric-value">0.829</div>
+                        <div class="metric-label">CPU Efficiency</div>
+                    </div>
+                    <div class="metric-box">
+                        <div class="metric-value scalability-good">Good</div>
+                        <div class="metric-label">Scalability</div>
+                    </div>
+                </div>
+                
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-top: 1rem;">
+                    <div>
+                        <h4>Quality Metrics</h4>
+                        <p><strong>Solution Quality:</strong> 0.535</p>
+                        <p><strong>Numerical Stability:</strong> 0.479</p>
+                        <p><strong>Convergence Reliability:</strong> 0.684</p>
+                    </div>
+                    <div>
+                        <h4>Scalability Analysis</h4>
+                        <p><strong>Time Complexity:</strong> 2.184</p>
+                        <p><strong>Memory Complexity:</strong> 0.100</p>
+                        <p><strong>Memory Efficiency:</strong> 0.599</p>
+                    </div>
+                </div>
+            </div>
+            <div class="profile-card">
+                <h3>SciPy</h3>
+                
+                <div class="metrics-grid">
+                    <div class="metric-box">
+                        <div class="metric-value">0.0052s</div>
+                        <div class="metric-label">Avg Solve Time</div>
+                    </div>
+                    <div class="metric-box">
+                        <div class="metric-value">192.9</div>
+                        <div class="metric-label">Problems/Second</div>
+                    </div>
+                    <div class="metric-box">
+                        <div class="metric-value">100.0%</div>
+                        <div class="metric-label">Success Rate</div>
+                    </div>
+                    <div class="metric-box">
+                        <div class="metric-value">10.0 MB</div>
+                        <div class="metric-label">Peak Memory</div>
+                    </div>
+                    <div class="metric-box">
+                        <div class="metric-value">0.705</div>
+                        <div class="metric-label">CPU Efficiency</div>
+                    </div>
+                    <div class="metric-box">
+                        <div class="metric-value scalability-excellent">Excellent</div>
+                        <div class="metric-label">Scalability</div>
+                    </div>
+                </div>
+                
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-top: 1rem;">
+                    <div>
+                        <h4>Quality Metrics</h4>
+                        <p><strong>Solution Quality:</strong> 0.728</p>
+                        <p><strong>Numerical Stability:</strong> 0.032</p>
+                        <p><strong>Convergence Reliability:</strong> 0.708</p>
+                    </div>
+                    <div>
+                        <h4>Scalability Analysis</h4>
+                        <p><strong>Time Complexity:</strong> 0.100</p>
+                        <p><strong>Memory Complexity:</strong> 0.100</p>
+                        <p><strong>Memory Efficiency:</strong> 2.894</p>
+                    </div>
+                </div>
+            </div>
+            <div class="profile-card">
+                <h3>ECOS (via CVXPY)</h3>
+                
+                <div class="metrics-grid">
+                    <div class="metric-box">
+                        <div class="metric-value">0.0053s</div>
+                        <div class="metric-label">Avg Solve Time</div>
+                    </div>
+                    <div class="metric-box">
+                        <div class="metric-value">187.1</div>
+                        <div class="metric-label">Problems/Second</div>
+                    </div>
+                    <div class="metric-box">
+                        <div class="metric-value">100.0%</div>
+                        <div class="metric-label">Success Rate</div>
+                    </div>
+                    <div class="metric-box">
+                        <div class="metric-value">10.0 MB</div>
+                        <div class="metric-label">Peak Memory</div>
+                    </div>
+                    <div class="metric-box">
+                        <div class="metric-value">0.655</div>
+                        <div class="metric-label">CPU Efficiency</div>
+                    </div>
+                    <div class="metric-box">
+                        <div class="metric-value scalability-excellent">Excellent</div>
+                        <div class="metric-label">Scalability</div>
+                    </div>
+                </div>
+                
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-top: 1rem;">
+                    <div>
+                        <h4>Quality Metrics</h4>
+                        <p><strong>Solution Quality:</strong> 0.528</p>
+                        <p><strong>Numerical Stability:</strong> 0.000</p>
+                        <p><strong>Convergence Reliability:</strong> 0.862</p>
+                    </div>
+                    <div>
+                        <h4>Scalability Analysis</h4>
+                        <p><strong>Time Complexity:</strong> 0.100</p>
+                        <p><strong>Memory Complexity:</strong> 0.100</p>
+                        <p><strong>Memory Efficiency:</strong> 0.599</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <section class="scalability-analysis">
+            <h2>📈 Scalability Analysis</h2>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <h3>Excellent Scalability</h3>
+                    <span class="stat-value">4</span>
+                </div>
+                <div class="stat-card">
+                    <h3>Good Scalability</h3>
+                    <span class="stat-value">1</span>
+                </div>
+                <div class="stat-card">
+                    <h3>Avg Time Complexity</h3>
+                    <span class="stat-value">0.734</span>
+                </div>
+                <div class="stat-card">
+                    <h3>Avg Memory Complexity</h3>
+                    <span class="stat-value">0.100</span>
+                </div>
+            </div>
+        </section>
+        
+        <section class="resource-utilization">
+            <h2>💾 Resource Utilization</h2>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <h3>Total Memory Usage</h3>
+                    <span class="stat-value">50.1 MB</span>
+                </div>
+                <div class="stat-card">
+                    <h3>Avg CPU Efficiency</h3>
+                    <span class="stat-value">83.8%</span>
+                </div>
+                <div class="stat-card">
+                    <h3>Total Throughput</h3>
+                    <span class="stat-value">1417.2 prob/s</span>
+                </div>
+            </div>
+        </section>
+    </main>
+    
+    <footer>
+        <div class="footer-content">
+            <div class="footer-info">
+                <p>Generated automatically from benchmark results • <a href="data/performance_profiling_report.json">Download Report Data</a></p>
+                <p class="author-info">© 2025 Naoki Ito • <a href="mailto:napinoco@gmail.com">Contact</a> • <a href="https://github.com/napinoco/optimization-solver-benchmark">View on GitHub</a></p>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>
