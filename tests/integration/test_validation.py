@@ -11,7 +11,7 @@ import logging
 from pathlib import Path
 
 # Add project root to path for imports
-project_root = Path(__file__).parent
+project_root = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(project_root))
 
 from scripts.utils.validation import create_default_validator, ValidationResult
