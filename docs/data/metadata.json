@@ -1,6 +1,6 @@
 {
   "metadata": {
-    "generated_at": "2025-06-15T10:23:18.109271",
+    "generated_at": "2025-06-15T11:08:50.606075",
     "format_version": "1.0",
     "description": "Problem and solver metadata"
   },
@@ -150,6 +150,6 @@
       "SDP"
     ],
     "last_updated": "2025-06-15T10:02:52.076740",
-    "collection_timestamp": "2025-06-15T10:23:18.109653"
+    "collection_timestamp": "2025-06-15T11:08:50.606454"
   }
 }

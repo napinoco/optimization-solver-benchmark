@@ -90,8 +90,10 @@ def generate_facility_location_socp(n_facilities: int = 3, n_customers: int = 5,
     for i in range(n_facilities):
         for j in range(n_customers):
             # ||facility_i - customer_j||_2 <= t_ij
+            # Create constant vector for the Euclidean distance
             diff = facility_locations[i] - customer_locations[j]
-            constraints.append(cp.SOC(t[i, j], diff))
+            # Use cp.Constant to properly convert numpy array to CVXPY parameter
+            constraints.append(cp.SOC(t[i, j], cp.Constant(diff)))
     
     # Distance activation constraints: t_ij >= distance_base * x_ij
     # This links distance to shipment (if we ship, we pay the distance cost)
