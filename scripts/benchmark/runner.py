@@ -22,6 +22,7 @@ from scripts.utils.logger import get_logger
 from scripts.utils.solver_validation import SolverValidator, ProblemType
 from scripts.benchmark.backend_selector import BackendSelector, SelectionStrategy
 from scripts.database.models import create_database
+from scripts.utils.git_utils import get_git_commit_hash
 
 logger = get_logger("benchmark_runner")
 
