@@ -1,13 +1,14 @@
-# Optimization Solver Benchmark System - Detailed Design
+# Optimization Solver Benchmark System - Simplified Design
 
-This document provides comprehensive technical specifications, implementation details, and architectural decisions for the optimization solver benchmark system.
+This document provides technical specifications for the **simplified** optimization solver benchmark system focused on reliability and maintainability.
 
 ---
 
 ## System Architecture
 
-### Overall Data Flow Architecture
+### Simplified Data Flow Architecture
 ```
+LOCAL DEVELOPMENT:
 ┌─────────────┐    ┌──────────────┐    ┌─────────────┐
 │   Problem   │───▶│   Solver     │───▶│   Result    │
 │   Loading   │    │   Execution  │    │  Collection │
@@ -24,42 +25,54 @@ This document provides comprehensive technical specifications, implementation de
                                      │   Report    │
                                      │ Generation  │
                                      └─────────────┘
+                                              │
+                                              ▼
+                                     ┌─────────────┐
+                                     │  Commit to  │
+                                     │   docs/     │
+                                     └─────────────┘
+
+GITHUB ACTIONS (Publishing Only):
+┌─────────────┐    ┌──────────────┐
+│  Pre-built  │───▶│   GitHub     │
+│    docs/    │    │    Pages     │
+└─────────────┘    └──────────────┘
 ```
 
-### Component Interaction
+### Component Interaction (Simplified)
 ```
-GitHub Actions (6-hour limit)
-├── Environment Setup (Python + Octave)
-├── Benchmark Problem Acquisition (URL/Local)
-├── Solver Execution (parallelization support)
-├── Result Collection & Validation (JSON format)
-├── SQLite Database Update
-├── Static Site Generation (HTML/CSS/JS)
-└── GitHub Pages Auto-Deploy
+LOCAL DEVELOPMENT:
+├── Problem Loading (Local files only)
+├── Python Solver Execution (CVXPY + SciPy)
+├── Result Collection & Database Storage
+├── HTML Report Generation
+├── Data Export (JSON/CSV)
+└── Commit Generated Files
+
+GITHUB ACTIONS (Minimal):
+├── PR Preview (Lightweight benchmark + publish)
+└── Main Branch Publishing (Static file deployment only)
 ```
 
 ---
 
-## File and Directory Structure
+## File and Directory Structure (Simplified)
 
 ```
 optimization-solver-benchmark/
 ├── README.md                    # Project overview and quick start
-├── architecture.md              # This file - system architecture  
+├── architecture.md              # High-level system overview  
 ├── CLAUDE.md                    # AI assistant integration context
 ├── LICENSE                      # MIT license
 │
 ├── .github/
 │   └── workflows/
-│       ├── benchmark.yml         # Main benchmark execution
-│       ├── octave_test.yml       # Octave solver testing
-│       ├── deploy-pages.yml      # Auto-deploy main branch to GitHub Pages
-│       └── pr-preview.yml        # PR preview deployment
+│       ├── deploy-pages.yml      # Publish pre-built docs/ to GitHub Pages
+│       └── pr-preview.yml        # PR preview with lightweight benchmark
 │
 ├── config/
-│   ├── benchmark_config.yaml    # Benchmark execution settings
-│   ├── solvers.yaml              # Solver definitions
-│   ├── octave_config.yaml        # Octave-specific configuration
+│   ├── benchmark_config.yaml    # Local benchmark execution settings
+│   ├── solvers.yaml              # Python solver definitions only
 │   ├── site_config.yaml          # Author and site metadata
 │   └── backend_templates/        # CVXPY backend configurations
 │       ├── clarabel.yaml
@@ -68,34 +81,25 @@ optimization-solver-benchmark/
 │       └── osqp.yaml
 │
 ├── problems/
-│   ├── light_set/               # Phase 1: Lightweight problems
-│   │   ├── lp/                  # Linear programming (.mps files)
-│   │   ├── qp/                  # Quadratic programming (.qps files)
-│   │   ├── socp/                # Second-order cone programming (Python)
-│   │   └── sdp/                 # Semidefinite programming (Python)
-│   ├── medium_set/              # Phase 2: External medium problems
-│   │   └── external_urls.yaml   # External storage URLs
-│   ├── large_set/               # Phase 2: External large problems  
-│   │   └── external_urls.yaml   # External storage URLs
-│   └── problem_registry.yaml    # Problem metadata and registry
+│   └── light_set/               # Local problems only
+│       ├── lp/                  # Linear programming (.mps files)
+│       ├── qp/                  # Quadratic programming (.qps files)
+│       ├── socp/                # Second-order cone programming (Python)
+│       └── sdp/                 # Semidefinite programming (Python)
 │
 ├── scripts/
 │   ├── benchmark/
 │   │   ├── runner.py             # Benchmark execution engine
 │   │   ├── solver_interface.py   # Solver abstraction layer
-│   │   ├── problem_loader.py     # Problem loading and validation
+│   │   ├── problem_loader.py     # Problem loading (local only)
 │   │   ├── result_collector.py   # Result collection and aggregation
 │   │   ├── backend_selector.py   # CVXPY backend selection
 │   │   └── environment_info.py   # Environment information gathering
 │   │
 │   ├── solvers/
-│   │   ├── python/
-│   │   │   ├── cvxpy_runner.py   # CVXPY execution with multiple backends
-│   │   │   └── scipy_runner.py   # SciPy optimization suite
-│   │   └── octave/
-│   │       ├── octave_runner.py  # Octave execution control
-│   │       ├── loadjson.m        # JSON loading utilities
-│   │       └── savejson.m        # JSON saving utilities
+│   │   └── python/               # Python solvers only
+│   │       ├── cvxpy_runner.py   # CVXPY execution with multiple backends
+│   │       └── scipy_runner.py   # SciPy optimization suite
 │   │
 │   ├── database/
 │   │   ├── models.py             # SQLAlchemy data models
@@ -109,13 +113,9 @@ optimization-solver-benchmark/
 │   │   └── statistics.py         # Statistical calculations
 │   │
 │   ├── analytics/
-│   │   ├── statistical_analysis.py  # Advanced statistical analysis
+│   │   ├── statistical_analysis.py  # Statistical analysis
 │   │   ├── performance_profiler.py  # Performance profiling
 │   │   └── analytics_runner.py   # Analytics execution
-│   │
-│   ├── storage/
-│   │   ├── external_storage.py   # External storage management
-│   │   └── external_manager.py   # Storage backend abstraction
 │   │
 │   └── utils/
 │       ├── config_loader.py      # Configuration loading
@@ -124,109 +124,93 @@ optimization-solver-benchmark/
 │       ├── problem_classifier.py # Problem type classification
 │       └── solver_diagnostics.py # Solver capability detection
 │
-├── docs/                        # GitHub Pages output (auto-generated)
-│   ├── index.html               # Main dashboard
-│   ├── solver_comparison.html   # Solver performance comparison
-│   ├── problem_analysis.html    # Problem-wise analysis
-│   ├── results_matrix.html      # Problems × solvers matrix
-│   ├── statistical_analysis.html # Statistical analysis report
-│   ├── performance_profiling.html # Performance profiling report
-│   ├── environment_info.html    # Environment information
+├── docs/                        # GitHub Pages output (PRE-BUILT)
+│   ├── index.html               # Main dashboard (committed)
+│   ├── solver_comparison.html   # Solver performance comparison (committed)
+│   ├── problem_analysis.html    # Problem-wise analysis (committed)
+│   ├── results_matrix.html      # Problems × solvers matrix (committed)
+│   ├── statistical_analysis.html # Statistical analysis report (committed)
+│   ├── performance_profiling.html # Performance profiling report (committed)
+│   ├── environment_info.html    # Environment information (committed)
 │   ├── assets/
-│   │   ├── css/style.css        # Custom styles
-│   │   └── js/                  # JavaScript for interactivity
+│   │   ├── css/style.css        # Custom styles (committed)
+│   │   └── js/                  # JavaScript for interactivity (committed)
 │   └── data/
-│       ├── results.json         # Complete benchmark results
-│       ├── summary.json         # Summary statistics
-│       ├── metadata.json        # Environment and configuration data
-│       ├── results.csv          # CSV export of results
-│       ├── statistical_analysis_report.json
-│       └── performance_profiling_report.json
+│       ├── results.json         # Complete benchmark results (committed)
+│       ├── summary.json         # Summary statistics (committed)
+│       ├── metadata.json        # Environment and configuration data (committed)
+│       ├── results.csv          # CSV export of results (committed)
+│       ├── statistical_analysis_report.json (committed)
+│       └── performance_profiling_report.json (committed)
 │
 ├── database/
-│   ├── results.db               # SQLite database (main)
+│   ├── results.db               # SQLite database (committed)
 │   ├── schema.sql               # Database schema definition
 │   └── schema_enhancement.sql   # Schema updates and enhancements
 │
 ├── requirements/
 │   ├── base.txt                 # Core dependencies
 │   ├── python.txt               # Python solver dependencies
-│   ├── export.txt               # Export functionality dependencies
-│   └── optional.txt             # Optional feature dependencies
+│   └── export.txt               # Export functionality dependencies
 │
-├── logs/                        # Log files (auto-generated)
+├── logs/                        # Log files (local only, .gitignore)
 │   └── benchmark.log            # Structured execution logs
 │
-└── tests/                       # Test suite
-    ├── test_validation.py       # Validation framework tests
-    └── test_github_actions.py   # GitHub Actions simulation tests
+└── tests/                       # Test suite (cleaned up)
+    ├── unit/                    # Unit tests
+    ├── integration/             # Integration tests
+    └── fixtures/                # Test data and fixtures
 ```
 
 ---
 
-## Core Components
+## Core Components (Simplified)
 
-### 1. GitHub Actions Workflows
+### 1. GitHub Actions Workflows (Minimal)
 
-#### benchmark.yml - Main Benchmark Execution
-```yaml
-# Key features:
-# - Scheduled execution (configurable)
-# - Manual trigger with input parameters
-# - Multi-environment matrix support (Ubuntu only for performance)
-# - Parallel job control (set to 1 for fair CPU utilization)
-# - Comprehensive artifact handling
-# - Automatic deployment trigger
-```
-
-#### octave_test.yml - Octave Environment Testing
-```yaml
-# Key features:
-# - MATLAB-compatible environment setup
-# - Octave package installation and testing
-# - Integration with Python benchmark system
-# - Controllable arguments matching benchmark.yml pattern
-```
-
-#### deploy-pages.yml - Main Branch Auto-Deployment
+#### deploy-pages.yml - Static File Publishing Only
 ```yaml
 # Key features:
 # - Triggers on push to main branch
-# - Manual workflow_dispatch with configurable parameters
-# - Deploys to gh-pages root (main site)
-# - Preserves PR preview subdirectories with clean: false
-# - Comprehensive deployment summary with direct links
+# - Publishes PRE-BUILT docs/ folder to GitHub Pages
+# - No benchmark execution in CI
+# - Fast and reliable deployment
+# - Preserves PR preview subdirectories
 ```
 
 #### pr-preview.yml - Pull Request Preview System
 ```yaml
 # Key features:
 # - Auto-deploy PR previews to gh-pages/pr-preview/pr-{number}/
-# - Lightweight benchmark with scipy,cvxpy and light_set
+# - Lightweight benchmark with scipy,clarabel_cvxpy,scs_cvxpy and light_set
 # - Auto-cleanup when PR closed
 # - Preview banners and metadata injection
 # - Comments with preview URLs on PRs
 ```
 
-### 2. Configuration Management
+### 2. Configuration Management (Simplified)
 
-#### benchmark_config.yaml - Execution Settings
+#### benchmark_config.yaml - Local Execution Settings
 ```yaml
 benchmark:
   timeout: 300                   # Solver timeout in seconds
   parallel_jobs: 1               # CPU core utilization (fair comparison)
   problem_sets:
-    light_set: "problems/light_set"
-    medium_set: "problems/medium_set"  
-    large_set: "problems/large_set"
+    light_set: "problems/light_set"   # Only local problems
   
 reporting:
   formats: ["html", "json", "csv"]
   include_environment_info: true
   include_statistical_analysis: true
+
+database:
+  path: "database/results.db"   # Local SQLite database
+
+output:
+  reports_dir: "docs"            # Pre-built HTML files
 ```
 
-#### solvers.yaml - Solver Definitions
+#### solvers.yaml - Python Solver Definitions Only
 ```yaml
 solvers:
   scipy:
@@ -239,11 +223,6 @@ solvers:
     module: scripts.solvers.python.cvxpy_runner
     class: CVXPYSolver
     backends: [CLARABEL, SCS, ECOS, OSQP]  # Multi-backend support
-    
-  octave:
-    type: octave
-    module: scripts.solvers.octave.octave_runner
-    class: OctaveSolver
 ```
 
 ### 3. Benchmark Execution Engine
