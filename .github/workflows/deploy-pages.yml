@@ -1,39 +1,16 @@
 name: Deploy to GitHub Pages
 
-# Automatically deploy benchmark reports when main branch is updated
+# Deploy pre-built reports to GitHub Pages when main branch is updated
 on:
   push:
     branches:
       - main
   workflow_dispatch:
-    inputs:
-      solvers:
-        description: 'Comma-separated list of solvers to benchmark'
-        required: false
-        default: 'scipy,cvxpy,highs,osqp'
-        type: string
-      problem_set:
-        description: 'Problem set to use for benchmarking'
-        required: false
-        default: 'standard_set'
-        type: choice
-        options:
-          - standard_set
-          - light_set
-          - full_set
-      timeout:
-        description: 'Solver timeout in seconds (10-3600)'
-        required: false
-        default: '300'
-        type: string
 
 # Allow only one concurrent deployment
 concurrency:
   group: pages-deploy
   cancel-in-progress: true
-
-env:
-  PYTHON_VERSION: '3.12'
 
 permissions:
   contents: write  # Allow pushing to gh-pages branch
@@ -47,81 +24,35 @@ jobs:
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
-      
-    - name: Set up Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: ${{ env.PYTHON_VERSION }}
-        cache: 'pip'
-        cache-dependency-path: |
-          requirements/base.txt
-          requirements/python.txt
         
-    - name: Create virtual environment
+    - name: Verify pre-built reports exist
       run: |
-        python -m venv venv
-        source venv/bin/activate
-        echo "VIRTUAL_ENV=${VIRTUAL_ENV}" >> $GITHUB_ENV
-        echo "${VIRTUAL_ENV}/bin" >> $GITHUB_PATH
-        
-    - name: Install dependencies
-      run: |
-        source venv/bin/activate
-        pip install --upgrade pip
-        pip install -r requirements/base.txt
-        pip install -r requirements/python.txt
-        
-    - name: Validate environment
-      run: |
-        source venv/bin/activate
-        python main.py --validate
-        
-    - name: Run benchmark
-      run: |
-        source venv/bin/activate
-        
-        # Use manual inputs if provided, otherwise use defaults for main branch
-        SOLVERS="${{ github.event.inputs.solvers || 'scipy,cvxpy,highs,osqp' }}"
-        PROBLEM_SET="${{ github.event.inputs.problem_set || 'standard_set' }}"
-        TIMEOUT="${{ github.event.inputs.timeout || '300' }}"
-        
-        echo "## Main Branch Benchmark Configuration" >> $GITHUB_STEP_SUMMARY
-        echo "- **Trigger**: ${{ github.event_name }}" >> $GITHUB_STEP_SUMMARY
-        echo "- **Branch**: main" >> $GITHUB_STEP_SUMMARY
-        echo "- **Solvers**: ${SOLVERS}" >> $GITHUB_STEP_SUMMARY
-        echo "- **Problem Set**: ${PROBLEM_SET}" >> $GITHUB_STEP_SUMMARY
-        echo "- **Timeout**: ${TIMEOUT}s" >> $GITHUB_STEP_SUMMARY
-        echo "" >> $GITHUB_STEP_SUMMARY
-        
-        # Run full benchmark for main branch
-        python main.py --benchmark --solvers "${SOLVERS}" --problem-set "${PROBLEM_SET}" --timeout "${TIMEOUT}"
-        
-    - name: Generate production reports
-      run: |
-        source venv/bin/activate
-        python main.py --report
-        
-        # Verify reports were generated
+        # Verify that pre-built reports exist
         if [ ! -f "docs/index.html" ]; then
-          echo "❌ Error: No index.html generated"
+          echo "❌ Error: No pre-built index.html found"
+          echo "Please run 'python main.py --all' locally and commit the generated files."
           exit 1
         fi
         
-        echo "✅ Production reports generated successfully"
+        if [ ! -d "docs/data" ]; then
+          echo "❌ Error: No pre-built data directory found"
+          echo "Please run 'python main.py --all' locally and commit the generated files."
+          exit 1
+        fi
         
-    - name: Create production metadata
+        echo "✅ Pre-built reports verified"
+        
+    - name: Create deployment metadata
       run: |
-        # Create production info file
-        cat > docs/production-info.json << EOF
+        # Create deployment info file
+        cat > docs/deployment-info.json << EOF
         {
+          "deployment_type": "static",
           "branch": "main",
           "commit_sha": "${{ github.sha }}",
-          "generated_at": "$(date -Iseconds)",
+          "deployed_at": "$(date -Iseconds)",
           "repository": "${{ github.repository }}",
-          "workflow_run": "${{ github.run_id }}",
-          "solvers": "${{ github.event.inputs.solvers || 'scipy,cvxpy,highs,osqp' }}",
-          "problem_set": "${{ github.event.inputs.problem_set || 'standard_set' }}",
-          "timeout": "${{ github.event.inputs.timeout || '300' }}"
+          "workflow_run": "${{ github.run_id }}"
         }
         EOF
         
@@ -135,18 +66,18 @@ jobs:
         
     - name: Display deployment summary
       run: |
-        echo "## Production Deployment Summary" >> $GITHUB_STEP_SUMMARY
+        echo "## Static Site Deployment Summary" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
-        echo "✅ **Main site deployed successfully!**" >> $GITHUB_STEP_SUMMARY
+        echo "✅ **Pre-built site deployed successfully!**" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
         echo "### Production URL" >> $GITHUB_STEP_SUMMARY
         echo "🔗 https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
         echo "### Deployment Details" >> $GITHUB_STEP_SUMMARY
+        echo "- **Type**: Static file deployment" >> $GITHUB_STEP_SUMMARY
         echo "- **Branch**: main" >> $GITHUB_STEP_SUMMARY
         echo "- **Commit**: ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
-        echo "- **Benchmark**: ${{ github.event.inputs.solvers || 'scipy,cvxpy,highs,osqp' }} with ${{ github.event.inputs.problem_set || 'standard_set' }}" >> $GITHUB_STEP_SUMMARY
-        echo "- **Generated**: $(date -Iseconds)" >> $GITHUB_STEP_SUMMARY
+        echo "- **Deployed**: $(date -Iseconds)" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
         echo "### Available Reports" >> $GITHUB_STEP_SUMMARY
         echo "- 📊 [Dashboard](https://napinoco.github.io/optimization-solver-benchmark/) - Main benchmark overview" >> $GITHUB_STEP_SUMMARY
