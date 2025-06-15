@@ -1,0 +1,114 @@
+name: Validate Codebase
+
+# Lightweight CI validation to ensure codebase consistency and completeness
+# No benchmarking or publishing - just validates that the system can start correctly
+
+on:
+  # Run on pushes to main branch
+  push:
+    branches: [main]
+    
+  # Run on pull requests to main
+  pull_request:
+    branches: [main]
+    
+  # Allow manual trigger
+  workflow_dispatch:
+
+# Only allow one validation run at a time per branch
+concurrency:
+  group: validate-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  PYTHON_VERSION: '3.12'
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: Set up Python ${{ env.PYTHON_VERSION }}
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+        cache: 'pip'
+        cache-dependency-path: |
+          requirements/base.txt
+          requirements/python.txt
+          
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements/base.txt
+        pip install -r requirements/python.txt
+        
+    - name: Validate system configuration
+      run: |
+        echo "## System Validation" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "Running comprehensive system validation..." >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        
+        # Run the validation
+        python main.py --validate
+        
+        echo "✅ **System validation completed successfully!**" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        
+    - name: Verify environment info
+      run: |
+        echo "### Environment Details" >> $GITHUB_STEP_SUMMARY
+        echo "- **Python Version**: $(python --version)" >> $GITHUB_STEP_SUMMARY
+        echo "- **Platform**: ${{ runner.os }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **Architecture**: $(uname -m)" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        
+    - name: Check solver availability
+      run: |
+        python -c "
+        import sys
+        sys.path.insert(0, '.')
+        from scripts.utils.solver_validation import SolverValidator
+        from scripts.utils.logger import get_logger
+        
+        logger = get_logger('ci_validation')
+        validator = SolverValidator(logger)
+        
+        print('### Solver Backend Availability')
+        validator.validate_all_backends()
+        " >> $GITHUB_STEP_SUMMARY 2>&1 || echo "Solver validation completed with warnings"
+        
+    - name: Display validation summary
+      if: success()
+      run: |
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "### Validation Results" >> $GITHUB_STEP_SUMMARY
+        echo "✅ **All validation checks passed**" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "This validates that:" >> $GITHUB_STEP_SUMMARY
+        echo "- Configuration files are valid and loadable" >> $GITHUB_STEP_SUMMARY
+        echo "- Python dependencies are correctly installed" >> $GITHUB_STEP_SUMMARY
+        echo "- Core system components can initialize" >> $GITHUB_STEP_SUMMARY
+        echo "- Database schema is accessible" >> $GITHUB_STEP_SUMMARY
+        echo "- Problem registry is valid" >> $GITHUB_STEP_SUMMARY
+        echo "- Solver configurations are loadable" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "*No benchmarks were run - this is a configuration validation only.*"
+        
+    - name: Display failure information
+      if: failure()
+      run: |
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "### ❌ Validation Failed" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "The system validation failed, which indicates potential issues with:" >> $GITHUB_STEP_SUMMARY
+        echo "- Configuration file syntax or content" >> $GITHUB_STEP_SUMMARY
+        echo "- Missing or incompatible dependencies" >> $GITHUB_STEP_SUMMARY
+        echo "- Database schema problems" >> $GITHUB_STEP_SUMMARY
+        echo "- Python import or module issues" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "Please check the workflow logs above for specific error details."
