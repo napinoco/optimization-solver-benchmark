@@ -21,7 +21,3 @@ database:
 output:
   reports_dir: "docs"  # Pre-built HTML files for GitHub Pages
 
-# Legacy format support (for compatibility)
-timeout: 300
-parallel_jobs: 1
-output_format: "json"
