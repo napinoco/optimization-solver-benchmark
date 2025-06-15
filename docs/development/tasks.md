@@ -59,15 +59,15 @@ This document outlines specific tasks to simplify the optimization solver benchm
 
 ## Phase 2: Code Cleanup (High Priority)
 
-### Task 2.1: Organize Test Files
-- **Objective**: Move scattered test files to proper test directory
-- **Scope**: Clean up root directory by moving test files
+### Task 2.1: Organize Test and Debug Files
+- **Objective**: Move scattered test and debug files to proper test directory
+- **Scope**: Clean up root directory by organizing test and debug files
 - **Success Criteria**:
-  - [ ] Create `tests/unit/`, `tests/integration/`, `tests/fixtures/`
+  - [ ] Create `tests/unit/`, `tests/integration/`, `tests/fixtures/`, `tests/debug/`
   - [ ] Move `test_*.py` files from root to appropriate test directories
   - [ ] Move `debug_*.py` files to `tests/debug/` or delete if obsolete
-  - [ ] Update test runner configurations
-- **Files to Modify**: Root directory test files, test configuration
+  - [ ] Update test runner configurations if needed
+- **Files to Modify**: Root directory test and debug files
 - **Test**: All tests run from new locations
 - **Estimated Time**: 1 hour
 

@@ -49,7 +49,7 @@ def test_pr_preview_workflow():
     print("=" * 60)
     
     # Change to project root
-    project_root = Path(__file__).parent
+    project_root = Path(__file__).parent.parent.parent
     os.chdir(project_root)
     
     # 1. Validate environment
@@ -142,7 +142,7 @@ def test_main_deployment_workflow():
     print("=" * 60)
     
     # Change to project root
-    project_root = Path(__file__).parent
+    project_root = Path(__file__).parent.parent.parent
     os.chdir(project_root)
     
     # 1. Validate environment
