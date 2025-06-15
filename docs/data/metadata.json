@@ -1,6 +1,6 @@
 {
   "metadata": {
-    "generated_at": "2025-06-15T09:49:44.376652",
+    "generated_at": "2025-06-15T10:23:18.109271",
     "format_version": "1.0",
     "description": "Problem and solver metadata"
   },
@@ -108,15 +108,6 @@
       "n_constraints": 13,
       "difficulty_level": "Easy",
       "complexity_score": 4.901350750150082
-    },
-    {
-      "name": "test_problem",
-      "class": "LP",
-      "type": "LP",
-      "n_variables": 0,
-      "n_constraints": 0,
-      "difficulty_level": "Unknown",
-      "complexity_score": 1.0
     }
   ],
   "environments": {
@@ -140,15 +131,15 @@
     },
     "memory_info": {
       "total_gb": 24.0,
-      "available_gb": 7.76
+      "available_gb": 9.19
     },
     "timezone_info": {
       "timezone_name": "JST",
       "system_timezone": null,
       "timedatectl_timezone": null,
       "utc_offset_hours": 9.0,
-      "current_time_utc": "2025-06-13T14:32:27.362883+00:00",
-      "current_time_local": "2025-06-13T23:32:27.363024",
+      "current_time_utc": "2025-06-15T01:02:52.068715+00:00",
+      "current_time_local": "2025-06-15T10:02:52.068875",
       "daylight_saving": false
     },
     "primary_solver_framework": "CVXPY",
@@ -158,7 +149,7 @@
       "SOCP",
       "SDP"
     ],
-    "last_updated": "2025-06-13 14:32:27",
-    "collection_timestamp": "2025-06-15T09:49:44.377062"
+    "last_updated": "2025-06-15T10:02:52.076740",
+    "collection_timestamp": "2025-06-15T10:23:18.109653"
   }
 }
