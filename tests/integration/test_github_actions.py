@@ -51,7 +51,7 @@ def test_github_actions_simulation():
     print("="*60)
     
     # Get current directory
-    repo_root = Path(__file__).parent
+    repo_root = Path(__file__).parent.parent.parent
     os.chdir(repo_root)
     
     print(f"Repository root: {repo_root}")
