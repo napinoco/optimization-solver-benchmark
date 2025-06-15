@@ -89,19 +89,6 @@ solvers:
     timeout: 300
     enabled: true
     
-  qsqp_cvxpy:
-    name: "QSQP (via CVXPY)"
-    environment: "python"
-    backend: "QSQP"
-    supported_types: ["QP"]
-    
-    # Minimal configuration - let solver use native defaults
-    solver_options:
-      verbose: false          # Disable verbose output
-    
-    timeout: 300
-    enabled: false  # Disabled due to platform compatibility issues with qsqp package
-    
   cbc_cvxpy:
     name: "CBC (via CVXPY)"
     environment: "python"
