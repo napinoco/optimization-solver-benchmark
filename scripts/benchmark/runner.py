@@ -165,7 +165,9 @@ class BenchmarkRunner:
             self.logger.error(f"Failed to load solver configuration: {e}")
             raise
         
-        timeout = self.benchmark_config.get('solver_timeout', 300.0)
+        # Get default timeout from global solver settings
+        global_settings = solver_config.get('global_settings', {})
+        default_timeout = global_settings.get('default_timeout', 300.0)
         
         # Initialize each configured solver
         for solver_id, config in solver_definitions.items():
@@ -174,7 +176,7 @@ class BenchmarkRunner:
                 continue
                 
             try:
-                solver_instance = self._create_solver_instance(solver_id, config, timeout)
+                solver_instance = self._create_solver_instance(solver_id, config, default_timeout)
                 if solver_instance:
                     self.solvers[solver_id] = solver_instance
                     self.logger.info(f"Initialized solver: {solver_instance.name}")
