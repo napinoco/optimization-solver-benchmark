@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solver Comparison - Optimization Benchmark</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+    <header>
+        <h1>⚡ Solver Comparison</h1>
+        <p>Detailed performance comparison of optimization solvers</p>
+    </header>
+    
+    <nav>
+        <a href="index.html">Overview</a>
+        <a href="solver_comparison.html">Solver Comparison</a>
+        <a href="problem_analysis.html">Problem Analysis</a>
+        <a href="results_matrix.html">Results Matrix</a>
+        <a href="statistical_analysis.html">Statistical Analysis</a>
+        <a href="performance_profiling.html">Performance Profiling</a>
+        <a href="environment_info.html">Environment Info</a>
+        <a href="data/">Raw Data</a>
+    </nav>
+    
+    <main>
+        <section class="solver-comparison">
+            <h2>📊 Performance Comparison</h2>
+            <table class="comparison-table">
+                <thead>
+                    <tr>
+                        <th>Solver</th>
+                        <th>Type</th>
+                        <th>Backend</th>
+                        <th>Problems Attempted</th>
+                        <th>Problems Solved</th>
+                        <th>Success Rate</th>
+                        <th>Avg Time (s)</th>
+                        <th>Best Time (s)</th>
+                        <th>Worst Time (s)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>SCS (via CVXPY)</td>
+                        <td>CVXPY Backend</td>
+                        <td>SCS</td>
+                        <td>6</td>
+                        <td>6</td>
+                        <td>100.0%</td>
+                        <td>0.0021</td>
+                        <td>0.0017</td>
+                        <td>0.0025</td>
+                    </tr>
+                    <tr>
+                        <td>OSQP (via CVXPY)</td>
+                        <td>CVXPY Backend</td>
+                        <td>OSQP</td>
+                        <td>6</td>
+                        <td>6</td>
+                        <td>100.0%</td>
+                        <td>0.0031</td>
+                        <td>0.0024</td>
+                        <td>0.0046</td>
+                    </tr>
+                    <tr>
+                        <td>SciPy</td>
+                        <td>SciPy Solver</td>
+                        <td>SciPy</td>
+                        <td>29</td>
+                        <td>29</td>
+                        <td>100.0%</td>
+                        <td>0.0052</td>
+                        <td>0.0009</td>
+                        <td>0.0164</td>
+                    </tr>
+                    <tr>
+                        <td>ECOS (via CVXPY)</td>
+                        <td>CVXPY Backend</td>
+                        <td>ECOS</td>
+                        <td>6</td>
+                        <td>6</td>
+                        <td>100.0%</td>
+                        <td>0.0053</td>
+                        <td>0.0016</td>
+                        <td>0.0192</td>
+                    </tr>
+                    <tr>
+                        <td>CLARABEL (via CVXPY)</td>
+                        <td>CVXPY Backend</td>
+                        <td>CLARABEL</td>
+                        <td>6</td>
+                        <td>4</td>
+                        <td>66.7%</td>
+                        <td>0.0042</td>
+                        <td>0.0026</td>
+                        <td>0.0084</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+        
+        <section class="solver-details">
+            <h2>🔧 Solver Information</h2>
+            <div class="solver-grid">
+                <div class="solver-card">
+                    <h3>CLARABEL (via CVXPY)</h3>
+                    <p><strong>Type:</strong> CVXPY Backend</p>
+                    <p><strong>Backend:</strong> CLARABEL</p>
+                    <p><strong>Environment:</strong> Python</p>
+                </div>
+                <div class="solver-card">
+                    <h3>ECOS (via CVXPY)</h3>
+                    <p><strong>Type:</strong> CVXPY Backend</p>
+                    <p><strong>Backend:</strong> ECOS</p>
+                    <p><strong>Environment:</strong> Python</p>
+                </div>
+                <div class="solver-card">
+                    <h3>OSQP (via CVXPY)</h3>
+                    <p><strong>Type:</strong> CVXPY Backend</p>
+                    <p><strong>Backend:</strong> OSQP</p>
+                    <p><strong>Environment:</strong> Python</p>
+                </div>
+                <div class="solver-card">
+                    <h3>SCS (via CVXPY)</h3>
+                    <p><strong>Type:</strong> CVXPY Backend</p>
+                    <p><strong>Backend:</strong> SCS</p>
+                    <p><strong>Environment:</strong> Python</p>
+                </div>
+                <div class="solver-card">
+                    <h3>SciPy</h3>
+                    <p><strong>Type:</strong> SciPy Solver</p>
+                    <p><strong>Backend:</strong> SciPy</p>
+                    <p><strong>Environment:</strong> Python</p>
+                </div>
+            </div>
+        </section>
+    </main>
+    
+    <footer>
+        <div class="footer-content">
+            <div class="footer-info">
+                <p>Generated automatically from benchmark results • <a href="data/summary.json">Download Summary Data</a></p>
+                <p class="author-info">© 2025 Naoki Ito • <a href="mailto:napinoco@gmail.com">Contact</a> • <a href="https://github.com/napinoco/optimization-solver-benchmark">View on GitHub</a></p>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>
