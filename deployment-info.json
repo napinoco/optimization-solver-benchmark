@@ -2,8 +2,8 @@
   "deployment_type": "production",
   "target_directory": ".",
   "branch": "main",
-  "commit_sha": "73259c8a6a23dd63a9e883a508707fa7f295b9fc",
-  "deployed_at": "2025-06-15T06:32:14+00:00",
+  "commit_sha": "522722cbdd1b2db0b6ed4ec4e0fdd87cf501a7b6",
+  "deployed_at": "2025-06-16T13:50:30+00:00",
   "repository": "napinoco/optimization-solver-benchmark",
-  "workflow_run": "15660389342"
+  "workflow_run": "15682693717"
 }
