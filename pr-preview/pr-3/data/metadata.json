@@ -1,0 +1,317 @@
+{
+  "metadata": {
+    "generated_at": "2025-06-16T00:34:15.072719",
+    "format_version": "1.0",
+    "description": "Problem and solver metadata"
+  },
+  "solvers": [
+    {
+      "name": "CLARABEL (via CVXPY)",
+      "type": "CVXPY Backend",
+      "backend": "CLARABEL",
+      "environment": "Python"
+    },
+    {
+      "name": "CLARABEL-Enhanced",
+      "type": "Unknown",
+      "backend": "CLARABEL-Enhanced",
+      "environment": "Python"
+    },
+    {
+      "name": "ECOS (via CVXPY)",
+      "type": "CVXPY Backend",
+      "backend": "ECOS",
+      "environment": "Python"
+    },
+    {
+      "name": "OSQP (via CVXPY)",
+      "type": "CVXPY Backend",
+      "backend": "OSQP",
+      "environment": "Python"
+    },
+    {
+      "name": "SCS (via CVXPY)",
+      "type": "CVXPY Backend",
+      "backend": "SCS",
+      "environment": "Python"
+    },
+    {
+      "name": "SciPy",
+      "type": "SciPy Solver",
+      "backend": "SciPy",
+      "environment": "Python"
+    },
+    {
+      "name": "SciPy-Enhanced",
+      "type": "Unknown",
+      "backend": "SciPy-Enhanced",
+      "environment": "Python"
+    },
+    {
+      "name": "TestSolver",
+      "type": "Unknown",
+      "backend": "TestSolver",
+      "environment": "Python"
+    },
+    {
+      "name": "scipy",
+      "type": "SciPy Solver",
+      "backend": "scipy",
+      "environment": "Python"
+    }
+  ],
+  "problems": [
+    {
+      "name": "SIMPLE_LP",
+      "class": "LP",
+      "type": "LP",
+      "n_variables": 0,
+      "n_constraints": 0,
+      "difficulty_level": "Unknown",
+      "complexity_score": 1.0,
+      "library_source": ""
+    },
+    {
+      "name": "SIMPLE_QP",
+      "class": "QP",
+      "type": "QP",
+      "n_variables": 0,
+      "n_constraints": 0,
+      "difficulty_level": "Unknown",
+      "complexity_score": 1.0,
+      "library_source": ""
+    },
+    {
+      "name": "arch0",
+      "class": "SDP",
+      "type": "SDP",
+      "n_variables": 13215,
+      "n_constraints": 174,
+      "difficulty_level": "Unknown",
+      "complexity_score": 1.0,
+      "library_source": "arch family"
+    },
+    {
+      "name": "control1",
+      "class": "SDP",
+      "type": "SDP",
+      "n_variables": 70,
+      "n_constraints": 21,
+      "difficulty_level": "Unknown",
+      "complexity_score": 1.0,
+      "library_source": "control family"
+    },
+    {
+      "name": "control_lmi",
+      "class": "SDP",
+      "type": "SDP",
+      "n_variables": 0,
+      "n_constraints": 0,
+      "difficulty_level": "Unknown",
+      "complexity_score": 1.0,
+      "library_source": ""
+    },
+    {
+      "name": "equalG11",
+      "class": "SDP",
+      "type": "SDP",
+      "n_variables": 321201,
+      "n_constraints": 801,
+      "difficulty_level": "Unknown",
+      "complexity_score": 1.0,
+      "library_source": "equalG family"
+    },
+    {
+      "name": "facility_location",
+      "class": "SOCP",
+      "type": "SOCP",
+      "n_variables": 0,
+      "n_constraints": 0,
+      "difficulty_level": "Unknown",
+      "complexity_score": 1.0,
+      "library_source": ""
+    },
+    {
+      "name": "filter48_socp",
+      "class": "SDP",
+      "type": "SDP",
+      "n_variables": 3284,
+      "n_constraints": 969,
+      "difficulty_level": "Unknown",
+      "complexity_score": 1.0,
+      "library_source": "FILTER problem set"
+    },
+    {
+      "name": "hinf1",
+      "class": "SDP",
+      "type": "SDP",
+      "n_variables": 41,
+      "n_constraints": 13,
+      "difficulty_level": "Unknown",
+      "complexity_score": 1.0,
+      "library_source": "hinf family"
+    },
+    {
+      "name": "hinf12",
+      "class": "SDP",
+      "type": "SDP",
+      "n_variables": 216,
+      "n_constraints": 43,
+      "difficulty_level": "Unknown",
+      "complexity_score": 1.0,
+      "library_source": "HINF problem set"
+    },
+    {
+      "name": "matrix_completion",
+      "class": "SDP",
+      "type": "SDP",
+      "n_variables": 0,
+      "n_constraints": 0,
+      "difficulty_level": "Unknown",
+      "complexity_score": 1.0,
+      "library_source": ""
+    },
+    {
+      "name": "max_cut_relaxation",
+      "class": "SDP",
+      "type": "SDP",
+      "n_variables": 0,
+      "n_constraints": 0,
+      "difficulty_level": "Unknown",
+      "complexity_score": 1.0,
+      "library_source": ""
+    },
+    {
+      "name": "nql30",
+      "class": "SOCP",
+      "type": "SOCP",
+      "n_variables": 6302,
+      "n_constraints": 3680,
+      "difficulty_level": "Unknown",
+      "complexity_score": 1.0,
+      "library_source": "NQL problem set"
+    },
+    {
+      "name": "portfolio_optimization",
+      "class": "SOCP",
+      "type": "SOCP",
+      "n_variables": 0,
+      "n_constraints": 0,
+      "difficulty_level": "Unknown",
+      "complexity_score": 1.0,
+      "library_source": ""
+    },
+    {
+      "name": "qap5",
+      "class": "SDP",
+      "type": "SDP",
+      "n_variables": 351,
+      "n_constraints": 136,
+      "difficulty_level": "Unknown",
+      "complexity_score": 1.0,
+      "library_source": "qap family"
+    },
+    {
+      "name": "qssp60",
+      "class": "SOCP",
+      "type": "SOCP",
+      "n_variables": 29526,
+      "n_constraints": 14581,
+      "difficulty_level": "Unknown",
+      "complexity_score": 1.0,
+      "library_source": "QSSP problem set"
+    },
+    {
+      "name": "robust_optimization",
+      "class": "SOCP",
+      "type": "SOCP",
+      "n_variables": 0,
+      "n_constraints": 0,
+      "difficulty_level": "Unknown",
+      "complexity_score": 1.0,
+      "library_source": ""
+    },
+    {
+      "name": "test_matrix_completion",
+      "class": "SDP",
+      "type": "SDP",
+      "n_variables": 48,
+      "n_constraints": 10,
+      "difficulty_level": "Unknown",
+      "complexity_score": 1.0,
+      "library_source": "test"
+    },
+    {
+      "name": "theta1",
+      "class": "SDP",
+      "type": "SDP",
+      "n_variables": 1275,
+      "n_constraints": 104,
+      "difficulty_level": "Unknown",
+      "complexity_score": 1.0,
+      "library_source": "theta family"
+    },
+    {
+      "name": "truss1",
+      "class": "SDP",
+      "type": "SDP",
+      "n_variables": 19,
+      "n_constraints": 6,
+      "difficulty_level": "Unknown",
+      "complexity_score": 1.0,
+      "library_source": "truss family"
+    },
+    {
+      "name": "truss5",
+      "class": "SDP",
+      "type": "SDP",
+      "n_variables": 3301,
+      "n_constraints": 208,
+      "difficulty_level": "Unknown",
+      "complexity_score": 1.0,
+      "library_source": "TRUSS problem set"
+    }
+  ],
+  "environments": {
+    "platform": "macOS-14.5-arm64-arm-64bit",
+    "operating_system": "Darwin 23.5.0",
+    "operating_system_details": {
+      "system": "Darwin",
+      "release": "23.5.0",
+      "version": "Darwin Kernel Version 23.5.0: Wed May  1 20:19:05 PDT 2024; root:xnu-10063.121.3~5/RELEASE_ARM64_T8112",
+      "machine": "arm64",
+      "architecture": "64bit",
+      "ubuntu_version": null,
+      "version_id": null
+    },
+    "python_version": "3.12.2",
+    "python_implementation": "CPython",
+    "cpu_info": {
+      "processor": "arm",
+      "cpu_count": 8,
+      "cpu_count_physical": 8
+    },
+    "memory_info": {
+      "total_gb": 24.0,
+      "available_gb": 7.53
+    },
+    "timezone_info": {
+      "timezone_name": "JST",
+      "system_timezone": null,
+      "timedatectl_timezone": null,
+      "utc_offset_hours": 9.0,
+      "current_time_utc": "2025-06-15T15:24:53.882136+00:00",
+      "current_time_local": "2025-06-16T00:24:53.882144",
+      "daylight_saving": false
+    },
+    "primary_solver_framework": "CVXPY",
+    "supported_problem_types": [
+      "LP",
+      "QP",
+      "SOCP",
+      "SDP"
+    ],
+    "last_updated": "2025-06-16T00:24:53.912867",
+    "collection_timestamp": "2025-06-16T00:34:15.073157"
+  }
+}
