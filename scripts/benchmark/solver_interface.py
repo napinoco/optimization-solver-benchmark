@@ -27,6 +27,11 @@ class SolverResult:
     iterations: Optional[int] = None
     error_message: Optional[str] = None
     solver_info: Optional[Dict[str, Any]] = None
+    # Enhanced tracking fields
+    solver_version: Optional[str] = None      # Backend version for reproducibility
+    solver_backend: Optional[str] = None      # Specific backend (CLARABEL, SCS, etc.)
+    problem_library: str = 'light_set'        # Problem source library
+    run_id: Optional[str] = None              # Unique run identifier
     
     def __post_init__(self):
         """Validate result data."""
@@ -52,7 +57,12 @@ class SolverResult:
             'duality_gap': self.duality_gap,
             'iterations': self.iterations,
             'error_message': self.error_message,
-            'solver_info': self.solver_info
+            'solver_info': self.solver_info,
+            # Enhanced tracking fields
+            'solver_version': self.solver_version,
+            'solver_backend': self.solver_backend,
+            'problem_library': self.problem_library,
+            'run_id': self.run_id
         }
 
 class TimeoutError(Exception):

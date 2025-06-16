@@ -1,4 +1,10 @@
 # Problem registry for optimization solver benchmark
+# 
+# This registry contains three problem libraries:
+# - light_set: Small test problems for quick validation
+# - DIMACS: Mixed semidefinite-quadratic-linear programs (SeDuMi .mat format)
+# - SDPLIB: Semidefinite programming test problems (SDPA .dat-s format)
+#
 problems:
   light_set:
     lp:
@@ -59,3 +65,149 @@ problems:
         variables: 15
         constraints: 6
         sdp_constraints: 1
+
+  DIMACS:
+    # Mixed semidefinite-quadratic-linear programs from 7th DIMACS Implementation Challenge
+    # Source: https://github.com/vsdp/DIMACS
+    # Format: SeDuMi .mat files (gzip compressed)
+    # Total problems available: 47 across 12 problem sets
+    library_info:
+      source: "7th DIMACS Implementation Challenge"
+      format: "SeDuMi .mat.gz"
+      total_problems: 47
+      description: "Mixed semidefinite-quadratic-linear programming test problems"
+      url: "https://github.com/vsdp/DIMACS"
+    
+    sdp:
+      - name: "truss5"
+        file_path: "problems/DIMACS/data/TRUSS/truss5.mat.gz"
+        problem_class: "SDP"
+        description: "5-bar truss topology optimization problem"
+        source: "TRUSS problem set"
+        estimated_size: "small"
+      
+      - name: "hinf12" 
+        file_path: "problems/DIMACS/data/HINF/hinf12.mat.gz"
+        problem_class: "SDP"
+        description: "H-infinity controller synthesis problem"
+        source: "HINF problem set"
+        estimated_size: "medium"
+        
+      - name: "filter48_socp"
+        file_path: "problems/DIMACS/data/FILTER/filter48_socp.mat.gz"
+        problem_class: "SDP"
+        description: "Digital filter design with semidefinite and second-order cone constraints"
+        source: "FILTER problem set"
+        estimated_size: "medium"
+        
+      - name: "hamming_7_5_6"
+        file_path: "problems/DIMACS/data/HAMMING/hamming_7_5_6.mat.gz"
+        problem_class: "SDP"
+        description: "Hamming error-correcting code design via SDP"
+        source: "HAMMING problem set"  
+        estimated_size: "small"
+        
+      - name: "copo23"
+        file_path: "problems/DIMACS/data/COPOS/copo23.mat.gz"
+        problem_class: "SDP"
+        description: "Copositivity detection problem"
+        source: "COPOS problem set"
+        estimated_size: "medium"
+        
+      - name: "nb"
+        file_path: "problems/DIMACS/data/ANTENNA/nb.mat.gz"
+        problem_class: "SDP"
+        description: "Antenna array design optimization"
+        source: "ANTENNA problem set"
+        estimated_size: "large"
+        
+      - name: "nql30"
+        file_path: "problems/DIMACS/data/NQL/nql30.mat.gz"
+        problem_class: "SDP"
+        description: "Nonlinear equations solver via SDP relaxation (30 variables)"
+        source: "NQL problem set"
+        estimated_size: "small"
+        
+      - name: "qssp60"
+        file_path: "problems/DIMACS/data/QSSP/qssp60.mat.gz"
+        problem_class: "SDP"  
+        description: "Quadratic assignment/stability problem (60 variables)"
+        source: "QSSP problem set"
+        estimated_size: "medium"
+
+  SDPLIB:
+    # Semidefinite programming test problems collection
+    # Source: https://github.com/vsdp/SDPLIB
+    # Format: SDPA sparse .dat-s files
+    # Total problems available: 92 
+    library_info:
+      source: "SDPLIB 1.2 by Brian Borchers"
+      format: "SDPA sparse .dat-s"
+      total_problems: 92
+      description: "Comprehensive semidefinite programming test problems"
+      url: "https://github.com/vsdp/SDPLIB"
+      citation: "Borchers, B., SDPLIB 1.2, A Library of Semidefinite Programming Test Problems. Optimization Methods and Software. 11(1):683-690, 1999."
+    
+    sdp:
+      - name: "arch0"
+        file_path: "problems/SDPLIB/data/arch0.dat-s"
+        problem_class: "SDP"
+        description: "Architecture/structural optimization problem (small)"
+        source: "arch family"
+        estimated_size: "small"
+        
+      - name: "control1"
+        file_path: "problems/SDPLIB/data/control1.dat-s"
+        problem_class: "SDP"
+        description: "Linear control system design problem"
+        source: "control family"
+        estimated_size: "small"
+        
+      - name: "equalG11"
+        file_path: "problems/SDPLIB/data/equalG11.dat-s"
+        problem_class: "SDP"
+        description: "Graph equipartition problem"
+        source: "equalG family"
+        estimated_size: "medium"
+        
+      - name: "gpp100"
+        file_path: "problems/SDPLIB/data/gpp100.dat-s"
+        problem_class: "SDP"
+        description: "Graph partitioning problem (100 nodes)"
+        source: "gpp family"
+        estimated_size: "medium"
+        
+      - name: "hinf1"
+        file_path: "problems/SDPLIB/data/hinf1.dat-s"
+        problem_class: "SDP"
+        description: "H-infinity norm minimization in control theory"
+        source: "hinf family"
+        estimated_size: "small"
+        
+      - name: "mcp124-1"
+        file_path: "problems/SDPLIB/data/mcp124-1.dat-s"
+        problem_class: "SDP"
+        description: "Matrix completion problem (124x124)"
+        source: "mcp family"
+        estimated_size: "medium"
+        
+      - name: "qap5"
+        file_path: "problems/SDPLIB/data/qap5.dat-s"
+        problem_class: "SDP"
+        description: "Quadratic assignment problem (5x5)"
+        source: "qap family"
+        estimated_size: "small"
+        
+      - name: "theta1"
+        file_path: "problems/SDPLIB/data/theta1.dat-s"
+        problem_class: "SDP"
+        description: "Lovász theta function computation"
+        source: "theta family"
+        estimated_size: "small"
+        
+      - name: "truss1"
+        file_path: "problems/SDPLIB/data/truss1.dat-s"
+        problem_class: "SDP"
+        description: "Truss topology optimization problem"
+        source: "truss family"
+        estimated_size: "small"

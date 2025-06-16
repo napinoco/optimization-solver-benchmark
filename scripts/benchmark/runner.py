@@ -22,6 +22,7 @@ from scripts.utils.logger import get_logger
 from scripts.utils.solver_validation import SolverValidator, ProblemType
 from scripts.benchmark.backend_selector import BackendSelector, SelectionStrategy
 from scripts.database.models import create_database
+from scripts.utils.git_utils import get_git_commit_hash
 
 logger = get_logger("benchmark_runner")
 
@@ -165,7 +166,9 @@ class BenchmarkRunner:
             self.logger.error(f"Failed to load solver configuration: {e}")
             raise
         
-        timeout = self.benchmark_config.get('solver_timeout', 300.0)
+        # Get default timeout from global solver settings
+        global_settings = solver_config.get('global_settings', {})
+        default_timeout = global_settings.get('default_timeout', 300.0)
         
         # Initialize each configured solver
         for solver_id, config in solver_definitions.items():
@@ -174,7 +177,7 @@ class BenchmarkRunner:
                 continue
                 
             try:
-                solver_instance = self._create_solver_instance(solver_id, config, timeout)
+                solver_instance = self._create_solver_instance(solver_id, config, default_timeout)
                 if solver_instance:
                     self.solvers[solver_id] = solver_instance
                     self.logger.info(f"Initialized solver: {solver_instance.name}")
@@ -257,6 +260,10 @@ class BenchmarkRunner:
             
             problem_count = 0
             for problem_class in registry["problems"][problem_set]:
+                # Skip metadata sections for external libraries (DIMACS/SDPLIB)
+                if problem_class == "library_info":
+                    continue
+                    
                 for problem_info in registry["problems"][problem_set][problem_class]:
                     problem_name = problem_info["name"]
                     
@@ -264,16 +271,23 @@ class BenchmarkRunner:
                         problem = load_problem(problem_name, problem_set)
                         self.problems[problem_name] = problem
                         
-                        # Store problem info in database
+                        # Store problem info in database with structure analysis
+                        metadata = {
+                            "description": problem_info.get("description", ""),
+                            "problem_set": problem_set,
+                            "source": problem_info.get("source", "")
+                        }
+                        
+                        # Add structure analysis if available
+                        structure_summary = problem.get_structure_summary()
+                        if structure_summary:
+                            metadata["structure"] = structure_summary
+                        
                         self.result_collector.store_problem_info(
                             name=problem.name,
                             problem_class=problem.problem_class,
                             file_path=problem_info["file_path"],
-                            metadata={
-                                "description": problem_info.get("description", ""),
-                                "problem_set": problem_set,
-                                "source": problem_info.get("source", "")
-                            }
+                            metadata=metadata
                         )
                         
                         problem_count += 1
