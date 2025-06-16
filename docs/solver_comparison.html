@@ -42,59 +42,103 @@
                 </thead>
                 <tbody>
                     <tr>
-                        <td>SCS (via CVXPY)</td>
-                        <td>CVXPY Backend</td>
-                        <td>SCS</td>
-                        <td>6</td>
-                        <td>6</td>
+                        <td>SciPy-Enhanced</td>
+                        <td>Unknown</td>
+                        <td>SciPy-Enhanced</td>
+                        <td>1</td>
+                        <td>1</td>
                         <td>100.0%</td>
-                        <td>0.0021</td>
-                        <td>0.0017</td>
-                        <td>0.0025</td>
+                        <td>0.0011</td>
+                        <td>0.0011</td>
+                        <td>0.0011</td>
                     </tr>
                     <tr>
-                        <td>OSQP (via CVXPY)</td>
-                        <td>CVXPY Backend</td>
-                        <td>OSQP</td>
-                        <td>6</td>
-                        <td>6</td>
+                        <td>CLARABEL-Enhanced</td>
+                        <td>Unknown</td>
+                        <td>CLARABEL-Enhanced</td>
+                        <td>1</td>
+                        <td>1</td>
                         <td>100.0%</td>
-                        <td>0.0031</td>
-                        <td>0.0024</td>
-                        <td>0.0046</td>
+                        <td>0.0040</td>
+                        <td>0.0040</td>
+                        <td>0.0040</td>
                     </tr>
                     <tr>
-                        <td>SciPy</td>
-                        <td>SciPy Solver</td>
-                        <td>SciPy</td>
-                        <td>29</td>
-                        <td>29</td>
+                        <td>TestSolver</td>
+                        <td>Unknown</td>
+                        <td>TestSolver</td>
+                        <td>1</td>
+                        <td>1</td>
                         <td>100.0%</td>
-                        <td>0.0052</td>
-                        <td>0.0009</td>
-                        <td>0.0164</td>
-                    </tr>
-                    <tr>
-                        <td>ECOS (via CVXPY)</td>
-                        <td>CVXPY Backend</td>
-                        <td>ECOS</td>
-                        <td>6</td>
-                        <td>6</td>
-                        <td>100.0%</td>
-                        <td>0.0053</td>
-                        <td>0.0016</td>
-                        <td>0.0192</td>
+                        <td>1.2340</td>
+                        <td>1.2340</td>
+                        <td>1.2340</td>
                     </tr>
                     <tr>
                         <td>CLARABEL (via CVXPY)</td>
                         <td>CVXPY Backend</td>
                         <td>CLARABEL</td>
-                        <td>6</td>
+                        <td>16</td>
+                        <td>10</td>
+                        <td>62.5%</td>
+                        <td>0.0049</td>
+                        <td>0.0000</td>
+                        <td>0.0188</td>
+                    </tr>
+                    <tr>
+                        <td>SCS (via CVXPY)</td>
+                        <td>CVXPY Backend</td>
+                        <td>SCS</td>
+                        <td>13</td>
+                        <td>8</td>
+                        <td>61.5%</td>
+                        <td>0.0024</td>
+                        <td>0.0000</td>
+                        <td>0.0107</td>
+                    </tr>
+                    <tr>
+                        <td>ECOS (via CVXPY)</td>
+                        <td>CVXPY Backend</td>
+                        <td>ECOS</td>
+                        <td>13</td>
                         <td>4</td>
-                        <td>66.7%</td>
-                        <td>0.0042</td>
-                        <td>0.0026</td>
-                        <td>0.0084</td>
+                        <td>30.8%</td>
+                        <td>0.0014</td>
+                        <td>0.0000</td>
+                        <td>0.0105</td>
+                    </tr>
+                    <tr>
+                        <td>SciPy</td>
+                        <td>SciPy Solver</td>
+                        <td>SciPy</td>
+                        <td>24</td>
+                        <td>7</td>
+                        <td>29.2%</td>
+                        <td>0.0014</td>
+                        <td>0.0000</td>
+                        <td>0.0101</td>
+                    </tr>
+                    <tr>
+                        <td>OSQP (via CVXPY)</td>
+                        <td>CVXPY Backend</td>
+                        <td>OSQP</td>
+                        <td>13</td>
+                        <td>2</td>
+                        <td>15.4%</td>
+                        <td>0.0005</td>
+                        <td>0.0000</td>
+                        <td>0.0031</td>
+                    </tr>
+                    <tr>
+                        <td>scipy</td>
+                        <td>SciPy Solver</td>
+                        <td>scipy</td>
+                        <td>8</td>
+                        <td>0</td>
+                        <td>0.0%</td>
+                        <td>0.0001</td>
+                        <td>0.0000</td>
+                        <td>0.0002</td>
                     </tr>
                 </tbody>
             </table>
@@ -107,6 +151,12 @@
                     <h3>CLARABEL (via CVXPY)</h3>
                     <p><strong>Type:</strong> CVXPY Backend</p>
                     <p><strong>Backend:</strong> CLARABEL</p>
+                    <p><strong>Environment:</strong> Python</p>
+                </div>
+                <div class="solver-card">
+                    <h3>CLARABEL-Enhanced</h3>
+                    <p><strong>Type:</strong> Unknown</p>
+                    <p><strong>Backend:</strong> CLARABEL-Enhanced</p>
                     <p><strong>Environment:</strong> Python</p>
                 </div>
                 <div class="solver-card">
@@ -131,6 +181,24 @@
                     <h3>SciPy</h3>
                     <p><strong>Type:</strong> SciPy Solver</p>
                     <p><strong>Backend:</strong> SciPy</p>
+                    <p><strong>Environment:</strong> Python</p>
+                </div>
+                <div class="solver-card">
+                    <h3>SciPy-Enhanced</h3>
+                    <p><strong>Type:</strong> Unknown</p>
+                    <p><strong>Backend:</strong> SciPy-Enhanced</p>
+                    <p><strong>Environment:</strong> Python</p>
+                </div>
+                <div class="solver-card">
+                    <h3>TestSolver</h3>
+                    <p><strong>Type:</strong> Unknown</p>
+                    <p><strong>Backend:</strong> TestSolver</p>
+                    <p><strong>Environment:</strong> Python</p>
+                </div>
+                <div class="solver-card">
+                    <h3>scipy</h3>
+                    <p><strong>Type:</strong> SciPy Solver</p>
+                    <p><strong>Backend:</strong> scipy</p>
                     <p><strong>Environment:</strong> Python</p>
                 </div>
             </div>
