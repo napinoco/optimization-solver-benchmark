@@ -13,6 +13,7 @@ from scripts.benchmark.solver_interface import SolverInterface, SolverResult
 from scripts.benchmark.problem_loader import ProblemData
 from scripts.utils.logger import get_logger
 from scripts.utils.solver_diagnostics import SolverDiagnostics
+from scripts.utils.version_utils import detect_cvxpy_backend_version
 
 logger = get_logger("cvxpy_solver")
 
@@ -46,6 +47,10 @@ class CvxpySolver(SolverInterface):
         self.solver_options = solver_options or {}
         self.problem_optimizations = problem_optimizations or {}
         self.enable_diagnostics = enable_diagnostics
+        
+        # Detect solver version and backend
+        self.solver_version = detect_cvxpy_backend_version(backend)
+        self.solver_backend = backend
         
         # Initialize diagnostics if enabled
         self.diagnostics = None
@@ -138,6 +143,28 @@ class CvxpySolver(SolverInterface):
         }
         return status_mapping.get(cvxpy_status, "unknown")
     
+    def _create_result(self, solver_name: str, problem_name: str, solve_time: float,
+                      status: str, objective_value: Optional[float] = None,
+                      duality_gap: Optional[float] = None, iterations: Optional[int] = None,
+                      error_message: Optional[str] = None, solver_info: Optional[Dict] = None,
+                      problem_library: str = 'light_set', run_id: Optional[str] = None) -> SolverResult:
+        """Create SolverResult with version information."""
+        return SolverResult(
+            solver_name=solver_name,
+            problem_name=problem_name,
+            solve_time=solve_time,
+            status=status,
+            objective_value=objective_value,
+            duality_gap=duality_gap,
+            iterations=iterations,
+            error_message=error_message,
+            solver_info=solver_info,
+            solver_version=self.solver_version,
+            solver_backend=self.solver_backend,
+            problem_library=problem_library,
+            run_id=run_id
+        )
+    
     def solve(self, problem: ProblemData) -> SolverResult:
         """
         Solve optimization problem using CVXPY.
@@ -169,7 +196,7 @@ class CvxpySolver(SolverInterface):
             error_msg = str(e)
             self.logger.error(f"Solver failed: {error_msg}")
             
-            return SolverResult(
+            return self._create_result(
                 solver_name=self.name,
                 problem_name=problem.name,
                 solve_time=solve_time,
@@ -246,7 +273,7 @@ class CvxpySolver(SolverInterface):
             error_msg = f"Backend solver {self.backend} failed: {str(e)}"
             self.logger.error(error_msg)
             
-            return SolverResult(
+            return self._create_result(
                 solver_name=self.name,
                 problem_name=problem.name,
                 solve_time=solve_time,
@@ -289,7 +316,7 @@ class CvxpySolver(SolverInterface):
         self.logger.debug(f"LP solve completed: status={status}, "
                          f"objective={objective_value}, time={solve_time:.3f}s")
         
-        return SolverResult(
+        return self._create_result(
             solver_name=self.name,
             problem_name=problem.name,
             solve_time=solve_time,
@@ -374,7 +401,7 @@ class CvxpySolver(SolverInterface):
             error_msg = f"Backend solver {self.backend} failed: {str(e)}"
             self.logger.error(error_msg)
             
-            return SolverResult(
+            return self._create_result(
                 solver_name=self.name,
                 problem_name=problem.name,
                 solve_time=solve_time,
@@ -417,7 +444,7 @@ class CvxpySolver(SolverInterface):
         self.logger.debug(f"QP solve completed: status={status}, "
                          f"objective={objective_value}, time={solve_time:.3f}s")
         
-        return SolverResult(
+        return self._create_result(
             solver_name=self.name,
             problem_name=problem.name,
             solve_time=solve_time,
@@ -466,7 +493,7 @@ class CvxpySolver(SolverInterface):
             error_msg = f"Backend solver failed: {str(e)}"
             self.logger.error(error_msg)
             
-            return SolverResult(
+            return self._create_result(
                 solver_name=self.name,
                 problem_name=problem.name,
                 solve_time=solve_time,
@@ -502,7 +529,7 @@ class CvxpySolver(SolverInterface):
         self.logger.debug(f"SOCP solve completed: status={status}, "
                          f"objective={objective_value}, time={solve_time:.3f}s")
         
-        return SolverResult(
+        return self._create_result(
             solver_name=self.name,
             problem_name=problem.name,
             solve_time=solve_time,
@@ -551,7 +578,7 @@ class CvxpySolver(SolverInterface):
             error_msg = f"Backend solver failed: {str(e)}"
             self.logger.error(error_msg)
             
-            return SolverResult(
+            return self._create_result(
                 solver_name=self.name,
                 problem_name=problem.name,
                 solve_time=solve_time,
@@ -587,7 +614,7 @@ class CvxpySolver(SolverInterface):
         self.logger.debug(f"SDP solve completed: status={status}, "
                          f"objective={objective_value}, time={solve_time:.3f}s")
         
-        return SolverResult(
+        return self._create_result(
             solver_name=self.name,
             problem_name=problem.name,
             solve_time=solve_time,
