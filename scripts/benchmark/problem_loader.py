@@ -14,6 +14,12 @@ from scripts.utils.logger import get_logger
 
 logger = get_logger("problem_loader")
 
+# Import for lazy loading to avoid circular imports
+def _get_structure_analyzer():
+    """Lazy import of structure analyzer to avoid circular dependencies."""
+    from scripts.utils.problem_structure import analyze_problem_structure
+    return analyze_problem_structure
+
 class ProblemData:
     """Container for optimization problem data."""
     def __init__(self, name: str, problem_class: str, c: np.ndarray = None, 
@@ -21,7 +27,7 @@ class ProblemData:
                  A_ub: np.ndarray = None, b_ub: np.ndarray = None,
                  bounds: List[Tuple] = None, P: np.ndarray = None,
                  cvxpy_problem=None, variables=None, objective=None, 
-                 constraints=None, metadata=None):
+                 constraints=None, metadata=None, analyze_structure: bool = True):
         self.name = name
         self.problem_class = problem_class
         self.c = c  # objective coefficients
@@ -39,8 +45,41 @@ class ProblemData:
         self.constraints = constraints or []  # List of CVXPY constraints
         self.metadata = metadata or {}  # Additional problem metadata
         
+        # Problem structure analysis
+        self._structure = None
+        self._structure_summary = None
+        if analyze_structure:
+            try:
+                self._analyze_structure()
+            except Exception as e:
+                logger.debug(f"Could not analyze structure for {name}: {e}")
+        
+    def _analyze_structure(self):
+        """Analyze problem structure using the structure analyzer."""
+        try:
+            analyze_func = _get_structure_analyzer()
+            self._structure = analyze_func(self)
+            self._structure_summary = self._structure.to_dict()
+        except Exception as e:
+            logger.debug(f"Structure analysis failed: {e}")
+            self._structure = None
+            self._structure_summary = None
+    
+    def get_structure(self):
+        """Get problem structure analysis."""
+        return self._structure
+    
+    def get_structure_summary(self):
+        """Get problem structure summary in user-requested format."""
+        return self._structure_summary
+        
     def __repr__(self):
-        return f"ProblemData(name='{self.name}', class='{self.problem_class}')"
+        structure_info = ""
+        if self._structure_summary:
+            vars_count = self._structure_summary.get('variables', '?')
+            constraints_count = self._structure_summary.get('constraints', '?')
+            structure_info = f", {vars_count} vars, {constraints_count} constraints"
+        return f"ProblemData(name='{self.name}', class='{self.problem_class}'{structure_info})"
 
 def load_mps_file(file_path: str) -> ProblemData:
     """Load MPS format linear programming problem."""
@@ -294,39 +333,106 @@ def load_python_problem(file_path: str, problem_class: str) -> ProblemData:
 def load_problem(problem_name: str, problem_set: str = "light_set") -> ProblemData:
     """Load a specific problem by name from the registry."""
     
-    # Only support local problems (light_set)
-    if problem_set not in ["light_set"]:
-        raise ValueError(f"Problem set '{problem_set}' not supported. Only 'light_set' is available for local execution.")
+    # Support local problems and external libraries
+    supported_sets = ["light_set", "DIMACS", "SDPLIB"]
+    if problem_set not in supported_sets:
+        raise ValueError(f"Problem set '{problem_set}' not supported. Supported sets: {supported_sets}")
     
-    # Load from local registry
+    # Load from registry
     registry = load_problem_registry()
     
     # Find the problem in the registry
     problem_info = None
-    for problem_class in registry["problems"][problem_set]:
-        for problem in registry["problems"][problem_set][problem_class]:
-            if problem["name"] == problem_name:
-                problem_info = problem
+    if problem_set == "light_set":
+        # Original structure for light_set
+        for problem_class in registry["problems"][problem_set]:
+            for problem in registry["problems"][problem_set][problem_class]:
+                if problem["name"] == problem_name:
+                    problem_info = problem
+                    break
+            if problem_info:
                 break
-        if problem_info:
-            break
+    else:
+        # External library structure (DIMACS/SDPLIB)
+        if problem_set in registry["problems"]:
+            for problem_class in registry["problems"][problem_set]:
+                if problem_class != "library_info":  # Skip metadata
+                    for problem in registry["problems"][problem_set][problem_class]:
+                        if problem["name"] == problem_name:
+                            problem_info = problem
+                            break
+                if problem_info:
+                    break
     
     if not problem_info:
-        raise ValueError(f"Problem '{problem_name}' not found in registry")
+        raise ValueError(f"Problem '{problem_name}' not found in '{problem_set}' registry")
     
     # Get absolute path to problem file
     project_root = Path(__file__).parent.parent.parent
     file_path = project_root / problem_info["file_path"]
     
-    # Load based on problem class
-    if problem_info["problem_class"] == "LP":
-        return load_mps_file(str(file_path))
-    elif problem_info["problem_class"] == "QP":
-        return load_qps_file(str(file_path))
-    elif problem_info["problem_class"] in ["SOCP", "SDP"]:
-        return load_python_problem(str(file_path), problem_info["problem_class"])
+    # Load based on problem set and file format
+    if problem_set == "DIMACS":
+        # Use DIMACS loader for .mat.gz files
+        from scripts.external.dimacs_loader import load_dimacs_problem
+        from scripts.external.cvxpy_converter import convert_to_cvxpy
+        problem_data = load_dimacs_problem(str(file_path), problem_name)
+        # Convert to CVXPY format for solver compatibility
+        return convert_to_cvxpy(problem_data)
+    elif problem_set == "SDPLIB":
+        # Use SDPLIB loader for .dat-s files
+        from scripts.external.sdplib_loader import load_sdplib_problem
+        from scripts.external.cvxpy_converter import convert_to_cvxpy
+        problem_data = load_sdplib_problem(str(file_path), problem_name)
+        # Convert to CVXPY format for solver compatibility
+        return convert_to_cvxpy(problem_data)
     else:
-        raise ValueError(f"Unsupported problem class: {problem_info['problem_class']}")
+        # Original light_set loading logic
+        if problem_info["problem_class"] == "LP":
+            return load_mps_file(str(file_path))
+        elif problem_info["problem_class"] == "QP":
+            return load_qps_file(str(file_path))
+        elif problem_info["problem_class"] in ["SOCP", "SDP"]:
+            return load_python_problem(str(file_path), problem_info["problem_class"])
+        else:
+            raise ValueError(f"Unsupported problem class: {problem_info['problem_class']}")
+
+
+def list_available_problems(problem_set: Optional[str] = None) -> Dict[str, List[str]]:
+    """
+    List all available problems in the registry.
+    
+    Args:
+        problem_set: Optional problem set filter ('light_set', 'DIMACS', 'SDPLIB')
+        
+    Returns:
+        Dictionary mapping problem set names to lists of problem names
+    """
+    registry = load_problem_registry()
+    available = {}
+    
+    supported_sets = ["light_set", "DIMACS", "SDPLIB"]
+    sets_to_check = [problem_set] if problem_set else supported_sets
+    
+    for pset in sets_to_check:
+        if pset in registry["problems"]:
+            problems = []
+            
+            if pset == "light_set":
+                # Original structure
+                for problem_class in registry["problems"][pset]:
+                    for problem in registry["problems"][pset][problem_class]:
+                        problems.append(problem["name"])
+            else:
+                # External library structure
+                for problem_class in registry["problems"][pset]:
+                    if problem_class != "library_info":  # Skip metadata
+                        for problem in registry["problems"][pset][problem_class]:
+                            problems.append(problem["name"])
+            
+            available[pset] = sorted(problems)
+    
+    return available
 
 if __name__ == "__main__":
     # Test script to load and validate problems
