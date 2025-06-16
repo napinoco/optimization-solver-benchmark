@@ -1,9 +1,0 @@
-{
-  "deployment_type": "preview",
-  "target_directory": "pr-preview/pr-3",
-  "branch": "3/merge",
-  "commit_sha": "1df0e84fc486d49c1d41396b1c8ebbf9a6ad1011",
-  "deployed_at": "2025-06-16T13:47:19+00:00",
-  "repository": "napinoco/optimization-solver-benchmark",
-  "workflow_run": "15682620234"
-}
