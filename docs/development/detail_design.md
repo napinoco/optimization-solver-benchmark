@@ -1,6 +1,6 @@
-# Optimization Solver Benchmark System - Simplified Design
+# Optimization Solver Benchmark System - Re-Architected Design
 
-This document provides technical specifications for the **simplified** optimization solver benchmark system focused on reliability and maintainability.
+This document provides technical specifications for the **re-architected** optimization solver benchmark system focused on simplicity, reliability, and maintainability.
 
 ---
 
@@ -56,969 +56,791 @@ GITHUB ACTIONS (Minimal):
 
 ---
 
-## File and Directory Structure (Simplified)
+## Re-Architected Directory Structure
 
 ```
 optimization-solver-benchmark/
-├── README.md                    # Project overview and quick start
-├── architecture.md              # High-level system overview  
+├── README.md                    # Project overview and quick start (updated)
 ├── CLAUDE.md                    # AI assistant integration context
 ├── LICENSE                      # MIT license
+├── requirements.txt             # All dependencies consolidated
 │
-├── .github/
+├── .github/                     # GitHub Actions workflows
 │   └── workflows/
-│       ├── deploy-pages.yml      # Publish pre-built docs/ to GitHub Pages
-│       └── pr-preview.yml        # PR preview with lightweight benchmark
+│       ├── deploy.yml             # Deploy reports and PR previews
+│       └── validate.yml           # Codebase validation (no benchmarking)
 │
-├── config/
-│   ├── benchmark_config.yaml    # Local benchmark execution settings
-│   ├── solvers.yaml              # Python solver definitions only
-│   ├── site_config.yaml          # Author and site metadata
-│   └── backend_templates/        # CVXPY backend configurations
-│       ├── clarabel.yaml
-│       ├── scs.yaml
-│       ├── ecos.yaml
-│       └── osqp.yaml
+├── config/                      # Configuration files
+│   ├── site_config.yaml          # Site display information
+│   ├── solver_registry.yaml      # Available solvers list
+│   └── problem_registry.yaml     # Available problems list (moved from problems/)
 │
-├── problems/
-│   └── light_set/               # Local problems only
-│       ├── lp/                  # Linear programming (.mps files)
-│       ├── qp/                  # Quadratic programming (.qps files)
-│       ├── socp/                # Second-order cone programming (Python)
-│       └── sdp/                 # Semidefinite programming (Python)
+├── problems/                    # Problem instances
+│   ├── light_set/               # Internal problems
+│   │   ├── lp/                  # Linear programming (.mps files)
+│   │   ├── qp/                  # Quadratic programming (.qps files)
+│   │   ├── socp/                # Second-order cone programming (Python)
+│   │   └── sdp/                 # Semidefinite programming (Python)
+│   ├── DIMACS/                  # External DIMACS library
+│   └── SDPLIB/                  # External SDPLIB library
 │
 ├── scripts/
-│   ├── benchmark/
-│   │   ├── runner.py             # Benchmark execution engine
-│   │   ├── solver_interface.py   # Solver abstraction layer
-│   │   ├── problem_loader.py     # Problem loading (local only)
-│   │   ├── result_collector.py   # Result collection and aggregation
-│   │   ├── backend_selector.py   # CVXPY backend selection
+│   ├── benchmark/               # Benchmark execution and database storage
+│   │   ├── __init__.py
+│   │   ├── runner.py             # Main benchmark execution logic
+│   │   ├── database_manager.py   # Database operations and result storage
 │   │   └── environment_info.py   # Environment information gathering
 │   │
-│   ├── solvers/
-│   │   └── python/               # Python solvers with version detection
-│   │       ├── cvxpy_runner.py   # CVXPY execution with multiple backends
-│   │       └── scipy_runner.py   # SciPy optimization suite
+│   ├── data_loaders/            # ETL: Data loading and format conversion
+│   │   ├── __init__.py
+│   │   ├── python/               # Python-based loaders
+│   │   │   ├── __init__.py
+│   │   │   ├── mat_loader.py     # DIMACS .mat file loader
+│   │   │   ├── dat_loader.py     # SDPLIB .dat-s file loader
+│   │   │   ├── mps_loader.py     # MPS format loader
+│   │   │   ├── qps_loader.py     # QPS format loader
+│   │   │   ├── python_loader.py  # Python problem loader
+│   │   │   └── cvxpy_converter.py # Convert to CVXPY format
+│   │   └── matlab_octave/        # MATLAB/Octave loaders (future)
+│   │       └── .gitkeep
 │   │
-│   ├── external/                 # External library integration ✅
-│   │   ├── __init__.py          
-│   │   ├── cvxpy_converter.py    # CVXPY problem conversion
-│   │   ├── dimacs_loader.py      # DIMACS SeDuMi format loader
-│   │   └── sdplib_loader.py      # SDPLIB SDPA format loader
+│   ├── solvers/                 # Solver execution with standardized output
+│   │   ├── __init__.py
+│   │   ├── solver_interface.py   # Abstract solver interface
+│   │   ├── python/               # Python solvers
+│   │   │   ├── __init__.py
+│   │   │   ├── cvxpy_runner.py   # CVXPY solver implementation
+│   │   │   └── scipy_runner.py   # SciPy solver implementation
+│   │   └── matlab_octave/        # MATLAB/Octave solvers (future)
+│   │       └── .gitkeep
 │   │
-│   ├── database/
-│   │   ├── models.py             # SQLAlchemy data models with version tracking
-│   │   └── classification_storage.py # Problem classification storage
+│   ├── reporting/               # HTML generation and data extraction
+│   │   ├── __init__.py
+│   │   ├── html_generator.py     # Generate overview, results_matrix, raw_data
+│   │   ├── data_exporter.py      # Export JSON/CSV data
+│   │   └── result_processor.py   # Process latest results from database
 │   │
-│   ├── reporting/
-│   │   ├── simple_html_generator.py  # Enhanced HTML with structure analysis
-│   │   ├── data_publisher.py     # JSON/CSV with comprehensive metadata
-│   │   ├── data_validator.py     # Result validation
-│   │   ├── export.py             # Multi-format data export
-│   │   └── statistics.py         # Statistical calculations
-│   │
-│   ├── analytics/
-│   │   ├── statistical_analysis.py  # Statistical analysis
-│   │   ├── performance_profiler.py  # Performance profiling
-│   │   └── analytics_runner.py   # Analytics execution
-│   │
-│   └── utils/
-│       ├── config_loader.py      # Configuration loading
-│       ├── logger.py             # Structured logging
-│       ├── validation.py         # Data validation utilities
-│       ├── problem_classifier.py # Problem type classification
-│       ├── problem_structure.py  # Problem structure analysis ✅
-│       └── solver_diagnostics.py # Solver capability detection
+│   └── database/                # Database models and operations
+│       ├── __init__.py
+│       ├── models.py             # Single denormalized table model
+│       └── schema.sql            # Database schema definition
 │
-├── docs/                        # GitHub Pages output (PRE-BUILT)
-│   ├── index.html               # Main dashboard (committed)
-│   ├── solver_comparison.html   # Solver performance comparison (committed)
-│   ├── problem_analysis.html    # Problem-wise analysis (committed)
-│   ├── results_matrix.html      # Problems × solvers matrix (committed)
-│   ├── statistical_analysis.html # Statistical analysis report (committed)
-│   ├── performance_profiling.html # Performance profiling report (committed)
-│   ├── environment_info.html    # Environment information (committed)
-│   ├── assets/
-│   │   ├── css/style.css        # Custom styles (committed)
-│   │   └── js/                  # JavaScript for interactivity (committed)
-│   └── data/
-│       ├── results.json         # Complete benchmark results (committed)
-│       ├── summary.json         # Summary statistics (committed)
-│       ├── metadata.json        # Environment and configuration data (committed)
-│       ├── results.csv          # CSV export of results (committed)
-│       ├── statistical_analysis_report.json (committed)
-│       └── performance_profiling_report.json (committed)
+├── docs/                        # GitHub Pages output (published data)
+│   ├── pages/                   # Generated HTML and data
+│   │   ├── index.html           # Overview report
+│   │   ├── results_matrix.html  # Problems × solvers matrix
+│   │   ├── raw_data.html        # Raw data display
+│   │   ├── assets/              # CSS, JS, images
+│   │   └── data/                # JSON/CSV exports
+│   ├── development/             # Developer documentation
+│   └── guides/                  # User documentation
 │
-├── database/
-│   ├── results.db               # SQLite database (committed)
-│   ├── schema.sql               # Database schema definition
-│   └── schema_enhancement.sql   # Schema updates and enhancements
-│
-├── requirements/
-│   ├── base.txt                 # Core dependencies
-│   ├── python.txt               # Python solver dependencies
-│   └── export.txt               # Export functionality dependencies
+├── database/                    # SQLite database
+│   └── results.db               # Single denormalized results table
 │
 ├── logs/                        # Log files (local only, .gitignore)
 │   └── benchmark.log            # Structured execution logs
 │
-└── tests/                       # Test suite (cleaned up)
+└── tests/                       # Test suite
     ├── unit/                    # Unit tests
     ├── integration/             # Integration tests
-    └── fixtures/                # Test data and fixtures
+    └── fixtures/                # Test data and configurations
 ```
 
 ---
 
-## Core Components (Simplified)
+## Re-Architected Core Components
 
 ### 1. GitHub Actions Workflows (Minimal)
 
-#### deploy-pages.yml - Static File Publishing Only
+#### deploy.yml - Unified Deployment System
 ```yaml
 # Key features:
-# - Triggers on push to main branch
+# - Triggers on push to main branch and pull requests
 # - Publishes PRE-BUILT docs/ folder to GitHub Pages
 # - No benchmark execution in CI
-# - Fast and reliable deployment
-# - Preserves PR preview subdirectories
-```
-
-#### pr-preview.yml - Pull Request Preview System
-```yaml
-# Key features:
+# - Unified workflow for both production and PR previews
 # - Auto-deploy PR previews to gh-pages/pr-preview/pr-{number}/
-# - Lightweight benchmark with scipy,clarabel_cvxpy,scs_cvxpy and light_set
 # - Auto-cleanup when PR closed
 # - Preview banners and metadata injection
 # - Comments with preview URLs on PRs
+# - Preserves PR preview subdirectories
 ```
 
-### 2. Configuration Management (Simplified)
-
-#### benchmark_config.yaml - Local Execution Settings
+#### validate.yml - Codebase Validation Only  
 ```yaml
-benchmark:
-  timeout: 300                   # Solver timeout in seconds
-  parallel_jobs: 1               # CPU core utilization (fair comparison)
-  problem_sets:
-    light_set: "problems/light_set"   # Only local problems
-  
-reporting:
-  formats: ["html", "json", "csv"]
-  include_environment_info: true
-  include_statistical_analysis: true
-
-database:
-  path: "database/results.db"   # Local SQLite database
-
-output:
-  reports_dir: "docs"            # Pre-built HTML files
+# Key features:
+# - Lightweight CI validation without benchmarking
+# - Validates configuration files can be loaded
+# - Checks Python dependencies installation
+# - Verifies core system components initialize correctly
+# - Tests solver backend availability
+# - No benchmark execution or report generation
+# - Fast validation for development workflow
 ```
 
-#### solvers.yaml - Python Solver Definitions Only
+### 2. Configuration Management (Re-architected)
+
+The new configuration structure eliminates `benchmark_config.yaml` and consolidates all configuration into three focused files. The system now derives configuration directly from the registries and uses sensible defaults.
+
+#### config/site_config.yaml - Site Display Information
 ```yaml
+site:
+  title: "Optimization Solver Benchmark"
+  author: "Your Name"
+  description: "Benchmarking optimization solvers with fair comparison"
+  url: "https://your-username.github.io/optimization-solver-benchmark"
+
+github:
+  username: "your-username"
+  repository: "optimization-solver-benchmark"
+```
+
+#### config/solver_registry.yaml - Solver Display Names Only
+```yaml
+# Simplified solver registry - only display names for reporting
+# Actual solver initialization logic is in code for better maintainability
 solvers:
-  scipy:
-    type: python
-    module: scripts.solvers.python.scipy_runner
-    class: ScipySolver
+  scipy_linprog:
+    display_name: "SciPy linprog"
     
-  cvxpy:
-    type: python  
-    module: scripts.solvers.python.cvxpy_runner
-    class: CVXPYSolver
-    backends: [CLARABEL, SCS, ECOS, OSQP]  # Multi-backend support
+  cvxpy_clarabel:
+    display_name: "CLARABEL (via CVXPY)"
+    
+  cvxpy_scs:
+    display_name: "SCS (via CVXPY)"
+    
+  cvxpy_ecos:
+    display_name: "ECOS (via CVXPY)"
+    
+  cvxpy_osqp:
+    display_name: "OSQP (via CVXPY)"
 ```
 
-### 3. Benchmark Execution Engine
+This simplified approach moves solver initialization logic to code while maintaining clean display names for reports. The solver selection logic becomes:
 
-#### runner.py - Orchestration Controller
+```python
+# In BenchmarkRunner.create_solver()
+def create_solver(self, solver_name: str) -> SolverInterface:
+    """Create solver instance based on solver name"""
+    
+    if solver_name == "scipy_linprog":
+        return SciPySolver()
+    elif solver_name == "cvxpy_clarabel":
+        return CVXPYSolver(backend="CLARABEL")
+    elif solver_name == "cvxpy_scs":
+        return CVXPYSolver(backend="SCS")
+    elif solver_name == "cvxpy_ecos":
+        return CVXPYSolver(backend="ECOS")
+    elif solver_name == "cvxpy_osqp":
+        return CVXPYSolver(backend="OSQP")
+    else:
+        raise ValueError(f"Unknown solver: {solver_name}")
+```
+
+#### config/problem_registry.yaml - Flat Problem Structure
+```yaml
+# Flat problem structure - each problem is a top-level entry
+# Eliminates light_set in favor of real problems with test flags
+problem_libraries:
+  
+  # Small-scale test problems from DIMACS/SDPLIB  
+  nb:
+    display_name: "ANTENNA NB (DIMACS)"
+    file_path: "problems/DIMACS/data/ANTENNA/nb.mat.gz"
+    file_type: "mat"
+    problem_type: "SDP"
+    library_name: "DIMACS"
+    for_test_flag: true  # Small problem suitable for testing
+    known_objective_value: -12.8  # Known optimal value for validation
+    
+  arch0:
+    display_name: "ARCH0 (SDPLIB)"
+    file_path: "problems/SDPLIB/data/arch0.dat-s"
+    file_type: "dat-s" 
+    problem_type: "SDP"
+    library_name: "SDPLIB"
+    for_test_flag: true  # Small problem suitable for testing
+    known_objective_value: -5.6506  # Known optimal value
+    
+  # Larger production problems
+  hinf12:
+    display_name: "H-infinity Control 12 (DIMACS)"
+    file_path: "problems/DIMACS/data/HINF/hinf12.mat.gz"
+    file_type: "mat"
+    problem_type: "SDP"
+    library_name: "DIMACS"
+    for_test_flag: false
+    # known_objective_value: null  # Unknown - omit field
+    
+  control1:
+    display_name: "Control Problem 1 (SDPLIB)"
+    file_path: "problems/SDPLIB/data/control1.dat-s"
+    file_type: "dat-s"
+    problem_type: "SDP" 
+    library_name: "SDPLIB"
+    for_test_flag: false
+    known_objective_value: 20.8  # Known optimal value
+    
+  gpp100:
+    display_name: "Graph Partitioning 100 (SDPLIB)"
+    file_path: "problems/SDPLIB/data/gpp100.dat-s"
+    file_type: "dat-s"
+    problem_type: "SDP"
+    library_name: "SDPLIB" 
+    for_test_flag: false
+    # known_objective_value: null  # Unknown - omit field
+    
+  # Linear programming problems
+  simple_lp_test:
+    display_name: "Simple LP Test (Internal)"
+    file_path: "problems/light_set/lp/simple_lp.mps"
+    file_type: "mps"
+    problem_type: "LP"
+    library_name: "internal"
+    for_test_flag: true  # Synthetic test problem
+    known_objective_value: 5.0  # Known optimal value
+```
+
+This structure provides:
+- **Flat hierarchy**: Direct problem access without nested library structure
+- **Test problem identification**: `for_test_flag` to identify small problems for quick testing
+- **Known objective values**: Optional field for result validation
+- **Library attribution**: Clear source library tracking
+- **Real problems for testing**: Eliminates synthetic light_set in favor of real small problems
+
+### 3. Re-architected Benchmark Execution
+
+The new execution system removes complex backend selection and aggregation, focusing on simple, direct execution with standardized results storage.
+
+#### scripts/benchmark/runner.py - Main Execution Logic
 ```python
 class BenchmarkRunner:
-    """
-    Main benchmark execution controller
-    - Manages parallel execution across problems and solvers
-    - Handles timeouts and error recovery
-    - Collects and aggregates results
-    - Provides progress reporting and logging
-    """
+    """Simplified benchmark execution with direct database storage"""
+    
+    def __init__(self, database_manager: DatabaseManager):
+        self.db = database_manager
+        self.environment_info = self.gather_environment_info()
+        self.commit_hash = self.get_git_commit_hash()
+        
+        # Load configurations
+        self.solver_registry = self.load_solver_registry()
+        self.problem_registry = self.load_problem_registry()
+    
+    def run_single_benchmark(self, problem_name: str, solver_name: str) -> None:
+        """Execute single problem-solver combination and store result"""
+        
+        # 1. Load problem using appropriate loader
+        problem_config = self.problem_registry[problem_name]
+        problem_data = self.load_problem(problem_name, problem_config)
+        
+        # 2. Initialize solver
+        solver = self.create_solver(solver_name)
+        
+        # 3. Convert problem to solver format
+        converter = CVXPYConverter()
+        cvxpy_problem = converter.convert(problem_data)
+        
+        # 4. Execute solver with timeout
+        try:
+            start_time = time.time()
+            result = solver.solve(cvxpy_problem)
+            solve_time = time.time() - start_time
+            
+            # 5. Store standardized result in database
+            self.store_result(solver_name, problem_name, result, solve_time)
+            
+        except Exception as e:
+            # Store error result
+            self.store_error_result(solver_name, problem_name, str(e))
+    
+    def run_benchmark_batch(self, problems: List[str], solvers: List[str]) -> None:
+        """Run benchmark for all problem-solver combinations"""
+        
+        total_combinations = len(problems) * len(solvers)
+        completed = 0
+        
+        for problem_name in problems:
+            for solver_name in solvers:
+                try:
+                    logger.info(f"Running {solver_name} on {problem_name}")
+                    self.run_single_benchmark(problem_name, solver_name)
+                    completed += 1
+                    logger.info(f"Progress: {completed}/{total_combinations}")
+                    
+                except Exception as e:
+                    logger.error(f"Failed {solver_name} on {problem_name}: {e}")
+                    completed += 1
 ```
 
-#### solver_interface.py - Abstraction Layer
+#### scripts/benchmark/database_manager.py - Database Operations
 ```python
-class SolverInterface(ABC):
-    """
-    Abstract base class for all solvers
-    - Standardized solve() method signature
-    - Consistent result format (SolverResult dataclass)
-    - Error handling and timeout management
-    - Environment compatibility checking
-    """
+class DatabaseManager:
+    """Handles all database operations for benchmark results"""
+    
+    def __init__(self, db_path: str = "database/results.db"):
+        self.db_path = db_path
+        self.ensure_schema()
+    
+    def store_result(self, solver_name: str, solver_version: str, 
+                    problem_library: str, problem_name: str, problem_type: str,
+                    environment_info: str, commit_hash: str,
+                    solve_time: float, status: str, 
+                    primal_objective: float, dual_objective: float,
+                    duality_gap: float, primal_infeas: float, dual_infeas: float,
+                    iterations: int) -> None:
+        """Store single benchmark result (append-only)"""
+        
+        # Insert into results table without initialization
+        # Preserves all historical data
+        
+    def get_latest_results(self) -> List[BenchmarkResult]:
+        """Get latest results for reporting"""
+        
+        # Query for results with latest commit_hash and environment_info
+        # Use timestamp as tiebreaker for truly latest results
+        query = """
+        SELECT * FROM results 
+        WHERE (commit_hash, environment_info, timestamp) IN (
+            SELECT commit_hash, environment_info, MAX(timestamp)
+            FROM results 
+            GROUP BY solver_name, solver_version, problem_library, problem_name
+        )
+        ORDER BY problem_library, problem_name, solver_name
+        """
+        
+    def get_solver_problem_history(self, solver_name: str, problem_name: str) -> List[BenchmarkResult]:
+        """Get historical results for analysis"""
 ```
 
-#### backend_selector.py - CVXPY Backend Management
+#### scripts/benchmark/environment_info.py - Environment Capture
 ```python
-class BackendSelector:
-    """
-    Intelligent CVXPY backend selection
-    - Problem type compatibility matrix
-    - Solver capability detection
-    - Fallback mechanism for failed backends
-    - Performance-based recommendations
-    """
+class EnvironmentInfo:
+    """Capture and standardize environment information"""
+    
+    @staticmethod
+    def gather() -> dict:
+        """Collect comprehensive environment information"""
+        return {
+            "platform": platform.platform(),
+            "python_version": platform.python_version(),
+            "cpu_cores": os.cpu_count(),
+            "memory_gb": round(psutil.virtual_memory().total / (1024**3), 1),
+            "hostname": platform.node(),
+            "user": getpass.getuser(),
+            "timestamp": datetime.now().isoformat(),
+            "timezone": str(datetime.now().astimezone().tzinfo)
+        }
+    
+    @staticmethod 
+    def get_git_commit_hash() -> str:
+        """Get current git commit hash"""
+        try:
+            result = subprocess.run(
+                ["git", "rev-parse", "HEAD"], 
+                capture_output=True, text=True, check=True
+            )
+            return result.stdout.strip()
+        except:
+            return "unknown"
 ```
 
-### 4. Database Layer
+### 1. Database Architecture - Single Denormalized Table
 
-#### Schema Design
+#### Simplified Schema Design
 ```sql
--- Core tables for benchmark results
-CREATE TABLE benchmarks (
-    id INTEGER PRIMARY KEY,
-    timestamp DATETIME,
-    environment_info TEXT,
-    git_commit TEXT,
-    configuration_hash TEXT
-);
-
+-- Single denormalized results table with historical retention
 CREATE TABLE results (
-    id INTEGER PRIMARY KEY,
-    benchmark_id INTEGER,
-    solver_name TEXT,
-    problem_name TEXT,
-    problem_type TEXT,
-    solve_time REAL,
-    status TEXT,
-    objective_value REAL,
-    duality_gap REAL,
-    error_message TEXT,
-    FOREIGN KEY (benchmark_id) REFERENCES benchmarks (id)
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    
+    -- Solver information
+    solver_name TEXT NOT NULL,
+    solver_version TEXT NOT NULL,
+    
+    -- Problem information  
+    problem_library TEXT NOT NULL,        -- 'light_set', 'DIMACS', 'SDPLIB'
+    problem_name TEXT NOT NULL,
+    problem_type TEXT NOT NULL,           -- 'LP', 'QP', 'SOCP', 'SDP'
+    
+    -- Environment and execution context
+    environment_info TEXT NOT NULL,      -- JSON string with system info
+    commit_hash TEXT NOT NULL,           -- Git commit hash
+    timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+    
+    -- Standardized solver results
+    solve_time REAL,                     -- Execution time in seconds
+    status TEXT,                         -- 'optimal', 'infeasible', 'error', etc.
+    primal_objective_value REAL,        -- Primal objective value
+    dual_objective_value REAL,          -- Dual objective value (if available)
+    duality_gap REAL,                   -- Duality gap
+    primal_infeasibility REAL,          -- Primal infeasibility measure
+    dual_infeasibility REAL,            -- Dual infeasibility measure
+    iterations INTEGER,                  -- Number of solver iterations
+    
+    -- Unique constraint to prevent exact duplicates
+    UNIQUE(solver_name, solver_version, problem_library, problem_name, commit_hash, timestamp)
 );
 
-CREATE TABLE problems (
-    id INTEGER PRIMARY KEY,
-    name TEXT UNIQUE,
-    problem_type TEXT,
-    file_path TEXT,
-    variables INTEGER,
-    constraints INTEGER,
-    difficulty TEXT
-);
-
-CREATE TABLE solvers (
-    id INTEGER PRIMARY KEY,
-    name TEXT UNIQUE,
-    solver_type TEXT,
-    version TEXT,
-    backend TEXT,
-    environment TEXT
-);
+-- Index for efficient latest results queries
+CREATE INDEX idx_latest_results ON results(commit_hash, environment_info, timestamp DESC);
+CREATE INDEX idx_solver_problem ON results(solver_name, problem_name);
 ```
 
-#### models.py - Data Models
+#### Database Manager
 ```python
-# SQLAlchemy models with validation
-class BenchmarkResult:
-    """Complete benchmark result with environment context"""
+class DatabaseManager:
+    """Manages database operations for benchmark results"""
     
+    def __init__(self, db_path: str):
+        self.db_path = db_path
+        self.init_database()
+    
+    def store_result(self, result: BenchmarkResult) -> None:
+        """Store a single benchmark result (append-only)"""
+        # No database initialization - preserve historical data
+        
+    def get_latest_results(self, commit_hash: str, environment_info: str) -> List[BenchmarkResult]:
+        """Get latest results for specific commit and environment"""
+        # Query for results with matching commit_hash and environment_info
+        # Use timestamp as tiebreaker for truly latest results
+        
+    def get_solver_problem_history(self, solver_name: str, problem_name: str) -> List[BenchmarkResult]:
+        """Get historical results for solver-problem combination"""
+```
+
+### 2. Data Loading and Format Conversion (ETL)
+
+#### Format-Specific Loaders Architecture
+```python
+# Direct loader usage without dispatcher
+class MATLoader:
+    """Load DIMACS .mat files in SeDuMi format"""
+    
+    def load(self, file_path: str) -> ProblemData:
+        """Load .mat file and extract problem matrices"""
+
+class DATLoader:
+    """Load SDPLIB .dat-s files in SDPA sparse format"""
+    
+    def load(self, file_path: str) -> ProblemData:
+        """Parse SDPA sparse format and create problem data"""
+
+class MPSLoader:
+    """Load MPS format files (Linear Programming)"""
+    
+    def load(self, file_path: str) -> ProblemData:
+        """Parse MPS format and create problem data"""
+
+class QPSLoader:
+    """Load QPS format files (Quadratic Programming)"""
+    
+    def load(self, file_path: str) -> ProblemData:
+        """Parse QPS format and create problem data"""
+
+class PythonLoader:
+    """Load Python-defined problems"""
+    
+    def load(self, file_path: str) -> ProblemData:
+        """Execute Python file and extract problem definition"""
+
+# Unified conversion to solver format
+class CVXPYConverter:
+    """Convert any problem format to CVXPY representation"""
+    
+    def convert(self, problem_data: ProblemData) -> CVXPYProblem:
+        """Convert problem to CVXPY format for solving"""
+```
+
+#### Loader Selection Logic
+```python
+# In BenchmarkRunner
+def load_problem(self, problem_name: str, problem_library: str) -> ProblemData:
+    """Load problem based on registry configuration"""
+    
+    # Get problem info from config/problem_registry.yaml
+    problem_config = self.get_problem_config(problem_name, problem_library)
+    file_type = problem_config['file_type']
+    file_path = problem_config['file_path']
+    
+    # Select appropriate loader based on file type
+    if file_type == 'mat':
+        loader = MATLoader()
+    elif file_type == 'dat-s':
+        loader = DATLoader()
+    elif file_type == 'mps':
+        loader = MPSLoader()
+    elif file_type == 'qps':
+        loader = QPSLoader()
+    elif file_type == 'python':
+        loader = PythonLoader()
+    else:
+        raise ValueError(f"Unsupported file type: {file_type}")
+    
+    return loader.load(file_path)
+```
+
+### 3. Solver Architecture with Standardized Output
+
+#### Solver Interface
+```python
+class SolverInterface:
+    """Abstract interface for all solvers with standardized output"""
+    
+    def solve(self, problem: ProblemData) -> SolverResult:
+        """Solve problem and return standardized result"""
+        
 class SolverResult:
-    """Individual solver execution result"""
+    """Standardized solver result format"""
     
-class ProblemMetadata:
-    """Problem characteristics and classification"""
+    def __init__(self):
+        self.solve_time: float
+        self.status: str                      # 'optimal', 'infeasible', 'unbounded', 'error'
+        self.primal_objective_value: float
+        self.dual_objective_value: float      # Optional, may be None
+        self.duality_gap: float              # Optional, may be None  
+        self.primal_infeasibility: float     # Constraint violation measure
+        self.dual_infeasibility: float       # Dual constraint violation measure
+        self.iterations: int                 # Number of solver iterations
+        self.solver_info: dict               # Additional solver-specific information
 ```
 
-### 5. Reporting System
-
-#### simple_html_generator.py - Report Generation
+#### CVXPY and SciPy Solver Implementation
 ```python
-class SimpleHTMLGenerator:
-    """
-    Generates comprehensive HTML reports
-    - Bootstrap 5 styling with responsive design
-    - Chart.js visualizations for performance data
-    - Multiple report types (dashboard, comparison, analysis)
-    - Author attribution and metadata integration
-    """
-```
-
-#### data_publisher.py - Data Export
-```python
-class DataPublisher:
-    """
-    Multi-format data publishing
-    - JSON export for programmatic access
-    - CSV export for spreadsheet analysis
-    - Metadata export for reproducibility
-    - Validation and quality assurance
-    """
-```
-
----
-
-## Data Formats and Standards
-
-### Result Data Schema
-```json
-{
-  "benchmark_metadata": {
-    "timestamp": "2025-12-15T10:30:00Z",
-    "environment": {
-      "platform": "macOS-14.5-arm64-arm-64bit",
-      "python_version": "3.12.2",
-      "cpu_cores": 8,
-      "memory_gb": 24.0,
-      "timezone": "JST (UTC+9.0)"
-    },
-    "configuration": {
-      "timeout": 300,
-      "parallel_jobs": 1,
-      "problem_set": "light_set"
-    }
-  },
-  "results": [
-    {
-      "solver": "CLARABEL (via CVXPY)",
-      "problem": "SIMPLE_LP",
-      "problem_type": "LP", 
-      "solve_time": 0.0025,
-      "status": "optimal",
-      "objective_value": 5.98e-10,
-      "duality_gap": null,
-      "variables": 2,
-      "constraints": 2
-    }
-  ]
-}
-```
-
-### Problem Classification
-```python
-class ProblemType(Enum):
-    LP = "Linear Programming"
-    QP = "Quadratic Programming" 
-    SOCP = "Second-Order Cone Programming"
-    SDP = "Semidefinite Programming"
+class CVXPYSolver(SolverInterface):
+    """CVXPY solver with multiple backend support"""
     
-class DifficultyLevel(Enum):
-    TRIVIAL = "Small problems for testing"
-    EASY = "Standard benchmark problems"
-    MEDIUM = "Challenging real-world problems"
-    HARD = "Large-scale or ill-conditioned problems"
+    def __init__(self, backend: str):
+        self.backend = backend  # 'CLARABEL', 'SCS', 'ECOS', 'OSQP'
+        self.solver_version = self.detect_version()
+    
+    def solve(self, problem: ProblemData) -> SolverResult:
+        """Solve using CVXPY with specified backend"""
+        # Convert to CVXPY format
+        # Solve with specified backend
+        # Extract standardized results
+        
+    def detect_version(self) -> str:
+        """Detect CVXPY and backend versions"""
+        # Return format: "cvxpy-1.4.0+CLARABEL-0.6.0"
+
+class SciPySolver(SolverInterface):
+    """SciPy optimization solvers"""
+    
+    def solve(self, problem: ProblemData) -> SolverResult:
+        """Solve using appropriate SciPy method based on problem type"""
+```
+
+### 4. Benchmark Execution and Database Storage
+
+#### Benchmark Runner
+```python
+class BenchmarkRunner:
+    """Main benchmark execution with database storage"""
+    
+    def __init__(self, database_manager: DatabaseManager):
+        self.db = database_manager
+        self.environment_info = self.gather_environment_info()
+        self.commit_hash = self.get_git_commit_hash()
+    
+    def run_single_benchmark(self, problem_name: str, solver_name: str) -> None:
+        """Run single problem-solver combination and store result"""
+        # Load problem using appropriate loader
+        # Execute solver 
+        # Store result in database (append-only)
+        
+    def run_benchmark_batch(self, problems: List[str], solvers: List[str]) -> None:
+        """Run benchmark for all problem-solver combinations"""
+        # Loop through problems and solvers
+        # Call run_single_benchmark for each combination
+```
+
+### 5. Simplified Reporting System  
+
+#### HTML Report Generation
+```python
+class HTMLGenerator:
+    """Generate simplified HTML reports"""
+    
+    def generate_overview(self) -> str:
+        """Generate overview dashboard showing summary statistics"""
+        
+    def generate_results_matrix(self) -> str:
+        """Generate problems × solvers results matrix"""
+        
+    def generate_raw_data(self) -> str:
+        """Generate raw data table for detailed inspection"""
+
+class DataExporter:
+    """Export data in JSON and CSV formats"""
+    
+    def export_latest_results(self) -> None:
+        """Export latest results to JSON and CSV files"""
+        
+class ResultProcessor:
+    """Process latest results from database for reporting"""
+    
+    def get_latest_results_for_reporting(self) -> List[BenchmarkResult]:
+        """Get latest results using commit_hash and environment_info with timestamp tiebreaker"""
 ```
 
 ---
 
-## Performance Optimization
+## Requirements Management
 
-### Parallel Execution Strategy
-```python
-# Problem-level parallelization with CPU fairness
-parallel_jobs: 1  # Fair CPU utilization for consistent benchmarking
-
-# Solver-level sequential execution
-# Ensures each solver gets dedicated CPU resources
-# Prevents resource contention affecting results
+### Consolidated requirements.txt
 ```
+# Core dependencies
+numpy>=1.24.0
+scipy>=1.10.0
+pandas>=2.0.0
+pyyaml>=6.0
+sqlalchemy>=2.0.0
+jinja2>=3.1.0
 
-### Caching and Storage
-```python
-# Problem file caching for external storage
-# Solver installation state caching
-# Result incremental updates
-# Compressed data transfer for GitHub Pages
-```
+# Solver dependencies  
+cvxpy>=1.4.0
+clarabel>=0.6.0
+scs>=3.2.0
+ecos>=2.0.0
+osqp>=0.6.0
 
-### GitHub Actions Optimization
-```yaml
-# Artifact handling for database persistence
-# Staged deployment with dependency caching
-# Efficient matrix execution for multiple environments
-# Resource-aware job scheduling
+# Development and testing
+pytest>=7.0.0
+pytest-cov>=4.0.0
+
+# Optional: file format support
+h5py>=3.8.0           # For .mat file loading
 ```
 
 ---
+
+## Main Execution Flow
+
+### Command Line Interface
+```python
+# Main execution command structure
+python main.py --benchmark --problems light_set --solvers scipy_linprog,cvxpy_clarabel
+python main.py --benchmark --problems DIMACS --solvers cvxpy_scs
+python main.py --report
+```
+
+### Execution Workflow
+```
+1. Configuration Loading
+   ├── Load config/solver_registry.yaml
+   ├── Load config/problem_registry.yaml  
+   └── Initialize database connection
+
+2. Problem and Solver Selection
+   ├── Parse command line arguments
+   ├── Filter problems by library/type
+   └── Filter solvers by capability
+
+3. Benchmark Execution
+   ├── For each problem-solver combination:
+   │   ├── Load problem using appropriate loader
+   │   ├── Execute solver with standardized interface
+   │   └── Store result in database (append-only)
+   └── Continue execution despite individual failures
+
+4. Report Generation
+   ├── Query latest results from database
+   ├── Generate HTML reports (overview, matrix, raw data)
+   ├── Export JSON/CSV data
+   └── Save to docs/pages/ directory
+```
 
 ## Extension Points
 
 ### Adding New Solvers
-```python
-# 1. Implement SolverInterface
-class NewSolver(SolverInterface):
-    def solve(self, problem: Problem) -> SolverResult:
-        # Implementation here
-        pass
+1. **Implement SolverInterface**: Create new solver class following the interface
+2. **Add to solver_registry.yaml**: Configure solver metadata and capabilities
+3. **Update requirements.txt**: Add solver dependencies
+4. **Test Integration**: Validate with existing problems
 
-# 2. Add configuration
-# config/solvers.yaml:
-new_solver:
-  type: python
-  module: scripts.solvers.python.new_solver
-  class: NewSolver
+### Adding New Problem Libraries
+1. **Create loader**: Implement format-specific loader in `scripts/data_loaders/`
+2. **Update problem_registry.yaml**: Add library and problem metadata
+3. **Test loading**: Ensure problems convert correctly to CVXPY format
+4. **Validate results**: Check solver compatibility and result quality
 
-# 3. Add dependencies
-# requirements/python.txt:
-new-solver-package>=1.0.0
-```
-
-### Adding Problem Types
-```python
-# 1. Extend problem loader
-class ProblemLoader:
-    def load_new_type(self, file_path: str) -> Problem:
-        # Implementation for new format
-        pass
-
-# 2. Update classification
-class ProblemClassifier:
-    def classify_new_type(self, problem: Problem) -> ProblemMetadata:
-        # Classification logic
-        pass
-```
+### Adding New File Formats
+1. **Implement loader**: Create format parser in `scripts/data_loaders/`
+2. **Add converter**: Implement conversion to CVXPY representation
+3. **Update dispatcher**: Add format mapping to ProblemLoader
+4. **Test pipeline**: Validate end-to-end problem loading and solving
 
 ---
 
-## Security and Validation
+## Implementation Validation
 
-### Input Validation
-```python
-# Problem file format validation
-# Configuration value range checking  
-# Solver result consistency verification
-# Database input sanitization
-```
-
-### Environment Isolation
-```python
-# GitHub Actions sandboxed execution
-# Explicit dependency management
-# Timeout enforcement for solver execution
-# Resource limit enforcement
-```
-
-### Data Integrity
-```python
-# Result validation against expected ranges
-# Cross-solver consistency checks
-# Environment reproducibility verification
-# Configuration hash validation
-```
-
----
-
-## Monitoring and Operations
-
-### Logging Framework
-```python
-# Structured logging with levels (DEBUG, INFO, WARNING, ERROR)
-# Execution time measurement and reporting
-# Error context capture for debugging
-# Performance metrics collection
-```
+### Testing Strategy
+- **Unit Tests**: Individual component validation (data loaders, solvers, database operations)
+- **Integration Tests**: Complete workflow testing (problem loading → solving → storage → reporting)
+- **Format Tests**: Validate all problem file formats load correctly
+- **Solver Tests**: Ensure all solvers produce standardized output format
 
 ### Error Handling
-```python
-# Graceful solver failure handling
-# Partial result collection on timeout
-# Automatic retry for transient failures
-# Comprehensive error reporting
-```
+- **Graceful Degradation**: Continue benchmark execution despite individual solver/problem failures
+- **Comprehensive Logging**: Structured logging with clear error messages and context
+- **Timeout Management**: Respect solver timeout limits and handle hanging processes
+- **Data Validation**: Validate solver results before database storage
 
-### Deployment Pipeline
-```python
-# GitHub Actions automated testing
-# Staged deployment with validation
-# Rollback capability for failed deployments
-# Environment consistency verification
-```
+### Security Considerations
+- **Input Validation**: Validate problem file formats and configuration values
+- **Resource Limits**: Enforce memory and execution time limits
+- **Dependency Management**: Explicit version pinning for reproducible environments
 
 ---
 
-*This detailed design document provides comprehensive technical specifications for implementation. For high-level concepts and project vision, see [basic_design.md](basic_design.md).*
+*This re-architected design document provides technical specifications for the simplified, maintainable optimization solver benchmark system. For high-level concepts and project vision, see [basic_design.md](basic_design.md).*
 
 ---
 
-## Current Implementation Status
+## Migration and Implementation Plan
 
-### ✅ Completed Components (Sprint 1-2)
-- **Core Simplification**: Removed Octave support, external storage components
-- **GitHub Actions**: Simplified to static file publishing only
-- **Local Workflow**: Complete benchmark execution and HTML report generation
-- **Test Organization**: Cleaned up and organized test files in proper directory structure
-- **Data Cleanup**: Removed test data, verified legitimate results only
+### Phase 1: Database and Configuration (Week 1)
+1. **Database Restructuring**: Implement single denormalized results table
+2. **Configuration Consolidation**: Move and restructure configuration files
+3. **Requirements Consolidation**: Merge all requirements into single file
 
-### 🔄 Current Capabilities
-- **Solvers**: 5 Python-based solvers (SciPy, CLARABEL, SCS, ECOS, OSQP)
-- **Problems**: 8 problems from light_set (LP, QP, SOCP, SDP)
-- **Workflow**: `python main.py --all` runs complete local benchmark + report generation
-- **Reports**: 7 HTML files + 6 data files generated in docs/
-- **Database**: SQLite with 53 legitimate benchmark results
+### Phase 2: Core Architecture (Week 2)  
+4. **Data Loaders Implementation**: Create ETL system for all problem formats
+5. **Solver Interface Standardization**: Implement standardized solver output format
+6. **Database Manager**: Implement append-only database operations
 
-### 📋 Implementation Notes
-- **Local-First Approach**: All benchmark execution happens locally, CI only publishes
-- **Pre-Built Artifacts**: HTML reports and data files are committed to repository
-- **Clean Architecture**: Removed complexity, focused on reliability
-- **Test Coverage**: Organized test suite with unit, integration, and debug tests
+### Phase 3: Benchmark and Reporting (Week 3)
+7. **Benchmark Runner**: Implement problem-solver execution loop with database storage
+8. **Simplified Reporting**: Generate three focused HTML reports (overview, matrix, raw data)
+9. **Data Export**: JSON/CSV export functionality
 
-*Last Updated: June 2025 (Sprint 2 Complete)*
+### Phase 4: Integration and Testing (Week 4)
+10. **End-to-End Testing**: Validate complete workflow from execution to reporting
+11. **Performance Validation**: Ensure no significant performance regression
+12. **Documentation Updates**: Update all documentation to reflect new architecture
 
 ---
 
-## 🚀 Next Major Enhancement: Public Reporting System (Sprint 5+)
-
-### Overview
-Transform the benchmark system to support meaningful public reporting with real-world problem instances from established optimization libraries.
-
-### Key Features
-1. **Standard Benchmark Libraries**: Integration with DIMACS and SDPLIB problem sets
-2. **Solver Version Tracking**: Record and display backend versions for reproducibility
-3. **Aggregated Reporting**: Statistical analysis across multiple benchmark runs
-4. **Enhanced Documentation**: Comprehensive guides for problem library integration
+*Last Updated: June 2025 - Re-Architecture Design Complete*
 
 ---
 
-## Enhanced Architecture Design
+## Summary
 
-### 1. Problem Library Integration System
+This re-architected design focuses on:
 
-#### Extended Problem Registry Architecture
-```yaml
-# Enhanced problem_registry.yaml structure
-problem_libraries:
-  light_set:
-    source: "internal"
-    description: "Internal test problems for basic validation"
-    problems: [existing structure]
-    
-  DIMACS:
-    source: "external"
-    library_url: "https://github.com/vsdp/DIMACS.git"
-    file_format: "mat"
-    description: "DIMACS optimization problems from established library"
-    problems:
-      - name: "problem_name"
-        library: "DIMACS"
-        file_path: "problems/DIMACS/category/problem.mat"
-        file_type: "sedumi_mat"
-        problem_class: "SDP"
-        metadata:
-          variables: 100
-          constraints: 50
-          source_category: "control"
-          
-  SDPLIB:
-    source: "external" 
-    library_url: "https://github.com/vsdp/SDPLIB.git"
-    file_format: "dat-s"
-    description: "SDPLIB semidefinite programming test problems"
-    problems:
-      - name: "problem_name"
-        library: "SDPLIB"
-        file_path: "problems/SDPLIB/category/problem.dat-s"
-        file_type: "sdpa_sparse"
-        problem_class: "SDP"
-        metadata:
-          variables: 200
-          constraints: 100
-          source_category: "graph"
-```
+1. **Simplicity**: Single denormalized database table, consolidated configuration files
+2. **Maintainability**: Clear separation of concerns with dedicated ETL and solver modules  
+3. **Reliability**: Append-only database, graceful error handling, comprehensive logging
+4. **Extensibility**: Modular design for adding new solvers, problems, and file formats
+5. **Clean Break**: Fresh start without backward compatibility constraints
 
-#### Problem Loader Architecture Enhancement
-```python
-# Enhanced ProblemData class
-class ProblemData:
-    def __init__(self, name: str, problem_class: str, library: str = "internal",
-                 file_type: str = "python", source_metadata: dict = None, ...):
-        # Existing fields
-        self.name = name
-        self.problem_class = problem_class
-        
-        # New library tracking fields
-        self.library = library  # "light_set", "DIMACS", "SDPLIB"
-        self.file_type = file_type  # "python", "mps", "qps", "sedumi_mat", "sdpa_sparse"
-        self.source_metadata = source_metadata or {}
-        
-        # Enhanced metadata for reporting
-        self.library_version = None  # Library version when downloaded
-        self.library_url = None  # Source URL for external libraries
-        
-# Enhanced problem loader with library support
-class EnhancedProblemLoader:
-    def __init__(self):
-        self.format_loaders = {
-            'python': self.load_python_problem,
-            'mps': self.load_mps_file,
-            'qps': self.load_qps_file,
-            'sedumi_mat': self.load_sedumi_mat,  # DIMACS .mat files
-            'sdpa_sparse': self.load_sdpa_sparse  # SDPLIB .dat-s files
-        }
-    
-    def load_problem_by_library(self, library: str, problem_name: str) -> ProblemData:
-        """Load problem with library context"""
-        
-    def get_problems_by_library(self, library: str) -> List[ProblemData]:
-        """Get all problems from specific library"""
-```
+### Key Benefits
 
-#### Directory Structure for External Libraries
-```
-problems/
-├── light_set/                 # Existing internal problems
-│   ├── lp/, qp/, socp/, sdp/
-│   └── ...
-├── DIMACS/                    # DIMACS problem library
-│   ├── control/               # Organized by problem category
-│   │   ├── problem1.mat
-│   │   └── problem2.mat
-│   ├── graph/
-│   │   └── ...
-│   └── LICENSE                # Library license
-├── SDPLIB/                    # SDPLIB problem library  
-│   ├── graph/
-│   │   ├── problem1.dat-s
-│   │   └── problem2.dat-s
-│   ├── combinatorial/
-│   │   └── ...
-│   └── LICENSE
-└── problem_registry.yaml     # Enhanced registry with library metadata
-```
+- **Reduced Complexity**: Eliminates multi-table relationships and complex aggregation logic
+- **Historical Preservation**: Append-only database maintains complete execution history
+- **Fair Benchmarking**: Standardized solver interface ensures consistent result format
+- **Easy Reporting**: Latest results query using commit_hash and environment_info with timestamp tiebreaker
+- **Format Flexibility**: ETL system supports multiple problem file formats with unified conversion
 
-### 2. Solver Version Tracking System
-
-#### Enhanced Database Schema
-```sql
--- Enhanced solvers table with version as primary component
-CREATE TABLE IF NOT EXISTS solvers (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    name TEXT NOT NULL,
-    version TEXT NOT NULL,
-    backend TEXT,                    -- CLARABEL, SCS, ECOS, etc.
-    environment TEXT,                -- python, system package
-    metadata TEXT,                   -- JSON: installation method, dependencies
-    detected_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    UNIQUE(name, version, backend)   -- Treat different versions as distinct solvers
-);
-
--- Enhanced results table with solver version tracking
-CREATE TABLE IF NOT EXISTS results (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    benchmark_id INTEGER NOT NULL,
-    solver_name TEXT NOT NULL,
-    solver_version TEXT NOT NULL,    -- New: track solver version
-    solver_backend TEXT,             -- New: track specific backend (for CVXPY)
-    problem_name TEXT NOT NULL,
-    problem_library TEXT DEFAULT 'light_set',  -- New: track problem source
-    solve_time REAL,
-    status TEXT,
-    objective_value REAL,
-    duality_gap REAL,
-    iterations INTEGER,
-    error_message TEXT,
-    solver_info TEXT,
-    run_id TEXT,                     -- New: track multiple runs for aggregation
-    FOREIGN KEY (benchmark_id) REFERENCES benchmarks (id)
-);
-
--- New table for aggregated results view
-CREATE TABLE IF NOT EXISTS aggregated_results (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    solver_name TEXT NOT NULL,
-    solver_version TEXT NOT NULL,
-    problem_name TEXT NOT NULL,
-    problem_library TEXT NOT NULL,
-    
-    -- Aggregated statistics (median of recent 5 runs)
-    median_solve_time REAL,
-    median_objective_value REAL,
-    success_rate REAL,              -- Percentage of successful runs
-    
-    -- Run metadata
-    runs_count INTEGER,             -- Number of runs included in aggregation
-    most_recent_run DATETIME,
-    aggregation_window INTEGER DEFAULT 5,
-    
-    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    UNIQUE(solver_name, solver_version, problem_name, problem_library)
-);
-```
-
-#### Solver Version Detection Architecture
-```python
-# Enhanced solver interface with version tracking
-class SolverInterface(ABC):
-    def __init__(self, name: str, timeout: float = 300.0):
-        self.name = name
-        self.timeout = timeout
-        self.version = self.detect_version()      # Auto-detect version
-        self.backend = self.detect_backend()      # Detect specific backend
-        self.metadata = self.gather_metadata()   # Installation details
-    
-    @abstractmethod
-    def detect_version(self) -> str:
-        """Detect and return solver version"""
-        pass
-    
-    def detect_backend(self) -> Optional[str]:
-        """Detect specific solver backend (for CVXPY solvers)"""
-        return None
-        
-    def gather_metadata(self) -> dict:
-        """Gather installation and environment metadata"""
-        return {
-            'detection_method': 'auto',
-            'detected_at': datetime.now().isoformat(),
-            'python_version': sys.version,
-            'platform': platform.platform()
-        }
-
-# Enhanced CVXPY solver with version tracking
-class CvxpySolver(SolverInterface):
-    def __init__(self, name: str, backend: str, timeout: float = 300.0, **kwargs):
-        self.backend_name = backend
-        super().__init__(name, timeout)
-    
-    def detect_version(self) -> str:
-        """Detect CVXPY and backend versions"""
-        import cvxpy as cp
-        cvxpy_version = cp.__version__
-        
-        # Detect backend-specific version
-        backend_version = self._detect_backend_version(self.backend_name)
-        
-        return f"cvxpy-{cvxpy_version}+{self.backend_name}-{backend_version}"
-    
-    def detect_backend(self) -> str:
-        return self.backend_name
-        
-    def _detect_backend_version(self, backend: str) -> str:
-        """Detect specific backend version"""
-        try:
-            if backend == "CLARABEL":
-                import clarabel
-                return clarabel.__version__
-            elif backend == "SCS":
-                import scs
-                return scs.__version__
-            elif backend == "ECOS":
-                import ecos
-                return ecos.__version__
-            elif backend == "OSQP":
-                import osqp
-                return osqp.__version__
-            else:
-                return "unknown"
-        except ImportError:
-            return "not-installed"
-```
-
-### 3. Aggregated Reporting System
-
-#### Multi-Run Execution Architecture
-```python
-class AggregatedBenchmarkRunner:
-    """Enhanced benchmark runner with multi-run support"""
-    
-    def __init__(self, config_path: str, aggregation_window: int = 5):
-        self.aggregation_window = aggregation_window
-        self.run_id = self.generate_run_id()
-        
-    def run_benchmark_with_aggregation(self, problems: List[str], 
-                                     solvers: List[str]) -> dict:
-        """Run benchmark and update aggregated results"""
-        
-        # Execute single benchmark run
-        results = self.run_single_benchmark(problems, solvers)
-        
-        # Update aggregated results
-        self.update_aggregated_results(results)
-        
-        return self.get_aggregated_results()
-    
-    def update_aggregated_results(self, new_results: List[dict]):
-        """Update aggregated results with new run data"""
-        for result in new_results:
-            # Get recent runs for this solver+problem combination
-            recent_runs = self.get_recent_runs(
-                result['solver_name'], 
-                result['solver_version'],
-                result['problem_name'],
-                result['problem_library'],
-                limit=self.aggregation_window
-            )
-            
-            # Calculate aggregated statistics
-            aggregated = self.calculate_aggregated_stats(recent_runs)
-            
-            # Store/update aggregated result
-            self.store_aggregated_result(aggregated)
-```
-
-#### Enhanced HTML Report Generator
-```python
-class EnhancedHTMLGenerator:
-    """Enhanced HTML generator with library and version support"""
-    
-    def generate_solver_comparison_report(self) -> str:
-        """Generate solver comparison with version information"""
-        
-        # Group results by solver name+version
-        solver_results = self.get_aggregated_results_by_solver()
-        
-        # Generate comparison table with version columns
-        html = self.render_solver_version_table(solver_results)
-        
-        return html
-    
-    def generate_library_breakdown_report(self) -> str:
-        """Generate report showing results by problem library"""
-        
-        library_results = self.get_results_by_library()
-        
-        # Separate sections for each library
-        html_sections = []
-        for library, results in library_results.items():
-            section = self.render_library_section(library, results)
-            html_sections.append(section)
-            
-        return self.combine_html_sections(html_sections)
-    
-    def render_solver_version_table(self, solver_results: dict) -> str:
-        """Render table showing different solver versions"""
-        # Table headers: Solver | Version | Backend | Problem Success Rate | Median Time
-```
-
-### 4. Implementation Architecture Overview
-
-#### Component Interaction Flow
-```
-ENHANCED BENCHMARK FLOW:
-
-1. Problem Loading (Enhanced)
-   ├── Load problem_registry.yaml with library metadata
-   ├── Identify problem library (light_set, DIMACS, SDPLIB)
-   ├── Use appropriate format loader (python, mps, qps, mat, dat-s)
-   └── Create ProblemData with library context
-
-2. Solver Initialization (Enhanced)
-   ├── Auto-detect solver versions and backends
-   ├── Store solver metadata in database
-   ├── Create solver instances with version tracking
-   └── Validate solver capabilities for problem types
-
-3. Benchmark Execution (Enhanced)
-   ├── Generate unique run_id for this execution
-   ├── Execute problems across solver+version combinations
-   ├── Store individual results with run_id and version info
-   └── Update aggregated results after completion
-
-4. Report Generation (Enhanced)
-   ├── Generate solver comparison with version breakdown
-   ├── Generate library-specific performance reports
-   ├── Show aggregated statistics (median of recent 5 runs)
-   ├── Include problem library attribution
-   └── Export enhanced data formats
-
-5. Database Management (Enhanced)
-   ├── Track multiple runs per solver+problem combination  
-   ├── Maintain aggregated results table
-   ├── Store solver version and library metadata
-   └── Support historical analysis and version comparison
-```
-
-#### File Organization Updates
-```
-scripts/
-├── benchmark/
-│   ├── runner.py                    # Enhanced with multi-run support
-│   ├── aggregated_runner.py         # New: aggregation-aware runner
-│   ├── problem_loader.py            # Enhanced with library support
-│   ├── solver_interface.py          # Enhanced with version detection
-│   └── library_manager.py           # New: manage external libraries
-│
-├── solvers/
-│   └── python/
-│       ├── cvxpy_runner.py          # Enhanced with version detection
-│       ├── scipy_runner.py          # Enhanced with version detection
-│       └── version_detector.py      # New: version detection utilities
-│
-├── database/
-│   ├── models.py                    # Enhanced with new schema
-│   ├── aggregation.py               # New: aggregated results management
-│   └── migration.py                 # New: schema migration utilities
-│
-├── reporting/
-│   ├── simple_html_generator.py     # Enhanced with library/version support
-│   ├── library_report_generator.py  # New: library-specific reports
-│   └── aggregation_reporter.py      # New: aggregated statistics reporting
-│
-├── utils/
-│   ├── library_downloader.py        # New: download and manage external libraries
-│   ├── format_converters.py         # New: problem format conversion utilities
-│   └── version_utils.py             # New: version detection and comparison
-│
-└── external/
-    ├── dimacs_loader.py              # New: DIMACS .mat file loader
-    ├── sdplib_loader.py              # New: SDPLIB .dat-s file loader
-    └── library_validator.py          # New: external library validation
-```
-
----
-
-### Implementation Priority and Dependencies
-
-#### Phase 1: Foundation (Weeks 1-2)
-1. **Database Schema Enhancement** (High Priority)
-   - Add solver version tracking to schema
-   - Add problem library tracking
-   - Add aggregated results table
-   - Create migration scripts
-
-2. **Solver Version Detection** (High Priority)
-   - Implement version detection for all existing solvers
-   - Update solver interfaces with version tracking
-   - Test version detection across different environments
-
-#### Phase 2: External Library Integration (Weeks 3-4)
-3. **Problem Library Management** (Medium Priority)
-   - Create library download and organization system
-   - Implement DIMACS .mat file loader
-   - Implement SDPLIB .dat-s file loader
-   - Extend problem registry with library metadata
-
-4. **Enhanced Problem Loading** (Medium Priority)
-   - Update problem loader with library support
-   - Test loading problems from all three libraries
-   - Validate problem data consistency
-
-#### Phase 3: Aggregation and Reporting (Weeks 5-6)
-5. **Multi-Run Aggregation** (Medium Priority)
-   - Implement run tracking and aggregation logic
-   - Create aggregated results calculation
-   - Test aggregation with multiple benchmark runs
-
-6. **Enhanced Reporting** (Low Priority)
-   - Update HTML reports with version and library information
-   - Create library-specific report sections
-   - Add aggregated statistics display
-
-#### Phase 4: Documentation and Polish (Week 7)
-7. **Documentation Updates** (Low Priority)
-   - Update README with new features
-   - Create library integration guide
-   - Document version tracking and aggregation
-
-### Risk Analysis and Mitigation
-
-#### High Risk Areas:
-1. **External Library Integration**: File format compatibility issues
-2. **Version Detection**: Inconsistent version reporting across solvers  
-3. **Database Migration**: Schema changes affecting existing data
-4. **Performance Impact**: Loading large external problem sets
-
-#### Mitigation Strategies:
-1. **Incremental Testing**: Test each component independently
-2. **Backward Compatibility**: Maintain support for existing light_set problems
-3. **Fallback Mechanisms**: Graceful handling of version detection failures
-4. **Performance Monitoring**: Track impact of external libraries on execution time
+This design provides a solid foundation for long-term development while addressing the complexity issues of the previous architecture.
