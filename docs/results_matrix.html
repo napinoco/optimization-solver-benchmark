@@ -61,7 +61,7 @@
     <main>
         <section class="matrix-summary">
             <h2>📋 Matrix Overview</h2>
-            <p><strong>Problems:</strong> 2 | <strong>Solvers:</strong> 5 | <strong>Total Results:</strong> 53</p>
+            <p><strong>Problems:</strong> 18 | <strong>Solvers:</strong> 9 | <strong>Total Results:</strong> 90</p>
             <div class="legend">
                 <span class="cell-optimal">■</span> Optimal 
                 <span class="cell-infeasible">■</span> Infeasible 
@@ -78,28 +78,232 @@
                     <tr>
                         <th class="problem-name">Problem</th>
                         <th>CLARABEL (via CVXPY)</th>
+                        <th>CLARABEL-Enhanced</th>
                         <th>ECOS (via CVXPY)</th>
                         <th>OSQP (via CVXPY)</th>
                         <th>SCS (via CVXPY)</th>
                         <th>SciPy</th>
+                        <th>SciPy-Enhanced</th>
+                        <th>TestSolver</th>
+                        <th>scipy</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr>
                         <td class="problem-name">SIMPLE_LP<br><small>(LP)</small></td>
-                        <td class="cell-optimal"><div class="result-time">0.005s</div><div class="result-obj">obj: 5.98e-10</div></td>
+                        <td class="cell-optimal"><div class="result-time">0.008s</div><div class="result-obj">obj: 5.98e-10</div></td>
+                        <td class="cell-optimal"><div class="result-time">0.004s</div><div class="result-obj">obj: 5.98e-10</div></td>
                         <td class="cell-optimal"><div class="result-time">0.002s</div><div class="result-obj">obj: 7.28e-10</div></td>
-                        <td class="cell-optimal"><div class="result-time">0.005s</div><div class="result-obj">obj: 0.0</div></td>
-                        <td class="cell-optimal"><div class="result-time">0.002s</div><div class="result-obj">obj: 0.0</div></td>
+                        <td class="cell-optimal"><div class="result-time">0.003s</div><div class="result-obj">obj: 0.0</div></td>
+                        <td class="cell-optimal"><div class="result-time">0.003s</div><div class="result-obj">obj: 0.0</div></td>
+                        <td class="cell-optimal"><div class="result-time">0.003s</div><div class="result-obj">obj: 0.0</div></td>
                         <td class="cell-optimal"><div class="result-time">0.001s</div><div class="result-obj">obj: 0.0</div></td>
+                        <td class="cell-unknown">-</td>
+                        <td class="cell-unknown">-</td>
                     </tr>
                     <tr>
                         <td class="problem-name">SIMPLE_QP<br><small>(QP)</small></td>
                         <td class="cell-optimal"><div class="result-time">0.003s</div><div class="result-obj">obj: 7.29e-10</div></td>
-                        <td class="cell-optimal"><div class="result-time">0.019s</div><div class="result-obj">obj: 3.68e-10</div></td>
-                        <td class="cell-optimal"><div class="result-time">0.003s</div><div class="result-obj">obj: 0.0</div></td>
+                        <td class="cell-unknown">-</td>
+                        <td class="cell-optimal"><div class="result-time">0.003s</div><div class="result-obj">obj: 3.68e-10</div></td>
                         <td class="cell-optimal"><div class="result-time">0.002s</div><div class="result-obj">obj: 0.0</div></td>
-                        <td class="cell-optimal"><div class="result-time">0.016s</div><div class="result-obj">obj: 5.14e-06</div></td>
+                        <td class="cell-optimal"><div class="result-time">0.002s</div><div class="result-obj">obj: 0.0</div></td>
+                        <td class="cell-optimal"><div class="result-time">0.010s</div><div class="result-obj">obj: 5.14e-06</div></td>
+                        <td class="cell-unknown">-</td>
+                        <td class="cell-unknown">-</td>
+                        <td class="cell-unknown">-</td>
+                    </tr>
+                    <tr>
+                        <td class="problem-name">TestProblem<br><small>(Unknown)</small></td>
+                        <td class="cell-unknown">-</td>
+                        <td class="cell-unknown">-</td>
+                        <td class="cell-unknown">-</td>
+                        <td class="cell-unknown">-</td>
+                        <td class="cell-unknown">-</td>
+                        <td class="cell-unknown">-</td>
+                        <td class="cell-unknown">-</td>
+                        <td class="cell-optimal"><div class="result-time">1.234s</div><div class="result-obj">obj: 42.000</div><div class="result-gap">gap: 0.001</div></td>
+                        <td class="cell-unknown">-</td>
+                    </tr>
+                    <tr>
+                        <td class="problem-name">control1<br><small>(SDP)</small></td>
+                        <td class="cell-optimal"><div class="result-time">0.019s</div><div class="result-obj">obj: -1.22e-10</div></td>
+                        <td class="cell-unknown">-</td>
+                        <td class="cell-unknown">-</td>
+                        <td class="cell-unknown">-</td>
+                        <td class="cell-unknown">-</td>
+                        <td class="cell-unknown">-</td>
+                        <td class="cell-unknown">-</td>
+                        <td class="cell-unknown">-</td>
+                        <td class="cell-unknown">-</td>
+                    </tr>
+                    <tr>
+                        <td class="problem-name">control_lmi<br><small>(SDP)</small></td>
+                        <td class="cell-optimal"><div class="result-time">0.003s</div><div class="result-obj">obj: 1.000</div></td>
+                        <td class="cell-unknown">-</td>
+                        <td class="cell-error"><div class="result-time">0.02ms</div><div class="result-obj">error</div></td>
+                        <td class="cell-error"><div class="result-time">0.02ms</div><div class="result-obj">error</div></td>
+                        <td class="cell-optimal"><div class="result-time">0.002s</div><div class="result-obj">obj: 1.000</div></td>
+                        <td class="cell-error"><div class="result-time">0.02ms</div><div class="result-obj">error</div></td>
+                        <td class="cell-unknown">-</td>
+                        <td class="cell-unknown">-</td>
+                        <td class="cell-error"><div class="result-time">0.04ms</div><div class="result-obj">error</div></td>
+                    </tr>
+                    <tr>
+                        <td class="problem-name">facility_location<br><small>(SOCP)</small></td>
+                        <td class="cell-optimal"><div class="result-time">0.012s</div><div class="result-obj">obj: 83.161</div></td>
+                        <td class="cell-unknown">-</td>
+                        <td class="cell-optimal"><div class="result-time">0.011s</div><div class="result-obj">obj: 83.161</div></td>
+                        <td class="cell-error"><div class="result-time">0.22ms</div><div class="result-obj">error</div></td>
+                        <td class="cell-optimal"><div class="result-time">0.011s</div><div class="result-obj">obj: 83.161</div></td>
+                        <td class="cell-error"><div class="result-time">0.02ms</div><div class="result-obj">error</div></td>
+                        <td class="cell-unknown">-</td>
+                        <td class="cell-unknown">-</td>
+                        <td class="cell-error"><div class="result-time">0.04ms</div><div class="result-obj">error</div></td>
+                    </tr>
+                    <tr>
+                        <td class="problem-name">filter48_socp<br><small>(SDP)</small></td>
+                        <td class="cell-error"><div class="result-time">0.03ms</div><div class="result-obj">error</div></td>
+                        <td class="cell-unknown">-</td>
+                        <td class="cell-error"><div class="result-time">0.02ms</div><div class="result-obj">error</div></td>
+                        <td class="cell-error"><div class="result-time">0.02ms</div><div class="result-obj">error</div></td>
+                        <td class="cell-error"><div class="result-time">0.02ms</div><div class="result-obj">error</div></td>
+                        <td class="cell-error"><div class="result-time">0.02ms</div><div class="result-obj">error</div></td>
+                        <td class="cell-unknown">-</td>
+                        <td class="cell-unknown">-</td>
+                        <td class="cell-unknown">-</td>
+                    </tr>
+                    <tr>
+                        <td class="problem-name">hinf12<br><small>(SDP)</small></td>
+                        <td class="cell-error"><div class="result-time">0.03ms</div><div class="result-obj">error</div></td>
+                        <td class="cell-unknown">-</td>
+                        <td class="cell-error"><div class="result-time">0.02ms</div><div class="result-obj">error</div></td>
+                        <td class="cell-error"><div class="result-time">0.02ms</div><div class="result-obj">error</div></td>
+                        <td class="cell-error"><div class="result-time">0.02ms</div><div class="result-obj">error</div></td>
+                        <td class="cell-error"><div class="result-time">0.03ms</div><div class="result-obj">error</div></td>
+                        <td class="cell-unknown">-</td>
+                        <td class="cell-unknown">-</td>
+                        <td class="cell-unknown">-</td>
+                    </tr>
+                    <tr>
+                        <td class="problem-name">matrix_completion<br><small>(SDP)</small></td>
+                        <td class="cell-optimal"><div class="result-time">0.005s</div><div class="result-obj">obj: 9.527</div></td>
+                        <td class="cell-unknown">-</td>
+                        <td class="cell-error"><div class="result-time">0.03ms</div><div class="result-obj">error</div></td>
+                        <td class="cell-error"><div class="result-time">0.02ms</div><div class="result-obj">error</div></td>
+                        <td class="cell-optimal"><div class="result-time">0.004s</div><div class="result-obj">obj: 9.527</div></td>
+                        <td class="cell-error"><div class="result-time">0.02ms</div><div class="result-obj">error</div></td>
+                        <td class="cell-unknown">-</td>
+                        <td class="cell-unknown">-</td>
+                        <td class="cell-error"><div class="result-time">0.04ms</div><div class="result-obj">error</div></td>
+                    </tr>
+                    <tr>
+                        <td class="problem-name">max_cut_relaxation<br><small>(SDP)</small></td>
+                        <td class="cell-optimal"><div class="result-time">0.003s</div><div class="result-obj">obj: 1.05e-09</div></td>
+                        <td class="cell-unknown">-</td>
+                        <td class="cell-error"><div class="result-time">0.02ms</div><div class="result-obj">error</div></td>
+                        <td class="cell-error"><div class="result-time">0.02ms</div><div class="result-obj">error</div></td>
+                        <td class="cell-optimal"><div class="result-time">0.003s</div><div class="result-obj">obj: -5.25e-07</div></td>
+                        <td class="cell-error"><div class="result-time">0.02ms</div><div class="result-obj">error</div></td>
+                        <td class="cell-unknown">-</td>
+                        <td class="cell-unknown">-</td>
+                        <td class="cell-error"><div class="result-time">0.04ms</div><div class="result-obj">error</div></td>
+                    </tr>
+                    <tr>
+                        <td class="problem-name">nql30<br><small>(SOCP)</small></td>
+                        <td class="cell-error"><div class="result-time">0.02ms</div><div class="result-obj">error</div></td>
+                        <td class="cell-unknown">-</td>
+                        <td class="cell-error"><div class="result-time">0.02ms</div><div class="result-obj">error</div></td>
+                        <td class="cell-error"><div class="result-time">0.02ms</div><div class="result-obj">error</div></td>
+                        <td class="cell-error"><div class="result-time">0.02ms</div><div class="result-obj">error</div></td>
+                        <td class="cell-error"><div class="result-time">0.02ms</div><div class="result-obj">error</div></td>
+                        <td class="cell-unknown">-</td>
+                        <td class="cell-unknown">-</td>
+                        <td class="cell-unknown">-</td>
+                    </tr>
+                    <tr>
+                        <td class="problem-name">portfolio_optimization<br><small>(SOCP)</small></td>
+                        <td class="cell-optimal"><div class="result-time">0.003s</div><div class="result-obj">obj: 0.904</div></td>
+                        <td class="cell-unknown">-</td>
+                        <td class="cell-optimal"><div class="result-time">0.002s</div><div class="result-obj">obj: 0.904</div></td>
+                        <td class="cell-error"><div class="result-time">0.09ms</div><div class="result-obj">error</div></td>
+                        <td class="cell-optimal"><div class="result-time">0.002s</div><div class="result-obj">obj: 0.904</div></td>
+                        <td class="cell-error"><div class="result-time">0.03ms</div><div class="result-obj">error</div></td>
+                        <td class="cell-unknown">-</td>
+                        <td class="cell-unknown">-</td>
+                        <td class="cell-error"><div class="result-time">0.03ms</div><div class="result-obj">error</div></td>
+                    </tr>
+                    <tr>
+                        <td class="problem-name">qssp60<br><small>(SOCP)</small></td>
+                        <td class="cell-error"><div class="result-time">0.02ms</div><div class="result-obj">error</div></td>
+                        <td class="cell-unknown">-</td>
+                        <td class="cell-error"><div class="result-time">0.02ms</div><div class="result-obj">error</div></td>
+                        <td class="cell-error"><div class="result-time">0.02ms</div><div class="result-obj">error</div></td>
+                        <td class="cell-error"><div class="result-time">0.02ms</div><div class="result-obj">error</div></td>
+                        <td class="cell-error"><div class="result-time">0.02ms</div><div class="result-obj">error</div></td>
+                        <td class="cell-unknown">-</td>
+                        <td class="cell-unknown">-</td>
+                        <td class="cell-unknown">-</td>
+                    </tr>
+                    <tr>
+                        <td class="problem-name">robust_optimization<br><small>(SOCP)</small></td>
+                        <td class="cell-optimal"><div class="result-time">0.004s</div><div class="result-obj">obj: 0.0</div></td>
+                        <td class="cell-unknown">-</td>
+                        <td class="cell-error"><div class="result-time">0.17ms</div><div class="result-obj">error</div></td>
+                        <td class="cell-error"><div class="result-time">0.07ms</div><div class="result-obj">error</div></td>
+                        <td class="cell-optimal"><div class="result-time">0.004s</div><div class="result-obj">obj: -6.50e-06</div></td>
+                        <td class="cell-error"><div class="result-time">0.02ms</div><div class="result-obj">error</div></td>
+                        <td class="cell-unknown">-</td>
+                        <td class="cell-unknown">-</td>
+                        <td class="cell-error"><div class="result-time">0.08ms</div><div class="result-obj">error</div></td>
+                    </tr>
+                    <tr>
+                        <td class="problem-name">simple_lp<br><small>(Unknown)</small></td>
+                        <td class="cell-unknown">-</td>
+                        <td class="cell-unknown">-</td>
+                        <td class="cell-unknown">-</td>
+                        <td class="cell-unknown">-</td>
+                        <td class="cell-unknown">-</td>
+                        <td class="cell-unknown">-</td>
+                        <td class="cell-unknown">-</td>
+                        <td class="cell-unknown">-</td>
+                        <td class="cell-error"><div class="result-time">0.15ms</div><div class="result-obj">error</div></td>
+                    </tr>
+                    <tr>
+                        <td class="problem-name">simple_qp<br><small>(Unknown)</small></td>
+                        <td class="cell-unknown">-</td>
+                        <td class="cell-unknown">-</td>
+                        <td class="cell-unknown">-</td>
+                        <td class="cell-unknown">-</td>
+                        <td class="cell-unknown">-</td>
+                        <td class="cell-unknown">-</td>
+                        <td class="cell-unknown">-</td>
+                        <td class="cell-unknown">-</td>
+                        <td class="cell-error"><div class="result-time">0.05ms</div><div class="result-obj">error</div></td>
+                    </tr>
+                    <tr>
+                        <td class="problem-name">truss1<br><small>(SDP)</small></td>
+                        <td class="cell-unknown"><div class="result-time">0.009s</div><div class="result-obj">unbounded</div></td>
+                        <td class="cell-unknown">-</td>
+                        <td class="cell-unknown">-</td>
+                        <td class="cell-unknown">-</td>
+                        <td class="cell-unknown">-</td>
+                        <td class="cell-unknown">-</td>
+                        <td class="cell-unknown">-</td>
+                        <td class="cell-unknown">-</td>
+                        <td class="cell-unknown">-</td>
+                    </tr>
+                    <tr>
+                        <td class="problem-name">truss5<br><small>(SDP)</small></td>
+                        <td class="cell-error"><div class="result-time">0.04ms</div><div class="result-obj">error</div></td>
+                        <td class="cell-unknown">-</td>
+                        <td class="cell-error"><div class="result-time">0.02ms</div><div class="result-obj">error</div></td>
+                        <td class="cell-error"><div class="result-time">0.02ms</div><div class="result-obj">error</div></td>
+                        <td class="cell-error"><div class="result-time">0.02ms</div><div class="result-obj">error</div></td>
+                        <td class="cell-error"><div class="result-time">0.04ms</div><div class="result-obj">error</div></td>
+                        <td class="cell-unknown">-</td>
+                        <td class="cell-unknown">-</td>
+                        <td class="cell-unknown">-</td>
                     </tr>
                 </tbody>
             </table>

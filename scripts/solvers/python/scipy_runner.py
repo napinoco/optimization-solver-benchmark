@@ -12,6 +12,7 @@ sys.path.insert(0, str(project_root))
 from scripts.benchmark.solver_interface import SolverInterface, SolverResult
 from scripts.benchmark.problem_loader import ProblemData
 from scripts.utils.logger import get_logger
+from scripts.utils.version_utils import format_solver_version
 
 logger = get_logger("scipy_solver")
 
@@ -32,7 +33,34 @@ class ScipySolver(SolverInterface):
         super().__init__(name, timeout)
         self.method = method
         self.options = options or {}
+        
+        # Detect solver version
+        self.solver_version = format_solver_version('scipy')
+        self.solver_backend = 'scipy'
+        
         self.logger.info(f"Initialized SciPy solver with method '{method}'")
+    
+    def _create_result(self, solver_name: str, problem_name: str, solve_time: float,
+                      status: str, objective_value: Optional[float] = None,
+                      duality_gap: Optional[float] = None, iterations: Optional[int] = None,
+                      error_message: Optional[str] = None, solver_info: Optional[Dict] = None,
+                      problem_library: str = 'light_set', run_id: Optional[str] = None) -> SolverResult:
+        """Create SolverResult with version information."""
+        return SolverResult(
+            solver_name=solver_name,
+            problem_name=problem_name,
+            solve_time=solve_time,
+            status=status,
+            objective_value=objective_value,
+            duality_gap=duality_gap,
+            iterations=iterations,
+            error_message=error_message,
+            solver_info=solver_info,
+            solver_version=self.solver_version,
+            solver_backend=self.solver_backend,
+            problem_library=problem_library,
+            run_id=run_id
+        )
     
     def solve(self, problem: ProblemData) -> SolverResult:
         """
@@ -61,7 +89,7 @@ class ScipySolver(SolverInterface):
             error_msg = str(e)
             self.logger.error(f"Solver failed: {error_msg}")
             
-            return SolverResult(
+            return self._create_result(
                 solver_name=self.name,
                 problem_name=problem.name,
                 solve_time=solve_time,
@@ -137,7 +165,7 @@ class ScipySolver(SolverInterface):
         self.logger.debug(f"LP solve completed: status={status}, "
                          f"objective={objective_value}, time={solve_time:.3f}s")
         
-        return SolverResult(
+        return self._create_result(
             solver_name=self.name,
             problem_name=problem.name,
             solve_time=solve_time,
@@ -257,7 +285,7 @@ class ScipySolver(SolverInterface):
         self.logger.debug(f"QP solve completed: status={status}, "
                          f"objective={objective_value}, time={solve_time:.3f}s")
         
-        return SolverResult(
+        return self._create_result(
             solver_name=self.name,
             problem_name=problem.name,
             solve_time=solve_time,

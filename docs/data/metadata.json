@@ -1,6 +1,6 @@
 {
   "metadata": {
-    "generated_at": "2025-06-15T11:08:50.606075",
+    "generated_at": "2025-06-16T00:34:15.072719",
     "format_version": "1.0",
     "description": "Problem and solver metadata"
   },
@@ -9,6 +9,12 @@
       "name": "CLARABEL (via CVXPY)",
       "type": "CVXPY Backend",
       "backend": "CLARABEL",
+      "environment": "Python"
+    },
+    {
+      "name": "CLARABEL-Enhanced",
+      "type": "Unknown",
+      "backend": "CLARABEL-Enhanced",
       "environment": "Python"
     },
     {
@@ -34,6 +40,24 @@
       "type": "SciPy Solver",
       "backend": "SciPy",
       "environment": "Python"
+    },
+    {
+      "name": "SciPy-Enhanced",
+      "type": "Unknown",
+      "backend": "SciPy-Enhanced",
+      "environment": "Python"
+    },
+    {
+      "name": "TestSolver",
+      "type": "Unknown",
+      "backend": "TestSolver",
+      "environment": "Python"
+    },
+    {
+      "name": "scipy",
+      "type": "SciPy Solver",
+      "backend": "scipy",
+      "environment": "Python"
     }
   ],
   "problems": [
@@ -41,28 +65,61 @@
       "name": "SIMPLE_LP",
       "class": "LP",
       "type": "LP",
-      "n_variables": 2,
-      "n_constraints": 2,
-      "difficulty_level": "Trivial",
-      "complexity_score": 0.6622659904607587
+      "n_variables": 0,
+      "n_constraints": 0,
+      "difficulty_level": "Unknown",
+      "complexity_score": 1.0,
+      "library_source": ""
     },
     {
       "name": "SIMPLE_QP",
       "class": "QP",
       "type": "QP",
-      "n_variables": 2,
-      "n_constraints": 1,
-      "difficulty_level": "Trivial",
-      "complexity_score": 0.4741222431707704
+      "n_variables": 0,
+      "n_constraints": 0,
+      "difficulty_level": "Unknown",
+      "complexity_score": 1.0,
+      "library_source": ""
+    },
+    {
+      "name": "arch0",
+      "class": "SDP",
+      "type": "SDP",
+      "n_variables": 13215,
+      "n_constraints": 174,
+      "difficulty_level": "Unknown",
+      "complexity_score": 1.0,
+      "library_source": "arch family"
+    },
+    {
+      "name": "control1",
+      "class": "SDP",
+      "type": "SDP",
+      "n_variables": 70,
+      "n_constraints": 21,
+      "difficulty_level": "Unknown",
+      "complexity_score": 1.0,
+      "library_source": "control family"
     },
     {
       "name": "control_lmi",
       "class": "SDP",
       "type": "SDP",
-      "n_variables": 9,
-      "n_constraints": 3,
-      "difficulty_level": "Trivial",
-      "complexity_score": 4.437227668892861
+      "n_variables": 0,
+      "n_constraints": 0,
+      "difficulty_level": "Unknown",
+      "complexity_score": 1.0,
+      "library_source": ""
+    },
+    {
+      "name": "equalG11",
+      "class": "SDP",
+      "type": "SDP",
+      "n_variables": 321201,
+      "n_constraints": 801,
+      "difficulty_level": "Unknown",
+      "complexity_score": 1.0,
+      "library_source": "equalG family"
     },
     {
       "name": "facility_location",
@@ -70,44 +127,149 @@
       "type": "SOCP",
       "n_variables": 0,
       "n_constraints": 0,
-      "difficulty_level": "Trivial",
-      "complexity_score": 0.0
+      "difficulty_level": "Unknown",
+      "complexity_score": 1.0,
+      "library_source": ""
+    },
+    {
+      "name": "filter48_socp",
+      "class": "SDP",
+      "type": "SDP",
+      "n_variables": 3284,
+      "n_constraints": 969,
+      "difficulty_level": "Unknown",
+      "complexity_score": 1.0,
+      "library_source": "FILTER problem set"
+    },
+    {
+      "name": "hinf1",
+      "class": "SDP",
+      "type": "SDP",
+      "n_variables": 41,
+      "n_constraints": 13,
+      "difficulty_level": "Unknown",
+      "complexity_score": 1.0,
+      "library_source": "hinf family"
+    },
+    {
+      "name": "hinf12",
+      "class": "SDP",
+      "type": "SDP",
+      "n_variables": 216,
+      "n_constraints": 43,
+      "difficulty_level": "Unknown",
+      "complexity_score": 1.0,
+      "library_source": "HINF problem set"
     },
     {
       "name": "matrix_completion",
       "class": "SDP",
       "type": "SDP",
-      "n_variables": 48,
-      "n_constraints": 10,
-      "difficulty_level": "Easy",
-      "complexity_score": 8.211301289462735
+      "n_variables": 0,
+      "n_constraints": 0,
+      "difficulty_level": "Unknown",
+      "complexity_score": 1.0,
+      "library_source": ""
     },
     {
       "name": "max_cut_relaxation",
       "class": "SDP",
       "type": "SDP",
-      "n_variables": 25,
-      "n_constraints": 6,
-      "difficulty_level": "Easy",
-      "complexity_score": 6.684952347819054
+      "n_variables": 0,
+      "n_constraints": 0,
+      "difficulty_level": "Unknown",
+      "complexity_score": 1.0,
+      "library_source": ""
+    },
+    {
+      "name": "nql30",
+      "class": "SOCP",
+      "type": "SOCP",
+      "n_variables": 6302,
+      "n_constraints": 3680,
+      "difficulty_level": "Unknown",
+      "complexity_score": 1.0,
+      "library_source": "NQL problem set"
     },
     {
       "name": "portfolio_optimization",
       "class": "SOCP",
       "type": "SOCP",
-      "n_variables": 7,
-      "n_constraints": 5,
-      "difficulty_level": "Trivial",
-      "complexity_score": 3.3087172378934477
+      "n_variables": 0,
+      "n_constraints": 0,
+      "difficulty_level": "Unknown",
+      "complexity_score": 1.0,
+      "library_source": ""
+    },
+    {
+      "name": "qap5",
+      "class": "SDP",
+      "type": "SDP",
+      "n_variables": 351,
+      "n_constraints": 136,
+      "difficulty_level": "Unknown",
+      "complexity_score": 1.0,
+      "library_source": "qap family"
+    },
+    {
+      "name": "qssp60",
+      "class": "SOCP",
+      "type": "SOCP",
+      "n_variables": 29526,
+      "n_constraints": 14581,
+      "difficulty_level": "Unknown",
+      "complexity_score": 1.0,
+      "library_source": "QSSP problem set"
     },
     {
       "name": "robust_optimization",
       "class": "SOCP",
       "type": "SOCP",
-      "n_variables": 13,
-      "n_constraints": 13,
-      "difficulty_level": "Easy",
-      "complexity_score": 4.901350750150082
+      "n_variables": 0,
+      "n_constraints": 0,
+      "difficulty_level": "Unknown",
+      "complexity_score": 1.0,
+      "library_source": ""
+    },
+    {
+      "name": "test_matrix_completion",
+      "class": "SDP",
+      "type": "SDP",
+      "n_variables": 48,
+      "n_constraints": 10,
+      "difficulty_level": "Unknown",
+      "complexity_score": 1.0,
+      "library_source": "test"
+    },
+    {
+      "name": "theta1",
+      "class": "SDP",
+      "type": "SDP",
+      "n_variables": 1275,
+      "n_constraints": 104,
+      "difficulty_level": "Unknown",
+      "complexity_score": 1.0,
+      "library_source": "theta family"
+    },
+    {
+      "name": "truss1",
+      "class": "SDP",
+      "type": "SDP",
+      "n_variables": 19,
+      "n_constraints": 6,
+      "difficulty_level": "Unknown",
+      "complexity_score": 1.0,
+      "library_source": "truss family"
+    },
+    {
+      "name": "truss5",
+      "class": "SDP",
+      "type": "SDP",
+      "n_variables": 3301,
+      "n_constraints": 208,
+      "difficulty_level": "Unknown",
+      "complexity_score": 1.0,
+      "library_source": "TRUSS problem set"
     }
   ],
   "environments": {
@@ -131,15 +293,15 @@
     },
     "memory_info": {
       "total_gb": 24.0,
-      "available_gb": 9.19
+      "available_gb": 7.53
     },
     "timezone_info": {
       "timezone_name": "JST",
       "system_timezone": null,
       "timedatectl_timezone": null,
       "utc_offset_hours": 9.0,
-      "current_time_utc": "2025-06-15T01:02:52.068715+00:00",
-      "current_time_local": "2025-06-15T10:02:52.068875",
+      "current_time_utc": "2025-06-15T15:24:53.882136+00:00",
+      "current_time_local": "2025-06-16T00:24:53.882144",
       "daylight_saving": false
     },
     "primary_solver_framework": "CVXPY",
@@ -149,7 +311,7 @@
       "SOCP",
       "SDP"
     ],
-    "last_updated": "2025-06-15T10:02:52.076740",
-    "collection_timestamp": "2025-06-15T11:08:50.606454"
+    "last_updated": "2025-06-16T00:24:53.912867",
+    "collection_timestamp": "2025-06-16T00:34:15.073157"
   }
 }

@@ -5,7 +5,8 @@
 CREATE TABLE IF NOT EXISTS benchmarks (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
-    environment_info TEXT  -- JSON string containing environment data
+    environment_info TEXT,  -- JSON string containing environment data
+    git_commit_hash TEXT    -- Git commit hash for reproducibility tracking
 );
 
 -- Problems table stores problem metadata with classification data
@@ -53,14 +54,18 @@ CREATE TABLE IF NOT EXISTS results (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     benchmark_id INTEGER NOT NULL,
     solver_name TEXT NOT NULL,
+    solver_version TEXT,        -- Solver backend version for reproducibility
+    solver_backend TEXT,        -- Specific backend (e.g., CLARABEL, SCS, ECOS, OSQP)
     problem_name TEXT NOT NULL,
+    problem_library TEXT DEFAULT 'light_set',  -- Problem source library
     solve_time REAL,
     status TEXT,
     objective_value REAL,
     duality_gap REAL,
     iterations INTEGER,
     error_message TEXT,
-    solver_info TEXT,  -- JSON string for solver-specific information
+    solver_info TEXT,           -- JSON string for solver-specific information
+    run_id TEXT,                -- Unique run identifier for aggregation
     FOREIGN KEY (benchmark_id) REFERENCES benchmarks (id)
 );
 

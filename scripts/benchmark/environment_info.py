@@ -14,6 +14,7 @@ project_root = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(project_root))
 
 from scripts.utils.logger import get_logger
+from scripts.utils.git_utils import get_git_info
 
 logger = get_logger("environment_info")
 
@@ -163,7 +164,8 @@ def collect_environment_info() -> Dict[str, Any]:
         "memory": get_memory_info(),
         "python": get_python_info(),
         "disk": get_disk_info(),
-        "timezone": get_timezone_info()
+        "timezone": get_timezone_info(),
+        "git": get_git_info()  # Add Git repository information
     }
     
     logger.info("Environment information collected successfully")
@@ -192,11 +194,21 @@ def get_environment_summary() -> str:
     elif 'macos_timezone' in tz_info:
         timezone_desc = f"{tz_info['macos_timezone']} (UTC{tz_info['utc_offset_hours']:+.1f})"
     
+    # Git information
+    git_info = env_info['git']
+    git_desc = "Not available"
+    if git_info['available']:
+        commit_hash = git_info['commit_hash'][:8] if git_info['commit_hash'] else 'unknown'
+        branch = git_info['branch'] or 'unknown'
+        dirty_flag = ' (dirty)' if git_info['is_dirty'] else ''
+        git_desc = f"{commit_hash} on {branch}{dirty_flag}"
+    
     summary = f"""Environment Summary:
 OS: {os_desc} ({env_info['os']['machine']})
 CPU: {env_info['cpu']['processor']} ({env_info['cpu']['cpu_count']} cores)
 Memory: {env_info['memory']['total_gb']} GB total, {env_info['memory']['available_gb']} GB available
 Python: {env_info['python']['version']} ({env_info['python']['implementation']})
+Git: {git_desc}
 Timezone: {timezone_desc}
 Local Time: {tz_info['current_time_local']}
 Disk: {env_info['disk']['free_gb']} GB free of {env_info['disk']['total_gb']} GB total"""

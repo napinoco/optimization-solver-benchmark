@@ -55,17 +55,27 @@ class ResultCollector:
         timestamp = datetime.now().isoformat()
         env_info_json = json.dumps(environment_info, default=str)
         
+        # Extract Git commit hash for reproducibility tracking
+        git_commit_hash = None
+        if 'git' in environment_info and environment_info['git'].get('commit_hash'):
+            git_commit_hash = environment_info['git']['commit_hash']
+        
         with sqlite3.connect(self.db_path) as conn:
             cursor = conn.cursor()
             cursor.execute(
-                """INSERT INTO benchmarks (timestamp, environment_info)
-                   VALUES (?, ?)""",
-                (timestamp, env_info_json)
+                """INSERT INTO benchmarks (timestamp, environment_info, git_commit_hash)
+                   VALUES (?, ?, ?)""",
+                (timestamp, env_info_json, git_commit_hash)
             )
             benchmark_id = cursor.lastrowid
             conn.commit()
         
         self.logger.info(f"Created benchmark session {benchmark_id} at {timestamp}")
+        if git_commit_hash:
+            self.logger.info(f"Git commit hash recorded: {git_commit_hash[:8]}...")
+        else:
+            self.logger.debug("No Git commit hash available")
+        
         return benchmark_id
     
     def store_result(self, benchmark_id: int, result: SolverResult, timeout: Optional[float] = None) -> int:
@@ -115,8 +125,9 @@ class ResultCollector:
             cursor.execute(
                 """INSERT INTO results 
                    (benchmark_id, solver_name, problem_name, solve_time, status, 
-                    objective_value, duality_gap, iterations, error_message, solver_info)
-                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                    objective_value, duality_gap, iterations, error_message, solver_info,
+                    solver_version, solver_backend, problem_library, run_id)
+                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
                 (
                     benchmark_id,
                     result.solver_name,
@@ -127,7 +138,11 @@ class ResultCollector:
                     result.duality_gap,
                     result.iterations,
                     result.error_message,
-                    solver_info_json
+                    solver_info_json,
+                    result.solver_version,
+                    result.solver_backend,
+                    result.problem_library,
+                    result.run_id
                 )
             )
             result_id = cursor.lastrowid
@@ -135,6 +150,8 @@ class ResultCollector:
         
         self.logger.debug(f"Stored result {result_id}: {result.solver_name} on {result.problem_name} "
                          f"({result.status}, {result.solve_time:.3f}s)")
+        self.logger.debug(f"Version info - Solver: {result.solver_version}, Backend: {result.solver_backend}, "
+                         f"Library: {result.problem_library}, Run ID: {result.run_id}")
         return result_id
     
     def store_problem_info(self, name: str, problem_class: str, file_path: str, 
