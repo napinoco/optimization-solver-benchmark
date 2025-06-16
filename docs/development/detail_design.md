@@ -97,17 +97,23 @@ optimization-solver-benchmark/
 │   │   └── environment_info.py   # Environment information gathering
 │   │
 │   ├── solvers/
-│   │   └── python/               # Python solvers only
+│   │   └── python/               # Python solvers with version detection
 │   │       ├── cvxpy_runner.py   # CVXPY execution with multiple backends
 │   │       └── scipy_runner.py   # SciPy optimization suite
 │   │
+│   ├── external/                 # External library integration ✅
+│   │   ├── __init__.py          
+│   │   ├── cvxpy_converter.py    # CVXPY problem conversion
+│   │   ├── dimacs_loader.py      # DIMACS SeDuMi format loader
+│   │   └── sdplib_loader.py      # SDPLIB SDPA format loader
+│   │
 │   ├── database/
-│   │   ├── models.py             # SQLAlchemy data models
+│   │   ├── models.py             # SQLAlchemy data models with version tracking
 │   │   └── classification_storage.py # Problem classification storage
 │   │
 │   ├── reporting/
-│   │   ├── simple_html_generator.py  # Simple HTML report generation
-│   │   ├── data_publisher.py     # JSON/CSV data publishing
+│   │   ├── simple_html_generator.py  # Enhanced HTML with structure analysis
+│   │   ├── data_publisher.py     # JSON/CSV with comprehensive metadata
 │   │   ├── data_validator.py     # Result validation
 │   │   ├── export.py             # Multi-format data export
 │   │   └── statistics.py         # Statistical calculations
@@ -122,6 +128,7 @@ optimization-solver-benchmark/
 │       ├── logger.py             # Structured logging
 │       ├── validation.py         # Data validation utilities
 │       ├── problem_classifier.py # Problem type classification
+│       ├── problem_structure.py  # Problem structure analysis ✅
 │       └── solver_diagnostics.py # Solver capability detection
 │
 ├── docs/                        # GitHub Pages output (PRE-BUILT)
