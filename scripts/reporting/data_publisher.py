@@ -176,7 +176,7 @@ class DataPublisher:
                         r.benchmark_id,
                         r.solver_name,
                         r.problem_name,
-                        COALESCE(pc.problem_type, p.problem_class, 'Unknown') as problem_type,
+                        COALESCE(p.problem_class, 'Unknown') as problem_type,
                         r.solve_time,
                         r.status,
                         r.objective_value,
@@ -184,12 +184,9 @@ class DataPublisher:
                         r.iterations,
                         r.error_message,
                         b.timestamp as benchmark_timestamp,
-                        COALESCE(pc.n_variables, 0) as n_variables,
-                        COALESCE(pc.n_constraints, 0) as n_constraints,
-                        COALESCE(pc.difficulty_level, 'Unknown') as difficulty_level
+                        p.metadata
                     FROM results r
                     LEFT JOIN problems p ON r.problem_name = p.name
-                    LEFT JOIN problem_classifications pc ON r.problem_name = pc.problem_name
                     LEFT JOIN benchmarks b ON r.benchmark_id = b.id
                     ORDER BY r.benchmark_id DESC, r.solver_name, r.problem_name
                 """
@@ -202,6 +199,41 @@ class DataPublisher:
                 
                 for row in cursor.fetchall():
                     result = dict(zip(columns, row))
+                    
+                    # Extract structure info from metadata JSON
+                    metadata_json = result.get('metadata')
+                    if metadata_json:
+                        try:
+                            import json
+                            metadata = json.loads(metadata_json)
+                            
+                            # Get structure analysis if available
+                            structure = metadata.get('structure', {})
+                            if structure:
+                                result['n_variables'] = structure.get('variables', 0)
+                                result['n_constraints'] = structure.get('constraints', 0)
+                            else:
+                                result['n_variables'] = 0
+                                result['n_constraints'] = 0
+                            
+                            # Get library source
+                            result['library_source'] = metadata.get('source', None)
+                            result['difficulty_level'] = 'Unknown'  # Could calculate from structure
+                            
+                        except (json.JSONDecodeError, TypeError):
+                            result['n_variables'] = 0
+                            result['n_constraints'] = 0
+                            result['library_source'] = None
+                            result['difficulty_level'] = 'Unknown'
+                    else:
+                        result['n_variables'] = 0
+                        result['n_constraints'] = 0
+                        result['library_source'] = None
+                        result['difficulty_level'] = 'Unknown'
+                    
+                    # Remove metadata field from final result to keep it clean
+                    result.pop('metadata', None)
+                    
                     results.append(result)
                 
                 return results
@@ -237,11 +269,10 @@ class DataPublisher:
                 # Problem type distribution
                 cursor.execute("""
                     SELECT 
-                        COALESCE(pc.problem_type, p.problem_class, 'Unknown') as problem_type,
+                        COALESCE(p.problem_class, 'Unknown') as problem_type,
                         COUNT(*) as count
                     FROM results r
                     LEFT JOIN problems p ON r.problem_name = p.name
-                    LEFT JOIN problem_classifications pc ON r.problem_name = pc.problem_name
                     GROUP BY problem_type
                     ORDER BY count DESC
                 """)
@@ -311,17 +342,14 @@ class DataPublisher:
                 cursor.execute("""
                     SELECT 
                         r.problem_name,
-                        COALESCE(pc.problem_type, p.problem_class, 'Unknown') as problem_type,
+                        COALESCE(p.problem_class, 'Unknown') as problem_type,
                         COUNT(*) as solver_attempts,
                         SUM(CASE WHEN r.status = 'optimal' THEN 1 ELSE 0 END) as successful_solves,
                         AVG(CASE WHEN r.status = 'optimal' THEN 1.0 ELSE 0.0 END) as success_rate,
                         AVG(r.solve_time) as avg_solve_time,
-                        COALESCE(pc.n_variables, 0) as n_variables,
-                        COALESCE(pc.n_constraints, 0) as n_constraints,
-                        COALESCE(pc.difficulty_level, 'Unknown') as difficulty_level
+                        p.metadata
                     FROM results r
                     LEFT JOIN problems p ON r.problem_name = p.name
-                    LEFT JOIN problem_classifications pc ON r.problem_name = pc.problem_name
                     WHERE r.solve_time IS NOT NULL
                     GROUP BY r.problem_name
                     ORDER BY success_rate DESC, avg_solve_time ASC
@@ -329,6 +357,30 @@ class DataPublisher:
                 
                 problem_stats = []
                 for row in cursor.fetchall():
+                    # Extract structure info from metadata JSON
+                    metadata_json = row[6]
+                    n_variables = 0
+                    n_constraints = 0
+                    difficulty_level = 'Unknown'
+                    library_source = None
+                    
+                    if metadata_json:
+                        try:
+                            import json
+                            metadata = json.loads(metadata_json)
+                            
+                            # Get structure analysis if available
+                            structure = metadata.get('structure', {})
+                            if structure:
+                                n_variables = structure.get('variables', 0)
+                                n_constraints = structure.get('constraints', 0)
+                            
+                            # Get library source
+                            library_source = metadata.get('source', None)
+                            
+                        except (json.JSONDecodeError, TypeError):
+                            pass
+                    
                     problem_data = {
                         "problem_name": row[0],
                         "problem_type": row[1],
@@ -336,9 +388,10 @@ class DataPublisher:
                         "successful_solves": row[3],
                         "success_rate": row[4],
                         "avg_solve_time": row[5],
-                        "n_variables": row[6],
-                        "n_constraints": row[7],
-                        "difficulty_level": row[8]
+                        "n_variables": n_variables,
+                        "n_constraints": n_constraints,
+                        "difficulty_level": difficulty_level,
+                        "library_source": library_source
                     }
                     problem_stats.append(problem_data)
                 
@@ -401,26 +454,47 @@ class DataPublisher:
                     SELECT 
                         p.name,
                         p.problem_class,
-                        COALESCE(pc.problem_type, p.problem_class) as problem_type,
-                        COALESCE(pc.n_variables, 0) as n_variables,
-                        COALESCE(pc.n_constraints, 0) as n_constraints,
-                        COALESCE(pc.difficulty_level, 'Unknown') as difficulty_level,
-                        COALESCE(pc.complexity_score, 1.0) as complexity_score
+                        p.metadata
                     FROM problems p
-                    LEFT JOIN problem_classifications pc ON p.name = pc.problem_name
                     ORDER BY p.name
                 """)
                 
                 problems = []
                 for row in cursor.fetchall():
+                    # Extract structure info from metadata JSON
+                    metadata_json = row[2]
+                    n_variables = 0
+                    n_constraints = 0
+                    difficulty_level = 'Unknown'
+                    complexity_score = 1.0
+                    library_source = None
+                    
+                    if metadata_json:
+                        try:
+                            import json
+                            metadata = json.loads(metadata_json)
+                            
+                            # Get structure analysis if available
+                            structure = metadata.get('structure', {})
+                            if structure:
+                                n_variables = structure.get('variables', 0)
+                                n_constraints = structure.get('constraints', 0)
+                            
+                            # Get library source
+                            library_source = metadata.get('source', None)
+                            
+                        except (json.JSONDecodeError, TypeError):
+                            pass
+                    
                     problem_info = {
                         "name": row[0],
                         "class": row[1],
-                        "type": row[2],
-                        "n_variables": row[3],
-                        "n_constraints": row[4],
-                        "difficulty_level": row[5],
-                        "complexity_score": row[6]
+                        "type": row[1],  # Use problem_class as type
+                        "n_variables": n_variables,
+                        "n_constraints": n_constraints,
+                        "difficulty_level": difficulty_level,
+                        "complexity_score": complexity_score,
+                        "library_source": library_source
                     }
                     problems.append(problem_info)
                 

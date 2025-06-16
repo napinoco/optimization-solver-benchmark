@@ -260,6 +260,10 @@ class BenchmarkRunner:
             
             problem_count = 0
             for problem_class in registry["problems"][problem_set]:
+                # Skip metadata sections for external libraries (DIMACS/SDPLIB)
+                if problem_class == "library_info":
+                    continue
+                    
                 for problem_info in registry["problems"][problem_set][problem_class]:
                     problem_name = problem_info["name"]
                     
@@ -267,16 +271,23 @@ class BenchmarkRunner:
                         problem = load_problem(problem_name, problem_set)
                         self.problems[problem_name] = problem
                         
-                        # Store problem info in database
+                        # Store problem info in database with structure analysis
+                        metadata = {
+                            "description": problem_info.get("description", ""),
+                            "problem_set": problem_set,
+                            "source": problem_info.get("source", "")
+                        }
+                        
+                        # Add structure analysis if available
+                        structure_summary = problem.get_structure_summary()
+                        if structure_summary:
+                            metadata["structure"] = structure_summary
+                        
                         self.result_collector.store_problem_info(
                             name=problem.name,
                             problem_class=problem.problem_class,
                             file_path=problem_info["file_path"],
-                            metadata={
-                                "description": problem_info.get("description", ""),
-                                "problem_set": problem_set,
-                                "source": problem_info.get("source", "")
-                            }
+                            metadata=metadata
                         )
                         
                         problem_count += 1
