@@ -1,44 +1,113 @@
-import sqlite3
-import os
-from pathlib import Path
+"""
+Database Models for Re-Architected Benchmark System
 
-def get_database_path():
-    """Get the path to the database file."""
-    project_root = Path(__file__).parent.parent.parent
-    return project_root / "database" / "results.db"
+Contains the single denormalized table model and data structures
+for the simplified database design.
+"""
 
-def create_database():
-    """Create the database and tables using the schema file."""
-    db_path = get_database_path()
-    
-    # Ensure database directory exists
-    db_path.parent.mkdir(exist_ok=True)
-    
-    # Read schema file
-    schema_path = db_path.parent / "schema.sql"
-    with open(schema_path, 'r') as f:
-        schema_sql = f.read()
-    
-    # Create database and tables
-    with sqlite3.connect(db_path) as conn:
-        conn.executescript(schema_sql)
-        conn.commit()
-    
-    return db_path
+from dataclasses import dataclass
+from typing import Optional, Dict, Any
+from datetime import datetime
+import json
 
-def get_connection():
-    """Get a database connection."""
-    db_path = get_database_path()
-    return sqlite3.connect(db_path)
 
-if __name__ == "__main__":
-    # Test script to create database
-    db_path = create_database()
-    print(f"Database created at: {db_path}")
+@dataclass
+class BenchmarkResult:
+    """
+    Single denormalized benchmark result model.
     
-    # Verify tables exist
-    with get_connection() as conn:
-        cursor = conn.cursor()
-        cursor.execute("SELECT name FROM sqlite_master WHERE type='table';")
-        tables = cursor.fetchall()
-        print("Tables created:", [table[0] for table in tables])
+    Represents one row in the results table with all necessary information
+    for a single solver-problem combination execution.
+    """
+    # Primary key
+    id: Optional[int] = None
+    
+    # Solver information
+    solver_name: str = ""
+    solver_version: str = ""
+    
+    # Problem information
+    problem_library: str = ""  # 'internal', 'DIMACS', 'SDPLIB'
+    problem_name: str = ""
+    problem_type: str = ""     # 'LP', 'QP', 'SOCP', 'SDP'
+    
+    # Environment and execution context
+    environment_info: Dict[str, Any] = None
+    commit_hash: str = ""
+    timestamp: Optional[datetime] = None
+    
+    # Standardized solver results
+    solve_time: Optional[float] = None
+    status: Optional[str] = None
+    primal_objective_value: Optional[float] = None
+    dual_objective_value: Optional[float] = None
+    duality_gap: Optional[float] = None
+    primal_infeasibility: Optional[float] = None
+    dual_infeasibility: Optional[float] = None
+    iterations: Optional[int] = None
+    
+    def __post_init__(self):
+        """Initialize default values"""
+        if self.environment_info is None:
+            self.environment_info = {}
+        if self.timestamp is None:
+            self.timestamp = datetime.now()
+    
+    def to_dict(self) -> Dict[str, Any]:
+        """Convert to dictionary for JSON serialization"""
+        result = {}
+        for field_name, field_value in self.__dict__.items():
+            if field_name == 'timestamp' and field_value:
+                result[field_name] = field_value.isoformat()
+            elif field_name == 'environment_info':
+                result[field_name] = field_value or {}
+            else:
+                result[field_name] = field_value
+        return result
+    
+    @classmethod
+    def from_dict(cls, data: Dict[str, Any]) -> 'BenchmarkResult':
+        """Create from dictionary (e.g., from database row)"""
+        # Handle timestamp conversion
+        if 'timestamp' in data and isinstance(data['timestamp'], str):
+            data['timestamp'] = datetime.fromisoformat(data['timestamp'])
+        
+        # Handle environment_info JSON
+        if 'environment_info' in data and isinstance(data['environment_info'], str):
+            try:
+                data['environment_info'] = json.loads(data['environment_info'])
+            except (json.JSONDecodeError, TypeError):
+                data['environment_info'] = {}
+        
+        # Filter only known fields
+        known_fields = set(cls.__annotations__.keys())
+        filtered_data = {k: v for k, v in data.items() if k in known_fields}
+        
+        return cls(**filtered_data)
+
+
+# Database table schema constants
+TABLE_NAME = "results"
+
+REQUIRED_FIELDS = [
+    "solver_name",
+    "solver_version", 
+    "problem_library",
+    "problem_name",
+    "problem_type",
+    "environment_info",
+    "commit_hash"
+]
+
+OPTIONAL_RESULT_FIELDS = [
+    "solve_time",
+    "status",
+    "primal_objective_value",
+    "dual_objective_value", 
+    "duality_gap",
+    "primal_infeasibility",
+    "dual_infeasibility",
+    "iterations"
+]
+
+ALL_FIELDS = ["id", "timestamp"] + REQUIRED_FIELDS + OPTIONAL_RESULT_FIELDS
