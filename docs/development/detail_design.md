@@ -88,7 +88,6 @@ optimization-solver-benchmark/
 │   ├── benchmark/               # Benchmark execution and database storage
 │   │   ├── __init__.py
 │   │   ├── runner.py             # Main benchmark execution logic
-│   │   ├── database_manager.py   # Database operations and result storage
 │   │   └── environment_info.py   # Environment information gathering
 │   │
 │   ├── data_loaders/            # ETL: Data loading and format conversion
