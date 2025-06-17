@@ -123,6 +123,7 @@ optimization-solver-benchmark/
 │   └── database/                # Database models and operations
 │       ├── __init__.py
 │       ├── models.py             # Single denormalized table model
+│       ├── database_manager.py   # Database operations and result storage
 │       └── schema.sql            # Database schema definition
 │
 ├── docs/                        # GitHub Pages output (published data)
@@ -373,7 +374,7 @@ class BenchmarkRunner:
                     completed += 1
 ```
 
-#### scripts/benchmark/database_manager.py - Database Operations
+#### scripts/database/database_manager.py - Database Operations
 ```python
 class DatabaseManager:
     """Handles all database operations for benchmark results"""
@@ -484,6 +485,47 @@ CREATE TABLE results (
 -- Index for efficient latest results queries
 CREATE INDEX idx_latest_results ON results(commit_hash, environment_info, timestamp DESC);
 CREATE INDEX idx_solver_problem ON results(solver_name, problem_name);
+```
+
+#### BenchmarkResult Model
+```python
+@dataclass
+class BenchmarkResult:
+    """Single denormalized benchmark result model"""
+    
+    # Primary key
+    id: Optional[int] = None
+    
+    # Solver information
+    solver_name: str = ""
+    solver_version: str = ""
+    
+    # Problem information
+    problem_library: str = ""  # 'internal', 'DIMACS', 'SDPLIB'
+    problem_name: str = ""
+    problem_type: str = ""     # 'LP', 'QP', 'SOCP', 'SDP'
+    
+    # Environment and execution context
+    environment_info: Dict[str, Any] = None
+    commit_hash: str = ""
+    timestamp: Optional[datetime] = None
+    
+    # Standardized solver results
+    solve_time: Optional[float] = None
+    status: Optional[str] = None
+    primal_objective_value: Optional[float] = None
+    dual_objective_value: Optional[float] = None
+    duality_gap: Optional[float] = None
+    primal_infeasibility: Optional[float] = None
+    dual_infeasibility: Optional[float] = None
+    iterations: Optional[int] = None
+    
+    def to_dict(self) -> Dict[str, Any]:
+        """Convert to dictionary for JSON serialization"""
+        
+    @classmethod
+    def from_dict(cls, data: Dict[str, Any]) -> 'BenchmarkResult':
+        """Create from dictionary (e.g., from database row)"""
 ```
 
 #### Database Manager
