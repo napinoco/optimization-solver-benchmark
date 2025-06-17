@@ -1,74 +1,51 @@
+"""
+CVXPY Solver for LP, QP, SOCP, and SDP Problems.
+
+This module provides a CVXPY-based solver that uses different backends
+for solving optimization problems. It implements the standardized solver
+interface for consistent result format across all solvers.
+"""
+
 import sys
 import time
 import numpy as np
 import cvxpy as cp
 from pathlib import Path
-from typing import Optional, Dict, Any, List
+from typing import Optional, Dict, List
 
 # Add project root to path for imports
 project_root = Path(__file__).parent.parent.parent.parent
 sys.path.insert(0, str(project_root))
 
-from scripts.benchmark.solver_interface import SolverInterface, SolverResult
+from scripts.solvers.solver_interface import SolverInterface, SolverResult
 from scripts.benchmark.problem_loader import ProblemData
 from scripts.utils.logger import get_logger
-from scripts.utils.solver_diagnostics import SolverDiagnostics
-from scripts.utils.version_utils import detect_cvxpy_backend_version
 
 logger = get_logger("cvxpy_solver")
+
 
 class CvxpySolver(SolverInterface):
     """CVXPY-based solver for LP, QP, SOCP, and SDP problems."""
     
-    def __init__(self, name: str = None, timeout: float = 300.0, 
-                 backend: str = "CLARABEL", verbose: bool = False,
-                 solver_options: Optional[Dict] = None,
-                 problem_optimizations: Optional[Dict] = None,
-                 enable_diagnostics: bool = True):
+    def __init__(self, backend: str = "CLARABEL", verbose: bool = False,
+                 solver_options: Optional[Dict] = None, **kwargs):
         """
-        Initialize CVXPY solver with specific backend and enhanced configuration.
+        Initialize CVXPY solver with specific backend.
         
         Args:
-            name: Solver name (auto-generated if None)
-            timeout: Timeout in seconds
             backend: CVXPY backend solver (CLARABEL, OSQP, SCS, etc.)
             verbose: Whether to enable verbose solver output
             solver_options: Backend-specific solver options
-            problem_optimizations: Problem-type-specific parameter overrides
-            enable_diagnostics: Enable parameter validation and diagnostics
+            **kwargs: Additional configuration parameters
         """
-        # Auto-generate name with proper "(via CVXPY)" format
-        if name is None:
-            name = f"{backend} (via CVXPY)"
+        # Auto-generate name with proper format
+        solver_name = f"cvxpy_{backend.lower()}"
         
-        super().__init__(name, timeout)
+        super().__init__(solver_name, backend=backend, verbose=verbose, 
+                        solver_options=solver_options, **kwargs)
         self.backend = backend
         self.verbose = verbose
         self.solver_options = solver_options or {}
-        self.problem_optimizations = problem_optimizations or {}
-        self.enable_diagnostics = enable_diagnostics
-        
-        # Detect solver version and backend
-        self.solver_version = detect_cvxpy_backend_version(backend)
-        self.solver_backend = backend
-        
-        # Initialize diagnostics if enabled
-        self.diagnostics = None
-        if self.enable_diagnostics:
-            try:
-                self.diagnostics = SolverDiagnostics()
-                # Validate parameters
-                if self.solver_options:
-                    validation_results = self.diagnostics.validate_backend_parameters(
-                        self.backend, self.solver_options
-                    )
-                    failed_validations = [r for r in validation_results if not r.passed]
-                    if failed_validations:
-                        self.logger.warning(f"Parameter validation issues for {self.backend}:")
-                        for result in failed_validations:
-                            self.logger.warning(f"  {result.message}")
-            except Exception as e:
-                self.logger.warning(f"Could not initialize diagnostics: {e}")
         
         # Verify solver availability
         available_solvers = cp.installed_solvers()
@@ -78,7 +55,6 @@ class CvxpySolver(SolverInterface):
             # Fall back to first available solver
             if available_solvers:
                 self.backend = available_solvers[0]
-                self.name = f"{self.backend} (via CVXPY)"
                 self.logger.info(f"Using fallback backend: {self.backend}")
             else:
                 raise RuntimeError("No CVXPY backends available")
@@ -86,7 +62,7 @@ class CvxpySolver(SolverInterface):
         # Get backend capabilities
         self.backend_capabilities = self._get_backend_capabilities()
         
-        self.logger.info(f"Initialized CVXPY solver '{self.name}' with backend '{self.backend}'")
+        self.logger.info(f"Initialized CVXPY solver '{self.solver_name}' with backend '{self.backend}'")
     
     def _get_backend_capabilities(self) -> Dict[str, List[str]]:
         """Get capabilities of the current backend solver."""
@@ -98,7 +74,6 @@ class CvxpySolver(SolverInterface):
             "OSQP": ["QP", "SOCP"],
             "CBC": ["LP"],
             "GLOP": ["LP"],
-            "GLOP_MI": ["LP"],
             "SCIP": ["LP", "QP"],
             "GUROBI": ["LP", "QP", "SOCP"],
             "MOSEK": ["LP", "QP", "SOCP", "SDP"],
@@ -112,108 +87,73 @@ class CvxpySolver(SolverInterface):
             "backend_name": self.backend
         }
     
-    def _get_optimized_options(self, problem_class: str) -> Dict[str, Any]:
-        """Get solver options optimized for specific problem type."""
-        # Start with base solver options
+    def _get_solver_options(self, timeout: Optional[float] = None) -> Dict:
+        """Get solver options with verbosity and timeout."""
         options = self.solver_options.copy()
-        
-        # Apply problem-specific optimizations if available
-        if problem_class in self.problem_optimizations:
-            optimizations = self.problem_optimizations[problem_class]
-            options.update(optimizations)
-            self.logger.debug(f"Applied {len(optimizations)} problem-specific optimizations for {problem_class}")
         
         # Add verbosity setting
         if 'verbose' not in options:
             options['verbose'] = self.verbose
         
+        # Add timeout if specified
+        if timeout is not None:
+            options['max_time'] = timeout
+        
         return options
     
-    def _map_cvxpy_status(self, cvxpy_status: str) -> str:
-        """Map CVXPY status to our standardized status format."""
-        status_mapping = {
-            "optimal": "optimal",
-            "optimal_inaccurate": "optimal",
-            "infeasible": "infeasible",
-            "infeasible_inaccurate": "infeasible",
-            "unbounded": "unbounded",
-            "unbounded_inaccurate": "unbounded",
-            "solver_error": "error",
-            "unknown": "unknown"
-        }
-        return status_mapping.get(cvxpy_status, "unknown")
-    
-    def _create_result(self, solver_name: str, problem_name: str, solve_time: float,
-                      status: str, objective_value: Optional[float] = None,
-                      duality_gap: Optional[float] = None, iterations: Optional[int] = None,
-                      error_message: Optional[str] = None, solver_info: Optional[Dict] = None,
-                      problem_library: str = 'light_set', run_id: Optional[str] = None) -> SolverResult:
-        """Create SolverResult with version information."""
-        return SolverResult(
-            solver_name=solver_name,
-            problem_name=problem_name,
-            solve_time=solve_time,
-            status=status,
-            objective_value=objective_value,
-            duality_gap=duality_gap,
-            iterations=iterations,
-            error_message=error_message,
-            solver_info=solver_info,
-            solver_version=self.solver_version,
-            solver_backend=self.solver_backend,
-            problem_library=problem_library,
-            run_id=run_id
-        )
-    
-    def solve(self, problem: ProblemData) -> SolverResult:
+    def solve(self, problem_data: ProblemData, timeout: Optional[float] = None) -> SolverResult:
         """
         Solve optimization problem using CVXPY.
         
         Args:
-            problem: Problem data to solve
+            problem_data: Problem data to solve
+            timeout: Optional timeout in seconds
             
         Returns:
             SolverResult containing solve status and results
         """
-        self.logger.debug(f"Solving {problem.problem_class} problem '{problem.name}'")
+        self.logger.debug(f"Solving {problem_data.problem_class} problem '{problem_data.name}'")
         
         start_time = time.time()
         
         try:
-            if problem.problem_class == "LP":
-                return self._solve_lp(problem, start_time)
-            elif problem.problem_class == "QP":
-                return self._solve_qp(problem, start_time)
-            elif problem.problem_class == "SOCP":
-                return self._solve_socp(problem, start_time)
-            elif problem.problem_class == "SDP":
-                return self._solve_sdp(problem, start_time)
+            # Check if backend supports this problem type
+            if problem_data.problem_class not in self.backend_capabilities["supported_problem_types"]:
+                error_msg = f"Backend {self.backend} does not support {problem_data.problem_class} problems"
+                self.logger.error(error_msg)
+                solve_time = time.time() - start_time
+                return SolverResult.create_error_result(error_msg, solve_time)
+            
+            if problem_data.problem_class == "LP":
+                return self._solve_lp(problem_data, start_time, timeout)
+            elif problem_data.problem_class == "QP":
+                return self._solve_qp(problem_data, start_time, timeout)
+            elif problem_data.problem_class == "SOCP":
+                return self._solve_socp(problem_data, start_time, timeout)
+            elif problem_data.problem_class == "SDP":
+                return self._solve_sdp(problem_data, start_time, timeout)
             else:
-                raise ValueError(f"Unsupported problem class: {problem.problem_class}")
+                error_msg = f"Unsupported problem class: {problem_data.problem_class}"
+                self.logger.error(error_msg)
+                solve_time = time.time() - start_time
+                return SolverResult.create_error_result(error_msg, solve_time)
                 
         except Exception as e:
             solve_time = time.time() - start_time
             error_msg = str(e)
             self.logger.error(f"Solver failed: {error_msg}")
-            
-            return self._create_result(
-                solver_name=self.name,
-                problem_name=problem.name,
-                solve_time=solve_time,
-                status='error',
-                error_message=error_msg
-            )
+            return SolverResult.create_error_result(error_msg, solve_time)
     
-    def _solve_lp(self, problem: ProblemData, start_time: float) -> SolverResult:
+    def _solve_lp(self, problem_data: ProblemData, start_time: float, timeout: Optional[float] = None) -> SolverResult:
         """Solve linear programming problem using CVXPY."""
         
         # Extract problem data
-        c = problem.c
-        A_ub = problem.A_ub
-        b_ub = problem.b_ub
-        A_eq = problem.A_eq
-        b_eq = problem.b_eq
-        bounds = problem.bounds
+        c = problem_data.c
+        A_ub = problem_data.A_ub
+        b_ub = problem_data.b_ub
+        A_eq = problem_data.A_eq
+        b_eq = problem_data.b_eq
+        bounds = problem_data.bounds
         
         n_vars = len(c)
         
@@ -221,7 +161,7 @@ class CvxpySolver(SolverInterface):
         x = cp.Variable(n_vars, name="x")
         
         # Create objective: minimize c^T * x
-        objective = cp.Minimize(cp.sum(cp.multiply(c, x)))
+        objective = cp.Minimize(c.T @ x)
         
         # Create constraints
         constraints = []
@@ -237,16 +177,12 @@ class CvxpySolver(SolverInterface):
         # Variable bounds
         if bounds:
             for i, bound in enumerate(bounds):
-                if bound is not None:
-                    if isinstance(bound, tuple):
-                        lower, upper = bound
-                        if lower is not None:
-                            constraints.append(x[i] >= lower)
-                        if upper is not None:
-                            constraints.append(x[i] <= upper)
-                    else:
-                        # Assume non-negative if bound is not a tuple
-                        constraints.append(x[i] >= 0)
+                if bound is not None and isinstance(bound, tuple):
+                    lower, upper = bound
+                    if lower is not None and lower != float('-inf'):
+                        constraints.append(x[i] >= lower)
+                    if upper is not None and upper != float('inf'):
+                        constraints.append(x[i] <= upper)
                 else:
                     # Default to non-negative
                     constraints.append(x[i] >= 0)
@@ -254,13 +190,13 @@ class CvxpySolver(SolverInterface):
             # Default bounds: non-negative
             constraints.append(x >= 0)
         
-        # Create problem
+        # Create and solve problem
         cvx_problem = cp.Problem(objective, constraints)
         
         self.logger.debug(f"LP problem: {n_vars} variables, {len(constraints)} constraints")
         
-        # Get optimized solver options for this problem type
-        solver_options = self._get_optimized_options(problem.problem_class)
+        # Get solver options
+        solver_options = self._get_solver_options(timeout)
         
         try:
             cvx_problem.solve(
@@ -272,123 +208,66 @@ class CvxpySolver(SolverInterface):
             solve_time = time.time() - start_time
             error_msg = f"Backend solver {self.backend} failed: {str(e)}"
             self.logger.error(error_msg)
-            
-            return self._create_result(
-                solver_name=self.name,
-                problem_name=problem.name,
-                solve_time=solve_time,
-                status='error',
-                error_message=error_msg
-            )
+            return SolverResult.create_error_result(error_msg, solve_time)
         
-        solve_time = time.time() - start_time
-        
-        # Map CVXPY status to our standard status
-        status_mapping = {
-            cp.OPTIMAL: 'optimal',
-            cp.INFEASIBLE: 'infeasible',
-            cp.UNBOUNDED: 'unbounded',
-            cp.INFEASIBLE_INACCURATE: 'infeasible',
-            cp.UNBOUNDED_INACCURATE: 'unbounded',
-            cp.OPTIMAL_INACCURATE: 'optimal'
-        }
-        
-        status = status_mapping.get(cvx_problem.status, 'unknown')
-        objective_value = cvx_problem.value if cvx_problem.value is not None else None
-        
-        # Extract solver-specific information
-        solver_info = {
-            "cvxpy_status": cvx_problem.status,
-            "backend_solver": self.backend,
-            "solver_stats": cvx_problem.solver_stats.__dict__ if cvx_problem.solver_stats else None,
-            "cvxpy_version": cp.__version__
-        }
-        
-        # Add solution norm if available
-        if x.value is not None:
-            solver_info["solution_norm"] = float(np.linalg.norm(x.value))
-        
-        # Get iterations if available
-        iterations = None
-        if cvx_problem.solver_stats and hasattr(cvx_problem.solver_stats, 'num_iters'):
-            iterations = cvx_problem.solver_stats.num_iters
-        
-        self.logger.debug(f"LP solve completed: status={status}, "
-                         f"objective={objective_value}, time={solve_time:.3f}s")
-        
-        return self._create_result(
-            solver_name=self.name,
-            problem_name=problem.name,
-            solve_time=solve_time,
-            status=status,
-            objective_value=objective_value,
-            iterations=iterations,
-            solver_info=solver_info
-        )
+        return self._create_result_from_cvxpy(cvx_problem, start_time)
     
-    def _solve_qp(self, problem: ProblemData, start_time: float) -> SolverResult:
+    def _solve_qp(self, problem_data: ProblemData, start_time: float, timeout: Optional[float] = None) -> SolverResult:
         """Solve quadratic programming problem using CVXPY."""
         
-        # For QP: minimize 0.5 * x^T * P * x + c^T * x
-        # Subject to: A_ub * x <= b_ub, A_eq * x = b_eq, bounds
+        # For QP: minimize 0.5 * x^T * Q * x + c^T * x
+        Q = getattr(problem_data, 'Q', None)
+        if Q is None:
+            error_msg = "QP problem missing quadratic matrix Q"
+            solve_time = time.time() - start_time
+            return SolverResult.create_error_result(error_msg, solve_time)
+            
+        c = problem_data.c if problem_data.c is not None else np.zeros(Q.shape[0])
+        A_ub = problem_data.A_ub
+        b_ub = problem_data.b_ub
+        A_eq = problem_data.A_eq
+        b_eq = problem_data.b_eq
+        bounds = problem_data.bounds
         
-        P = problem.P
-        c = problem.c if problem.c is not None else np.zeros(P.shape[0])
-        A_ub = problem.A_ub
-        b_ub = problem.b_ub
-        A_eq = problem.A_eq
-        b_eq = problem.b_eq
-        bounds = problem.bounds
-        
-        n_vars = P.shape[0]
+        n_vars = Q.shape[0]
         
         # Create CVXPY variables
         x = cp.Variable(n_vars, name="x")
         
-        # Create objective: minimize 0.5 * x^T * P * x + c^T * x
-        quadratic_term = cp.quad_form(x, P)
-        linear_term = cp.sum(cp.multiply(c, x))
-        objective = cp.Minimize(0.5 * quadratic_term + linear_term)
+        # Create objective: minimize 0.5 * x^T * Q * x + c^T * x
+        objective = cp.Minimize(0.5 * cp.quad_form(x, Q) + c.T @ x)
         
-        # Create constraints
+        # Create constraints (same as LP)
         constraints = []
         
-        # Inequality constraints: A_ub * x <= b_ub
         if A_ub is not None and b_ub is not None:
             constraints.append(A_ub @ x <= b_ub)
         
-        # Equality constraints: A_eq * x == b_eq
         if A_eq is not None and b_eq is not None:
             constraints.append(A_eq @ x == b_eq)
         
         # Variable bounds
         if bounds:
             for i, bound in enumerate(bounds):
-                if bound is not None:
-                    if isinstance(bound, tuple):
-                        lower, upper = bound
-                        if lower is not None:
-                            constraints.append(x[i] >= lower)
-                        if upper is not None:
-                            constraints.append(x[i] <= upper)
-                    else:
-                        # Assume non-negative if bound is not a tuple
-                        constraints.append(x[i] >= 0)
+                if bound is not None and isinstance(bound, tuple):
+                    lower, upper = bound
+                    if lower is not None and lower != float('-inf'):
+                        constraints.append(x[i] >= lower)
+                    if upper is not None and upper != float('inf'):
+                        constraints.append(x[i] <= upper)
                 else:
-                    # Default to non-negative
                     constraints.append(x[i] >= 0)
         else:
-            # Default bounds: non-negative
             constraints.append(x >= 0)
         
-        # Create problem
+        # Create and solve problem
         cvx_problem = cp.Problem(objective, constraints)
         
-        self.logger.debug(f"QP problem: {n_vars} variables, P shape: {P.shape}, "
+        self.logger.debug(f"QP problem: {n_vars} variables, Q shape: {Q.shape}, "
                          f"{len(constraints)} constraints")
         
-        # Get optimized solver options for this problem type
-        solver_options = self._get_optimized_options(problem.problem_class)
+        # Get solver options
+        solver_options = self._get_solver_options(timeout)
         
         try:
             cvx_problem.solve(
@@ -396,398 +275,221 @@ class CvxpySolver(SolverInterface):
                 **solver_options
             )
         except Exception as e:
-            # Handle solver-specific errors
             solve_time = time.time() - start_time
             error_msg = f"Backend solver {self.backend} failed: {str(e)}"
             self.logger.error(error_msg)
-            
-            return self._create_result(
-                solver_name=self.name,
-                problem_name=problem.name,
-                solve_time=solve_time,
-                status='error',
-                error_message=error_msg
+            return SolverResult.create_error_result(error_msg, solve_time)
+        
+        return self._create_result_from_cvxpy(cvx_problem, start_time)
+    
+    def _solve_socp(self, problem_data: ProblemData, start_time: float, timeout: Optional[float] = None) -> SolverResult:
+        """Solve Second-Order Cone Programming problem using CVXPY."""
+        
+        # For SOCP problems, we use the pre-built CVXPY problem from the problem data
+        if problem_data.cvxpy_problem is None:
+            error_msg = "SOCP problem must include a pre-built CVXPY problem"
+            solve_time = time.time() - start_time
+            return SolverResult.create_error_result(error_msg, solve_time)
+        
+        cvx_problem = problem_data.cvxpy_problem
+        
+        # Get solver options
+        solver_options = self._get_solver_options(timeout)
+        
+        try:
+            cvx_problem.solve(
+                solver=getattr(cp, self.backend),
+                **solver_options
             )
+        except Exception as e:
+            solve_time = time.time() - start_time
+            error_msg = f"Backend solver failed: {str(e)}"
+            self.logger.error(error_msg)
+            return SolverResult.create_error_result(error_msg, solve_time)
+        
+        return self._create_result_from_cvxpy(cvx_problem, start_time)
+    
+    def _solve_sdp(self, problem_data: ProblemData, start_time: float, timeout: Optional[float] = None) -> SolverResult:
+        """Solve Semidefinite Programming problem using CVXPY."""
+        
+        # For SDP problems, we use the pre-built CVXPY problem from the problem data
+        if problem_data.cvxpy_problem is None:
+            error_msg = "SDP problem must include a pre-built CVXPY problem"
+            solve_time = time.time() - start_time
+            return SolverResult.create_error_result(error_msg, solve_time)
+        
+        cvx_problem = problem_data.cvxpy_problem
+        
+        # Get solver options
+        solver_options = self._get_solver_options(timeout)
+        
+        try:
+            cvx_problem.solve(
+                solver=getattr(cp, self.backend),
+                **solver_options
+            )
+        except Exception as e:
+            solve_time = time.time() - start_time
+            error_msg = f"Backend solver failed: {str(e)}"
+            self.logger.error(error_msg)
+            return SolverResult.create_error_result(error_msg, solve_time)
+        
+        return self._create_result_from_cvxpy(cvx_problem, start_time)
+    
+    def _create_result_from_cvxpy(self, cvx_problem: cp.Problem, start_time: float) -> SolverResult:
+        """Create standardized result from CVXPY problem."""
         
         solve_time = time.time() - start_time
         
-        # Map CVXPY status to our standard status
+        # Map CVXPY status to standard status
         status_mapping = {
-            cp.OPTIMAL: 'optimal',
-            cp.INFEASIBLE: 'infeasible',
-            cp.UNBOUNDED: 'unbounded',
-            cp.INFEASIBLE_INACCURATE: 'infeasible',
-            cp.UNBOUNDED_INACCURATE: 'unbounded',
-            cp.OPTIMAL_INACCURATE: 'optimal'
+            cp.OPTIMAL: 'OPTIMAL',
+            cp.INFEASIBLE: 'INFEASIBLE',
+            cp.UNBOUNDED: 'UNBOUNDED',
+            cp.INFEASIBLE_INACCURATE: 'INFEASIBLE',
+            cp.UNBOUNDED_INACCURATE: 'UNBOUNDED',
+            cp.OPTIMAL_INACCURATE: 'OPTIMAL'
         }
         
-        status = status_mapping.get(cvx_problem.status, 'unknown')
-        objective_value = cvx_problem.value if cvx_problem.value is not None else None
+        status = status_mapping.get(cvx_problem.status, 'UNKNOWN')
+        primal_objective_value = cvx_problem.value if cvx_problem.value is not None else None
         
-        # Extract solver-specific information
-        solver_info = {
-            "cvxpy_status": cvx_problem.status,
-            "backend_solver": self.backend,
-            "solver_stats": cvx_problem.solver_stats.__dict__ if cvx_problem.solver_stats else None,
-            "cvxpy_version": cp.__version__
-        }
+        # Calculate dual objective if available
+        dual_objective_value = None
+        if hasattr(cvx_problem, 'dual_value') and cvx_problem.dual_value is not None:
+            dual_objective_value = float(cvx_problem.dual_value)
         
-        # Add solution norm if available
-        if x.value is not None:
-            solver_info["solution_norm"] = float(np.linalg.norm(x.value))
+        # Calculate duality gap if both values available
+        duality_gap = None
+        if primal_objective_value is not None and dual_objective_value is not None:
+            duality_gap = abs(primal_objective_value - dual_objective_value)
         
         # Get iterations if available
         iterations = None
         if cvx_problem.solver_stats and hasattr(cvx_problem.solver_stats, 'num_iters'):
             iterations = cvx_problem.solver_stats.num_iters
         
-        self.logger.debug(f"QP solve completed: status={status}, "
-                         f"objective={objective_value}, time={solve_time:.3f}s")
-        
-        return self._create_result(
-            solver_name=self.name,
-            problem_name=problem.name,
-            solve_time=solve_time,
-            status=status,
-            objective_value=objective_value,
-            iterations=iterations,
-            solver_info=solver_info
-        )
-    
-    def _solve_socp(self, problem: ProblemData, start_time: float) -> SolverResult:
-        """Solve Second-Order Cone Programming problem using CVXPY."""
-        
-        # For SOCP problems, we use the pre-built CVXPY problem from the problem data
-        if problem.cvxpy_problem is None:
-            raise ValueError("SOCP problem must include a pre-built CVXPY problem")
-        
-        cvx_problem = problem.cvxpy_problem
-        
-        # Get problem dimensions for logging
-        try:
-            n_vars = cvx_problem.size_metrics.num_scalar_variables
-        except AttributeError:
-            n_vars = len([v for v in cvx_problem.variables() if v.is_scalar()]) if hasattr(cvx_problem, 'variables') else 0
-        
-        try:
-            n_constraints = cvx_problem.size_metrics.num_scalar_eq_constraints + cvx_problem.size_metrics.num_scalar_leq_constraints
-        except AttributeError:
-            n_constraints = len(cvx_problem.constraints) if hasattr(cvx_problem, 'constraints') else 0
-        
-        self.logger.debug(f"SOCP problem: {n_vars} variables, {n_constraints} constraints")
-        
-        # Check if backend supports SOCP
-        if "SOCP" not in self.backend_capabilities["supported_problem_types"]:
-            raise ValueError(f"Backend {self.backend} does not support SOCP problems")
-        
-        # Get optimized solver options for SOCP
-        solver_options = self._get_optimized_options(problem.problem_class)
-        
-        try:
-            cvx_problem.solve(
-                solver=getattr(cp, self.backend),
-                **solver_options
-            )
-        except Exception as e:
-            solve_time = time.time() - start_time
-            error_msg = f"Backend solver failed: {str(e)}"
-            self.logger.error(error_msg)
-            
-            return self._create_result(
-                solver_name=self.name,
-                problem_name=problem.name,
-                solve_time=solve_time,
-                status='error',
-                error_message=error_msg
-            )
-        
-        solve_time = time.time() - start_time
-        
-        # Map CVXPY status to our status format
-        status = self._map_cvxpy_status(cvx_problem.status)
-        
-        # Extract solution info
-        objective_value = cvx_problem.value if cvx_problem.value is not None else None
-        
-        # Get solver statistics
-        solver_info = {
-            "backend_solver": self.backend,
+        # Extract solver-specific information
+        additional_info = {
             "cvxpy_status": cvx_problem.status,
-            "solver_stats": cvx_problem.solver_stats.__dict__ if cvx_problem.solver_stats else {},
-            "problem_size": {
-                "variables": n_vars,
-                "constraints": n_constraints,
-                "socp_constraints": len([c for c in cvx_problem.constraints if hasattr(c, 'cone_type') and c.cone_type == 'SOC'])
-            }
+            "backend_solver": self.backend,
+            "solver_stats": cvx_problem.solver_stats.__dict__ if cvx_problem.solver_stats else None,
+            "cvxpy_version": cp.__version__
         }
         
-        # Get iteration count if available
-        iterations = None
-        if cvx_problem.solver_stats and hasattr(cvx_problem.solver_stats, 'num_iters'):
-            iterations = cvx_problem.solver_stats.num_iters
+        # Add solution information if available
+        try:
+            if cvx_problem.variables:
+                variables_list = list(cvx_problem.variables)
+                if variables_list and variables_list[0].value is not None:
+                    additional_info["solution_norm"] = float(np.linalg.norm(variables_list[0].value))
+        except Exception:
+            pass
         
-        self.logger.debug(f"SOCP solve completed: status={status}, "
-                         f"objective={objective_value}, time={solve_time:.3f}s")
+        self.logger.debug(f"Solve completed: status={status}, "
+                         f"objective={primal_objective_value}, time={solve_time:.3f}s")
         
-        return self._create_result(
-            solver_name=self.name,
-            problem_name=problem.name,
+        return SolverResult(
             solve_time=solve_time,
             status=status,
-            objective_value=objective_value,
+            primal_objective_value=primal_objective_value,
+            dual_objective_value=dual_objective_value,
+            duality_gap=duality_gap,
+            primal_infeasibility=None,  # CVXPY doesn't provide this easily
+            dual_infeasibility=None,
             iterations=iterations,
-            solver_info=solver_info
-        )
-    
-    def _solve_sdp(self, problem: ProblemData, start_time: float) -> SolverResult:
-        """Solve Semidefinite Programming problem using CVXPY."""
-        
-        # For SDP problems, we use the pre-built CVXPY problem from the problem data
-        if problem.cvxpy_problem is None:
-            raise ValueError("SDP problem must include a pre-built CVXPY problem")
-        
-        cvx_problem = problem.cvxpy_problem
-        
-        # Get problem dimensions for logging
-        try:
-            n_vars = cvx_problem.size_metrics.num_scalar_variables
-        except AttributeError:
-            n_vars = len([v for v in cvx_problem.variables() if v.is_scalar()]) if hasattr(cvx_problem, 'variables') else 0
-        
-        try:
-            n_constraints = cvx_problem.size_metrics.num_scalar_eq_constraints + cvx_problem.size_metrics.num_scalar_leq_constraints
-        except AttributeError:
-            n_constraints = len(cvx_problem.constraints) if hasattr(cvx_problem, 'constraints') else 0
-        
-        self.logger.debug(f"SDP problem: {n_vars} variables, {n_constraints} constraints")
-        
-        # Check if backend supports SDP
-        if "SDP" not in self.backend_capabilities["supported_problem_types"]:
-            raise ValueError(f"Backend {self.backend} does not support SDP problems")
-        
-        # Get optimized solver options for SDP
-        solver_options = self._get_optimized_options(problem.problem_class)
-        
-        try:
-            cvx_problem.solve(
-                solver=getattr(cp, self.backend),
-                **solver_options
-            )
-        except Exception as e:
-            solve_time = time.time() - start_time
-            error_msg = f"Backend solver failed: {str(e)}"
-            self.logger.error(error_msg)
-            
-            return self._create_result(
-                solver_name=self.name,
-                problem_name=problem.name,
-                solve_time=solve_time,
-                status='error',
-                error_message=error_msg
-            )
-        
-        solve_time = time.time() - start_time
-        
-        # Map CVXPY status to our status format
-        status = self._map_cvxpy_status(cvx_problem.status)
-        
-        # Extract solution info
-        objective_value = cvx_problem.value if cvx_problem.value is not None else None
-        
-        # Get solver statistics
-        solver_info = {
-            "backend_solver": self.backend,
-            "cvxpy_status": cvx_problem.status,
-            "solver_stats": cvx_problem.solver_stats.__dict__ if cvx_problem.solver_stats else {},
-            "problem_size": {
-                "variables": n_vars,
-                "constraints": n_constraints,
-                "sdp_constraints": len([c for c in cvx_problem.constraints if hasattr(c, 'cone_type') and c.cone_type == 'PSD'])
-            }
-        }
-        
-        # Get iteration count if available
-        iterations = None
-        if cvx_problem.solver_stats and hasattr(cvx_problem.solver_stats, 'num_iters'):
-            iterations = cvx_problem.solver_stats.num_iters
-        
-        self.logger.debug(f"SDP solve completed: status={status}, "
-                         f"objective={objective_value}, time={solve_time:.3f}s")
-        
-        return self._create_result(
-            solver_name=self.name,
-            problem_name=problem.name,
-            solve_time=solve_time,
-            status=status,
-            objective_value=objective_value,
-            iterations=iterations,
-            solver_info=solver_info
+            solver_name=self.solver_name,
+            solver_version=self.get_version(),
+            additional_info=additional_info
         )
     
     def get_version(self) -> str:
         """Get CVXPY version information."""
-        return f"cvxpy-{cp.__version__}"
+        return f"cvxpy-{cp.__version__}-{self.backend}"
     
-    def get_info(self) -> Dict[str, Any]:
-        """Get solver information."""
-        base_info = super().get_info()
-        base_info.update({
-            "backend_solver": self.backend,
-            "available_backends": cp.installed_solvers(),
-            "cvxpy_version": cp.__version__,
-            "supported_problem_types": self.backend_capabilities["supported_problem_types"],
-            "solver_options": self.solver_options,
-            "backend_capabilities": self.backend_capabilities
-        })
-        return base_info
+    def validate_problem_compatibility(self, problem_data: ProblemData) -> bool:
+        """Check if the solver can handle the given problem type."""
+        return problem_data.problem_class in self.backend_capabilities["supported_problem_types"]
 
-# Utility function to create solvers with different backends
-def create_cvxpy_solvers(timeout: float = 300.0, verbose: bool = False) -> List[CvxpySolver]:
+
+# Convenience function to create solvers with different backends
+def create_cvxpy_solvers(verbose: bool = False) -> List[CvxpySolver]:
     """Create CVXPY solver instances for different available backends."""
     available_backends = cp.installed_solvers()
     solver_instances = []
     
     # Define open-source backends in order of preference
-    open_source_backends = {
-        # General purpose solvers
-        "CLARABEL": {},
-        "SCS": {},
-        "ECOS": {},
-        
-        # QP specialists  
-        "OSQP": {},
-        
-        # LP specialists
-        "CBC": {},
-        "GLOP": {},
-        "SCIP": {},
-        
-        # Other open-source
-        "CVXOPT": {}
-    }
+    open_source_backends = ["CLARABEL", "SCS", "ECOS", "OSQP"]
     
-    for backend_name, options in open_source_backends.items():
+    for backend_name in open_source_backends:
         if backend_name in available_backends:
             try:
-                solver_instance = CvxpySolver(
-                    backend=backend_name,
-                    timeout=timeout,
-                    verbose=verbose,
-                    solver_options=options
-                )
+                solver_instance = CvxpySolver(backend=backend_name, verbose=verbose)
                 solver_instances.append(solver_instance)
             except Exception as e:
                 logger.warning(f"Failed to create solver for backend {backend_name}: {e}")
     
     return solver_instances
 
+
 if __name__ == "__main__":
     # Test script to verify CVXPY solver
+    print("Testing CVXPY Solver...")
+    
+    # Test available solvers
+    print(f"\nAvailable CVXPY solvers: {cp.installed_solvers()}")
+    
+    # Test solver initialization
+    print("\nTesting solver initialization:")
     try:
-        print("Testing CVXPY Solver...")
-        
-        # Import problem loader for testing
-        from scripts.benchmark.problem_loader import load_problem
-        
-        # Test available solvers
-        print(f"\nAvailable CVXPY solvers: {cp.installed_solvers()}")
-        
-        # Test solver initialization with different backends
-        print("\nTesting solver initialization:")
-        for backend in ["CLARABEL", "OSQP", "SCS"]:
-            if backend in cp.installed_solvers():
-                try:
-                    solver = CvxpySolver(backend=backend)
-                    print(f"✓ {solver.name} initialized")
-                    print(f"  Version: {solver.get_version()}")
-                    
-                    # Test info
-                    info = solver.get_info()
-                    print(f"  Backend: {info['backend_solver']}")
-                    print(f"  CVXPY version: {info['cvxpy_version']}")
-                    print(f"  Supported types: {info['supported_problem_types']}")
-                    
-                except Exception as e:
-                    print(f"✗ Failed to initialize {backend}: {e}")
-        
-        # Test LP solving with default solver
-        print("\nTesting LP solving:")
-        try:
-            solver = CvxpySolver()
-            lp_problem = load_problem("simple_lp")
-            print(f"Loaded LP problem: {lp_problem.name}")
-            
-            lp_result = solver.solve(lp_problem)
-            print(f"LP result: {lp_result}")
-            print(f"  Status: {lp_result.status}")
-            print(f"  Objective: {lp_result.objective_value}")
-            print(f"  Time: {lp_result.solve_time:.3f}s")
-            print(f"  Backend: {lp_result.solver_info['backend_solver']}")
-            print(f"  CVXPY status: {lp_result.solver_info['cvxpy_status']}")
-            
-        except Exception as e:
-            print(f"✗ LP test failed: {e}")
-        
-        # Test QP solving
-        print("\nTesting QP solving:")
-        try:
-            qp_problem = load_problem("simple_qp")
-            print(f"Loaded QP problem: {qp_problem.name}")
-            
-            qp_result = solver.solve(qp_problem)
-            print(f"QP result: {qp_result}")
-            print(f"  Status: {qp_result.status}")
-            print(f"  Objective: {qp_result.objective_value}")
-            print(f"  Time: {qp_result.solve_time:.3f}s")
-            print(f"  Backend: {qp_result.solver_info['backend_solver']}")
-            print(f"  CVXPY status: {qp_result.solver_info['cvxpy_status']}")
-            
-        except Exception as e:
-            print(f"✗ QP test failed: {e}")
-        
-        # Test different backends on same problem
-        print("\nTesting different backends:")
-        for backend in ["CLARABEL", "OSQP", "SCS"]:
-            if backend in cp.installed_solvers():
-                try:
-                    backend_solver = CvxpySolver(backend=backend)
-                    result = backend_solver.solve(lp_problem)
-                    print(f"  {backend}: {result.status} in {result.solve_time:.3f}s "
-                          f"(obj={result.objective_value})")
-                except Exception as e:
-                    print(f"  {backend}: Failed - {e}")
-        
-        # Test error handling
-        print("\nTesting error handling:")
-        try:
-            # Create a problem with invalid data
-            from scripts.benchmark.problem_loader import ProblemData
-            invalid_problem = ProblemData(
-                name="invalid",
-                problem_class="INVALID",
-                c=np.array([1.0])
-            )
-            
-            error_result = solver.solve(invalid_problem)
-            print(f"Error handling result: {error_result.status}")
-            print(f"  Error message: {error_result.error_message}")
-            
-        except Exception as e:
-            print(f"✗ Error handling test failed: {e}")
-        
-        # Test multiple solver creation
-        print("\nTesting multiple solver creation:")
-        try:
-            solvers = create_cvxpy_solvers()
-            print(f"Created {len(solvers)} CVXPY solver variants:")
-            for s in solvers:
-                info = s.get_info()
-                print(f"  {s.name}: {info['backend_solver']}")
-        except Exception as e:
-            print(f"✗ Multiple solver creation failed: {e}")
-        
-        print("\n✓ All CVXPY solver tests completed!")
+        solver = CvxpySolver(backend="CLARABEL")
+        print(f"✓ {solver.solver_name} initialized")
+        print(f"  Version: {solver.get_version()}")
+        print(f"  Backend capabilities: {solver.backend_capabilities}")
         
     except Exception as e:
-        logger.error(f"CVXPY solver test failed: {e}")
-        raise
+        print(f"✗ Failed to initialize CLARABEL: {e}")
+        # Try fallback
+        try:
+            solver = CvxpySolver(backend="SCS")
+            print(f"✓ Fallback {solver.solver_name} initialized")
+        except Exception as e2:
+            print(f"✗ Failed to initialize any solver: {e2}")
+            exit(1)
+    
+    # Test LP solving
+    print("\nTesting LP solving:")
+    try:
+        # Create a simple LP problem: minimize x1 + 2*x2 subject to x1 + x2 <= 1, x1, x2 >= 0
+        simple_lp = ProblemData(
+            name="test_lp",
+            problem_class="LP",
+            c=np.array([1.0, 2.0]),
+            A_ub=np.array([[1.0, 1.0]]),
+            b_ub=np.array([1.0]),
+            bounds=[(0, None), (0, None)]
+        )
+        
+        result = solver.solve(simple_lp)
+        print(f"✓ LP result: {result.status}")
+        print(f"  Objective: {result.primal_objective_value}")
+        print(f"  Time: {result.solve_time:.3f}s")
+        if result.additional_info and 'backend_solver' in result.additional_info:
+            print(f"  Backend: {result.additional_info['backend_solver']}")
+        else:
+            print(f"  Backend: {solver.backend}")
+        
+    except Exception as e:
+        print(f"✗ LP test failed: {e}")
+    
+    # Test multiple solver creation
+    print("\nTesting multiple solver creation:")
+    try:
+        solvers = create_cvxpy_solvers()
+        print(f"Created {len(solvers)} CVXPY solver variants:")
+        for s in solvers:
+            print(f"  {s.solver_name}: {s.backend}")
+    except Exception as e:
+        print(f"✗ Multiple solver creation failed: {e}")
+    
+    print("\n✓ CVXPY solver test completed!")

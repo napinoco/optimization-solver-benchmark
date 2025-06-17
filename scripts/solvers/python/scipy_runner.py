@@ -2,123 +2,119 @@ import sys
 import time
 import numpy as np
 from pathlib import Path
-from typing import Optional, Dict, Any
+from typing import Optional, Dict
 from scipy.optimize import linprog, minimize
+import scipy
 
 # Add project root to path for imports
 project_root = Path(__file__).parent.parent.parent.parent
 sys.path.insert(0, str(project_root))
 
-from scripts.benchmark.solver_interface import SolverInterface, SolverResult
+from scripts.solvers.solver_interface import SolverInterface, SolverResult
 from scripts.benchmark.problem_loader import ProblemData
 from scripts.utils.logger import get_logger
-from scripts.utils.version_utils import format_solver_version
 
 logger = get_logger("scipy_solver")
 
 class ScipySolver(SolverInterface):
     """SciPy-based solver for LP and QP problems."""
     
-    def __init__(self, name: str = "SciPy", timeout: float = 300.0, 
-                 method: str = "highs", options: Optional[Dict] = None):
+    def __init__(self, method: str = "highs", options: Optional[Dict] = None, **kwargs):
         """
         Initialize SciPy solver.
         
         Args:
-            name: Solver name
-            timeout: Timeout in seconds
             method: SciPy optimization method to use
             options: Additional options for the solver
+            **kwargs: Additional configuration parameters
         """
-        super().__init__(name, timeout)
+        super().__init__("scipy_linprog", method=method, options=options, **kwargs)
         self.method = method
         self.options = options or {}
         
-        # Detect solver version
-        self.solver_version = format_solver_version('scipy')
-        self.solver_backend = 'scipy'
-        
         self.logger.info(f"Initialized SciPy solver with method '{method}'")
     
-    def _create_result(self, solver_name: str, problem_name: str, solve_time: float,
-                      status: str, objective_value: Optional[float] = None,
-                      duality_gap: Optional[float] = None, iterations: Optional[int] = None,
-                      error_message: Optional[str] = None, solver_info: Optional[Dict] = None,
-                      problem_library: str = 'light_set', run_id: Optional[str] = None) -> SolverResult:
-        """Create SolverResult with version information."""
+    def _create_standardized_result(self, solve_time: float, status: str, 
+                                  primal_objective_value: Optional[float] = None,
+                                  dual_objective_value: Optional[float] = None,
+                                  duality_gap: Optional[float] = None,
+                                  primal_infeasibility: Optional[float] = None,
+                                  dual_infeasibility: Optional[float] = None,
+                                  iterations: Optional[int] = None,
+                                  additional_info: Optional[Dict] = None) -> SolverResult:
+        """Create standardized SolverResult."""
         return SolverResult(
-            solver_name=solver_name,
-            problem_name=problem_name,
             solve_time=solve_time,
             status=status,
-            objective_value=objective_value,
+            primal_objective_value=primal_objective_value,
+            dual_objective_value=dual_objective_value,
             duality_gap=duality_gap,
+            primal_infeasibility=primal_infeasibility,
+            dual_infeasibility=dual_infeasibility,
             iterations=iterations,
-            error_message=error_message,
-            solver_info=solver_info,
-            solver_version=self.solver_version,
-            solver_backend=self.solver_backend,
-            problem_library=problem_library,
-            run_id=run_id
+            solver_name=self.solver_name,
+            solver_version=self.get_version(),
+            additional_info=additional_info
         )
     
-    def solve(self, problem: ProblemData) -> SolverResult:
+    def solve(self, problem_data: ProblemData, timeout: Optional[float] = None) -> SolverResult:
         """
         Solve optimization problem using SciPy.
         
         Args:
-            problem: Problem data to solve
+            problem_data: Problem data to solve
+            timeout: Optional timeout in seconds (ignored for SciPy)
             
         Returns:
             SolverResult containing solve status and results
         """
-        self.logger.debug(f"Solving {problem.problem_class} problem '{problem.name}'")
+        self.logger.debug(f"Solving {problem_data.problem_class} problem '{problem_data.name}'")
         
         start_time = time.time()
         
         try:
-            if problem.problem_class == "LP":
-                return self._solve_lp(problem, start_time)
-            elif problem.problem_class == "QP":
-                return self._solve_qp(problem, start_time)
+            if problem_data.problem_class == "LP":
+                return self._solve_lp(problem_data, start_time)
+            elif problem_data.problem_class == "QP":
+                return self._solve_qp(problem_data, start_time)
             else:
-                raise ValueError(f"Unsupported problem class: {problem.problem_class}")
+                error_msg = f"Unsupported problem class: {problem_data.problem_class}"
+                self.logger.error(error_msg)
+                solve_time = time.time() - start_time
+                return SolverResult.create_error_result(error_msg, solve_time)
                 
         except Exception as e:
             solve_time = time.time() - start_time
             error_msg = str(e)
             self.logger.error(f"Solver failed: {error_msg}")
-            
-            return self._create_result(
-                solver_name=self.name,
-                problem_name=problem.name,
-                solve_time=solve_time,
-                status='error',
-                error_message=error_msg
-            )
+            return SolverResult.create_error_result(error_msg, solve_time)
     
-    def _solve_lp(self, problem: ProblemData, start_time: float) -> SolverResult:
+    def _solve_lp(self, problem_data: ProblemData, start_time: float) -> SolverResult:
         """Solve linear programming problem using scipy.optimize.linprog."""
         
         # Prepare problem data for linprog
-        c = problem.c
-        A_ub = problem.A_ub
-        b_ub = problem.b_ub
-        A_eq = problem.A_eq
-        b_eq = problem.b_eq
-        bounds = problem.bounds
+        c = problem_data.c
+        A_ub = problem_data.A_ub
+        b_ub = problem_data.b_ub
+        A_eq = problem_data.A_eq
+        b_eq = problem_data.b_eq
+        bounds = problem_data.bounds
         
         # Convert bounds to scipy format
         if bounds:
             bounds_list = []
             for bound in bounds:
                 if bound is None:
-                    bounds_list.append((None, None))
+                    bounds_list.append((0, None))  # Default non-negative
                 elif isinstance(bound, tuple):
                     bounds_list.append(bound)
                 else:
                     bounds_list.append((0, None))  # Default non-negative
             bounds = bounds_list
+        else:
+            # If no bounds specified, assume non-negative variables
+            n_vars = len(c) if c is not None else 0
+            bounds = [(0, None)] * n_vars
         
         self.logger.debug(f"LP problem dimensions: c={c.shape if c is not None else None}, "
                          f"A_ub={A_ub.shape if A_ub is not None else None}, "
@@ -138,20 +134,25 @@ class ScipySolver(SolverInterface):
         
         solve_time = time.time() - start_time
         
-        # Map SciPy status to our standard status
+        # Map SciPy status to standard status
         status_mapping = {
-            0: 'optimal',      # Optimization terminated successfully
-            1: 'infeasible',   # Iteration limit reached
-            2: 'infeasible',   # Problem appears to be infeasible
-            3: 'unbounded',    # Problem appears to be unbounded
-            4: 'error'         # Numerical difficulties encountered
+            0: 'OPTIMAL',      # Optimization terminated successfully
+            1: 'MAX_ITERATIONS',   # Iteration limit reached
+            2: 'INFEASIBLE',   # Problem appears to be infeasible
+            3: 'UNBOUNDED',    # Problem appears to be unbounded
+            4: 'ERROR'         # Numerical difficulties encountered
         }
         
-        status = status_mapping.get(result.status, 'unknown')
-        objective_value = float(result.fun) if result.success else None
+        status = status_mapping.get(result.status, 'UNKNOWN')
+        primal_objective_value = float(result.fun) if result.success else None
+        
+        # Calculate infeasibility measures if available
+        primal_infeasibility = None
+        if hasattr(result, 'con') and result.con is not None and len(result.con) > 0:
+            primal_infeasibility = float(np.max(np.abs(result.con)))
         
         # Extract solver-specific information
-        solver_info = {
+        additional_info = {
             "scipy_status": result.status,
             "scipy_message": result.message,
             "scipy_success": result.success,
@@ -160,46 +161,53 @@ class ScipySolver(SolverInterface):
         }
         
         if hasattr(result, 'x') and result.x is not None:
-            solver_info["solution_norm"] = float(np.linalg.norm(result.x))
+            additional_info["solution_norm"] = float(np.linalg.norm(result.x))
         
         self.logger.debug(f"LP solve completed: status={status}, "
-                         f"objective={objective_value}, time={solve_time:.3f}s")
+                         f"objective={primal_objective_value}, time={solve_time:.3f}s")
         
-        return self._create_result(
-            solver_name=self.name,
-            problem_name=problem.name,
+        return self._create_standardized_result(
             solve_time=solve_time,
             status=status,
-            objective_value=objective_value,
+            primal_objective_value=primal_objective_value,
+            dual_objective_value=None,  # SciPy doesn't provide dual values easily
+            duality_gap=None,
+            primal_infeasibility=primal_infeasibility,
+            dual_infeasibility=None,
             iterations=getattr(result, 'nit', None),
-            solver_info=solver_info
+            additional_info=additional_info
         )
     
-    def _solve_qp(self, problem: ProblemData, start_time: float) -> SolverResult:
+    def _solve_qp(self, problem_data: ProblemData, start_time: float) -> SolverResult:
         """Solve quadratic programming problem using scipy.optimize.minimize."""
         
-        # For QP: minimize 0.5 * x^T * P * x + c^T * x
+        # For QP: minimize 0.5 * x^T * Q * x + c^T * x
         # Subject to: A_ub * x <= b_ub, A_eq * x = b_eq, bounds
         
-        P = problem.P
-        c = problem.c if problem.c is not None else np.zeros(P.shape[0])
-        A_ub = problem.A_ub
-        b_ub = problem.b_ub
-        A_eq = problem.A_eq
-        b_eq = problem.b_eq
-        bounds = problem.bounds
+        Q = getattr(problem_data, 'Q', None)
+        if Q is None:
+            error_msg = "QP problem missing quadratic matrix Q"
+            solve_time = time.time() - start_time
+            return SolverResult.create_error_result(error_msg, solve_time)
+            
+        c = problem_data.c if problem_data.c is not None else np.zeros(Q.shape[0])
+        A_ub = problem_data.A_ub
+        b_ub = problem_data.b_ub
+        A_eq = problem_data.A_eq
+        b_eq = problem_data.b_eq
+        bounds = problem_data.bounds
         
-        n_vars = P.shape[0]
+        n_vars = Q.shape[0]
         
         # Define objective function and its gradient
         def objective(x):
-            return 0.5 * np.dot(x, np.dot(P, x)) + np.dot(c, x)
+            return 0.5 * np.dot(x, np.dot(Q, x)) + np.dot(c, x)
         
         def gradient(x):
-            return np.dot(P, x) + c
+            return np.dot(Q, x) + c
         
         def hessian(x):
-            return P
+            return Q
         
         # Prepare constraints
         constraints = []
@@ -237,7 +245,7 @@ class ScipySolver(SolverInterface):
         # Initial guess (zero vector)
         x0 = np.zeros(n_vars)
         
-        self.logger.debug(f"QP problem dimensions: P={P.shape}, c={c.shape}, "
+        self.logger.debug(f"QP problem dimensions: Q={Q.shape}, c={c.shape}, "
                          f"constraints={len(constraints)}")
         
         # Solve using minimize
@@ -254,23 +262,28 @@ class ScipySolver(SolverInterface):
         
         solve_time = time.time() - start_time
         
-        # Map SciPy status to our standard status
+        # Map SciPy status to standard status
         if result.success:
-            status = 'optimal'
+            status = 'OPTIMAL'
         else:
             # Try to infer status from message
             message = result.message.lower()
             if 'infeasible' in message:
-                status = 'infeasible'
+                status = 'INFEASIBLE'
             elif 'unbounded' in message:
-                status = 'unbounded'
+                status = 'UNBOUNDED'
             else:
-                status = 'error'
+                status = 'ERROR'
         
-        objective_value = float(result.fun) if result.success else None
+        primal_objective_value = float(result.fun) if result.success else None
+        
+        # Calculate constraint violations if available
+        primal_infeasibility = None
+        if hasattr(result, 'constr_violation') and result.constr_violation is not None:
+            primal_infeasibility = float(result.constr_violation)
         
         # Extract solver-specific information
-        solver_info = {
+        additional_info = {
             "scipy_success": result.success,
             "scipy_message": result.message,
             "scipy_nfev": getattr(result, 'nfev', None),
@@ -280,119 +293,79 @@ class ScipySolver(SolverInterface):
         }
         
         if hasattr(result, 'x') and result.x is not None:
-            solver_info["solution_norm"] = float(np.linalg.norm(result.x))
+            additional_info["solution_norm"] = float(np.linalg.norm(result.x))
         
         self.logger.debug(f"QP solve completed: status={status}, "
-                         f"objective={objective_value}, time={solve_time:.3f}s")
+                         f"objective={primal_objective_value}, time={solve_time:.3f}s")
         
-        return self._create_result(
-            solver_name=self.name,
-            problem_name=problem.name,
+        return self._create_standardized_result(
             solve_time=solve_time,
             status=status,
-            objective_value=objective_value,
+            primal_objective_value=primal_objective_value,
+            dual_objective_value=None,  # SciPy doesn't provide dual values easily
+            duality_gap=None,
+            primal_infeasibility=primal_infeasibility,
+            dual_infeasibility=None,
             iterations=getattr(result, 'nit', None),
-            solver_info=solver_info
+            additional_info=additional_info
         )
     
     def get_version(self) -> str:
         """Get SciPy version information."""
-        try:
-            import scipy
-            return f"scipy-{scipy.__version__}"
-        except ImportError:
-            return "scipy-unknown"
+        return f"scipy-{scipy.__version__}"
     
-    def get_info(self) -> Dict[str, Any]:
-        """Get solver information."""
-        base_info = super().get_info()
-        base_info.update({
-            "method": self.method,
-            "options": self.options,
-            "supported_problem_types": ["LP", "QP"]
-        })
-        return base_info
+    def validate_problem_compatibility(self, problem_data: ProblemData) -> bool:
+        """Check if the solver can handle the given problem type."""
+        return problem_data.problem_class in ["LP", "QP"]
 
 if __name__ == "__main__":
     # Test script to verify SciPy solver
+    print("Testing SciPy Solver...")
+    
+    # Test solver initialization
+    print("\nTesting solver initialization:")
+    solver = ScipySolver(method="highs")
+    print(f"✓ Solver created: {solver.solver_name}")
+    print(f"  Version: {solver.get_version()}")
+    print(f"  Config: {solver.config}")
+    
+    # Test with simple LP problem
+    print("\nTesting LP solving:")
     try:
-        print("Testing SciPy Solver...")
+        # Create a simple LP problem: minimize c^T * x subject to A_ub * x <= b_ub
+        # minimize x1 + 2*x2 subject to x1 + x2 <= 1, x1, x2 >= 0
+        simple_lp = ProblemData(
+            name="test_lp",
+            problem_class="LP",
+            c=np.array([1.0, 2.0]),
+            A_ub=np.array([[1.0, 1.0]]),
+            b_ub=np.array([1.0]),
+            bounds=[(0, None), (0, None)]
+        )
         
-        # Import problem loader for testing
-        from scripts.benchmark.problem_loader import load_problem
-        
-        # Test solver initialization
-        print("\nTesting solver initialization:")
-        solver = ScipySolver(method="highs")
-        print(f"✓ Solver created: {solver.name}")
-        print(f"  Version: {solver.get_version()}")
-        print(f"  Info: {solver.get_info()}")
-        
-        # Test LP solving
-        print("\nTesting LP solving:")
-        try:
-            lp_problem = load_problem("simple_lp")
-            print(f"Loaded LP problem: {lp_problem.name}")
-            
-            lp_result = solver.solve_with_timeout(lp_problem)
-            print(f"LP result: {lp_result}")
-            print(f"  Status: {lp_result.status}")
-            print(f"  Objective: {lp_result.objective_value}")
-            print(f"  Time: {lp_result.solve_time:.3f}s")
-            print(f"  Solver info: {lp_result.solver_info}")
-            
-        except Exception as e:
-            print(f"✗ LP test failed: {e}")
-        
-        # Test QP solving
-        print("\nTesting QP solving:")
-        try:
-            qp_problem = load_problem("simple_qp")
-            print(f"Loaded QP problem: {qp_problem.name}")
-            
-            qp_result = solver.solve_with_timeout(qp_problem)
-            print(f"QP result: {qp_result}")
-            print(f"  Status: {qp_result.status}")
-            print(f"  Objective: {qp_result.objective_value}")
-            print(f"  Time: {qp_result.solve_time:.3f}s")
-            print(f"  Solver info: {qp_result.solver_info}")
-            
-        except Exception as e:
-            print(f"✗ QP test failed: {e}")
-        
-        # Test different LP methods
-        print("\nTesting different LP methods:")
-        methods = ["highs", "highs-ds", "highs-ipm"]
-        
-        for method in methods:
-            try:
-                method_solver = ScipySolver(name=f"SciPy-{method}", method=method)
-                lp_problem = load_problem("simple_lp")
-                result = method_solver.solve_with_timeout(lp_problem)
-                print(f"  {method}: {result.status} in {result.solve_time:.3f}s")
-            except Exception as e:
-                print(f"  {method}: Failed - {e}")
-        
-        # Test error handling
-        print("\nTesting error handling:")
-        try:
-            # Create a problem with invalid data
-            from scripts.benchmark.problem_loader import ProblemData
-            invalid_problem = ProblemData(
-                name="invalid",
-                problem_class="INVALID",
-                c=np.array([1.0])
-            )
-            
-            error_result = solver.solve_with_timeout(invalid_problem)
-            print(f"Error handling result: {error_result.status}")
-            print(f"  Error message: {error_result.error_message}")
-            
-        except Exception as e:
-            print(f"✗ Error handling test failed: {e}")
-        
-        print("\n✓ All SciPy solver tests completed!")
+        result = solver.solve(simple_lp)
+        print(f"✓ LP result: {result.status}")
+        print(f"  Objective: {result.primal_objective_value}")
+        print(f"  Time: {result.solve_time:.3f}s")
+        print(f"  Iterations: {result.iterations}")
         
     except Exception as e:
-        logger.error(f"SciPy solver test failed: {e}")
-        raise
+        print(f"✗ LP test failed: {e}")
+    
+    # Test error handling
+    print("\nTesting error handling:")
+    try:
+        invalid_problem = ProblemData(
+            name="invalid",
+            problem_class="INVALID",
+            c=np.array([1.0])
+        )
+        
+        error_result = solver.solve(invalid_problem)
+        print(f"✓ Error handling result: {error_result.status}")
+        print(f"  Additional info: {error_result.additional_info}")
+        
+    except Exception as e:
+        print(f"✗ Error handling test failed: {e}")
+    
+    print("\n✓ SciPy solver test completed!")
