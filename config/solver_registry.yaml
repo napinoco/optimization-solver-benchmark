@@ -1,0 +1,17 @@
+# Simplified solver registry - only display names for reporting
+# Actual solver initialization logic is in code for better maintainability
+solvers:
+  scipy_linprog:
+    display_name: "SciPy linprog"
+    
+  cvxpy_clarabel:
+    display_name: "CLARABEL (via CVXPY)"
+    
+  cvxpy_scs:
+    display_name: "SCS (via CVXPY)"
+    
+  cvxpy_ecos:
+    display_name: "ECOS (via CVXPY)"
+    
+  cvxpy_osqp:
+    display_name: "OSQP (via CVXPY)"
