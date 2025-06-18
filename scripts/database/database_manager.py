@@ -43,6 +43,10 @@ class DatabaseManager:
             with open(schema_path, 'r') as f:
                 schema_sql = f.read()
             
+            # Replace CREATE TABLE with CREATE TABLE IF NOT EXISTS for graceful handling
+            schema_sql = schema_sql.replace("CREATE TABLE", "CREATE TABLE IF NOT EXISTS")
+            schema_sql = schema_sql.replace("CREATE INDEX", "CREATE INDEX IF NOT EXISTS")
+            
             with sqlite3.connect(self.db_path) as conn:
                 conn.executescript(schema_sql)
                 conn.commit()

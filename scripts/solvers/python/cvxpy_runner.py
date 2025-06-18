@@ -65,25 +65,73 @@ class CvxpySolver(SolverInterface):
         self.logger.info(f"Initialized CVXPY solver '{self.solver_name}' with backend '{self.backend}'")
     
     def _get_backend_capabilities(self) -> Dict[str, List[str]]:
-        """Get capabilities of the current backend solver."""
-        # Define backend capabilities for different problem types
-        backend_capabilities = {
-            "CLARABEL": ["LP", "QP", "SOCP", "SDP"],
-            "SCS": ["LP", "QP", "SOCP", "SDP"],
-            "ECOS": ["LP", "QP", "SOCP"],
-            "OSQP": ["QP", "SOCP"],
-            "CBC": ["LP"],
-            "GLOP": ["LP"],
-            "SCIP": ["LP", "QP"],
-            "GUROBI": ["LP", "QP", "SOCP"],
-            "MOSEK": ["LP", "QP", "SOCP", "SDP"],
-            "CPLEX": ["LP", "QP", "SOCP"],
-            "CVXOPT": ["LP", "QP", "SOCP"],
-            "XPRESS": ["LP", "QP"]
-        }
+        """Get capabilities of the current backend solver dynamically."""
+        
+        try:
+            solver_obj = getattr(cp, self.backend, None)
+            if solver_obj is None:
+                return {
+                    "supported_problem_types": [],
+                    "backend_name": self.backend
+                }
+            
+            supported_types = []
+            
+            # Test problem types by creating simple test problems
+            # This is more reliable than hard-coding capabilities
+            
+            # Test LP support (all solvers should support this)
+            try:
+                x = cp.Variable(1)
+                prob = cp.Problem(cp.Minimize(x), [x >= 0])
+                prob.solve(solver=solver_obj, verbose=False)
+                if prob.status not in [cp.SOLVER_ERROR]:
+                    supported_types.append("LP")
+            except:
+                pass
+            
+            # Test QP support
+            try:
+                x = cp.Variable(1)
+                prob = cp.Problem(cp.Minimize(cp.square(x)), [x >= 0])
+                prob.solve(solver=solver_obj, verbose=False)
+                if prob.status not in [cp.SOLVER_ERROR]:
+                    supported_types.append("QP")
+            except:
+                pass
+            
+            # Test SOCP support
+            try:
+                x = cp.Variable(2)
+                prob = cp.Problem(cp.Minimize(cp.sum(x)), [cp.norm(x) <= 1])
+                prob.solve(solver=solver_obj, verbose=False)
+                if prob.status not in [cp.SOLVER_ERROR]:
+                    supported_types.append("SOCP")
+            except:
+                pass
+            
+            # Test SDP support
+            try:
+                X = cp.Variable((2, 2), symmetric=True)
+                prob = cp.Problem(cp.Minimize(cp.trace(X)), [X >> 0])
+                prob.solve(solver=solver_obj, verbose=False)
+                if prob.status not in [cp.SOLVER_ERROR]:
+                    supported_types.append("SDP")
+            except:
+                pass
+            
+            # If no tests passed, default to LP
+            if not supported_types:
+                supported_types = ["LP"]
+                
+        except Exception as e:
+            logger.debug(f"Error detecting capabilities for {self.backend}: {e}")
+            supported_types = ["LP"]
+        
+        logger.debug(f"Detected capabilities for {self.backend}: {supported_types}")
         
         return {
-            "supported_problem_types": backend_capabilities.get(self.backend, ["LP", "QP"]),
+            "supported_problem_types": supported_types,
             "backend_name": self.backend
         }
     

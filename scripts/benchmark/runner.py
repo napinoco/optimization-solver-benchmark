@@ -1,724 +1,464 @@
+"""
+Simplified Benchmark Runner for Re-Architected System
+
+This module provides a simplified benchmark execution engine that follows the
+re-architected design principles:
+
+- Direct solver creation without complex backend selection
+- Unified data loading through format-specific loaders
+- Direct database storage with standardized results
+- Simple configuration loading from YAML files
+- Error resilience with graceful degradation
+
+Key Features:
+- Load problems using format-specific loaders (MAT, DAT, MPS, QPS, Python)  
+- Create solvers with direct if-elif logic (no complex configuration)
+- Execute benchmarks with standardized SolverResult output
+- Store results directly in simplified database schema
+- Environment info collection for reproducibility
+"""
+
 import sys
 import time
-import os
+import json
 from pathlib import Path
-from typing import List, Dict, Any, Optional, Tuple
-from concurrent.futures import ThreadPoolExecutor, as_completed
-import traceback
+from typing import Dict, List, Optional, Any
+import yaml
 
 # Add project root to path for imports
 project_root = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(project_root))
 
-from scripts.benchmark.problem_loader import load_problem, load_problem_registry
-from scripts.benchmark.solver_interface import SolverInterface, SolverResult
-from scripts.benchmark.result_collector import ResultCollector
+# Core imports
+from scripts.database.database_manager import DatabaseManager
 from scripts.benchmark.environment_info import collect_environment_info
-from scripts.utils.config_loader import load_config
-from scripts.solvers.python.scipy_runner import ScipySolver
-from scripts.solvers.python.cvxpy_runner import CvxpySolver, create_cvxpy_solvers
-from scripts.utils.config_loader import load_benchmark_config, load_solvers_config
-from scripts.utils.logger import get_logger
-from scripts.utils.solver_validation import SolverValidator, ProblemType
-from scripts.benchmark.backend_selector import BackendSelector, SelectionStrategy
-from scripts.database.models import create_database
 from scripts.utils.git_utils import get_git_commit_hash
+from scripts.utils.logger import get_logger
+
+# Solver imports
+from scripts.solvers.python.scipy_runner import ScipySolver
+from scripts.solvers.python.cvxpy_runner import CvxpySolver
+from scripts.solvers.solver_interface import SolverInterface, SolverResult
+
+# Data loader imports
+from scripts.data_loaders.python.mat_loader import MATLoader
+from scripts.data_loaders.python.dat_loader import DATLoader
+from scripts.data_loaders.python.mps_loader import MPSLoader
+from scripts.data_loaders.python.qps_loader import QPSLoader
+from scripts.data_loaders.python.python_loader import PythonLoader
 
 logger = get_logger("benchmark_runner")
 
+
 class BenchmarkRunner:
-    """Orchestrates the complete benchmark execution process."""
+    """Main benchmark execution engine with direct database storage"""
     
-    def __init__(self, config_path: Optional[str] = None):
+    def __init__(self, database_manager: Optional[DatabaseManager] = None):
         """
-        Initialize benchmark runner.
+        Initialize simplified benchmark runner.
         
         Args:
-            config_path: Path to benchmark configuration file
+            database_manager: Optional database manager (creates default if None)
         """
-        self.logger = get_logger("benchmark_runner")
+        self.db = database_manager or DatabaseManager()
+        
+        # Collect environment info and git hash once
+        self.environment_info = collect_environment_info()
+        self.commit_hash = get_git_commit_hash()
         
         # Load configurations
+        self.solver_registry = self.load_solver_registry()
+        self.problem_registry = self.load_problem_registry()
+        
+        
+        logger.info("Benchmark runner initialized")
+        logger.info(f"Git commit: {self.commit_hash}")
+        logger.info(f"Environment: {self.environment_info['os']['system']} {self.environment_info['python']['version']}")
+    
+    def load_solver_registry(self) -> Dict[str, Any]:
+        """Load solver registry from config/solver_registry.yaml"""
         try:
-            self.benchmark_config = load_benchmark_config()
-            self.solver_config = load_solvers_config()
+            config_path = project_root / "config" / "solver_registry.yaml"
+            with open(config_path, 'r') as f:
+                return yaml.safe_load(f)
         except Exception as e:
-            self.logger.error(f"Failed to load configuration: {e}")
-            raise
-        
-        # Initialize components
-        self.result_collector = ResultCollector()
-        self.solvers = {}
-        self.problems = {}
-        
-        # Backend validation and selection
-        self.validator = SolverValidator()
-        self.backend_selector = BackendSelector(self.validator)
-        self.validation_results = None
-        
-        # Benchmark session tracking
-        self.current_benchmark_id = None
-        self.execution_stats = {
-            'total_runs': 0,
-            'successful_runs': 0,
-            'failed_runs': 0,
-            'total_time': 0.0
-        }
-        
-        self.logger.info("Benchmark runner initialized")
+            logger.error(f"Failed to load solver registry: {e}")
+            # Return empty registry to force configuration fix
+            return {'solvers': {}}
     
-    def _get_optimal_parallel_jobs(self) -> int:
-        """Determine optimal number of parallel jobs based on configuration and system."""
-        config_value = self.benchmark_config.get('parallel_jobs', 2)
-        
-        # If explicitly set to an integer, use it
-        if isinstance(config_value, int):
-            return max(1, min(config_value, 8))  # Clamp to reasonable range
-        
-        # If set to "auto", detect based on system
-        if config_value == "auto":
-            try:
-                cpu_count = os.cpu_count() or 2
-                # Use conservative strategy: min(cpu_count, 4) to avoid resource contention
-                optimal = min(cpu_count, 4)
-                self.logger.info(f"Auto-detected {optimal} parallel workers based on {cpu_count} CPU cores")
-                return optimal
-            except Exception as e:
-                self.logger.warning(f"Failed to auto-detect CPU count: {e}. Using default of 2")
-                return 2
-        
-        # Fallback to default
-        self.logger.warning(f"Invalid parallel_jobs setting: {config_value}. Using default of 2")
-        return 2
+    def load_problem_registry(self) -> Dict[str, Any]:
+        """Load problem registry from config/problem_registry.yaml"""
+        try:
+            config_path = project_root / "config" / "problem_registry.yaml"
+            with open(config_path, 'r') as f:
+                return yaml.safe_load(f)
+        except Exception as e:
+            logger.warning(f"Failed to load problem registry: {e}")
+            return {'problem_libraries': {}}
     
-    def validate_backends(self) -> Dict[str, Any]:
-        """Validate all available CVXPY backends and return validation report."""
-        self.logger.info("Validating CVXPY backends...")
+    def create_solver(self, solver_name: str) -> SolverInterface:
+        """
+        Create solver instance based on solver name using direct logic.
         
-        # Perform validation and cache results
-        self.validation_results = self.validator.validate_all_backends()
+        Args:
+            solver_name: Name of solver to create
+            
+        Returns:
+            Solver instance
+            
+        Raises:
+            ValueError: If solver name is unknown
+        """
+        logger.debug(f"Creating solver: {solver_name}")
         
-        # Generate comprehensive validation report
-        validation_report = self.validator.generate_validation_report(self.validation_results)
-        
-        # Log validation summary
-        available_count = validation_report['summary']['available_backends']
-        total_count = validation_report['summary']['total_backends']
-        availability_pct = validation_report['summary']['availability_percentage']
-        
-        self.logger.info(f"Backend validation complete: {available_count}/{total_count} available ({availability_pct:.1f}%)")
-        
-        # Log problem type coverage
-        for problem_type, coverage in validation_report['problem_type_coverage'].items():
-            available_backends = coverage['available_backends']
-            coverage_pct = coverage['coverage_percentage']
-            recommended = coverage['recommended']
-            backend_count = len(available_backends) if isinstance(available_backends, list) else available_backends
-            self.logger.info(f"  {problem_type}: {backend_count} backends ({coverage_pct:.1f}%), recommended: {recommended}")
-        
-        return validation_report
+        # Direct if-elif logic as specified in re-architecture
+        if solver_name == "scipy_linprog":
+            return ScipySolver()
+        elif solver_name == "cvxpy_clarabel":
+            return CvxpySolver(backend="CLARABEL")
+        elif solver_name == "cvxpy_scs":
+            return CvxpySolver(backend="SCS")
+        elif solver_name == "cvxpy_ecos":
+            return CvxpySolver(backend="ECOS")
+        elif solver_name == "cvxpy_osqp":
+            return CvxpySolver(backend="OSQP")
+        else:
+            raise ValueError(f"Unknown solver: {solver_name}")
     
-    def select_optimal_backends(self, strategy: SelectionStrategy = SelectionStrategy.BALANCED) -> Dict[str, Any]:
-        """Select optimal backends for comprehensive benchmarking."""
-        self.logger.info(f"Selecting optimal backends using {strategy.value} strategy...")
+    def load_problem(self, problem_name: str, problem_config: Dict[str, Any]) -> Any:
+        """
+        Load problem using appropriate loader based on file type.
         
-        # Ensure validation is complete
-        if self.validation_results is None:
-            self.validate_backends()
+        Args:
+            problem_name: Name of the problem
+            problem_config: Problem configuration from registry
+            
+        Returns:
+            Loaded problem data
+        """
+        file_type = problem_config['file_type']
+        file_path = project_root / problem_config['file_path']
         
-        # Select backends for all problem types
-        problem_types = [ProblemType.LP, ProblemType.QP, ProblemType.SOCP, ProblemType.SDP]
-        selections = self.backend_selector.select_backends_for_benchmark(
-            problem_types, strategy=strategy, max_backends_per_type=3
+        logger.debug(f"Loading problem {problem_name} from {file_path} (type: {file_type})")
+        
+        # Select appropriate loader based on file type
+        if file_type == 'mat':
+            loader = MATLoader()
+        elif file_type == 'dat-s':
+            loader = DATLoader()
+        elif file_type == 'mps':
+            loader = MPSLoader()
+        elif file_type == 'qps':
+            loader = QPSLoader()
+        elif file_type == 'python':
+            loader = PythonLoader()
+        else:
+            raise ValueError(f"Unsupported file type: {file_type}")
+        
+        return loader.load(str(file_path))
+    
+    def store_result(self, solver_name: str, problem_name: str, 
+                    result: SolverResult, problem_config: Dict[str, Any]) -> None:
+        """
+        Store result in database using simplified schema.
+        
+        Args:
+            solver_name: Name of the solver
+            problem_name: Name of the problem  
+            result: Standardized solver result
+            problem_config: Problem configuration for metadata
+        """
+        try:
+            # Determine problem library and type
+            problem_library = problem_config.get('library_name', 'internal')
+            problem_type = problem_config.get('problem_type', 'UNKNOWN')
+            
+            # Store in database using the simplified schema
+            self.db.store_result(
+                solver_name=solver_name,
+                solver_version=result.solver_version or "unknown",
+                problem_library=problem_library,
+                problem_name=problem_name,
+                problem_type=problem_type,
+                environment_info=self.environment_info,
+                commit_hash=self.commit_hash,
+                solve_time=result.solve_time,
+                status=result.status,
+                primal_objective_value=result.primal_objective_value,
+                dual_objective_value=result.dual_objective_value,
+                duality_gap=result.duality_gap,
+                primal_infeasibility=result.primal_infeasibility,
+                dual_infeasibility=result.dual_infeasibility,
+                iterations=result.iterations
+            )
+            
+            logger.debug(f"Stored result: {solver_name} on {problem_name}")
+            
+        except Exception as e:
+            logger.error(f"Failed to store result for {solver_name} on {problem_name}: {e}")
+    
+    def store_error_result(self, solver_name: str, problem_name: str, 
+                          error_message: str, problem_config: Dict[str, Any]) -> None:
+        """
+        Store error result in database.
+        
+        Args:
+            solver_name: Name of the solver
+            problem_name: Name of the problem
+            error_message: Error description
+            problem_config: Problem configuration for metadata
+        """
+        error_result = SolverResult.create_error_result(
+            error_message=error_message,
+            solve_time=0.0,
+            solver_name=solver_name,
+            solver_version="unknown"
         )
         
-        # Generate selection report
-        selection_report = self.backend_selector.generate_selection_report(selections)
-        
-        # Log selection summary
-        total_selections = selection_report['summary']['total_selections']
-        unique_backends = selection_report['summary']['unique_backends_selected']
-        selected_backends = selection_report['summary']['selected_backends']
-        
-        self.logger.info(f"Backend selection complete: {total_selections} selections, {unique_backends} unique backends")
-        self.logger.info(f"Selected backends: {selected_backends}")
-        
-        return {
-            'selections': selections,
-            'report': selection_report,
-            'strategy': strategy.value
-        }
+        self.store_result(solver_name, problem_name, error_result, problem_config)
     
-    def setup_solvers(self, use_validation: bool = True) -> None:
-        """Initialize configured solvers from configuration file."""
-        self.logger.info("Setting up solvers...")
-        
-        # Perform backend validation if requested
-        if use_validation:
-            validation_report = self.validate_backends()
-            self.logger.info("Using backend validation for solver setup")
-        
-        # Load solver configuration
-        try:
-            solver_config = load_config("solvers.yaml")
-            solver_definitions = solver_config.get("solvers", {})
-        except Exception as e:
-            self.logger.error(f"Failed to load solver configuration: {e}")
-            raise
-        
-        # Get default timeout from global solver settings
-        global_settings = solver_config.get('global_settings', {})
-        default_timeout = global_settings.get('default_timeout', 300.0)
-        
-        # Initialize each configured solver
-        for solver_id, config in solver_definitions.items():
-            if not config.get('enabled', True):
-                self.logger.info(f"Skipping disabled solver: {solver_id}")
-                continue
-                
-            try:
-                solver_instance = self._create_solver_instance(solver_id, config, default_timeout)
-                if solver_instance:
-                    self.solvers[solver_id] = solver_instance
-                    self.logger.info(f"Initialized solver: {solver_instance.name}")
-                    
-                    # Store solver info in database
-                    solver_info = solver_instance.get_info()
-                    self.result_collector.store_solver_info(
-                        name=solver_instance.name,
-                        version=solver_instance.get_version(),
-                        environment=config.get('environment', 'unknown'),
-                        metadata=solver_info
-                    )
-                    
-            except Exception as e:
-                self.logger.error(f"Failed to initialize solver {solver_id}: {e}")
-        
-        if not self.solvers:
-            raise RuntimeError("No solvers were successfully initialized")
-        
-        self.logger.info(f"Successfully initialized {len(self.solvers)} solvers")
-    
-    def _create_solver_instance(self, solver_id: str, config: dict, timeout: float):
-        """Create a solver instance based on configuration."""
-        environment = config.get('environment', 'python')
-        
-        if environment == 'python':
-            if 'backend' in config:
-                # CVXPY backend solver
-                backend = config['backend']
-                solver_name = config.get('name', f"{backend} (via CVXPY)")
-                
-                # Check if backend is available using validation results
-                if self.validation_results and backend in self.validation_results:
-                    validation_result = self.validation_results[backend]
-                    if not validation_result.available:
-                        self.logger.warning(f"Backend {backend} not available (validation: {validation_result.error_message}). Skipping {solver_id}")
-                        return None
-                    else:
-                        self.logger.debug(f"Backend {backend} validated successfully")
-                else:
-                    # Fallback to direct CVXPY check if validation not available
-                    import cvxpy as cp
-                    available_backends = cp.installed_solvers()
-                    if backend not in available_backends:
-                        self.logger.warning(f"Backend {backend} not available. Skipping {solver_id}")
-                        return None
-                
-                solver_instance = CvxpySolver(
-                    name=solver_name,
-                    backend=backend,
-                    timeout=config.get('timeout', timeout),
-                    verbose=False,
-                    solver_options=config.get('solver_options', {}),
-                    problem_optimizations=config.get('problem_optimizations', {}),
-                    enable_diagnostics=config.get('diagnostics', {}).get('enabled', True)
-                )
-                return solver_instance
-                
-            elif solver_id == 'scipy':
-                # SciPy solver
-                solver_instance = ScipySolver(
-                    name=config.get('name', 'SciPy'),
-                    timeout=config.get('timeout', timeout)
-                )
-                return solver_instance
-                
-                
-        self.logger.warning(f"Unknown solver configuration for {solver_id}")
-        return None
-    
-    def load_problems(self, problem_set: str = "light_set") -> None:
-        """Load problems from the registry."""
-        self.logger.info(f"Loading problems from set: {problem_set}")
-        
-        try:
-            registry = load_problem_registry()
-            
-            if problem_set not in registry["problems"]:
-                raise ValueError(f"Problem set '{problem_set}' not found in registry")
-            
-            problem_count = 0
-            for problem_class in registry["problems"][problem_set]:
-                # Skip metadata sections for external libraries (DIMACS/SDPLIB)
-                if problem_class == "library_info":
-                    continue
-                    
-                for problem_info in registry["problems"][problem_set][problem_class]:
-                    problem_name = problem_info["name"]
-                    
-                    try:
-                        problem = load_problem(problem_name, problem_set)
-                        self.problems[problem_name] = problem
-                        
-                        # Store problem info in database with structure analysis
-                        metadata = {
-                            "description": problem_info.get("description", ""),
-                            "problem_set": problem_set,
-                            "source": problem_info.get("source", "")
-                        }
-                        
-                        # Add structure analysis if available
-                        structure_summary = problem.get_structure_summary()
-                        if structure_summary:
-                            metadata["structure"] = structure_summary
-                        
-                        self.result_collector.store_problem_info(
-                            name=problem.name,
-                            problem_class=problem.problem_class,
-                            file_path=problem_info["file_path"],
-                            metadata=metadata
-                        )
-                        
-                        problem_count += 1
-                        self.logger.debug(f"Loaded problem: {problem_name} ({problem.problem_class})")
-                        
-                    except Exception as e:
-                        self.logger.warning(f"Failed to load problem {problem_name}: {e}")
-            
-            self.logger.info(f"Successfully loaded {problem_count} problems")
-            
-        except Exception as e:
-            self.logger.error(f"Failed to load problems: {e}")
-            raise
-    
-    def run_single_benchmark(self, solver_name: str, problem_name: str) -> SolverResult:
+    def run_single_benchmark(self, problem_name: str, solver_name: str) -> None:
         """
-        Run a single solver on a single problem.
+        Execute single problem-solver combination and store result.
         
         Args:
-            solver_name: Name of the solver to use
             problem_name: Name of the problem to solve
-            
-        Returns:
-            SolverResult from the benchmark run
+            solver_name: Name of the solver to use
         """
-        if solver_name not in self.solvers:
-            raise ValueError(f"Solver '{solver_name}' not available")
+        logger.info(f"Running {solver_name} on {problem_name}")
         
-        if problem_name not in self.problems:
-            raise ValueError(f"Problem '{problem_name}' not loaded")
-        
-        solver = self.solvers[solver_name]
-        problem = self.problems[problem_name]
-        
-        self.logger.info(f"Running {solver_name} on {problem_name}")
-        
-        start_time = time.time()
         try:
-            result = solver.solve_with_timeout(problem)
-            self.execution_stats['successful_runs'] += 1
+            # Get problem configuration
+            if problem_name not in self.problem_registry['problem_libraries']:
+                raise ValueError(f"Problem {problem_name} not found in registry")
+                
+            problem_config = self.problem_registry['problem_libraries'][problem_name]
+            
+            # Load problem using appropriate loader
+            problem_data = self.load_problem(problem_name, problem_config)
+            
+            # Create solver
+            solver = self.create_solver(solver_name)
+            
+            # Execute solver with timing
+            start_time = time.time()
+            result = solver.solve(problem_data)
+            solve_time = time.time() - start_time
+            
+            # Ensure timing is accurate
+            result.solve_time = solve_time
+            result.solver_name = solver_name
+            result.solver_version = solver.get_version()
+            
+            # Store result in database
+            self.store_result(solver_name, problem_name, result, problem_config)
+            
+            logger.info(f"Completed {solver_name} on {problem_name}: {result.status} in {solve_time:.3f}s")
             
         except Exception as e:
-            # Create error result if solver completely fails
-            elapsed_time = time.time() - start_time
             error_msg = f"Benchmark execution failed: {str(e)}"
-            self.logger.error(error_msg)
+            logger.error(error_msg)
             
-            result = SolverResult(
-                solver_name=solver_name,
-                problem_name=problem_name,
-                solve_time=elapsed_time,
-                status='error',
-                error_message=error_msg
-            )
-            self.execution_stats['failed_runs'] += 1
-        
-        # Update execution statistics
-        self.execution_stats['total_runs'] += 1
-        self.execution_stats['total_time'] += result.solve_time
-        
-        # Store result in database
-        if self.current_benchmark_id:
-            self.result_collector.store_result(self.current_benchmark_id, result)
-        
-        self.logger.info(f"Completed {solver_name} on {problem_name}: "
-                        f"{result.status} in {result.solve_time:.3f}s")
-        
-        return result
+            # Store error result
+            if problem_name in self.problem_registry['problem_libraries']:
+                problem_config = self.problem_registry['problem_libraries'][problem_name]
+                self.store_error_result(solver_name, problem_name, error_msg, problem_config)
     
-    def run_sequential_benchmark(self, solver_names: Optional[List[str]] = None,
-                                problem_names: Optional[List[str]] = None) -> List[SolverResult]:
+    def run_benchmark_batch(self, problems: List[str], solvers: List[str]) -> None:
         """
-        Run benchmark sequentially (one at a time).
+        Run benchmark for all problem-solver combinations.
         
         Args:
-            solver_names: List of solver names to run. If None, runs all available solvers.
-            problem_names: List of problem names to run. If None, runs all loaded problems.
-            
-        Returns:
-            List of SolverResults from all benchmark runs
+            problems: List of problem names to run
+            solvers: List of solver names to use
         """
-        # Use all available solvers/problems if not specified
-        if solver_names is None:
-            solver_names = list(self.solvers.keys())
-        if problem_names is None:
-            problem_names = list(self.problems.keys())
+        total_combinations = len(problems) * len(solvers)
+        completed = 0
         
-        total_runs = len(solver_names) * len(problem_names)
-        self.logger.info(f"Starting sequential benchmark: {len(solver_names)} solvers × "
-                        f"{len(problem_names)} problems = {total_runs} total runs")
+        logger.info(f"Starting benchmark batch: {len(problems)} problems × {len(solvers)} solvers = {total_combinations} combinations")
         
-        results = []
-        run_count = 0
-        
-        for solver_name in solver_names:
-            for problem_name in problem_names:
-                run_count += 1
-                self.logger.info(f"Progress: {run_count}/{total_runs} - "
-                               f"{solver_name} on {problem_name}")
-                
+        for problem_name in problems:
+            for solver_name in solvers:
                 try:
-                    result = self.run_single_benchmark(solver_name, problem_name)
-                    results.append(result)
+                    completed += 1
+                    logger.info(f"Progress: {completed}/{total_combinations}")
+                    
+                    self.run_single_benchmark(problem_name, solver_name)
                     
                 except Exception as e:
-                    self.logger.error(f"Failed to run {solver_name} on {problem_name}: {e}")
-                    # Continue with next benchmark
+                    logger.error(f"Failed {solver_name} on {problem_name}: {e}")
+                    # Continue with next combination
         
-        self.logger.info(f"Sequential benchmark completed: {len(results)} results")
-        return results
+        logger.info(f"Benchmark batch completed: {completed} combinations processed")
     
-    def run_parallel_benchmark(self, solver_names: Optional[List[str]] = None,
-                              problem_names: Optional[List[str]] = None,
-                              max_workers: Optional[int] = None) -> List[SolverResult]:
+    def get_available_problems(self, for_test_only: bool = False) -> List[str]:
         """
-        Run benchmark in parallel using ThreadPoolExecutor.
+        Get list of available problems from registry.
         
         Args:
-            solver_names: List of solver names to run. If None, runs all available solvers.
-            problem_names: List of problem names to run. If None, runs all loaded problems.
-            max_workers: Maximum number of parallel workers
+            for_test_only: If True, only return problems marked for testing
             
         Returns:
-            List of SolverResults from all benchmark runs
+            List of problem names
         """
-        # Use all available solvers/problems if not specified
-        if solver_names is None:
-            solver_names = list(self.solvers.keys())
-        if problem_names is None:
-            problem_names = list(self.problems.keys())
+        problems = []
+        for problem_name, config in self.problem_registry['problem_libraries'].items():
+            if for_test_only:
+                if config.get('for_test_flag', False):
+                    problems.append(problem_name)
+            else:
+                problems.append(problem_name)
         
-        if max_workers is None:
-            max_workers = self._get_optimal_parallel_jobs()
-        
-        # Create list of all (solver, problem) combinations
-        benchmark_tasks = []
-        for solver_name in solver_names:
-            for problem_name in problem_names:
-                benchmark_tasks.append((solver_name, problem_name))
-        
-        total_runs = len(benchmark_tasks)
-        self.logger.info(f"Starting parallel benchmark: {total_runs} total runs "
-                        f"with {max_workers} workers")
-        
-        results = []
-        completed_count = 0
-        
-        with ThreadPoolExecutor(max_workers=max_workers) as executor:
-            # Submit all tasks
-            future_to_task = {
-                executor.submit(self.run_single_benchmark, solver_name, problem_name): 
-                (solver_name, problem_name)
-                for solver_name, problem_name in benchmark_tasks
-            }
-            
-            # Collect results as they complete
-            for future in as_completed(future_to_task):
-                solver_name, problem_name = future_to_task[future]
-                completed_count += 1
-                
-                try:
-                    result = future.result()
-                    results.append(result)
-                    self.logger.info(f"Progress: {completed_count}/{total_runs} - "
-                                   f"Completed {solver_name} on {problem_name}")
-                    
-                except Exception as e:
-                    self.logger.error(f"Failed {solver_name} on {problem_name}: {e}")
-                    self.logger.debug(f"Exception details: {traceback.format_exc()}")
-        
-        self.logger.info(f"Parallel benchmark completed: {len(results)} results")
-        return results
+        return problems
     
-    def run_full_benchmark(self, problem_set: str = "light_set",
-                          parallel: bool = True,
-                          max_workers: Optional[int] = None) -> Dict[str, Any]:
+    def get_available_solvers(self) -> List[str]:
         """
-        Run complete benchmark including setup, execution, and summary.
+        Get list of available solvers from registry.
         
-        Args:
-            problem_set: Problem set to run
-            parallel: Whether to run in parallel or sequential
-            max_workers: Maximum parallel workers (if parallel=True)
-            
         Returns:
-            Dictionary with benchmark summary and results
+            List of solver names
         """
-        benchmark_start_time = time.time()
-        
-        try:
-            # Initialize database
-            self.logger.info("Initializing database...")
-            create_database()
-            
-            # Create benchmark session
-            self.logger.info("Creating benchmark session...")
-            env_info = collect_environment_info()
-            self.current_benchmark_id = self.result_collector.create_benchmark_session(env_info)
-            
-            # Setup phase
-            self.logger.info("Setting up benchmark...")
-            self.setup_solvers()
-            self.load_problems(problem_set)
-            
-            if not self.solvers:
-                raise RuntimeError("No solvers available")
-            if not self.problems:
-                raise RuntimeError("No problems loaded")
-            
-            # Execution phase
-            self.logger.info("Starting benchmark execution...")
-            if parallel:
-                results = self.run_parallel_benchmark(max_workers=max_workers)
-            else:
-                results = self.run_sequential_benchmark()
-            
-            # Generate summary
-            benchmark_time = time.time() - benchmark_start_time
-            summary = self._generate_summary(results, benchmark_time)
-            
-            self.logger.info("Benchmark completed successfully!")
-            self.logger.info(f"Total time: {benchmark_time:.1f}s, "
-                           f"Results: {len(results)}, "
-                           f"Success rate: {summary['success_rate']:.1%}")
-            
-            return summary
-            
-        except Exception as e:
-            self.logger.error(f"Benchmark failed: {e}")
-            self.logger.debug(f"Exception details: {traceback.format_exc()}")
-            raise
+        return list(self.solver_registry['solvers'].keys())
     
-    def _generate_summary(self, results: List[SolverResult], 
-                         benchmark_time: float) -> Dict[str, Any]:
-        """Generate benchmark summary statistics."""
+    def validate_setup(self) -> Dict[str, Any]:
+        """
+        Validate that solvers and problems can be loaded.
         
-        if not results:
-            return {
-                'total_runs': 0,
-                'successful_runs': 0,
-                'failed_runs': 0,
-                'success_rate': 0.0,
-                'total_benchmark_time': benchmark_time,
-                'solver_statistics': {},
-                'problem_statistics': {}
+        Returns:
+            Validation report
+        """
+        report = {
+            'solvers': {},
+            'problems': {},
+            'summary': {
+                'total_solvers': 0,
+                'working_solvers': 0,
+                'total_problems': 0,
+                'working_problems': 0
             }
-        
-        # Overall statistics
-        successful_runs = sum(1 for r in results if r.is_successful())
-        failed_runs = len(results) - successful_runs
-        success_rate = successful_runs / len(results) if results else 0.0
-        
-        # Per-solver statistics
-        solver_stats = {}
-        for result in results:
-            solver_name = result.solver_name
-            if solver_name not in solver_stats:
-                solver_stats[solver_name] = {
-                    'total_runs': 0,
-                    'successful_runs': 0,
-                    'total_time': 0.0,
-                    'min_time': float('inf'),
-                    'max_time': 0.0,
-                    'problems_solved': set()
-                }
-            
-            stats = solver_stats[solver_name]
-            stats['total_runs'] += 1
-            stats['total_time'] += result.solve_time
-            stats['min_time'] = min(stats['min_time'], result.solve_time)
-            stats['max_time'] = max(stats['max_time'], result.solve_time)
-            
-            if result.is_successful():
-                stats['successful_runs'] += 1
-                stats['problems_solved'].add(result.problem_name)
-        
-        # Calculate averages and clean up
-        for solver_name, stats in solver_stats.items():
-            if stats['total_runs'] > 0:
-                stats['avg_time'] = stats['total_time'] / stats['total_runs']
-                stats['success_rate'] = stats['successful_runs'] / stats['total_runs']
-            else:
-                stats['avg_time'] = 0.0
-                stats['success_rate'] = 0.0
-            
-            if stats['min_time'] == float('inf'):
-                stats['min_time'] = 0.0
-            
-            # Convert set to count
-            stats['unique_problems_solved'] = len(stats['problems_solved'])
-            del stats['problems_solved']  # Remove set from final output
-        
-        # Per-problem statistics
-        problem_stats = {}
-        for result in results:
-            problem_name = result.problem_name
-            if problem_name not in problem_stats:
-                problem_stats[problem_name] = {
-                    'total_attempts': 0,
-                    'successful_attempts': 0,
-                    'solver_results': {}
-                }
-            
-            stats = problem_stats[problem_name]
-            stats['total_attempts'] += 1
-            
-            if result.is_successful():
-                stats['successful_attempts'] += 1
-            
-            stats['solver_results'][result.solver_name] = {
-                'status': result.status,
-                'solve_time': result.solve_time,
-                'objective_value': result.objective_value
-            }
-        
-        # Calculate problem success rates
-        for problem_name, stats in problem_stats.items():
-            if stats['total_attempts'] > 0:
-                stats['success_rate'] = stats['successful_attempts'] / stats['total_attempts']
-            else:
-                stats['success_rate'] = 0.0
-        
-        return {
-            'benchmark_id': self.current_benchmark_id,
-            'total_runs': len(results),
-            'successful_runs': successful_runs,
-            'failed_runs': failed_runs,
-            'success_rate': success_rate,
-            'total_benchmark_time': benchmark_time,
-            'avg_run_time': sum(r.solve_time for r in results) / len(results),
-            'solver_statistics': solver_stats,
-            'problem_statistics': problem_stats,
-            'execution_stats': self.execution_stats.copy()
         }
-    
-    def get_benchmark_status(self) -> Dict[str, Any]:
-        """Get current benchmark status and statistics."""
-        return {
-            'benchmark_id': self.current_benchmark_id,
-            'solvers_loaded': len(self.solvers),
-            'problems_loaded': len(self.problems),
-            'execution_stats': self.execution_stats.copy(),
-            'solver_names': list(self.solvers.keys()),
-            'problem_names': list(self.problems.keys())
-        }
-
-if __name__ == "__main__":
-    # Test script to verify benchmark runner
-    try:
-        print("Testing Benchmark Runner...")
         
-        # Test runner initialization
-        print("\nTesting runner initialization:")
-        runner = BenchmarkRunner()
-        print(f"✓ Runner initialized")
-        
-        # Test solver setup
-        print("\nTesting solver setup:")
-        runner.setup_solvers()
-        status = runner.get_benchmark_status()
-        print(f"✓ Solvers loaded: {status['solvers_loaded']}")
-        print(f"  Available solvers: {status['solver_names']}")
+        # Test solver creation
+        for solver_name in self.get_available_solvers():
+            report['summary']['total_solvers'] += 1
+            try:
+                solver = self.create_solver(solver_name)
+                report['solvers'][solver_name] = {
+                    'status': 'working',
+                    'version': solver.get_version()
+                }
+                report['summary']['working_solvers'] += 1
+            except Exception as e:
+                report['solvers'][solver_name] = {
+                    'status': 'error',
+                    'error': str(e)
+                }
         
         # Test problem loading
-        print("\nTesting problem loading:")
-        runner.load_problems("light_set")
-        status = runner.get_benchmark_status()
-        print(f"✓ Problems loaded: {status['problems_loaded']}")
-        print(f"  Available problems: {status['problem_names']}")
+        for problem_name in self.get_available_problems():
+            report['summary']['total_problems'] += 1
+            try:
+                problem_config = self.problem_registry['problem_libraries'][problem_name]
+                problem_data = self.load_problem(problem_name, problem_config)
+                report['problems'][problem_name] = {
+                    'status': 'working',
+                    'type': problem_config.get('problem_type', 'unknown'),
+                    'library': problem_config.get('library_name', 'unknown')
+                }
+                report['summary']['working_problems'] += 1
+            except Exception as e:
+                report['problems'][problem_name] = {
+                    'status': 'error',
+                    'error': str(e)
+                }
         
-        # Test single benchmark
-        print("\nTesting single benchmark:")
-        if runner.solvers and runner.problems:
-            # Create a benchmark session for testing
-            runner.current_benchmark_id = runner.result_collector.create_benchmark_session()
-            
-            solver_name = list(runner.solvers.keys())[0]
-            problem_name = list(runner.problems.keys())[0]
-            
-            result = runner.run_single_benchmark(solver_name, problem_name)
-            print(f"✓ Single benchmark completed: {result.solver_name} on {result.problem_name}")
-            print(f"  Status: {result.status}, Time: {result.solve_time:.3f}s")
+        return report
+
+
+if __name__ == "__main__":
+    # Test script for simplified runner
+    try:
+        print("Testing Simplified Benchmark Runner...")
+        print("=" * 50)
         
-        # Test sequential benchmark (small subset)
-        print("\nTesting sequential benchmark:")
-        try:
-            # Create new session for sequential test
-            runner.current_benchmark_id = runner.result_collector.create_benchmark_session()
-            
-            # Run just one solver on available problems for testing
-            solver_names = [list(runner.solvers.keys())[0]]
-            results = runner.run_sequential_benchmark(solver_names=solver_names)
-            print(f"✓ Sequential benchmark completed: {len(results)} results")
-            
-            for result in results[:3]:  # Show first 3 results
-                print(f"  {result.solver_name} on {result.problem_name}: "
-                      f"{result.status} ({result.solve_time:.3f}s)")
+        # Initialize runner
+        print("\n1. Initializing runner...")
+        runner = BenchmarkRunner()
+        print(f"   ✓ Runner initialized")
+        print(f"   Git commit: {runner.commit_hash[:8]}")
+        print(f"   Environment: {runner.environment_info['os']['system']}")
         
-        except Exception as e:
-            print(f"✗ Sequential benchmark test failed: {e}")
+        # Validate setup
+        print("\n2. Validating setup...")
+        validation_report = runner.validate_setup()
         
-        # Test parallel benchmark (small subset)
-        print("\nTesting parallel benchmark:")
-        try:
-            # Create new session for parallel test
-            runner.current_benchmark_id = runner.result_collector.create_benchmark_session()
-            
-            # Run with 2 workers for testing
-            solver_names = [list(runner.solvers.keys())[0]]
-            results = runner.run_parallel_benchmark(solver_names=solver_names, max_workers=2)
-            print(f"✓ Parallel benchmark completed: {len(results)} results")
-            
-        except Exception as e:
-            print(f"✗ Parallel benchmark test failed: {e}")
+        working_solvers = validation_report['summary']['working_solvers']
+        total_solvers = validation_report['summary']['total_solvers']
+        working_problems = validation_report['summary']['working_problems']
+        total_problems = validation_report['summary']['total_problems']
         
-        # Test full benchmark
-        print("\nTesting full benchmark:")
-        try:
-            summary = runner.run_full_benchmark(parallel=False)  # Use sequential for testing
-            print(f"✓ Full benchmark completed!")
-            print(f"  Total runs: {summary['total_runs']}")
-            print(f"  Success rate: {summary['success_rate']:.1%}")
-            print(f"  Benchmark time: {summary['total_benchmark_time']:.1f}s")
-            print(f"  Solvers: {list(summary['solver_statistics'].keys())}")
-            
-        except Exception as e:
-            print(f"✗ Full benchmark test failed: {e}")
+        print(f"   Solvers: {working_solvers}/{total_solvers} working")
+        print(f"   Problems: {working_problems}/{total_problems} working")
         
-        print("\n✓ All benchmark runner tests completed!")
+        # Show working solvers
+        print("\n   Working solvers:")
+        for solver_name, info in validation_report['solvers'].items():
+            if info['status'] == 'working':
+                print(f"     ✓ {solver_name}: {info['version']}")
+            else:
+                print(f"     ✗ {solver_name}: {info['error']}")
+        
+        # Show working problems
+        print("\n   Working problems:")
+        for problem_name, info in validation_report['problems'].items():
+            if info['status'] == 'working':
+                print(f"     ✓ {problem_name} ({info['type']}, {info['library']})")
+            else:
+                print(f"     ✗ {problem_name}: {info['error']}")
+        
+        # Test single benchmark if we have working solver and problem
+        if working_solvers > 0 and working_problems > 0:
+            print("\n3. Testing single benchmark...")
+            
+            # Find first working solver and problem
+            working_solver = None
+            working_problem = None
+            
+            for solver_name, info in validation_report['solvers'].items():
+                if info['status'] == 'working':
+                    working_solver = solver_name
+                    break
+            
+            for problem_name, info in validation_report['problems'].items():
+                if info['status'] == 'working':
+                    working_problem = problem_name
+                    break
+            
+            if working_solver and working_problem:
+                print(f"   Running {working_solver} on {working_problem}...")
+                runner.run_single_benchmark(working_problem, working_solver)
+                print(f"   ✓ Single benchmark completed successfully")
+        
+        # Test batch benchmark with small subset
+        if working_solvers > 0 and working_problems > 0:
+            print("\n4. Testing batch benchmark...")
+            
+            # Get test problems (or first problem if no test problems)
+            test_problems = runner.get_available_problems(for_test_only=True)
+            if not test_problems:
+                test_problems = [runner.get_available_problems()[0]]
+            
+            # Use first working solver
+            test_solvers = [working_solver]
+            
+            print(f"   Running {len(test_solvers)} solvers on {len(test_problems)} problems...")
+            runner.run_benchmark_batch(test_problems[:1], test_solvers[:1])  # Limit for testing
+            print(f"   ✓ Batch benchmark completed successfully")
+        
+        print("\n" + "=" * 50)
+        print("✓ All simplified runner tests passed!")
         
     except Exception as e:
-        logger.error(f"Benchmark runner test failed: {e}")
+        logger.error(f"Test failed: {e}")
         print(f"✗ Test failed: {e}")
         raise

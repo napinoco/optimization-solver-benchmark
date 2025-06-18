@@ -280,7 +280,7 @@ def load_qps_file(file_path: str) -> ProblemData:
 def load_problem_registry() -> Dict:
     """Load the problem registry YAML file."""
     project_root = Path(__file__).parent.parent.parent
-    registry_path = project_root / "problems" / "problem_registry.yaml"
+    registry_path = project_root / "config" / "problem_registry.yaml"
     
     logger.info(f"Loading problem registry: {registry_path}")
     
@@ -330,72 +330,52 @@ def load_python_problem(file_path: str, problem_class: str) -> ProblemData:
         logger.error(f"Failed to load Python problem {file_path}: {e}")
         raise
 
-def load_problem(problem_name: str, problem_set: str = "light_set") -> ProblemData:
+def load_problem(problem_name: str, problem_set: str = None) -> ProblemData:
     """Load a specific problem by name from the registry."""
     
-    # Support local problems and external libraries
-    supported_sets = ["light_set", "DIMACS", "SDPLIB"]
-    if problem_set not in supported_sets:
-        raise ValueError(f"Problem set '{problem_set}' not supported. Supported sets: {supported_sets}")
-    
-    # Load from registry
+    # Load from registry (new flat structure)
     registry = load_problem_registry()
     
-    # Find the problem in the registry
+    # Find the problem in the flat registry
     problem_info = None
-    if problem_set == "light_set":
-        # Original structure for light_set
-        for problem_class in registry["problems"][problem_set]:
-            for problem in registry["problems"][problem_set][problem_class]:
-                if problem["name"] == problem_name:
-                    problem_info = problem
-                    break
-            if problem_info:
-                break
-    else:
-        # External library structure (DIMACS/SDPLIB)
-        if problem_set in registry["problems"]:
-            for problem_class in registry["problems"][problem_set]:
-                if problem_class != "library_info":  # Skip metadata
-                    for problem in registry["problems"][problem_set][problem_class]:
-                        if problem["name"] == problem_name:
-                            problem_info = problem
-                            break
-                if problem_info:
-                    break
+    if problem_name in registry["problem_libraries"]:
+        problem_info = registry["problem_libraries"][problem_name]
     
     if not problem_info:
-        raise ValueError(f"Problem '{problem_name}' not found in '{problem_set}' registry")
+        raise ValueError(f"Problem '{problem_name}' not found in registry")
+    
+    # Filter by problem_set/library if specified
+    if problem_set and problem_info.get("library_name") != problem_set:
+        raise ValueError(f"Problem '{problem_name}' is not from library '{problem_set}'")
     
     # Get absolute path to problem file
     project_root = Path(__file__).parent.parent.parent
     file_path = project_root / problem_info["file_path"]
     
-    # Load based on problem set and file format
-    if problem_set == "DIMACS":
-        # Use DIMACS loader for .mat.gz files
-        from scripts.external.dimacs_loader import load_dimacs_problem
-        from scripts.external.cvxpy_converter import convert_to_cvxpy
-        problem_data = load_dimacs_problem(str(file_path), problem_name)
-        # Convert to CVXPY format for solver compatibility
-        return convert_to_cvxpy(problem_data)
-    elif problem_set == "SDPLIB":
-        # Use SDPLIB loader for .dat-s files
-        from scripts.external.sdplib_loader import load_sdplib_problem
-        from scripts.external.cvxpy_converter import convert_to_cvxpy
-        problem_data = load_sdplib_problem(str(file_path), problem_name)
-        # Convert to CVXPY format for solver compatibility
-        return convert_to_cvxpy(problem_data)
+    # Load based on file type
+    file_type = problem_info["file_type"]
+    
+    if file_type == "mat":
+        # Use MAT loader for .mat.gz files (DIMACS)
+        from scripts.data_loaders.python.mat_loader import MATLoader
+        loader = MATLoader()
+        return loader.load(str(file_path))
+    elif file_type == "dat-s":
+        # Use DAT loader for .dat-s files (SDPLIB)
+        from scripts.data_loaders.python.dat_loader import DATLoader
+        loader = DATLoader()
+        return loader.load(str(file_path))
+    elif file_type == "mps":
+        # Use MPS loader for Linear Programming
+        return load_mps_file(str(file_path))
+    elif file_type == "qps":
+        # Use QPS loader for Quadratic Programming
+        return load_qps_file(str(file_path))
+    elif file_type == "python":
+        # Use Python loader for SOCP/SDP
+        return load_python_problem(str(file_path), problem_info["problem_type"])
     else:
-        # Original light_set loading logic
-        if problem_info["problem_class"] == "LP":
-            return load_mps_file(str(file_path))
-        elif problem_info["problem_class"] == "QP":
-            return load_qps_file(str(file_path))
-        elif problem_info["problem_class"] in ["SOCP", "SDP"]:
-            return load_python_problem(str(file_path), problem_info["problem_class"])
-        else:
-            raise ValueError(f"Unsupported problem class: {problem_info['problem_class']}")
+        raise ValueError(f"Unsupported file type: {file_type}")
 
 
 def list_available_problems(problem_set: Optional[str] = None) -> Dict[str, List[str]]:
@@ -403,34 +383,29 @@ def list_available_problems(problem_set: Optional[str] = None) -> Dict[str, List
     List all available problems in the registry.
     
     Args:
-        problem_set: Optional problem set filter ('light_set', 'DIMACS', 'SDPLIB')
+        problem_set: Optional library filter ('DIMACS', 'SDPLIB', 'internal')
         
     Returns:
-        Dictionary mapping problem set names to lists of problem names
+        Dictionary mapping library names to lists of problem names
     """
     registry = load_problem_registry()
     available = {}
     
-    supported_sets = ["light_set", "DIMACS", "SDPLIB"]
-    sets_to_check = [problem_set] if problem_set else supported_sets
+    # Group problems by library_name from the flat structure
+    for problem_name, problem_info in registry["problem_libraries"].items():
+        library_name = problem_info.get("library_name", "unknown")
+        
+        # Filter by problem_set if specified
+        if problem_set and library_name != problem_set:
+            continue
+            
+        if library_name not in available:
+            available[library_name] = []
+        available[library_name].append(problem_name)
     
-    for pset in sets_to_check:
-        if pset in registry["problems"]:
-            problems = []
-            
-            if pset == "light_set":
-                # Original structure
-                for problem_class in registry["problems"][pset]:
-                    for problem in registry["problems"][pset][problem_class]:
-                        problems.append(problem["name"])
-            else:
-                # External library structure
-                for problem_class in registry["problems"][pset]:
-                    if problem_class != "library_info":  # Skip metadata
-                        for problem in registry["problems"][pset][problem_class]:
-                            problems.append(problem["name"])
-            
-            available[pset] = sorted(problems)
+    # Sort problem names within each library
+    for library in available:
+        available[library] = sorted(available[library])
     
     return available
 

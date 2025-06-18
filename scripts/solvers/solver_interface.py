@@ -127,13 +127,16 @@ class SolverResult:
         }
     
     @classmethod
-    def create_error_result(cls, error_message: str, solve_time: float = 0.0) -> 'SolverResult':
+    def create_error_result(cls, error_message: str, solve_time: float = 0.0, 
+                          solver_name: str = "unknown", solver_version: str = "unknown") -> 'SolverResult':
         """
         Create a standardized error result.
         
         Args:
             error_message: Description of the error
             solve_time: Time spent before error occurred
+            solver_name: Name of the solver that failed
+            solver_version: Version of the solver that failed
             
         Returns:
             SolverResult indicating error status
@@ -147,16 +150,21 @@ class SolverResult:
             primal_infeasibility=None,
             dual_infeasibility=None,
             iterations=None,
+            solver_name=solver_name,
+            solver_version=solver_version,
             additional_info={"error_message": error_message}
         )
     
     @classmethod
-    def create_timeout_result(cls, timeout_duration: float) -> 'SolverResult':
+    def create_timeout_result(cls, timeout_duration: float, solver_name: str = "unknown", 
+                            solver_version: str = "unknown") -> 'SolverResult':
         """
         Create a standardized timeout result.
         
         Args:
             timeout_duration: Time limit that was exceeded
+            solver_name: Name of the solver that timed out
+            solver_version: Version of the solver that timed out
             
         Returns:
             SolverResult indicating timeout status
@@ -170,6 +178,8 @@ class SolverResult:
             primal_infeasibility=None,
             dual_infeasibility=None,
             iterations=None,
+            solver_name=solver_name,
+            solver_version=solver_version,
             additional_info={"timeout_duration": timeout_duration}
         )
 
