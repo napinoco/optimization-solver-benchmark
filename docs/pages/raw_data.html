@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Optimization Solver Benchmark - Raw Data</title>
+    <style>
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f8f9fa;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+            color: white;
+            text-align: center;
+            padding: 2rem 1rem;
+            margin-bottom: 2rem;
+        }
+        
+        header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+        
+        nav {
+            background: white;
+            padding: 1rem;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+        
+        nav a {
+            color: #2c3e50;
+            text-decoration: none;
+            margin: 0 1rem;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            transition: background-color 0.2s;
+        }
+        
+        nav a:hover {
+            background-color: #ecf0f1;
+        }
+        
+        nav a.active {
+            background-color: #3498db;
+            color: white;
+        }
+        
+        main {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 1rem;
+        }
+        
+        .section {
+            background: white;
+            margin: 2rem 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .section h2 {
+            background: linear-gradient(135deg, #34495e 0%, #2c3e50 100%);
+            color: white;
+            padding: 1rem 1.5rem;
+            margin: 0;
+            border-radius: 8px 8px 0 0;
+            font-size: 1.5rem;
+        }
+        
+        .section-content {
+            padding: 1.5rem;
+        }
+        
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+            font-size: 0.9em;
+        }
+        
+        .data-table th, .data-table td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #ecf0f1;
+        }
+        
+        .data-table th {
+            background-color: #f8f9fa;
+            font-weight: 600;
+            color: #2c3e50;
+            position: sticky;
+            top: 0;
+            border-bottom: 2px solid #dee2e6;
+        }
+        
+        .data-table tr:hover {
+            background-color: #f8f9fa;
+        }
+        
+        .status-optimal {
+            background-color: #d4edda;
+            color: #155724;
+            font-weight: bold;
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
+        
+        .status-error {
+            background-color: #f8d7da;
+            color: #721c24;
+            font-weight: bold;
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
+        
+        .status-infeasible {
+            background-color: #fff3cd;
+            color: #856404;
+            font-weight: bold;
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
+        
+        .solver-name {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        
+        .problem-type {
+            font-weight: 500;
+            color: #3498db;
+        }
+        
+        .library-name {
+            font-style: italic;
+            color: #7f8c8d;
+        }
+        
+        .number {
+            text-align: right;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+        }
+        
+        .timestamp {
+            font-size: 0.85em;
+            color: #7f8c8d;
+            font-family: 'Courier New', monospace;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 2rem;
+            color: #7f8c8d;
+            border-top: 1px solid #ecf0f1;
+            margin-top: 3rem;
+        }
+        
+        footer a {
+            color: #3498db;
+            text-decoration: none;
+            margin: 0 1rem;
+        }
+        
+        footer a:hover {
+            text-decoration: underline;
+        }
+        
+    </style>
+</head>
+<body>
+    <header>
+        <h1>🔬 Optimization Solver Benchmark</h1>
+        <p>Raw Data - Detailed Results Table</p>
+        <p><small>Generated: 2025-06-18 12:00:48 | Total Results: 14</small></p>
+    </header>
+    
+    <nav>
+        <a href="index.html">Overview</a>
+        <a href="results_matrix.html">Results Matrix</a>
+        <a href="raw_data.html" class="active">Raw Data</a>
+        <a href="data/">Data Exports</a>
+    </nav>
+    
+    <main>
+        <div class="section">
+            <h2>📋 Detailed Results</h2>
+            <div class="section-content">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Solver</th>
+                            <th>Problem</th>
+                            <th>Type</th>
+                            <th>Library</th>
+                            <th>Status</th>
+                            <th>Solve Time (s)</th>
+                            <th>Objective Value</th>
+                            <th>Iterations</th>
+                            <th>Duality Gap</th>
+                            <th>Timestamp</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            <tr>
+                <td><span class="solver-name">cvxpy_clarabel</span></td>
+                <td>hinf12</td>
+                <td><span class="problem-type">SDP</span></td>
+                <td><span class="library-name">DIMACS</span></td>
+                <td><span class="">ERROR</span></td>
+                <td class="number">0.0000</td>
+                <td class="number">—</td>
+                <td class="number">—</td>
+                <td class="number">—</td>
+                <td class="timestamp">2025-06-17 13:35:49</td>
+            </tr>
+            <tr>
+                <td><span class="solver-name">scipy_linprog</span></td>
+                <td>hinf12</td>
+                <td><span class="problem-type">SDP</span></td>
+                <td><span class="library-name">DIMACS</span></td>
+                <td><span class="">ERROR</span></td>
+                <td class="number">0.0000</td>
+                <td class="number">—</td>
+                <td class="number">—</td>
+                <td class="number">—</td>
+                <td class="timestamp">2025-06-17 13:35:49</td>
+            </tr>
+            <tr>
+                <td><span class="solver-name">cvxpy_clarabel</span></td>
+                <td>nb</td>
+                <td><span class="problem-type">SDP</span></td>
+                <td><span class="library-name">DIMACS</span></td>
+                <td><span class="">ERROR</span></td>
+                <td class="number">0.0000</td>
+                <td class="number">—</td>
+                <td class="number">—</td>
+                <td class="number">—</td>
+                <td class="timestamp">2025-06-18 02:27:11</td>
+            </tr>
+            <tr>
+                <td><span class="solver-name">cvxpy_clarabel</span></td>
+                <td>nb</td>
+                <td><span class="problem-type">SDP</span></td>
+                <td><span class="library-name">DIMACS</span></td>
+                <td><span class="">ERROR</span></td>
+                <td class="number">0.0000</td>
+                <td class="number">—</td>
+                <td class="number">—</td>
+                <td class="number">—</td>
+                <td class="timestamp">2025-06-18 02:19:05</td>
+            </tr>
+            <tr>
+                <td><span class="solver-name">scipy_linprog</span></td>
+                <td>nb</td>
+                <td><span class="problem-type">SDP</span></td>
+                <td><span class="library-name">DIMACS</span></td>
+                <td><span class="">ERROR</span></td>
+                <td class="number">0.0000</td>
+                <td class="number">—</td>
+                <td class="number">—</td>
+                <td class="number">—</td>
+                <td class="timestamp">2025-06-17 14:49:30</td>
+            </tr>
+            <tr>
+                <td><span class="solver-name">cvxpy_clarabel</span></td>
+                <td>arch0</td>
+                <td><span class="problem-type">SDP</span></td>
+                <td><span class="library-name">SDPLIB</span></td>
+                <td><span class="">ERROR</span></td>
+                <td class="number">0.0000</td>
+                <td class="number">—</td>
+                <td class="number">—</td>
+                <td class="number">—</td>
+                <td class="timestamp">2025-06-18 02:27:11</td>
+            </tr>
+            <tr>
+                <td><span class="solver-name">cvxpy_clarabel</span></td>
+                <td>arch0</td>
+                <td><span class="problem-type">SDP</span></td>
+                <td><span class="library-name">SDPLIB</span></td>
+                <td><span class="">ERROR</span></td>
+                <td class="number">0.0000</td>
+                <td class="number">—</td>
+                <td class="number">—</td>
+                <td class="number">—</td>
+                <td class="timestamp">2025-06-17 13:35:49</td>
+            </tr>
+            <tr>
+                <td><span class="solver-name">scipy_linprog</span></td>
+                <td>arch0</td>
+                <td><span class="problem-type">SDP</span></td>
+                <td><span class="library-name">SDPLIB</span></td>
+                <td><span class="">ERROR</span></td>
+                <td class="number">0.0000</td>
+                <td class="number">—</td>
+                <td class="number">—</td>
+                <td class="number">—</td>
+                <td class="timestamp">2025-06-17 14:49:30</td>
+            </tr>
+            <tr>
+                <td><span class="solver-name">scipy_linprog</span></td>
+                <td>arch0</td>
+                <td><span class="problem-type">SDP</span></td>
+                <td><span class="library-name">SDPLIB</span></td>
+                <td><span class="">ERROR</span></td>
+                <td class="number">0.0000</td>
+                <td class="number">—</td>
+                <td class="number">—</td>
+                <td class="number">—</td>
+                <td class="timestamp">2025-06-17 13:35:49</td>
+            </tr>
+            <tr>
+                <td><span class="solver-name">cvxpy_clarabel</span></td>
+                <td>control1</td>
+                <td><span class="problem-type">SDP</span></td>
+                <td><span class="library-name">SDPLIB</span></td>
+                <td><span class="">ERROR</span></td>
+                <td class="number">0.0000</td>
+                <td class="number">—</td>
+                <td class="number">—</td>
+                <td class="number">—</td>
+                <td class="timestamp">2025-06-17 13:35:05</td>
+            </tr>
+            <tr>
+                <td><span class="solver-name">cvxpy_clarabel</span></td>
+                <td>simple_lp_test</td>
+                <td><span class="problem-type">LP</span></td>
+                <td><span class="library-name">internal</span></td>
+                <td><span class="">OPTIMAL</span></td>
+                <td class="number">0.0032</td>
+                <td class="number">-1.963365e-09</td>
+                <td class="number">5</td>
+                <td class="number">—</td>
+                <td class="timestamp">2025-06-18 02:19:05</td>
+            </tr>
+            <tr>
+                <td><span class="solver-name">cvxpy_clarabel</span></td>
+                <td>simple_lp_test</td>
+                <td><span class="problem-type">LP</span></td>
+                <td><span class="library-name">internal</span></td>
+                <td><span class="">OPTIMAL</span></td>
+                <td class="number">0.0032</td>
+                <td class="number">-1.963365e-09</td>
+                <td class="number">5</td>
+                <td class="number">—</td>
+                <td class="timestamp">2025-06-17 13:35:05</td>
+            </tr>
+            <tr>
+                <td><span class="solver-name">scipy_linprog</span></td>
+                <td>simple_lp_test</td>
+                <td><span class="problem-type">LP</span></td>
+                <td><span class="library-name">internal</span></td>
+                <td><span class="">OPTIMAL</span></td>
+                <td class="number">0.0015</td>
+                <td class="number">0.000000e+00</td>
+                <td class="number">0</td>
+                <td class="number">—</td>
+                <td class="timestamp">2025-06-17 13:35:05</td>
+            </tr>
+            <tr>
+                <td><span class="solver-name">scipy_linprog</span></td>
+                <td>simple_lp_test</td>
+                <td><span class="problem-type">LP</span></td>
+                <td><span class="library-name">internal</span></td>
+                <td><span class="">OPTIMAL</span></td>
+                <td class="number">0.0051</td>
+                <td class="number">0.000000e+00</td>
+                <td class="number">0</td>
+                <td class="number">—</td>
+                <td class="timestamp">2025-06-18 02:34:41</td>
+            </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <p>
+            <a href="index.html">Overview</a> |
+            <a href="results_matrix.html">Results Matrix</a> |
+            <a href="data/">Data Exports</a>
+        </p>
+        <p><small>Generated by Optimization Solver Benchmark System</small></p>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,58 @@
+{
+  "metadata": {
+    "generated_at": "2025-06-18T12:00:48.691853",
+    "total_results": 14,
+    "format": "summary_only"
+  },
+  "overall_statistics": {
+    "total_results": 14,
+    "total_solvers": 2,
+    "total_problems": 5,
+    "success_rate": 0.0,
+    "avg_solve_time": 0.001857757568359375,
+    "problem_type_distribution": {
+      "SDP": 10,
+      "LP": 4
+    },
+    "library_distribution": {
+      "DIMACS": 5,
+      "SDPLIB": 5,
+      "internal": 4
+    },
+    "solver_names": [
+      "cvxpy_clarabel",
+      "scipy_linprog"
+    ],
+    "problem_names": [
+      "arch0",
+      "control1",
+      "hinf12",
+      "nb",
+      "simple_lp_test"
+    ]
+  },
+  "solver_performance": [
+    {
+      "solver_name": "cvxpy_clarabel",
+      "problems_attempted": 8,
+      "problems_solved": 0,
+      "success_rate": 0.0,
+      "avg_solve_time": 0.0015895366668701172,
+      "min_solve_time": 1.0013580322265625e-05,
+      "max_solve_time": 0.0031769275665283203
+    },
+    {
+      "solver_name": "scipy_linprog",
+      "problems_attempted": 6,
+      "problems_solved": 0,
+      "success_rate": 0.0,
+      "avg_solve_time": 0.0022153854370117188,
+      "min_solve_time": 2.7894973754882812e-05,
+      "max_solve_time": 0.005103111267089844
+    }
+  ],
+  "environment": {
+    "commit_hash": "b13af6c54afb59fcc4b00f10b6450804736a0060",
+    "platform": "Unknown"
+  }
+}
