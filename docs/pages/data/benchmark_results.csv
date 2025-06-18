@@ -1,0 +1,15 @@
+solver_name,solver_version,problem_name,problem_type,problem_library,status,solve_time,primal_objective_value,dual_objective_value,duality_gap,primal_infeasibility,dual_infeasibility,iterations,commit_hash,timestamp
+cvxpy_clarabel,cvxpy-1.6.5-CLARABEL,hinf12,SDP,DIMACS,ERROR,1.0013580322265625e-05,,,,,,,b13af6c54afb59fcc4b00f10b6450804736a0060,2025-06-17T13:35:49
+scipy_linprog,scipy-1.15.3,hinf12,SDP,DIMACS,ERROR,2.7894973754882812e-05,,,,,,,b13af6c54afb59fcc4b00f10b6450804736a0060,2025-06-17T13:35:49
+cvxpy_clarabel,unknown,nb,SDP,DIMACS,ERROR,0.0,,,,,,,a39e8aa3fbfc3c53d2877149d56b43e0d341199b,2025-06-18T02:27:11
+cvxpy_clarabel,unknown,nb,SDP,DIMACS,ERROR,0.0,,,,,,,a39e8aa3fbfc3c53d2877149d56b43e0d341199b,2025-06-18T02:19:05
+scipy_linprog,unknown,nb,SDP,DIMACS,ERROR,0.0,,,,,,,b13af6c54afb59fcc4b00f10b6450804736a0060,2025-06-17T14:49:30
+cvxpy_clarabel,cvxpy-1.6.5-CLARABEL,arch0,SDP,SDPLIB,ERROR,1.6927719116210938e-05,,,,,,,a39e8aa3fbfc3c53d2877149d56b43e0d341199b,2025-06-18T02:27:11
+cvxpy_clarabel,unknown,arch0,SDP,SDPLIB,ERROR,0.0,,,,,,,b13af6c54afb59fcc4b00f10b6450804736a0060,2025-06-17T13:35:49
+scipy_linprog,unknown,arch0,SDP,SDPLIB,ERROR,0.0,,,,,,,b13af6c54afb59fcc4b00f10b6450804736a0060,2025-06-17T14:49:30
+scipy_linprog,unknown,arch0,SDP,SDPLIB,ERROR,0.0,,,,,,,b13af6c54afb59fcc4b00f10b6450804736a0060,2025-06-17T13:35:49
+cvxpy_clarabel,unknown,control1,SDP,SDPLIB,ERROR,0.0,,,,,,,b13af6c54afb59fcc4b00f10b6450804736a0060,2025-06-17T13:35:05
+cvxpy_clarabel,cvxpy-1.6.5-CLARABEL,simple_lp_test,LP,internal,OPTIMAL,0.003154277801513672,-1.9633649676875667e-09,,,,,5,a39e8aa3fbfc3c53d2877149d56b43e0d341199b,2025-06-18T02:19:05
+cvxpy_clarabel,cvxpy-1.6.5-CLARABEL,simple_lp_test,LP,internal,OPTIMAL,0.0031769275665283203,-1.9633649676875667e-09,,,,,5,b13af6c54afb59fcc4b00f10b6450804736a0060,2025-06-17T13:35:05
+scipy_linprog,scipy-1.15.3,simple_lp_test,LP,internal,OPTIMAL,0.0015151500701904297,0.0,,,,,0,b13af6c54afb59fcc4b00f10b6450804736a0060,2025-06-17T13:35:05
+scipy_linprog,scipy-1.15.3,simple_lp_test,LP,internal,OPTIMAL,0.005103111267089844,0.0,,,,,0,c9c99600541fccb1a2e4f4bde9f028e397d1f1f4,2025-06-18T02:34:41

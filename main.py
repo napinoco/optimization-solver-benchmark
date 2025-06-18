@@ -30,7 +30,8 @@ sys.path.insert(0, str(project_root))
 try:
     from scripts.benchmark.runner import BenchmarkRunner
     from scripts.database.database_manager import DatabaseManager
-    from scripts.reporting.simple_html_generator import SimpleHTMLGenerator
+    from scripts.reporting.html_generator import HTMLGenerator
+    from scripts.reporting.data_exporter import DataExporter
     from scripts.benchmark.problem_loader import list_available_problems
     from scripts.utils.logger import get_logger
 except ImportError as e:
@@ -198,12 +199,12 @@ def run_benchmark(problems: Optional[List[str]] = None,
 
 
 def generate_reports() -> bool:
-    """Generate HTML reports from benchmark results."""
+    """Generate simplified HTML reports and data exports from benchmark results."""
     
     logger = get_logger("reporting")
     
     try:
-        logger.info("Starting report generation...")
+        logger.info("Starting simplified report generation...")
         
         # Check if database exists
         database_path = "database/results.db"
@@ -212,41 +213,40 @@ def generate_reports() -> bool:
             logger.error("Please run benchmarks first to generate data.")
             return False
         
-        # First, publish data files (JSON/CSV exports)
-        from scripts.reporting.data_publisher import DataPublisher
+        # Generate simplified HTML reports (3 reports only)
+        logger.info("Generating simplified HTML reports...")
         
-        data_dir = "docs/data"
-        logger.info("Publishing data files...")
+        html_generator = HTMLGenerator(output_dir="docs/pages")
+        html_success = html_generator.generate_all_reports()
         
-        data_publisher = DataPublisher(
-            db_path=database_path,
-            output_dir=data_dir
-        )
-        
-        if not data_publisher.publish_all_data():
-            logger.error("Failed to publish data files")
-            return False
-        
-        logger.info("Data files published successfully")
-        
-        # Then, generate HTML reports
-        output_dir = "docs"
-        generator = SimpleHTMLGenerator(
-            data_dir=data_dir,
-            output_dir=output_dir
-        )
-        
-        # Generate all reports
-        start_time = time.time()
-        success = generator.generate_all_html()
-        duration = time.time() - start_time
-        
-        if success:
-            logger.info(f"Reports generated successfully in {duration:.2f}s")
-            logger.info(f"Output directory: {output_dir}/")
-        else:
+        if not html_success:
             logger.error("Failed to generate HTML reports")
             return False
+        
+        logger.info("HTML reports generated successfully")
+        
+        # Export data in JSON/CSV formats
+        logger.info("Exporting data files...")
+        
+        data_exporter = DataExporter(output_dir="docs/pages/data")
+        data_success = data_exporter.export_latest_results()
+        summary_success = data_exporter.export_summary_only()
+        
+        if not (data_success and summary_success):
+            logger.error("Failed to export data files")
+            return False
+        
+        logger.info("Data export completed successfully")
+        
+        # Summary
+        logger.info("Simplified reporting completed successfully")
+        logger.info("Generated files:")
+        logger.info("  • docs/pages/index.html (Overview Dashboard)")
+        logger.info("  • docs/pages/results_matrix.html (Results Matrix)")
+        logger.info("  • docs/pages/raw_data.html (Raw Data Table)")
+        logger.info("  • docs/pages/data/benchmark_results.json (Full Results JSON)")
+        logger.info("  • docs/pages/data/benchmark_results.csv (Full Results CSV)")
+        logger.info("  • docs/pages/data/summary.json (Summary Statistics)")
         
         return True
         
