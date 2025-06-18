@@ -443,74 +443,11 @@ class StatisticsCalculator:
     
     def calculate_backend_comparison(self) -> Dict[str, Any]:
         """Calculate comprehensive backend comparison statistics."""
-        logger.info("Calculating backend comparison statistics...")
+        logger.info("Backend comparison statistics not available in re-architected system")
         
-        try:
-            from scripts.utils.solver_validation import SolverValidator, ProblemType
-            from scripts.benchmark.backend_selector import BackendSelector
-        except ImportError:
-            logger.warning("Backend validation modules not available, skipping backend comparison")
-            return {}
-        
-        # Initialize backend analysis components
-        validator = SolverValidator()
-        selector = BackendSelector(validator)
-        
-        # Get validation results
-        validation_results = validator.validate_all_backends()
-        available_backends = [k for k, v in validation_results.items() if v.available]
-        
-        # Calculate backend performance from database
-        backend_performance = self._calculate_backend_performance_from_db()
-        
-        # Generate comprehensive backend analysis
-        backend_analysis = {
-            "validation_summary": {
-                "total_backends": len(validation_results),
-                "available_backends": len(available_backends),
-                "unavailable_backends": len(validation_results) - len(available_backends),
-                "availability_percentage": len(available_backends) / len(validation_results) * 100 if validation_results else 0
-            },
-            "available_backends": available_backends,
-            "backend_capabilities": {},
-            "performance_comparison": backend_performance,
-            "problem_type_coverage": {},
-            "recommendations": {}
-        }
-        
-        # Add capability information for available backends
-        for backend_name, result in validation_results.items():
-            if result.available and result.capabilities:
-                backend_analysis["backend_capabilities"][backend_name] = {
-                    "supported_types": [pt.value for pt in result.capabilities.supported_types],
-                    "performance_tier": result.capabilities.performance_tier,
-                    "memory_efficiency": result.capabilities.memory_efficiency,
-                    "stability": result.capabilities.stability,
-                    "installation_notes": result.capabilities.installation_notes
-                }
-        
-        # Analyze problem type coverage
-        for problem_type in ProblemType:
-            compatible_backends = validator.get_backends_for_problem_type(problem_type)
-            available_compatible = [b for b in compatible_backends if b in available_backends]
-            selection = selector.select_backend_for_problem(problem_type)
-            recommended = selection.selected_backend
-            
-            backend_analysis["problem_type_coverage"][problem_type.value] = {
-                "total_compatible": len(compatible_backends),
-                "available_compatible": len(available_compatible),
-                "coverage_percentage": len(available_compatible) / len(compatible_backends) * 100 if compatible_backends else 0,
-                "available_backends": available_compatible,
-                "recommended_backend": recommended
-            }
-        
-        # Add recommendations for each problem type
-        for problem_type in ProblemType:
-            selection = selector.select_backend_for_problem(problem_type)
-            recommended = selection.selected_backend
-            backend_analysis["recommendations"][problem_type.value] = recommended
-        
-        return backend_analysis
+        # Backend comparison functionality removed in new architecture
+        # Solver selection is now done directly without complex backend selection
+        return {}
     
     def calculate_advanced_analytics(self) -> Dict[str, Any]:
         """Calculate advanced analytics using the statistical analysis module."""

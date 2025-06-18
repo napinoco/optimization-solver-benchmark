@@ -98,8 +98,7 @@ optimization-solver-benchmark/
 │   │   │   ├── dat_loader.py     # SDPLIB .dat-s file loader
 │   │   │   ├── mps_loader.py     # MPS format loader
 │   │   │   ├── qps_loader.py     # QPS format loader
-│   │   │   ├── python_loader.py  # Python problem loader
-│   │   │   └── cvxpy_converter.py # Convert to CVXPY format
+│   │   │   └── python_loader.py  # Python problem loader
 │   │   └── matlab_octave/        # MATLAB/Octave loaders (future)
 │   │       └── .gitkeep
 │   │
@@ -337,14 +336,10 @@ class BenchmarkRunner:
         # 2. Initialize solver
         solver = self.create_solver(solver_name)
         
-        # 3. Convert problem to solver format
-        converter = CVXPYConverter()
-        cvxpy_problem = converter.convert(problem_data)
-        
-        # 4. Execute solver with timeout
+        # 3. Execute solver with timeout (problem_data is already in solver-compatible format)
         try:
             start_time = time.time()
-            result = solver.solve(cvxpy_problem)
+            result = solver.solve(problem_data)
             solve_time = time.time() - start_time
             
             # 5. Store standardized result in database
@@ -584,12 +579,8 @@ class PythonLoader:
     def load(self, file_path: str) -> ProblemData:
         """Execute Python file and extract problem definition"""
 
-# Unified conversion to solver format
-class CVXPYConverter:
-    """Convert any problem format to CVXPY representation"""
-    
-    def convert(self, problem_data: ProblemData) -> CVXPYProblem:
-        """Convert problem to CVXPY format for solving"""
+# Note: Conversion to solver format is handled directly by loaders
+# Each loader produces ProblemData that is compatible with solvers
 ```
 
 #### Loader Selection Logic
