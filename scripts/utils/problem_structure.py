@@ -111,7 +111,7 @@ class ProblemStructureAnalyzer:
         Returns:
             ProblemStructure with comprehensive analysis
         """
-        self.logger.debug(f"Analyzing structure of problem: {problem_data.name}")
+        self.logger.debug(f"Analyzing structure of problem")
         
         try:
             # Check if this is an external library problem with cone structure

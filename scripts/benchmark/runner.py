@@ -245,9 +245,10 @@ class BenchmarkRunner:
             result = solver.solve(problem_data)
             solve_time = time.time() - start_time
             
-            # Ensure timing is accurate
+            # Ensure timing is accurate and set proper names
             result.solve_time = solve_time
             result.solver_name = solver_name
+            result.problem_name = problem_name  # Set correct problem name
             result.solver_version = solver.get_version()
             
             # Store result in database

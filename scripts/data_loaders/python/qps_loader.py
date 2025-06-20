@@ -53,11 +53,9 @@ class QPSLoader:
         Returns:
             ProblemData object
         """
-        problem_name = Path(file_path).stem
-        
         # Parse and convert the file
         parsed_data = self.parse_qps_file(file_path)
-        problem_data = self.convert_to_problem_data(parsed_data, problem_name)
+        problem_data = self.convert_to_problem_data(parsed_data)
         
         logger.info(f"Successfully loaded QPS problem: {problem_data}")
         return problem_data

@@ -52,11 +52,9 @@ class MPSLoader:
         Returns:
             ProblemData object
         """
-        problem_name = Path(file_path).stem
-        
         # Parse and convert the file
         parsed_data = self.parse_mps_file(file_path)
-        problem_data = self.convert_to_problem_data(parsed_data, problem_name)
+        problem_data = self.convert_to_problem_data(parsed_data)
         
         logger.info(f"Successfully loaded MPS problem: {problem_data}")
         return problem_data
@@ -208,14 +206,12 @@ class MPSLoader:
             elif bound_type == 'PL':  # Plus infinity
                 parsed_data['bounds'][var_name]['upper'] = float('inf')
     
-    def convert_to_problem_data(self, parsed_data: Dict[str, Any], 
-                              problem_name: str) -> ProblemData:
+    def convert_to_problem_data(self, parsed_data: Dict[str, Any]) -> ProblemData:
         """
         Convert parsed MPS data to unified ProblemData format.
         
         Args:
             parsed_data: Parsed MPS problem data
-            problem_name: Name for the problem
             
         Returns:
             ProblemData object
@@ -298,12 +294,11 @@ class MPSLoader:
             'constraint_names': list(constraint_rows.keys())
         }
         
-        logger.info(f"Converted {problem_name}: LP problem "
+        logger.info(f"Converted LP problem "
                    f"({n_vars} vars, {n_constraints} constraints)")
         
         # Create ProblemData object
         return ProblemData(
-            name=problem_name,
             problem_class='LP',
             c=c,
             A_eq=A_eq,
@@ -316,14 +311,12 @@ class MPSLoader:
 
 
 # Convenience function for backward compatibility
-def load_mps_problem(file_path: str, 
-                    problem_name: Optional[str] = None) -> ProblemData:
+def load_mps_problem(file_path: str) -> ProblemData:
     """
     Convenience function to load an MPS problem.
     
     Args:
         file_path: Path to the .mps file
-        problem_name: Optional name for the problem
         
     Returns:
         ProblemData object

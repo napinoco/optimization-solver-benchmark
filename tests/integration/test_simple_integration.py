@@ -25,7 +25,7 @@ def test_python_solvers():
         # Test loading a simple problem
         print("📝 Loading test problem...")
         problem = load_problem("simple_lp_001", "light_set")
-        print(f"✅ Problem loaded: {problem.name} ({problem.problem_class})")
+        print(f"✅ Problem loaded: {problem.problem_class} problem")
         print(f"   Variables: {len(problem.c) if problem.c is not None else 0}")
         
         # Test basic functionality
