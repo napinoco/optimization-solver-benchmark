@@ -166,7 +166,7 @@ class ResultProcessor:
         problems = set(r.problem_name for r in results)
         
         # Success rate calculation
-        successful_results = [r for r in results if r.status == 'optimal']
+        successful_results = [r for r in results if r.status and r.status.upper() == 'OPTIMAL']
         success_rate = len(successful_results) / total_results if total_results > 0 else 0.0
         
         # Average solve time calculation
@@ -218,7 +218,7 @@ class ResultProcessor:
             
             solver_stats[solver]['problems_attempted'] += 1
             
-            if result.status == 'optimal':
+            if result.status and result.status.upper() == 'OPTIMAL':
                 solver_stats[solver]['problems_solved'] += 1
             
             if result.solve_time is not None and result.solve_time > 0:

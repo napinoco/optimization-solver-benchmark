@@ -798,11 +798,12 @@ class HTMLGenerator:
                     solve_time = result['solve_time']
                     
                     # Determine CSS class based on status
-                    if status == 'optimal':
+                    status_lower = status.lower()
+                    if status_lower == 'optimal':
                         css_class = 'status-optimal'
-                    elif status == 'error':
+                    elif status_lower == 'error':
                         css_class = 'status-error'
-                    elif status in ['infeasible', 'unbounded']:
+                    elif status_lower in ['infeasible', 'unbounded']:
                         css_class = 'status-infeasible'
                     else:
                         css_class = 'status-unknown'
@@ -1091,11 +1092,12 @@ class HTMLGenerator:
             
             # Status styling
             status = result.status or "unknown"
-            if status == 'optimal':
+            status_lower = status.lower()
+            if status_lower == 'optimal':
                 status_class = 'status-optimal'
-            elif status == 'error':
+            elif status_lower == 'error':
                 status_class = 'status-error'
-            elif status in ['infeasible', 'unbounded']:
+            elif status_lower in ['infeasible', 'unbounded']:
                 status_class = 'status-infeasible'
             else:
                 status_class = ''
