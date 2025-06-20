@@ -52,9 +52,11 @@ class MATLoader:
         Returns:
             ProblemData object
         """
+        problem_name = Path(file_path).stem.replace('.mat', '')
+        
         # Load and parse the file
         mat_data = self.load_sedumi_mat(file_path)
-        problem_data = self.convert_to_problem_data(mat_data)
+        problem_data = self.convert_to_problem_data(mat_data, problem_name)
         
         logger.info(f"Successfully loaded MAT problem: {problem_data}")
         return problem_data
@@ -169,12 +171,14 @@ class MATLoader:
         else:
             return 'LP'
     
-    def convert_to_problem_data(self, mat_data: Dict[str, Any]) -> ProblemData:
+    def convert_to_problem_data(self, mat_data: Dict[str, Any], 
+                              problem_name: str) -> ProblemData:
         """
         Convert SeDuMi data to unified ProblemData format.
         
         Args:
             mat_data: Loaded SeDuMi MATLAB data
+            problem_name: Name for the problem
             
         Returns:
             ProblemData object
@@ -227,12 +231,13 @@ class MATLoader:
             }
         }
         
-        logger.info(f"Converted {problem_class} problem "
+        logger.info(f"Converted {problem_name}: {problem_class} problem "
                    f"({A.shape[1]} vars, {A.shape[0]} constraints)")
         
         # Create ProblemData object
         # SeDuMi format uses equality constraints: Ax = b
         return ProblemData(
+            name=problem_name,
             problem_class=problem_class,
             c=c,
             A_eq=A,
@@ -245,12 +250,14 @@ class MATLoader:
 
 
 # Convenience function for backward compatibility
-def load_mat_problem(file_path: str) -> ProblemData:
+def load_mat_problem(file_path: str, 
+                    problem_name: Optional[str] = None) -> ProblemData:
     """
     Convenience function to load a MAT problem.
     
     Args:
         file_path: Path to the .mat or .mat.gz file
+        problem_name: Optional name for the problem
         
     Returns:
         ProblemData object

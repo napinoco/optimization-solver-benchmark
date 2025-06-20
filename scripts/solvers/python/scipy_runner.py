@@ -68,7 +68,7 @@ class ScipySolver(SolverInterface):
         Returns:
             SolverResult containing solve status and results
         """
-        self.logger.debug(f"Solving {problem_data.problem_class} problem")
+        self.logger.debug(f"Solving {problem_data.problem_class} problem '{problem_data.name}'")
         
         start_time = time.time()
         
