@@ -81,7 +81,7 @@ class ProblemData:
             structure_info = f", {vars_count} vars, {constraints_count} constraints"
         return f"ProblemData(name='{self.name}', class='{self.problem_class}'{structure_info})"
 
-def load_mps_file(file_path: str) -> ProblemData:
+def load_mps_file(file_path: str, problem_name: str = None) -> ProblemData:
     """Load MPS format linear programming problem."""
     logger.info(f"Loading MPS file: {file_path}")
     
@@ -95,9 +95,10 @@ def load_mps_file(file_path: str) -> ProblemData:
             if section not in content:
                 raise ValueError(f"Missing required section: {section}")
         
-        # Extract problem name
-        name_match = re.search(r'NAME\s+(\w+)', content)
-        problem_name = name_match.group(1) if name_match else "unnamed"
+        # Use provided name or extract from file as fallback
+        if problem_name is None:
+            name_match = re.search(r'NAME\s+(\w+)', content)
+            problem_name = name_match.group(1) if name_match else "unnamed"
         
         # Parse ROWS section to identify constraint types
         rows_section = re.search(r'ROWS\s*\n(.*?)\n(?:COLUMNS|$)', content, re.DOTALL)
@@ -207,7 +208,7 @@ def load_mps_file(file_path: str) -> ProblemData:
         logger.error(f"Failed to load MPS file {file_path}: {e}")
         raise
 
-def load_qps_file(file_path: str) -> ProblemData:
+def load_qps_file(file_path: str, problem_name: str = None) -> ProblemData:
     """Load QPS format quadratic programming problem."""
     logger.info(f"Loading QPS file: {file_path}")
     
@@ -221,13 +222,14 @@ def load_qps_file(file_path: str) -> ProblemData:
             if section not in content:
                 raise ValueError(f"Missing required section: {section}")
         
-        # Extract problem name
-        name_match = re.search(r'NAME\s+(\w+)', content)
-        problem_name = name_match.group(1) if name_match else "unnamed"
+        # Use provided name or extract from file as fallback
+        if problem_name is None:
+            name_match = re.search(r'NAME\s+(\w+)', content)
+            problem_name = name_match.group(1) if name_match else "unnamed"
         
         # Parse similar to MPS but also handle QUADOBJ section
         # For simplicity, reuse MPS parsing logic for linear part
-        mps_problem = load_mps_file(file_path)  # Will fail on QUADOBJ, but that's OK
+        mps_problem = load_mps_file(file_path, problem_name)  # Will fail on QUADOBJ, but that's OK
         
         # Parse QUADOBJ section for quadratic terms
         quadobj_section = re.search(r'QUADOBJ\s*\n(.*?)\n(?:ENDATA|$)', content, re.DOTALL)
@@ -359,18 +361,18 @@ def load_problem(problem_name: str, problem_set: str = None) -> ProblemData:
         # Use MAT loader for .mat.gz files (DIMACS)
         from scripts.data_loaders.python.mat_loader import MATLoader
         loader = MATLoader()
-        return loader.load(str(file_path))
+        return loader.load(str(file_path), problem_name)
     elif file_type == "dat-s":
         # Use DAT loader for .dat-s files (SDPLIB)
         from scripts.data_loaders.python.dat_loader import DATLoader
         loader = DATLoader()
-        return loader.load(str(file_path))
+        return loader.load(str(file_path), problem_name)
     elif file_type == "mps":
         # Use MPS loader for Linear Programming
-        return load_mps_file(str(file_path))
+        return load_mps_file(str(file_path), problem_name)
     elif file_type == "qps":
         # Use QPS loader for Quadratic Programming
-        return load_qps_file(str(file_path))
+        return load_qps_file(str(file_path), problem_name)
     elif file_type == "python":
         # Use Python loader for SOCP/SDP
         return load_python_problem(str(file_path), problem_info["problem_type"])
