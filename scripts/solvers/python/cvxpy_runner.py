@@ -333,13 +333,19 @@ class CvxpySolver(SolverInterface):
     def _solve_socp(self, problem_data: ProblemData, start_time: float, timeout: Optional[float] = None) -> SolverResult:
         """Solve Second-Order Cone Programming problem using CVXPY."""
         
-        # For SOCP problems, we use the pre-built CVXPY problem from the problem data
+        # Convert to CVXPY format if not already done
         if problem_data.cvxpy_problem is None:
-            error_msg = "SOCP problem must include a pre-built CVXPY problem"
-            solve_time = time.time() - start_time
-            return SolverResult.create_error_result(error_msg, solve_time)
-        
-        cvx_problem = problem_data.cvxpy_problem
+            try:
+                from scripts.data_loaders.python.cvxpy_converter import CVXPYConverter
+                converter = CVXPYConverter()
+                cvx_problem = converter.convert(problem_data)
+                self.logger.debug(f"Converted SOCP problem to CVXPY format")
+            except Exception as e:
+                error_msg = f"Failed to convert SOCP problem to CVXPY format: {str(e)}"
+                solve_time = time.time() - start_time
+                return SolverResult.create_error_result(error_msg, solve_time)
+        else:
+            cvx_problem = problem_data.cvxpy_problem
         
         # Get solver options
         solver_options = self._get_solver_options(timeout)
@@ -360,13 +366,19 @@ class CvxpySolver(SolverInterface):
     def _solve_sdp(self, problem_data: ProblemData, start_time: float, timeout: Optional[float] = None) -> SolverResult:
         """Solve Semidefinite Programming problem using CVXPY."""
         
-        # For SDP problems, we use the pre-built CVXPY problem from the problem data
+        # Convert to CVXPY format if not already done
         if problem_data.cvxpy_problem is None:
-            error_msg = "SDP problem must include a pre-built CVXPY problem"
-            solve_time = time.time() - start_time
-            return SolverResult.create_error_result(error_msg, solve_time)
-        
-        cvx_problem = problem_data.cvxpy_problem
+            try:
+                from scripts.data_loaders.python.cvxpy_converter import CVXPYConverter
+                converter = CVXPYConverter()
+                cvx_problem = converter.convert(problem_data)
+                self.logger.debug(f"Converted SDP problem to CVXPY format")
+            except Exception as e:
+                error_msg = f"Failed to convert SDP problem to CVXPY format: {str(e)}"
+                solve_time = time.time() - start_time
+                return SolverResult.create_error_result(error_msg, solve_time)
+        else:
+            cvx_problem = problem_data.cvxpy_problem
         
         # Get solver options
         solver_options = self._get_solver_options(timeout)
