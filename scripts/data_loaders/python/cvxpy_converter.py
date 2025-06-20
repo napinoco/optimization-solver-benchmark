@@ -55,7 +55,7 @@ class CVXPYConverter:
         Raises:
             ValueError: If problem format is not supported
         """
-        logger.info(f"Converting {problem_data.name} ({problem_data.problem_class}) to CVXPY format")
+        logger.info(f"Converting {problem_data.problem_class} problem to CVXPY format")
         
         # If already a CVXPY problem, return as-is
         if hasattr(problem_data, 'cvxpy_problem') and problem_data.cvxpy_problem is not None:

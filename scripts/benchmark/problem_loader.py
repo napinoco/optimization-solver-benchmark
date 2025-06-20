@@ -22,13 +22,13 @@ def _get_structure_analyzer():
 
 class ProblemData:
     """Container for optimization problem data."""
-    def __init__(self, name: str, problem_class: str, c: np.ndarray = None, 
+    def __init__(self, problem_class: str, c: np.ndarray = None, 
                  A_eq: np.ndarray = None, b_eq: np.ndarray = None,
                  A_ub: np.ndarray = None, b_ub: np.ndarray = None,
                  bounds: List[Tuple] = None, P: np.ndarray = None,
                  cvxpy_problem=None, variables=None, objective=None, 
                  constraints=None, metadata=None, analyze_structure: bool = True):
-        self.name = name
+        # Note: name removed - problem names are managed externally by problem registry
         self.problem_class = problem_class
         self.c = c  # objective coefficients
         self.A_eq = A_eq  # equality constraint matrix
@@ -52,7 +52,7 @@ class ProblemData:
             try:
                 self._analyze_structure()
             except Exception as e:
-                logger.debug(f"Could not analyze structure for {name}: {e}")
+                logger.debug(f"Could not analyze structure: {e}")
         
     def _analyze_structure(self):
         """Analyze problem structure using the structure analyzer."""
@@ -79,7 +79,7 @@ class ProblemData:
             vars_count = self._structure_summary.get('variables', '?')
             constraints_count = self._structure_summary.get('constraints', '?')
             structure_info = f", {vars_count} vars, {constraints_count} constraints"
-        return f"ProblemData(name='{self.name}', class='{self.problem_class}'{structure_info})"
+        return f"ProblemData(class='{self.problem_class}'{structure_info})"
 
 def load_mps_file(file_path: str) -> ProblemData:
     """Load MPS format linear programming problem."""
@@ -95,7 +95,7 @@ def load_mps_file(file_path: str) -> ProblemData:
             if section not in content:
                 raise ValueError(f"Missing required section: {section}")
         
-        # Extract problem name
+        # Extract problem name (for logging only)
         name_match = re.search(r'NAME\s+(\w+)', content)
         problem_name = name_match.group(1) if name_match else "unnamed"
         
@@ -193,7 +193,6 @@ def load_mps_file(file_path: str) -> ProblemData:
         logger.info(f"Successfully loaded MPS problem: {problem_name} ({n_vars} variables, {len(constraint_rows)} constraints)")
         
         return ProblemData(
-            name=problem_name,
             problem_class="LP",
             c=c,
             A_ub=A_ub,
@@ -221,7 +220,7 @@ def load_qps_file(file_path: str) -> ProblemData:
             if section not in content:
                 raise ValueError(f"Missing required section: {section}")
         
-        # Extract problem name
+        # Extract problem name (for logging only)
         name_match = re.search(r'NAME\s+(\w+)', content)
         problem_name = name_match.group(1) if name_match else "unnamed"
         
@@ -264,7 +263,6 @@ def load_qps_file(file_path: str) -> ProblemData:
         logger.info(f"Successfully loaded QPS problem: {problem_name} ({n_vars} variables)")
         
         return ProblemData(
-            name=problem_name,
             problem_class="QP",
             c=np.zeros(n_vars),  # Linear part is usually zero for our simple QP
             A_ub=mps_problem.A_ub,
@@ -323,7 +321,7 @@ def load_python_problem(file_path: str, problem_class: str) -> ProblemData:
         else:
             raise ValueError(f"Unsupported Python problem class: {problem_class}")
         
-        logger.info(f"Successfully loaded Python problem: {problem_data.name} ({problem_class})")
+        logger.info(f"Successfully loaded Python problem ({problem_class})")
         return problem_data
         
     except Exception as e:

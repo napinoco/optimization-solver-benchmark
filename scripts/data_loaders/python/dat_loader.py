@@ -54,11 +54,9 @@ class DATLoader:
         Returns:
             ProblemData object
         """
-        problem_name = Path(file_path).stem.replace('.dat-s', '')
-        
         # Parse and convert the file
         parsed_data = self.parse_sdpa_file(file_path)
-        problem_data = self.convert_to_problem_data(parsed_data, problem_name)
+        problem_data = self.convert_to_problem_data(parsed_data)
         
         logger.info(f"Successfully loaded DAT problem: {problem_data}")
         return problem_data
@@ -270,14 +268,12 @@ class DATLoader:
         
         return cone_info
     
-    def convert_to_problem_data(self, parsed_data: Dict[str, Any], 
-                              problem_name: str) -> ProblemData:
+    def convert_to_problem_data(self, parsed_data: Dict[str, Any]) -> ProblemData:
         """
         Convert parsed SDPA data to unified ProblemData format.
         
         Args:
             parsed_data: Parsed SDPA problem data
-            problem_name: Name for the problem
             
         Returns:
             ProblemData object
@@ -310,13 +306,12 @@ class DATLoader:
             }
         }
         
-        logger.info(f"Converted {problem_name}: {problem_class} problem "
+        logger.info(f"Converted {problem_class} problem "
                    f"({A.shape[1]} vars, {A.shape[0]} constraints)")
         
         # Create ProblemData object
         # SDPA format uses equality constraints: Ax = b
         return ProblemData(
-            name=problem_name,
             problem_class=problem_class,
             c=c,
             A_eq=A,
@@ -329,14 +324,12 @@ class DATLoader:
 
 
 # Convenience function for backward compatibility
-def load_dat_problem(file_path: str, 
-                    problem_name: Optional[str] = None) -> ProblemData:
+def load_dat_problem(file_path: str) -> ProblemData:
     """
     Convenience function to load a DAT problem.
     
     Args:
         file_path: Path to the .dat-s file
-        problem_name: Optional name for the problem
         
     Returns:
         ProblemData object

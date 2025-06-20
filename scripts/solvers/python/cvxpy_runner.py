@@ -160,7 +160,7 @@ class CvxpySolver(SolverInterface):
         Returns:
             SolverResult containing solve status and results
         """
-        self.logger.debug(f"Solving {problem_data.problem_class} problem '{problem_data.name}'")
+        self.logger.debug(f"Solving {problem_data.problem_class} problem")
         
         start_time = time.time()
         
