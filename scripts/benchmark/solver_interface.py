@@ -107,7 +107,7 @@ class SolverInterface(ABC):
         Returns:
             SolverResult with timeout handling
         """
-        self.logger.info(f"Starting solve with timeout {self.timeout}s")
+        self.logger.info(f"Starting solve for problem '{problem.name}' with timeout {self.timeout}s")
         
         # Set up timeout handler
         def timeout_handler(signum, frame):
@@ -143,7 +143,7 @@ class SolverInterface(ABC):
             
             return SolverResult(
                 solver_name=self.name,
-                problem_name="unknown",  # Will be set by BenchmarkRunner
+                problem_name=problem.name,
                 solve_time=elapsed_time,
                 status='timeout',
                 error_message=f"Solver timed out after {self.timeout} seconds"
@@ -157,7 +157,7 @@ class SolverInterface(ABC):
             
             return SolverResult(
                 solver_name=self.name,
-                problem_name="unknown",  # Will be set by BenchmarkRunner
+                problem_name=problem.name,
                 solve_time=elapsed_time,
                 status='error',
                 error_message=error_msg
@@ -199,7 +199,7 @@ class MockSolver(SolverInterface):
     
     def solve(self, problem: ProblemData) -> SolverResult:
         """Mock solve implementation."""
-        self.logger.debug(f"Mock solving {problem.problem_class} problem")
+        self.logger.debug(f"Mock solving problem '{problem.name}'")
         
         # Simulate solving time
         time.sleep(self.simulate_time)
@@ -216,7 +216,7 @@ class MockSolver(SolverInterface):
         
         return SolverResult(
             solver_name=self.name,
-            problem_name="unknown",  # Will be set by BenchmarkRunner
+            problem_name=problem.name,
             solve_time=self.simulate_time,
             status=self.simulate_status,
             objective_value=objective_value,
@@ -270,7 +270,7 @@ if __name__ == "__main__":
         
         # Load a test problem
         problem = load_problem("simple_lp")
-        print(f"Loaded problem: {problem.problem_class}")
+        print(f"Loaded problem: {problem.name}")
         
         # Test normal solve
         result = mock_solver.solve_with_timeout(problem)
