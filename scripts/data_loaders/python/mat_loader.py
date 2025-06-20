@@ -89,8 +89,9 @@ class MATLoader:
                 mat_data = scipy.io.loadmat(file_path)
             
             # SeDuMi format validation
-            required_fields = ['A', 'b', 'c']
-            for field in required_fields:
+            if 'A' not in mat_data and 'At' not in mat_data:
+                raise ValueError(f"Missing required SeDuMi field: A or At")
+            for field in ['b', 'c', 'K']:
                 if field not in mat_data:
                     raise ValueError(f"Missing required SeDuMi field: {field}")
             
@@ -182,8 +183,15 @@ class MATLoader:
         Returns:
             ProblemData object
         """
-        # Extract basic data
-        A = mat_data['A']
+        # Extract basic data - handle both A and At variants
+        if 'A' in mat_data:
+            A = mat_data['A']
+            logger.debug("Using constraint matrix 'A' from MAT file")
+        elif 'At' in mat_data:
+            A = mat_data['At'].T  # Transpose to get A from At
+            logger.debug("Using transposed constraint matrix 'At' from MAT file")
+        else:
+            raise ValueError("MAT file must contain 'A' or 'At' field for constraint matrix.")
         
         # Handle sparse matrices for b and c
         b = mat_data['b']
@@ -211,9 +219,11 @@ class MATLoader:
             A = A.toarray()
         
         # Create metadata
+        matrix_variant = 'A' if 'A' in mat_data else 'At'
         metadata = {
             'source': 'MAT file',
             'format': 'SeDuMi .mat/.mat.gz',
+            'matrix_variant': matrix_variant,
             'cone_structure': cone_info,
             'original_dimensions': {
                 'variables': A.shape[1],
