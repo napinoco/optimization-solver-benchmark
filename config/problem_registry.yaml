@@ -58,3 +58,33 @@ problem_libraries:
     library_name: "internal"
     for_test_flag: true  # Synthetic test problem
     known_objective_value: 5.0  # Known optimal value
+    
+  # Quadratic programming problems  
+  simple_qp_test:
+    display_name: "Simple QP Test (Internal)"
+    file_path: "problems/light_set/qp/simple_qp.qps"
+    file_type: "qps"
+    problem_type: "QP"
+    library_name: "internal"
+    for_test_flag: true  # Synthetic test problem
+    # known_objective_value: null  # Unknown - omit field
+    
+  # Second-order cone programming problems
+  portfolio_optimization_test:
+    display_name: "Portfolio Optimization Test (Internal)"
+    file_path: "problems/light_set/socp/portfolio_optimization.py"
+    file_type: "python"
+    problem_type: "SOCP"
+    library_name: "internal"
+    for_test_flag: true  # Synthetic test problem
+    # known_objective_value: null  # Unknown - omit field
+    
+  # Semidefinite programming problems
+  control_lmi_test:
+    display_name: "Control LMI Test (Internal)"
+    file_path: "problems/light_set/sdp/control_lmi.py"
+    file_type: "python"
+    problem_type: "SDP"
+    library_name: "internal"
+    for_test_flag: true  # Synthetic test problem
+    # known_objective_value: null  # Unknown - omit field

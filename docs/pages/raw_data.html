@@ -190,7 +190,7 @@
     <header>
         <h1>🔬 Optimization Solver Benchmark</h1>
         <p>Raw Data - Detailed Results Table</p>
-        <p><small>Generated: 2025-06-18 12:00:48 | Total Results: 14</small></p>
+        <p><small>Generated: 2025-06-20 21:02:26 | Total Results: 20</small></p>
     </header>
     
     <nav>
@@ -225,7 +225,19 @@
                 <td>hinf12</td>
                 <td><span class="problem-type">SDP</span></td>
                 <td><span class="library-name">DIMACS</span></td>
-                <td><span class="">ERROR</span></td>
+                <td><span class="status-infeasible">UNBOUNDED</span></td>
+                <td class="number">0.0050</td>
+                <td class="number">-inf</td>
+                <td class="number">5</td>
+                <td class="number">—</td>
+                <td class="timestamp">2025-06-20 11:56:09</td>
+            </tr>
+            <tr>
+                <td><span class="solver-name">cvxpy_clarabel</span></td>
+                <td>hinf12</td>
+                <td><span class="problem-type">SDP</span></td>
+                <td><span class="library-name">DIMACS</span></td>
+                <td><span class="status-error">ERROR</span></td>
                 <td class="number">0.0000</td>
                 <td class="number">—</td>
                 <td class="number">—</td>
@@ -237,7 +249,7 @@
                 <td>hinf12</td>
                 <td><span class="problem-type">SDP</span></td>
                 <td><span class="library-name">DIMACS</span></td>
-                <td><span class="">ERROR</span></td>
+                <td><span class="status-error">ERROR</span></td>
                 <td class="number">0.0000</td>
                 <td class="number">—</td>
                 <td class="number">—</td>
@@ -249,7 +261,7 @@
                 <td>nb</td>
                 <td><span class="problem-type">SDP</span></td>
                 <td><span class="library-name">DIMACS</span></td>
-                <td><span class="">ERROR</span></td>
+                <td><span class="status-error">ERROR</span></td>
                 <td class="number">0.0000</td>
                 <td class="number">—</td>
                 <td class="number">—</td>
@@ -257,23 +269,11 @@
                 <td class="timestamp">2025-06-18 02:27:11</td>
             </tr>
             <tr>
-                <td><span class="solver-name">cvxpy_clarabel</span></td>
-                <td>nb</td>
-                <td><span class="problem-type">SDP</span></td>
-                <td><span class="library-name">DIMACS</span></td>
-                <td><span class="">ERROR</span></td>
-                <td class="number">0.0000</td>
-                <td class="number">—</td>
-                <td class="number">—</td>
-                <td class="number">—</td>
-                <td class="timestamp">2025-06-18 02:19:05</td>
-            </tr>
-            <tr>
                 <td><span class="solver-name">scipy_linprog</span></td>
                 <td>nb</td>
                 <td><span class="problem-type">SDP</span></td>
                 <td><span class="library-name">DIMACS</span></td>
-                <td><span class="">ERROR</span></td>
+                <td><span class="status-error">ERROR</span></td>
                 <td class="number">0.0000</td>
                 <td class="number">—</td>
                 <td class="number">—</td>
@@ -285,7 +285,7 @@
                 <td>arch0</td>
                 <td><span class="problem-type">SDP</span></td>
                 <td><span class="library-name">SDPLIB</span></td>
-                <td><span class="">ERROR</span></td>
+                <td><span class="status-error">ERROR</span></td>
                 <td class="number">0.0000</td>
                 <td class="number">—</td>
                 <td class="number">—</td>
@@ -297,7 +297,7 @@
                 <td>arch0</td>
                 <td><span class="problem-type">SDP</span></td>
                 <td><span class="library-name">SDPLIB</span></td>
-                <td><span class="">ERROR</span></td>
+                <td><span class="status-error">ERROR</span></td>
                 <td class="number">0.0000</td>
                 <td class="number">—</td>
                 <td class="number">—</td>
@@ -309,7 +309,7 @@
                 <td>arch0</td>
                 <td><span class="problem-type">SDP</span></td>
                 <td><span class="library-name">SDPLIB</span></td>
-                <td><span class="">ERROR</span></td>
+                <td><span class="status-error">ERROR</span></td>
                 <td class="number">0.0000</td>
                 <td class="number">—</td>
                 <td class="number">—</td>
@@ -321,7 +321,7 @@
                 <td>arch0</td>
                 <td><span class="problem-type">SDP</span></td>
                 <td><span class="library-name">SDPLIB</span></td>
-                <td><span class="">ERROR</span></td>
+                <td><span class="status-error">ERROR</span></td>
                 <td class="number">0.0000</td>
                 <td class="number">—</td>
                 <td class="number">—</td>
@@ -333,7 +333,7 @@
                 <td>control1</td>
                 <td><span class="problem-type">SDP</span></td>
                 <td><span class="library-name">SDPLIB</span></td>
-                <td><span class="">ERROR</span></td>
+                <td><span class="status-error">ERROR</span></td>
                 <td class="number">0.0000</td>
                 <td class="number">—</td>
                 <td class="number">—</td>
@@ -342,22 +342,70 @@
             </tr>
             <tr>
                 <td><span class="solver-name">cvxpy_clarabel</span></td>
-                <td>simple_lp_test</td>
-                <td><span class="problem-type">LP</span></td>
+                <td>control_lmi_test</td>
+                <td><span class="problem-type">SDP</span></td>
                 <td><span class="library-name">internal</span></td>
-                <td><span class="">OPTIMAL</span></td>
-                <td class="number">0.0032</td>
-                <td class="number">-1.963365e-09</td>
-                <td class="number">5</td>
+                <td><span class="status-optimal">OPTIMAL</span></td>
+                <td class="number">0.0047</td>
+                <td class="number">1.000000e+00</td>
+                <td class="number">6</td>
                 <td class="number">—</td>
-                <td class="timestamp">2025-06-18 02:19:05</td>
+                <td class="timestamp">2025-06-20 12:02:18</td>
+            </tr>
+            <tr>
+                <td><span class="solver-name">scipy_linprog</span></td>
+                <td>control_lmi_test</td>
+                <td><span class="problem-type">SDP</span></td>
+                <td><span class="library-name">internal</span></td>
+                <td><span class="status-error">ERROR</span></td>
+                <td class="number">0.0000</td>
+                <td class="number">—</td>
+                <td class="number">—</td>
+                <td class="number">—</td>
+                <td class="timestamp">2025-06-20 12:02:18</td>
+            </tr>
+            <tr>
+                <td><span class="solver-name">cvxpy_clarabel</span></td>
+                <td>portfolio_optimization_test</td>
+                <td><span class="problem-type">SOCP</span></td>
+                <td><span class="library-name">internal</span></td>
+                <td><span class="status-optimal">OPTIMAL</span></td>
+                <td class="number">0.0043</td>
+                <td class="number">9.035403e-01</td>
+                <td class="number">9</td>
+                <td class="number">—</td>
+                <td class="timestamp">2025-06-20 12:02:18</td>
+            </tr>
+            <tr>
+                <td><span class="solver-name">scipy_linprog</span></td>
+                <td>portfolio_optimization_test</td>
+                <td><span class="problem-type">SOCP</span></td>
+                <td><span class="library-name">internal</span></td>
+                <td><span class="status-error">ERROR</span></td>
+                <td class="number">0.0001</td>
+                <td class="number">—</td>
+                <td class="number">—</td>
+                <td class="number">—</td>
+                <td class="timestamp">2025-06-20 12:02:18</td>
             </tr>
             <tr>
                 <td><span class="solver-name">cvxpy_clarabel</span></td>
                 <td>simple_lp_test</td>
                 <td><span class="problem-type">LP</span></td>
                 <td><span class="library-name">internal</span></td>
-                <td><span class="">OPTIMAL</span></td>
+                <td><span class="status-optimal">OPTIMAL</span></td>
+                <td class="number">0.0031</td>
+                <td class="number">-1.963365e-09</td>
+                <td class="number">5</td>
+                <td class="number">—</td>
+                <td class="timestamp">2025-06-20 12:02:18</td>
+            </tr>
+            <tr>
+                <td><span class="solver-name">cvxpy_clarabel</span></td>
+                <td>simple_lp_test</td>
+                <td><span class="problem-type">LP</span></td>
+                <td><span class="library-name">internal</span></td>
+                <td><span class="status-optimal">OPTIMAL</span></td>
                 <td class="number">0.0032</td>
                 <td class="number">-1.963365e-09</td>
                 <td class="number">5</td>
@@ -369,7 +417,19 @@
                 <td>simple_lp_test</td>
                 <td><span class="problem-type">LP</span></td>
                 <td><span class="library-name">internal</span></td>
-                <td><span class="">OPTIMAL</span></td>
+                <td><span class="status-optimal">OPTIMAL</span></td>
+                <td class="number">0.0042</td>
+                <td class="number">0.000000e+00</td>
+                <td class="number">0</td>
+                <td class="number">—</td>
+                <td class="timestamp">2025-06-20 12:02:18</td>
+            </tr>
+            <tr>
+                <td><span class="solver-name">scipy_linprog</span></td>
+                <td>simple_lp_test</td>
+                <td><span class="problem-type">LP</span></td>
+                <td><span class="library-name">internal</span></td>
+                <td><span class="status-optimal">OPTIMAL</span></td>
                 <td class="number">0.0015</td>
                 <td class="number">0.000000e+00</td>
                 <td class="number">0</td>
@@ -377,16 +437,28 @@
                 <td class="timestamp">2025-06-17 13:35:05</td>
             </tr>
             <tr>
-                <td><span class="solver-name">scipy_linprog</span></td>
-                <td>simple_lp_test</td>
-                <td><span class="problem-type">LP</span></td>
+                <td><span class="solver-name">cvxpy_clarabel</span></td>
+                <td>simple_qp_test</td>
+                <td><span class="problem-type">QP</span></td>
                 <td><span class="library-name">internal</span></td>
-                <td><span class="">OPTIMAL</span></td>
-                <td class="number">0.0051</td>
+                <td><span class="status-optimal">OPTIMAL</span></td>
+                <td class="number">0.0039</td>
                 <td class="number">0.000000e+00</td>
-                <td class="number">0</td>
+                <td class="number">5</td>
                 <td class="number">—</td>
-                <td class="timestamp">2025-06-18 02:34:41</td>
+                <td class="timestamp">2025-06-20 12:02:18</td>
+            </tr>
+            <tr>
+                <td><span class="solver-name">scipy_linprog</span></td>
+                <td>simple_qp_test</td>
+                <td><span class="problem-type">QP</span></td>
+                <td><span class="library-name">internal</span></td>
+                <td><span class="status-optimal">OPTIMAL</span></td>
+                <td class="number">0.0028</td>
+                <td class="number">0.000000e+00</td>
+                <td class="number">1</td>
+                <td class="number">—</td>
+                <td class="timestamp">2025-06-20 12:02:18</td>
             </tr>
                     </tbody>
                 </table>
