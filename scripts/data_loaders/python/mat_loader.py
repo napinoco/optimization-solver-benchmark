@@ -42,17 +42,20 @@ class MATLoader:
         """Initialize the MAT loader."""
         pass
     
-    def load(self, file_path: str) -> ProblemData:
+    def load(self, file_path: str, problem_name: str = None) -> ProblemData:
         """
         Load problem from .mat or .mat.gz file.
         
         Args:
             file_path: Path to the .mat or .mat.gz file
+            problem_name: Optional problem name (if not provided, extracted from file path)
             
         Returns:
             ProblemData object
         """
-        problem_name = Path(file_path).stem.replace('.mat', '')
+        # Use provided name or extract from file path as fallback
+        if problem_name is None:
+            problem_name = Path(file_path).stem.replace('.mat', '')
         
         # Load and parse the file
         mat_data = self.load_sedumi_mat(file_path)
@@ -263,7 +266,7 @@ def load_mat_problem(file_path: str,
         ProblemData object
     """
     loader = MATLoader()
-    return loader.load(file_path)
+    return loader.load(file_path, problem_name)
 
 
 if __name__ == "__main__":
