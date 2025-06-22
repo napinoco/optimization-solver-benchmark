@@ -18,7 +18,7 @@ project_root = Path(__file__).parent.parent.parent.parent
 sys.path.insert(0, str(project_root))
 
 from scripts.solvers.solver_interface import SolverInterface, SolverResult
-from scripts.benchmark.problem_loader import ProblemData
+from scripts.data_loaders.problem_loader import ProblemData
 from scripts.utils.logger import get_logger
 
 logger = get_logger("cvxpy_solver")
@@ -47,17 +47,11 @@ class CvxpySolver(SolverInterface):
         self.verbose = verbose
         self.solver_options = solver_options or {}
         
-        # Verify solver availability
+        # Verify solver availability - no fallbacks for pure benchmarking
         available_solvers = cp.installed_solvers()
         if backend not in available_solvers:
-            self.logger.warning(f"Requested backend {backend} not available. "
-                              f"Available backends: {available_solvers}")
-            # Fall back to first available solver
-            if available_solvers:
-                self.backend = available_solvers[0]
-                self.logger.info(f"Using fallback backend: {self.backend}")
-            else:
-                raise RuntimeError("No CVXPY backends available")
+            raise RuntimeError(f"Requested backend {backend} not available. "
+                             f"Available backends: {available_solvers}")
         
         # Get backend capabilities
         self.backend_capabilities = self._get_backend_capabilities()
@@ -139,13 +133,46 @@ class CvxpySolver(SolverInterface):
         """Get solver options with verbosity and timeout."""
         options = self.solver_options.copy()
         
-        # Add verbosity setting
-        if 'verbose' not in options:
-            options['verbose'] = self.verbose
-        
-        # Add timeout if specified
-        if timeout is not None:
-            options['max_time'] = timeout
+        # Handle backend-specific option formats
+        if self.backend == "SCIPY":
+            # SCIPY solver requires options in scipy_options dict
+            scipy_options = options.get('scipy_options', {})
+            
+            # Set method to HiGHS for better performance
+            if 'method' not in scipy_options:
+                scipy_options['method'] = 'highs'
+            
+            # Add timeout if specified
+            if timeout is not None:
+                scipy_options['maxiter'] = int(timeout * 1000)  # rough conversion
+            
+            options = {
+                'verbose': self.verbose,
+                'scipy_options': scipy_options
+            }
+        elif self.backend == "SCIP":
+            # SCIP solver has different parameter names
+            if 'verbose' not in options:
+                options['verbose'] = self.verbose
+            
+            # SCIP timeout parameter is not well supported in CVXPY, skip for now
+            # TODO: Research correct SCIP timeout parameter format
+        elif self.backend == "HIGHS":
+            # HiGHS solver options
+            if 'verbose' not in options:
+                options['verbose'] = self.verbose
+            
+            # HiGHS supports time_limit parameter
+            if timeout is not None:
+                options['time_limit'] = timeout
+        else:
+            # Standard format for other solvers
+            if 'verbose' not in options:
+                options['verbose'] = self.verbose
+            
+            # Add timeout if specified
+            if timeout is not None:
+                options['max_time'] = timeout
         
         return options
     
@@ -222,6 +249,11 @@ class CvxpySolver(SolverInterface):
         # Create CVXPY problem
         # cvx_problem = cp.Problem(objective, constraints)
 
+        # Check if cone structure is available (needed for DIMACS/SDPLIB problems)
+        if 'cone_structure' not in problem_data.metadata:
+            # For standard LP/QP problems without cone structure, use simple conversion
+            return self._convert_simple_problem(problem_data)
+        
         cone_structure = problem_data.metadata['cone_structure']
         A_eq = problem_data.A_eq
         b_eq = problem_data.b_eq
@@ -277,6 +309,51 @@ class CvxpySolver(SolverInterface):
         self.logger.debug(f"Converted {problem_data.problem_class} problem: {n_vars} vars, {len(constraints)} constraints")
         
         return cvx_problem
+    
+    def _convert_simple_problem(self, problem_data: ProblemData) -> cp.Problem:
+        """
+        Convert simple LP/QP problems without cone structure to CVXPY format.
+        
+        Args:
+            problem_data: Problem data for LP/QP problems
+            
+        Returns:
+            CVXPY Problem object
+        """
+        if problem_data.c is None:
+            raise ValueError("Problem must have objective coefficients")
+        
+        n_vars = len(problem_data.c)
+        x = cp.Variable(n_vars)
+        
+        # Build objective
+        if problem_data.P is not None:
+            # Quadratic objective: 0.5 * x^T P x + c^T x
+            objective = cp.Minimize(0.5 * cp.quad_form(x, problem_data.P) + problem_data.c.T @ x)
+        else:
+            # Linear objective: c^T x
+            objective = cp.Minimize(problem_data.c.T @ x)
+        
+        # Build constraints
+        constraints = []
+        
+        # Equality constraints: A_eq x = b_eq
+        if problem_data.A_eq is not None and problem_data.b_eq is not None:
+            constraints.append(problem_data.A_eq @ x == problem_data.b_eq)
+        
+        # Inequality constraints: A_ub x <= b_ub
+        if problem_data.A_ub is not None and problem_data.b_ub is not None:
+            constraints.append(problem_data.A_ub @ x <= problem_data.b_ub)
+        
+        # Variable bounds
+        if problem_data.bounds:
+            for i, (lb, ub) in enumerate(problem_data.bounds):
+                if lb is not None:
+                    constraints.append(x[i] >= lb)
+                if ub is not None:
+                    constraints.append(x[i] <= ub)
+        
+        return cp.Problem(objective, constraints)
     
     def _get_variable_count(self, problem_data: ProblemData) -> int:
         """Determine the number of variables in the problem."""
