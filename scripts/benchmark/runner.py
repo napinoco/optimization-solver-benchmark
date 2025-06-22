@@ -126,6 +126,10 @@ class BenchmarkRunner:
             return CvxpySolver(backend="CVXOPT")
         elif solver_name == "cvxpy_sdpa":
             return CvxpySolver(backend="SDPA")
+        elif solver_name == "cvxpy_scip":
+            return CvxpySolver(backend="SCIP")
+        elif solver_name == "cvxpy_highs":
+            return CvxpySolver(backend="HIGHS")  # Actual HiGHS solver
         else:
             raise ValueError(f"Unknown solver: {solver_name}")
     

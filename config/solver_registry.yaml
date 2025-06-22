@@ -21,3 +21,9 @@ solvers:
     
   cvxpy_sdpa:
     display_name: "SDPA (via CVXPY)"
+    
+  cvxpy_scip:
+    display_name: "SCIP (via CVXPY)"
+    
+  cvxpy_highs:
+    display_name: "HiGHS (via CVXPY)"
