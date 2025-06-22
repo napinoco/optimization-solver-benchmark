@@ -28,7 +28,7 @@ from pathlib import Path
 project_root = Path(__file__).parent.parent.parent.parent
 sys.path.insert(0, str(project_root))
 
-from scripts.benchmark.problem_loader import ProblemData
+from scripts.data_loaders.problem_loader import ProblemData
 
 
 def generate_max_cut_sdp(n_vertices: int = 5, edge_probability: float = 0.6, seed: int = 42) -> Tuple[Dict[str, Any], ProblemData]:

@@ -16,7 +16,7 @@ sys.path.insert(0, str(project_root))
 
 from scripts.utils.validation import create_default_validator, ValidationResult
 from scripts.benchmark.result_collector import ResultCollector
-from scripts.benchmark.solver_interface import SolverResult
+from scripts.solvers.solver_interface import SolverResult
 
 # Set up logging
 logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')

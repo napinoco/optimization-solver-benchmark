@@ -142,7 +142,7 @@ import yaml
 from sqlalchemy import create_engine
 
 # Local application imports
-from scripts.benchmark.solver_interface import SolverInterface
+from scripts.solvers.solver_interface import SolverInterface
 from scripts.utils.config_loader import ConfigLoader
 ```
 

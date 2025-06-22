@@ -30,7 +30,7 @@ from pathlib import Path
 project_root = Path(__file__).parent.parent.parent.parent
 sys.path.insert(0, str(project_root))
 
-from scripts.benchmark.problem_loader import ProblemData
+from scripts.data_loaders.problem_loader import ProblemData
 
 
 def generate_matrix_completion_sdp(n_rows: int = 4, n_cols: int = 4, observation_rate: float = 0.6, seed: int = 42) -> Tuple[Dict[str, Any], ProblemData]:
