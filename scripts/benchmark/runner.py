@@ -122,6 +122,10 @@ class BenchmarkRunner:
             return CvxpySolver(backend="ECOS")
         elif solver_name == "cvxpy_osqp":
             return CvxpySolver(backend="OSQP")
+        elif solver_name == "cvxpy_cvxopt":
+            return CvxpySolver(backend="CVXOPT")
+        elif solver_name == "cvxpy_sdpa":
+            return CvxpySolver(backend="SDPA")
         else:
             raise ValueError(f"Unknown solver: {solver_name}")
     

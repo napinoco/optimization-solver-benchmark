@@ -155,7 +155,7 @@ def run_benchmark(problems: Optional[List[str]] = None,
             logger.info(f"Using all available problems: {len(problems_to_run)} problems")
         
         # Determine which solvers to run
-        available_solvers = ["scipy_linprog", "cvxpy_clarabel", "cvxpy_scs", "cvxpy_ecos", "cvxpy_osqp"]
+        available_solvers = ["scipy_linprog", "cvxpy_clarabel", "cvxpy_scs", "cvxpy_ecos", "cvxpy_osqp", "cvxpy_cvxopt", "cvxpy_sdpa"]
         if solvers:
             # Validate requested solvers
             invalid_solvers = [s for s in solvers if s not in available_solvers]

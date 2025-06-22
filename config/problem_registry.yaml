@@ -2,96 +2,461 @@
 # Eliminates light_set in favor of real problems with test flags
 problem_libraries:
   
-  # Small-scale test problems from DIMACS/SDPLIB  
+  # DIMACS Library Problems - Complete Set (47 problems)
+  
+  # ANTENNA Set
   nb:
-    display_name: "ANTENNA NB (DIMACS)"
+    display_name: "NB (DIMACS)"
     file_path: "problems/DIMACS/data/ANTENNA/nb.mat.gz"
     file_type: "mat"
     library_name: "DIMACS"
-    for_test_flag: true  # Small problem suitable for testing
+    for_test_flag: true
+    known_objective_value: -0.05070309
 
+  nb_L1:
+    display_name: "NB L1 (DIMACS)"
+    file_path: "problems/DIMACS/data/ANTENNA/nb_L1.mat.gz"
+    file_type: "mat"
+    library_name: "DIMACS"
+    for_test_flag: true
+    known_objective_value: -13.012337
+
+  nb_L2:
+    display_name: "NB L2 (DIMACS)"
+    file_path: "problems/DIMACS/data/ANTENNA/nb_L2.mat.gz"
+    file_type: "mat"
+    library_name: "DIMACS"
+    for_test_flag: true
+    known_objective_value: -1.62897198
+
+  nb_L2_bessel:
+    display_name: "NB L2 Bessel (DIMACS)"
+    file_path: "problems/DIMACS/data/ANTENNA/nb_L2_bessel.mat.gz"
+    file_type: "mat"
+    library_name: "DIMACS"
+    for_test_flag: true
+    known_objective_value: -0.102569511
+
+  # BISECTION Set
+  bm1:
+    display_name: "BM1 (DIMACS)"
+    file_path: "problems/DIMACS/data/BISECT/bm1.mat.gz"
+    file_type: "mat"
+    library_name: "DIMACS"
+    for_test_flag: true
+    known_objective_value: 23.4434
+
+  biomedP:
+    display_name: "Biomed P (DIMACS)"
+    file_path: "problems/DIMACS/data/BISECT/biomedP.dat.gz"
+    file_type: "mat"
+    library_name: "DIMACS"
+    for_test_flag: false
+    known_objective_value: 33.6
+
+  industry2:
+    display_name: "Industry2 (DIMACS)"
+    file_path: "problems/DIMACS/data/BISECT/industry2.dat.gz"
+    file_type: "mat"
+    library_name: "DIMACS"
+    for_test_flag: false
+    known_objective_value: 65.6
+
+  # COPOS Set
+  copo14:
+    display_name: "Copo 14 (DIMACS)"
+    file_path: "problems/DIMACS/data/COPOS/copo14.mat.gz"
+    file_type: "mat"
+    library_name: "DIMACS"
+    for_test_flag: false
+    known_objective_value: 0
+
+  copo23:
+    display_name: "Copo 23 (DIMACS)"
+    file_path: "problems/DIMACS/data/COPOS/copo23.mat.gz"
+    file_type: "mat"
+    library_name: "DIMACS"
+    for_test_flag: false
+    known_objective_value: 0
+
+  copo68:
+    display_name: "Copo 68 (DIMACS)"
+    file_path: "problems/DIMACS/data/COPOS/copo68.mat.gz"
+    file_type: "mat"
+    library_name: "DIMACS"
+    for_test_flag: false
+    known_objective_value: 0
+
+  # FAP Set
+  fap09:
+    display_name: "FAP 09 (DIMACS)"
+    file_path: "problems/DIMACS/data/FAP/fap09.mat.gz"
+    file_type: "mat"
+    library_name: "DIMACS"
+    for_test_flag: false
+    known_objective_value: 10.8
+
+  fap25:
+    display_name: "FAP 25 (DIMACS)"
+    file_path: "problems/DIMACS/data/FAP/fap25.mat.gz"
+    file_type: "mat"
+    library_name: "DIMACS"
+    for_test_flag: false
+
+  fap36:
+    display_name: "FAP 36 (DIMACS)"
+    file_path: "problems/DIMACS/data/FAP/fap36.dat.gz"
+    file_type: "mat"
+    library_name: "DIMACS"
+    for_test_flag: false
+
+  # FILTER Set
   filter48:
     display_name: "Filter 48 (DIMACS)"
     file_path: "problems/DIMACS/data/FILTER/filter48_socp.mat.gz"
     file_type: "mat"
-    problem_type: "SDP"
     library_name: "DIMACS"
-    for_test_flag: true  # Small problem suitable for testing
-    known_objective_value: 1.41612901  # Known optimal value for validation
-    
+    for_test_flag: true
+    known_objective_value: 1.41612901
+
+  filtinf1:
+    display_name: "Filter Inf 1 (DIMACS)"
+    file_path: "problems/DIMACS/data/FILTER/filtinf1.mat.gz"
+    file_type: "mat"
+    library_name: "DIMACS"
+    for_test_flag: true
+
+  minphase:
+    display_name: "Min Phase (DIMACS)"
+    file_path: "problems/DIMACS/data/FILTER/minphase.mat.gz"
+    file_type: "mat"
+    library_name: "DIMACS"
+    for_test_flag: true
+    known_objective_value: 5.98
+
+  # HAMMING Set
+  hamming_9_8:
+    display_name: "Hamming 9-8 (DIMACS)"
+    file_path: "problems/DIMACS/data/HAMMING/hamming_9_8.mat.gz"
+    file_type: "mat"
+    library_name: "DIMACS"
+    for_test_flag: false
+    known_objective_value: 224
+
+  hamming_10_2:
+    display_name: "Hamming 10-2 (DIMACS)"
+    file_path: "problems/DIMACS/data/HAMMING/hamming_10_2.mat.gz"
+    file_type: "mat"
+    library_name: "DIMACS"
+    for_test_flag: false
+    known_objective_value: 102.4
+
+  hamming_11_2:
+    display_name: "Hamming 11-2 (DIMACS)"
+    file_path: "problems/DIMACS/data/HAMMING/hamming_11_2.mat.gz"
+    file_type: "mat"
+    library_name: "DIMACS"
+    for_test_flag: false
+    known_objective_value: 170.666667
+
+  hamming_7_5_6:
+    display_name: "Hamming 7-5-6 (DIMACS)"
+    file_path: "problems/DIMACS/data/HAMMING/hamming_7_5_6.mat.gz"
+    file_type: "mat"
+    library_name: "DIMACS"
+    for_test_flag: false
+    known_objective_value: 42.666667
+
+  hamming_8_3_4:
+    display_name: "Hamming 8-3-4 (DIMACS)"
+    file_path: "problems/DIMACS/data/HAMMING/hamming_8_3_4.mat.gz"
+    file_type: "mat"
+    library_name: "DIMACS"
+    for_test_flag: false
+    known_objective_value: 25.6
+
+  hamming_9_5_6:
+    display_name: "Hamming 9-5-6 (DIMACS)"
+    file_path: "problems/DIMACS/data/HAMMING/hamming_9_5_6.mat.gz"
+    file_type: "mat"
+    library_name: "DIMACS"
+    for_test_flag: false
+    known_objective_value: 85.333333
+
+  # HINF Set
+  hinf12:
+    display_name: "H-Inf 12 (DIMACS)"
+    file_path: "problems/DIMACS/data/HINF/hinf12.mat.gz"
+    file_type: "mat"
+    library_name: "DIMACS"
+    for_test_flag: true
+
+  hinf13:
+    display_name: "H-Inf 13 (DIMACS)"
+    file_path: "problems/DIMACS/data/HINF/hinf13.mat.gz"
+    file_type: "mat"
+    library_name: "DIMACS"
+    for_test_flag: true
+
+  # NQL Set
+  nql30:
+    display_name: "NQL 30 (DIMACS)"
+    file_path: "problems/DIMACS/data/NQL/nql30.mat.gz"
+    file_type: "mat"
+    library_name: "DIMACS"
+    for_test_flag: false
+    known_objective_value: -0.9460
+
+  nql60:
+    display_name: "NQL 60 (DIMACS)"
+    file_path: "problems/DIMACS/data/NQL/nql60.mat.gz"
+    file_type: "mat"
+    library_name: "DIMACS"
+    for_test_flag: false
+    known_objective_value: -0.935
+
+  nql180:
+    display_name: "NQL 180 (DIMACS)"
+    file_path: "problems/DIMACS/data/NQL/nql180.mat.gz"
+    file_type: "mat"
+    library_name: "DIMACS"
+    for_test_flag: false
+
+  nql30old:
+    display_name: "NQL 30 Old (DIMACS)"
+    file_path: "problems/DIMACS/data/NQL/nql30old.mat.gz"
+    file_type: "mat"
+    library_name: "DIMACS"
+    for_test_flag: false
+    known_objective_value: 0.9460
+
+  nql60old:
+    display_name: "NQL 60 Old (DIMACS)"
+    file_path: "problems/DIMACS/data/NQL/nql60old.mat.gz"
+    file_type: "mat"
+    library_name: "DIMACS"
+    for_test_flag: false
+    known_objective_value: 0.935
+
+  nql180old:
+    display_name: "NQL 180 Old (DIMACS)"
+    file_path: "problems/DIMACS/data/NQL/nql180old.mat.gz"
+    file_type: "mat"
+    library_name: "DIMACS"
+    for_test_flag: false
+
+  # QSSP Set
+  qssp30:
+    display_name: "QSSP 30 (DIMACS)"
+    file_path: "problems/DIMACS/data/QSSP/qssp30.mat.gz"
+    file_type: "mat"
+    library_name: "DIMACS"
+    for_test_flag: false
+    known_objective_value: -6.4966749
+
+  qssp60:
+    display_name: "QSSP 60 (DIMACS)"
+    file_path: "problems/DIMACS/data/QSSP/qssp60.mat.gz"
+    file_type: "mat"
+    library_name: "DIMACS"
+    for_test_flag: false
+    known_objective_value: -6.5627049
+
+  qssp180:
+    display_name: "QSSP 180 (DIMACS)"
+    file_path: "problems/DIMACS/data/QSSP/qssp180.mat.gz"
+    file_type: "mat"
+    library_name: "DIMACS"
+    for_test_flag: false
+
+  qssp30old:
+    display_name: "QSSP 30 Old (DIMACS)"
+    file_path: "problems/DIMACS/data/QSSP/qssp30old.mat.gz"
+    file_type: "mat"
+    library_name: "DIMACS"
+    for_test_flag: false
+    known_objective_value: 6.4966749
+
+  qssp60old:
+    display_name: "QSSP 60 Old (DIMACS)"
+    file_path: "problems/DIMACS/data/QSSP/qssp60old.mat.gz"
+    file_type: "mat"
+    library_name: "DIMACS"
+    for_test_flag: false
+    known_objective_value: 6.5627049
+
+  qssp180old:
+    display_name: "QSSP 180 Old (DIMACS)"
+    file_path: "problems/DIMACS/data/QSSP/qssp180old.mat.gz"
+    file_type: "mat"
+    library_name: "DIMACS"
+    for_test_flag: false
+    known_objective_value: 6.54613
+
+  # SCHED Set
+  sched_50_50_orig:
+    display_name: "Sched 50-50 Original (DIMACS)"
+    file_path: "problems/DIMACS/data/SCHED/sched_50_50_orig.mat.gz"
+    file_type: "mat"
+    library_name: "DIMACS"
+    for_test_flag: false
+    known_objective_value: 26673.0
+
+  sched_100_50_orig:
+    display_name: "Sched 100-50 Original (DIMACS)"
+    file_path: "problems/DIMACS/data/SCHED/sched_100_50_orig.mat.gz"
+    file_type: "mat"
+    library_name: "DIMACS"
+    for_test_flag: false
+    known_objective_value: 181889.9
+
+  sched_100_100_orig:
+    display_name: "Sched 100-100 Original (DIMACS)"
+    file_path: "problems/DIMACS/data/SCHED/sched_100_100_orig.mat.gz"
+    file_type: "mat"
+    library_name: "DIMACS"
+    for_test_flag: false
+    known_objective_value: 717367.0
+
+  sched_200_100_orig:
+    display_name: "Sched 200-100 Original (DIMACS)"
+    file_path: "problems/DIMACS/data/SCHED/sched_200_100_orig.mat.gz"
+    file_type: "mat"
+    library_name: "DIMACS"
+    for_test_flag: false
+    known_objective_value: 141360.4464
+
+  sched_50_50_scaled:
+    display_name: "Sched 50-50 Scaled (DIMACS)"
+    file_path: "problems/DIMACS/data/SCHED/sched_50_50_scaled.mat.gz"
+    file_type: "mat"
+    library_name: "DIMACS"
+    for_test_flag: false
+    known_objective_value: 7.8520384
+
+  sched_100_50_scaled:
+    display_name: "Sched 100-50 Scaled (DIMACS)"
+    file_path: "problems/DIMACS/data/SCHED/sched_100_50_scaled.mat.gz"
+    file_type: "mat"
+    library_name: "DIMACS"
+    for_test_flag: false
+    known_objective_value: 6.716503
+
+  sched_100_100_scaled:
+    display_name: "Sched 100-100 Scaled (DIMACS)"
+    file_path: "problems/DIMACS/data/SCHED/sched_100_100_scaled.mat.gz"
+    file_type: "mat"
+    library_name: "DIMACS"
+    for_test_flag: false
+    known_objective_value: 27.3307
+
+  sched_200_100_scaled:
+    display_name: "Sched 200-100 Scaled (DIMACS)"
+    file_path: "problems/DIMACS/data/SCHED/sched_200_100_scaled.mat.gz"
+    file_type: "mat"
+    library_name: "DIMACS"
+    for_test_flag: false
+    known_objective_value: 51.81196099
+
+  # TORUS Set
+  toruspm3-8-50:
+    display_name: "Torus PM3 8-50 (DIMACS)"
+    file_path: "problems/DIMACS/data/TORUS/toruspm3-8-50.mat.gz"
+    file_type: "mat"
+    library_name: "DIMACS"
+    for_test_flag: true
+    known_objective_value: 527.808663
+
+  toruspm3-15-50:
+    display_name: "Torus PM3 15-50 (DIMACS)"
+    file_path: "problems/DIMACS/data/TORUS/toruspm3-15-50.mat.gz"
+    file_type: "mat"
+    library_name: "DIMACS"
+    for_test_flag: false
+    known_objective_value: 3474.4
+
+  torusg3-8:
+    display_name: "Torus G3-8 (DIMACS)"
+    file_path: "problems/DIMACS/data/TORUS/torusg3-8.mat.gz"
+    file_type: "mat"
+    library_name: "DIMACS"
+    for_test_flag: true
+    known_objective_value: 457.358179
+
+  torusg3-15:
+    display_name: "Torus G3-15 (DIMACS)"
+    file_path: "problems/DIMACS/data/TORUS/torusg3-15.mat.gz"
+    file_type: "mat"
+    library_name: "DIMACS"
+    for_test_flag: false
+    known_objective_value: 3134.6
+
+  # TRUSS Set
+  truss5:
+    display_name: "Truss 5 (DIMACS)"
+    file_path: "problems/DIMACS/data/TRUSS/truss5.mat.gz"
+    file_type: "mat"
+    library_name: "DIMACS"
+    for_test_flag: true
+    known_objective_value: 132.6356779
+
+  truss8:
+    display_name: "Truss 8 (DIMACS)"
+    file_path: "problems/DIMACS/data/TRUSS/truss8.mat.gz"
+    file_type: "mat"
+    library_name: "DIMACS"
+    for_test_flag: true
+    known_objective_value: 133.1145891
+  # SDPLIB Problems  
   arch0:
     display_name: "ARCH0 (SDPLIB)"
     file_path: "problems/SDPLIB/data/arch0.dat-s"
-    file_type: "dat-s" 
-    problem_type: "SDP"
+    file_type: "dat-s"
     library_name: "SDPLIB"
-    for_test_flag: true  # Small problem suitable for testing
-    known_objective_value: -5.6506  # Known optimal value
-    
-  # Larger production problems
-  hinf12:
-    display_name: "H-infinity Control 12 (DIMACS)"
-    file_path: "problems/DIMACS/data/HINF/hinf12.mat.gz"
-    file_type: "mat"
-    problem_type: "SDP"
-    library_name: "DIMACS"
-    for_test_flag: false
-    # known_objective_value: null  # Unknown - omit field
+    for_test_flag: true
+    known_objective_value: -5.6506
     
   control1:
     display_name: "Control Problem 1 (SDPLIB)"
     file_path: "problems/SDPLIB/data/control1.dat-s"
     file_type: "dat-s"
-    problem_type: "SDP" 
     library_name: "SDPLIB"
     for_test_flag: false
-    known_objective_value: 20.8  # Known optimal value
+    known_objective_value: 20.8
     
   gpp100:
     display_name: "Graph Partitioning 100 (SDPLIB)"
     file_path: "problems/SDPLIB/data/gpp100.dat-s"
     file_type: "dat-s"
-    problem_type: "SDP"
     library_name: "SDPLIB" 
     for_test_flag: false
-    # known_objective_value: null  # Unknown - omit field
     
-  # Linear programming problems
+  # Internal Test Problems
   simple_lp_test:
     display_name: "Simple LP Test (Internal)"
     file_path: "problems/light_set/lp/simple_lp.mps"
     file_type: "mps"
-    problem_type: "LP"
     library_name: "internal"
-    for_test_flag: true  # Synthetic test problem
-    known_objective_value: 5.0  # Known optimal value
+    for_test_flag: true
+    known_objective_value: 5.0
     
-  # Quadratic programming problems  
   simple_qp_test:
     display_name: "Simple QP Test (Internal)"
     file_path: "problems/light_set/qp/simple_qp.qps"
     file_type: "qps"
-    problem_type: "QP"
     library_name: "internal"
-    for_test_flag: true  # Synthetic test problem
-    # known_objective_value: null  # Unknown - omit field
+    for_test_flag: true
     
-  # Second-order cone programming problems
   portfolio_optimization_test:
     display_name: "Portfolio Optimization Test (Internal)"
     file_path: "problems/light_set/socp/portfolio_optimization.py"
     file_type: "python"
-    problem_type: "SOCP"
     library_name: "internal"
-    for_test_flag: true  # Synthetic test problem
-    # known_objective_value: null  # Unknown - omit field
+    for_test_flag: true
     
-  # Semidefinite programming problems
   control_lmi_test:
     display_name: "Control LMI Test (Internal)"
     file_path: "problems/light_set/sdp/control_lmi.py"
     file_type: "python"
-    problem_type: "SDP"
     library_name: "internal"
-    for_test_flag: true  # Synthetic test problem
-    # known_objective_value: null  # Unknown - omit field
+    for_test_flag: true

@@ -15,3 +15,9 @@ solvers:
     
   cvxpy_osqp:
     display_name: "OSQP (via CVXPY)"
+    
+  cvxpy_cvxopt:
+    display_name: "CVXOPT (via CVXPY)"
+    
+  cvxpy_sdpa:
+    display_name: "SDPA (via CVXPY)"
