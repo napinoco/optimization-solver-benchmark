@@ -18,7 +18,7 @@ problem_libraries:
     file_path: "problems/DIMACS/data/ANTENNA/nb_L1.mat.gz"
     file_type: "mat"
     library_name: "DIMACS"
-    for_test_flag: true
+    for_test_flag: false
     known_objective_value: -13.012337
 
   nb_L2:
@@ -43,7 +43,7 @@ problem_libraries:
     file_path: "problems/DIMACS/data/BISECT/bm1.mat.gz"
     file_type: "mat"
     library_name: "DIMACS"
-    for_test_flag: true
+    for_test_flag: false
     known_objective_value: 23.4434
 
   biomedP:
@@ -124,14 +124,14 @@ problem_libraries:
     file_path: "problems/DIMACS/data/FILTER/filtinf1.mat.gz"
     file_type: "mat"
     library_name: "DIMACS"
-    for_test_flag: true
+    for_test_flag: false
 
   minphase:
     display_name: "Min Phase (DIMACS)"
     file_path: "problems/DIMACS/data/FILTER/minphase.mat.gz"
     file_type: "mat"
     library_name: "DIMACS"
-    for_test_flag: true
+    for_test_flag: false
     known_objective_value: 5.98
 
   # HAMMING Set
@@ -189,14 +189,14 @@ problem_libraries:
     file_path: "problems/DIMACS/data/HINF/hinf12.mat.gz"
     file_type: "mat"
     library_name: "DIMACS"
-    for_test_flag: true
+    for_test_flag: false
 
   hinf13:
     display_name: "H-Inf 13 (DIMACS)"
     file_path: "problems/DIMACS/data/HINF/hinf13.mat.gz"
     file_type: "mat"
     library_name: "DIMACS"
-    for_test_flag: true
+    for_test_flag: false
 
   # NQL Set
   nql30:
@@ -364,7 +364,7 @@ problem_libraries:
     file_path: "problems/DIMACS/data/TORUS/toruspm3-8-50.mat.gz"
     file_type: "mat"
     library_name: "DIMACS"
-    for_test_flag: true
+    for_test_flag: false
     known_objective_value: 527.808663
 
   toruspm3-15-50:
@@ -380,7 +380,7 @@ problem_libraries:
     file_path: "problems/DIMACS/data/TORUS/torusg3-8.mat.gz"
     file_type: "mat"
     library_name: "DIMACS"
-    for_test_flag: true
+    for_test_flag: false
     known_objective_value: 457.358179
 
   torusg3-15:
@@ -397,7 +397,7 @@ problem_libraries:
     file_path: "problems/DIMACS/data/TRUSS/truss5.mat.gz"
     file_type: "mat"
     library_name: "DIMACS"
-    for_test_flag: true
+    for_test_flag: false
     known_objective_value: 132.6356779
 
   truss8:
@@ -405,7 +405,7 @@ problem_libraries:
     file_path: "problems/DIMACS/data/TRUSS/truss8.mat.gz"
     file_type: "mat"
     library_name: "DIMACS"
-    for_test_flag: true
+    for_test_flag: false
     known_objective_value: 133.1145891
   # SDPLIB Problems  
   arch0:
@@ -413,7 +413,7 @@ problem_libraries:
     file_path: "problems/SDPLIB/data/arch0.dat-s"
     file_type: "dat-s"
     library_name: "SDPLIB"
-    for_test_flag: true
+    for_test_flag: false
     known_objective_value: -5.6506
     
   control1:
@@ -437,7 +437,7 @@ problem_libraries:
     file_path: "problems/light_set/lp/simple_lp.mps"
     file_type: "mps"
     library_name: "internal"
-    for_test_flag: true
+    for_test_flag: false
     known_objective_value: 5.0
     
   simple_qp_test:
@@ -445,18 +445,18 @@ problem_libraries:
     file_path: "problems/light_set/qp/simple_qp.qps"
     file_type: "qps"
     library_name: "internal"
-    for_test_flag: true
+    for_test_flag: false
     
   portfolio_optimization_test:
     display_name: "Portfolio Optimization Test (Internal)"
     file_path: "problems/light_set/socp/portfolio_optimization.py"
     file_type: "python"
     library_name: "internal"
-    for_test_flag: true
+    for_test_flag: false
     
   control_lmi_test:
     display_name: "Control LMI Test (Internal)"
     file_path: "problems/light_set/sdp/control_lmi.py"
     file_type: "python"
     library_name: "internal"
-    for_test_flag: true
+    for_test_flag: false

@@ -252,7 +252,9 @@ class CvxpySolver(SolverInterface):
                 nvar_cnt = end
         if 'soc_cones' in cone_structure:
             soc_cones = cone_structure['soc_cones']
-            for i, ndim in enumerate(soc_cones):
+            for ndim in soc_cones:
+                if ndim <= 0:
+                    continue
                 begin = nvar_cnt
                 end = nvar_cnt + ndim
                 z = c[begin:end] - (y.T @ A_eq[:, begin:end]).T
@@ -261,6 +263,8 @@ class CvxpySolver(SolverInterface):
         if 'sdp_cones' in cone_structure:
             sdp_cones = cone_structure['sdp_cones']
             for ndim in sdp_cones:
+                if ndim <= 0:
+                    continue
                 begin = nvar_cnt
                 end = nvar_cnt + ndim * ndim
                 z = c[begin:end].reshape(ndim, ndim) - cp.reshape(y.T @ A_eq[:, begin:end], (ndim, ndim), order='C')
