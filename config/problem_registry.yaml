@@ -7,10 +7,17 @@ problem_libraries:
     display_name: "ANTENNA NB (DIMACS)"
     file_path: "problems/DIMACS/data/ANTENNA/nb.mat.gz"
     file_type: "mat"
+    library_name: "DIMACS"
+    for_test_flag: true  # Small problem suitable for testing
+
+  filter48:
+    display_name: "Filter 48 (DIMACS)"
+    file_path: "problems/DIMACS/data/FILTER/filter48_socp.mat.gz"
+    file_type: "mat"
     problem_type: "SDP"
     library_name: "DIMACS"
     for_test_flag: true  # Small problem suitable for testing
-    known_objective_value: -12.8  # Known optimal value for validation
+    known_objective_value: 1.41612901  # Known optimal value for validation
     
   arch0:
     display_name: "ARCH0 (SDPLIB)"
