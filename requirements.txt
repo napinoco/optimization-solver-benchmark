@@ -22,4 +22,4 @@ cvxopt>=1.3.0
 # Note: SDPA requires separate installation of SDPA binary and Python bindings
 # Install with: pip install sdpa-python (if available) or compile from source
 # See: https://sourceforge.net/projects/sdpa/ for official SDPA solver
-# sdpa-python>=7.4.0  # Uncomment if SDPA bindings are available
+sdpa-python>=0.2.0  # Uncomment if SDPA bindings are available

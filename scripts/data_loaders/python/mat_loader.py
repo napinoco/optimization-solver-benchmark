@@ -87,9 +87,9 @@ class MATLoader:
             # Handle both compressed and uncompressed files
             if file_path.endswith('.gz'):
                 with gzip.open(file_path, 'rb') as f:
-                    mat_data = scipy.io.loadmat(f)
+                    mat_data = scipy.io.loadmat(f, spmatrix=False)  # Load as sparray
             else:
-                mat_data = scipy.io.loadmat(file_path)
+                mat_data = scipy.io.loadmat(file_path, spmatrix=False)  # Load as sparray
             
             # SeDuMi format validation
             if 'A' not in mat_data and 'At' not in mat_data:
@@ -125,26 +125,26 @@ class MATLoader:
         # K is a structured array, extract fields from first element
         try:
             # Access the fields using array indexing
-            if K.dtype.names and 's' in K.dtype.names:
-                s_data = K['s'][0][0]
-                if s_data.size > 0:
-                    cone_info['sdp_cones'] = [int(x) for x in s_data.flatten()]
-            
-            if K.dtype.names and 'q' in K.dtype.names:
-                q_data = K['q'][0][0]
-                if q_data.size > 0:
-                    cone_info['soc_cones'] = [int(x) for x in q_data.flatten()]
-            
-            if K.dtype.names and 'l' in K.dtype.names:
-                l_data = K['l'][0][0]
-                if l_data.size > 0:
-                    cone_info['nonneg_vars'] = int(l_data.flatten()[0])
-            
             if K.dtype.names and 'f' in K.dtype.names:
                 f_data = K['f'][0][0]
                 if f_data.size > 0:
                     cone_info['free_vars'] = int(f_data.flatten()[0])
-                    
+
+            if K.dtype.names and 'l' in K.dtype.names:
+                l_data = K['l'][0][0]
+                if l_data.size > 0:
+                    cone_info['nonneg_vars'] = int(l_data.flatten()[0])
+
+            if K.dtype.names and 'q' in K.dtype.names:
+                q_data = K['q'][0][0]
+                if q_data.size > 0:
+                    cone_info['soc_cones'] = [int(x) for x in q_data.flatten()]
+
+            if K.dtype.names and 's' in K.dtype.names:
+                s_data = K['s'][0][0]
+                if s_data.size > 0:
+                    cone_info['sdp_cones'] = [int(x) for x in s_data.flatten()]
+
         except (IndexError, KeyError, AttributeError) as e:
             logger.warning(f"Could not parse cone structure: {e}")
             # Fallback: treat as linear problem if parsing fails
