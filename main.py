@@ -32,7 +32,7 @@ try:
     from scripts.database.database_manager import DatabaseManager
     from scripts.reporting.html_generator import HTMLGenerator
     from scripts.reporting.data_exporter import DataExporter
-    from scripts.benchmark.problem_loader import list_available_problems
+    from scripts.data_loaders.problem_loader import list_available_problems
     from scripts.utils.logger import get_logger
 except ImportError as e:
     print(f"Error importing modules: {e}")
@@ -154,8 +154,28 @@ def run_benchmark(problems: Optional[List[str]] = None,
                 problems_to_run.extend(lib_problems)
             logger.info(f"Using all available problems: {len(problems_to_run)} problems")
         
-        # Determine which solvers to run
-        available_solvers = ["scipy_linprog", "cvxpy_clarabel", "cvxpy_scs", "cvxpy_ecos", "cvxpy_osqp", "cvxpy_cvxopt", "cvxpy_sdpa"]
+        # Determine which solvers to run - dynamically check availability
+        available_solvers = []
+        runner = BenchmarkRunner()
+        
+        # Load solver registry and test each solver
+        import yaml
+        registry_path = Path("config/solver_registry.yaml")
+        if registry_path.exists():
+            with open(registry_path, 'r') as f:
+                solver_registry = yaml.safe_load(f)
+            
+            for solver_id in solver_registry.get('solvers', {}):
+                try:
+                    runner.create_solver(solver_id)
+                    available_solvers.append(solver_id)
+                    logger.debug(f"Solver {solver_id} is available")
+                except Exception as e:
+                    logger.debug(f"Solver {solver_id} not available: {e}")
+        else:
+            # Fallback to hardcoded list if registry not found
+            available_solvers = ["scipy_linprog", "cvxpy_clarabel", "cvxpy_scs", "cvxpy_ecos", "cvxpy_osqp", "cvxpy_cvxopt", "cvxpy_sdpa"]
+            logger.warning("Solver registry not found, using fallback list")
         if solvers:
             # Validate requested solvers
             invalid_solvers = [s for s in solvers if s not in available_solvers]
