@@ -18,7 +18,7 @@ project_root = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(project_root))
 
 from scripts.utils.logger import get_logger
-from scripts.benchmark.problem_loader import ProblemData
+from scripts.data_loaders.problem_loader import ProblemData
 
 logger = get_logger("problem_structure")
 
@@ -482,7 +482,7 @@ if __name__ == "__main__":
     print("=== Problem Structure Analysis Test ===")
     
     try:
-        from scripts.benchmark.problem_loader import load_problem
+        from scripts.data_loaders.problem_loader import load_problem
         
         # Test with different problem types
         test_problems = ["simple_lp", "simple_qp"]

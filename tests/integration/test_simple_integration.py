@@ -20,7 +20,7 @@ def test_python_solvers():
     print("=" * 50)
     
     try:
-        from scripts.benchmark.problem_loader import load_problem
+        from scripts.data_loaders.problem_loader import load_problem
         
         # Test loading a simple problem
         print("📝 Loading test problem...")

@@ -232,7 +232,7 @@ optimization-solver-benchmark/
 
 1. **Create Solver Class** in `scripts/solvers/python/`
 ```python
-from scripts.benchmark.solver_interface import SolverInterface, SolverResult
+from scripts.solvers.solver_interface import SolverInterface, SolverResult
 
 class NewSolver(SolverInterface):
     def solve(self, problem: ProblemData) -> SolverResult:
@@ -275,7 +275,7 @@ problems:
 
 3. **Test Loading**
 ```bash
-python -c "from scripts.benchmark.problem_loader import load_problem; print(load_problem('new_problem', 'light_set'))"
+python -c "from scripts.data_loaders.problem_loader import load_problem; print(load_problem('new_problem', 'light_set'))"
 ```
 
 ---

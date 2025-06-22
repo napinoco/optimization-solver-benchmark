@@ -24,7 +24,7 @@ import os
 project_root = Path(__file__).parent.parent.parent.parent
 sys.path.insert(0, str(project_root))
 
-from scripts.benchmark.problem_loader import ProblemData
+from scripts.data_loaders.problem_loader import ProblemData
 from scripts.utils.logger import get_logger
 
 logger = get_logger("python_loader")
