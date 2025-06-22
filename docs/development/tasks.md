@@ -1,672 +1,238 @@
-# Re-Architecture Implementation Tasks
+# Development Tasks - DIMACS Registry & New Solvers
 
-**Status**: Planning Phase | Clean Break Implementation  
-**Objective**: Transform complex architecture into simplified, maintainable system
+**Phase**: DIMACS Integration & Solver Expansion  
+**Priority**: High - Adding DIMACS problem registry and CVXOPT/SDPA solver support  
+**Context**: Expanding problem coverage and solver options for comprehensive benchmarking
 
-This document provides a granular step-by-step plan to implement the re-architected optimization solver benchmark system. Each task is incredibly small, testable, and focuses on one specific concern.
-
----
-
-## 🎯 Implementation Strategy
-
-### Clean Break Approach
-- Complete replacement of existing complex architecture
-- No backward compatibility constraints
-- Focus on simplicity and maintainability
-- Test-driven implementation with validation at each step
-
-### Task Principles
-- **Minimal Scope**: Each task takes 15-30 minutes maximum
-- **Clear Boundaries**: Explicit start and end conditions
-- **Single Concern**: One specific functionality per task
-- **Immediately Testable**: Validation possible after each task
+This document provides a granular step-by-step plan to add all DIMACS problems to the registry and implement CVXOPT/SDPA solver support. Each task is incredibly small, testable, and focuses on one specific concern.
 
 ---
 
-## Phase 1: Foundation and Configuration (Week 1)
+## Task Queue (Execute in Order)
 
-### Task 1.1: Consolidate Requirements Files
-- **Objective**: Replace requirements/ directory with single requirements.txt
-- **Start Condition**: Multiple requirements files exist in requirements/ directory
-- **End Condition**: Single requirements.txt file with all dependencies
-- **Success Criteria**:
-  - [ ] Create root-level requirements.txt with all current dependencies
-  - [ ] Remove requirements/ directory entirely
-  - [ ] Test `pip install -r requirements.txt` works correctly
-- **Files to Create**: `requirements.txt`
-- **Files to Delete**: `requirements/` directory
-- **Test**: `pip install -r requirements.txt` installs all necessary packages
-- **Estimated Time**: 15 minutes
+### **Task 1: Extract DIMACS Problem Data** ⭐ HIGH PRIORITY
+**Objective**: Parse all DIMACS problems from README.md into structured format  
+**Context**: Need to extract 47+ problems from README tables for registry
 
-### Task 1.2: Create New Site Configuration
-- **Objective**: Create config/site_config.yaml for display information
-- **Start Condition**: Existing site_config.yaml
-- **End Condition**: Site configuration file exists with proper structure
-- **Success Criteria**:
-  - [ ] Create config/site_config.yaml with site and github sections
-  - [ ] Include title, author, description, url fields
-  - [ ] Include github username and repository fields
-  - [ ] Validate YAML syntax
-- **Files to Create**: `config/site_config.yaml`
-- **Test**: YAML loads successfully with expected structure
-- **Estimated Time**: 10 minutes
+**Steps**:
+1. Read `problems/DIMACS/README.md` and identify all problem tables
+2. Extract problem names, file paths, and known optimal values from each table
+3. Create structured data list with fields: display_name, file_path, file_type, library_name, known_objective_value, for_test_flag
+4. Map file paths from README to actual paths in `problems/DIMACS/data/` directory structure
 
-### Task 1.3: Create Simplified Solver Registry
-- **Objective**: Replace complex solver configuration with display names only
-- **Start Condition**: Existing complex config/solvers.yaml
-- **End Condition**: Simple display-name-only solver registry
-- **Success Criteria**:
-  - [ ] Create new config/solver_registry.yaml with display_name fields only
-  - [ ] Include scipy_linprog, cvxpy_clarabel, cvxpy_scs, cvxpy_ecos, cvxpy_osqp
-  - [ ] Remove all type, module, class, backend configuration complexity
-  - [ ] Validate YAML syntax
-- **Files to Create**: `config/solver_registry.yaml`
-- **Files to Delete**: `config/solvers.yaml` (backup first)
-- **Test**: YAML loads successfully and contains only display names
-- **Estimated Time**: 15 minutes
+**Test Criteria**:
+- [ ] All 47+ DIMACS problems identified and structured
+- [ ] File paths correctly mapped to actual directory structure
+- [ ] Known objective values preserved where available
+- [ ] Small problems marked with `for_test_flag: true`
 
-### Task 1.4: Create Flat Problem Registry Structure
-- **Objective**: Replace nested problem structure with flat registry
-- **Start Condition**: Existing hierarchical problems/problem_registry.yaml
-- **End Condition**: Flat problem registry with enhanced metadata
-- **Success Criteria**:
-  - [ ] Move problems/problem_registry.yaml to config/problem_registry.yaml
-  - [ ] Restructure to flat hierarchy (problem names as top-level keys)
-  - [ ] Add display_name, for_test_flag, known_objective_value, library_name fields
-  - [ ] Include at least 2-3 example problems for testing
-  - [ ] Validate YAML syntax
-- **Files to Create**: `config/problem_registry.yaml`
-- **Files to Delete**: `problems/problem_registry.yaml`
-- **Test**: YAML loads successfully with flat structure and enhanced fields
-- **Estimated Time**: 25 minutes
+**Definition of Done**: Complete list of DIMACS problems in structured format ready for YAML insertion
 
-### Task 1.5: Delete Benchmark Config File
-- **Objective**: Remove benchmark_config.yaml as settings move to code
-- **Start Condition**: config/benchmark_config.yaml exists
-- **End Condition**: File deleted, settings handled in code
-- **Success Criteria**:
-  - [ ] Remove config/benchmark_config.yaml
-  - [ ] Document default settings that will be used in code
-- **Files to Delete**: `config/benchmark_config.yaml`
-- **Test**: File no longer exists
-- **Estimated Time**: 5 minutes
+### **Task 2: Add DIMACS Problems to Registry** ⭐ HIGH PRIORITY  
+**Objective**: Insert all DIMACS problems into `config/problem_registry.yaml`  
+**Context**: Registry currently has only 4 DIMACS problems, need all 47+
 
----
+**Steps**:
+1. Open `config/problem_registry.yaml` 
+2. Add all DIMACS problems following existing format pattern
+3. Use fields: display_name, file_path, file_type, library_name, known_objective_value (if known), for_test_flag
+4. Omit problem_type field as requested
+5. Set appropriate for_test_flag values (smaller problems = true)
 
-## Phase 2: Database Architecture (Week 1)
+**Test Criteria**:
+- [ ] All DIMACS problems added to registry
+- [ ] YAML syntax is valid
+- [ ] Fields match specification exactly
+- [ ] No problem_type fields included
+- [ ] File paths point to correct locations
 
-### Task 2.1: Create New Database Schema
-- **Objective**: Design single denormalized results table
-- **Start Condition**: Existing complex multi-table schema
-- **End Condition**: New schema file with single results table
-- **Success Criteria**:
-  - [ ] Create new database/schema.sql with single results table
-  - [ ] Include all fields: id, solver_name, solver_version, problem_library, problem_name, problem_type
-  - [ ] Include environment_info, commit_hash, timestamp fields
-  - [ ] Include standardized result fields: solve_time, status, primal_objective_value, dual_objective_value, duality_gap, primal_infeasibility, dual_infeasibility, iterations
-  - [ ] Add proper indexes for efficient queries
-- **Files to Create**: `database/schema.sql` (new version)
-- **Test**: SQL syntax is valid and table structure is correct
-- **Estimated Time**: 20 minutes
+**Definition of Done**: `config/problem_registry.yaml` contains all DIMACS problems with correct metadata
 
-### Task 2.2: Create Database Manager Class
-- **Objective**: Implement simple database operations for new schema
-- **Start Condition**: No database manager exists for new schema
-- **End Condition**: Basic database manager with core operations
-- **Success Criteria**:
-  - [ ] Create scripts/benchmark/database_manager.py
-  - [ ] Implement __init__ with db_path parameter
-  - [ ] Implement ensure_schema() method
-  - [ ] Implement store_result() method for single result storage
-  - [ ] Include basic error handling
-- **Files to Create**: `scripts/benchmark/database_manager.py`
-- **Test**: Database manager can create schema and connect to database
-- **Estimated Time**: 30 minutes
+### **Task 3: Add New Solvers to Registry** ⭐ HIGH PRIORITY
+**Objective**: Add CVXOPT and SDPA solver entries to `config/solver_registry.yaml`  
+**Context**: Registry follows simple display_name pattern
 
-### Task 2.3: Implement Latest Results Query
-- **Objective**: Add method to get latest results for reporting
-- **Start Condition**: Database manager exists with basic operations
-- **End Condition**: Query method for latest results implemented
-- **Success Criteria**:
-  - [ ] Add get_latest_results() method to DatabaseManager
-  - [ ] Implement query using commit_hash, environment_info, and timestamp
-  - [ ] Return results in standardized format
-  - [ ] Test with sample data
-- **Files to Modify**: `scripts/benchmark/database_manager.py`
-- **Test**: Method returns expected results from test data
-- **Estimated Time**: 25 minutes
+**Steps**:
+1. Open `config/solver_registry.yaml`
+2. Add entry for CVXOPT: `cvxpy_cvxopt` with display_name "CVXOPT (via CVXPY)"
+3. Add entry for SDPA: `cvxpy_sdpa` with display_name "SDPA (via CVXPY)"  
+4. Follow existing naming convention pattern
 
-### Task 2.4: Delete Old Database Files
-- **Objective**: Remove old database and schema files
-- **Start Condition**: Old database structure exists
-- **End Condition**: Clean database directory with new structure only
-- **Success Criteria**:
-  - [ ] Backup existing database/results.db if needed
-  - [ ] Remove old schema files
-  - [ ] Keep only new schema.sql and results.db (if preserving data)
-- **Files to Delete**: Old schema files, old database if clean break desired
-- **Test**: Only new database structure remains
-- **Estimated Time**: 10 minutes
+**Test Criteria**:
+- [ ] Both solvers added to registry
+- [ ] Display names follow "(via CVXPY)" pattern
+- [ ] YAML syntax is valid
+- [ ] Keys follow existing naming convention
+
+**Definition of Done**: Registry contains new solver entries ready for implementation
+
+### **Task 4: Analyze Current Solver Implementation Pattern** 
+**Objective**: Understand existing solver wrapper architecture for consistent implementation  
+**Context**: Need to follow established patterns for new solver wrappers
+
+**Steps**:
+1. Examine existing solver implementations in `scripts/solvers/python/`
+2. Identify `SolverInterface` abstract base class structure
+3. Review how CVXPY integration works in existing solvers
+4. Understand error handling, result formatting, and configuration patterns
+5. Check how solvers are registered and initialized in the system
+
+**Test Criteria**:
+- [ ] SolverInterface requirements understood
+- [ ] CVXPY integration pattern identified
+- [ ] Result format requirements clear
+- [ ] Configuration approach documented
+
+**Definition of Done**: Clear understanding of implementation requirements for new solver wrappers
+
+### **Task 5: Implement CVXOPT Solver Wrapper**
+**Objective**: Create CVXOPT solver implementation following existing patterns  
+**Context**: CVXOPT is a Python optimization package that integrates with CVXPY
+
+**Steps**:
+1. Create new solver file following naming convention
+2. Implement SolverInterface abstract methods
+3. Configure CVXOPT as CVXPY backend
+4. Add appropriate error handling and logging
+5. Set minimal configuration parameters (verbose: false)
+6. Implement result parsing and status code mapping
+
+**Test Criteria**:
+- [ ] Solver implements SolverInterface correctly
+- [ ] CVXOPT backend properly configured in CVXPY
+- [ ] Error handling follows project patterns
+- [ ] Results formatted consistently
+- [ ] Logging uses appropriate levels
+
+**Definition of Done**: Working CVXOPT solver wrapper that can be instantiated and run
 
 ---
 
-## Phase 3: Data Loading System (Week 2)
+### **Task 6: Implement SDPA Solver Wrapper** 
+**Objective**: Create SDPA solver implementation following existing patterns  
+**Context**: SDPA is specialized for semidefinite programming
 
-### Task 3.1: Create Data Loaders Directory Structure
-- **Objective**: Set up new data_loaders directory with subdirectories
-- **Start Condition**: scripts/external/ directory exists
-- **End Condition**: New data_loaders structure with python/ and matlab_octave/ subdirectories
-- **Success Criteria**:
-  - [ ] Create scripts/data_loaders/ directory
-  - [ ] Create scripts/data_loaders/python/ subdirectory
-  - [ ] Create scripts/data_loaders/matlab_octave/ subdirectory with .gitkeep
-  - [ ] Add __init__.py files to make them Python packages
-- **Files to Create**: Directory structure and __init__.py files
-- **Test**: Directories exist and are Python-importable
-- **Estimated Time**: 10 minutes
+**Steps**:
+1. Create new solver file following naming convention
+2. Implement SolverInterface abstract methods  
+3. Configure SDPA as CVXPY backend
+4. Add appropriate error handling and logging
+5. Set minimal configuration parameters (verbose: false)
+6. Implement result parsing and status code mapping
+7. Handle SDPA-specific requirements for SDP problems
 
-### Task 3.2: Move MAT Loader to New Location
-- **Objective**: Move DIMACS .mat file loader to new data_loaders structure
-- **Start Condition**: Existing external/dimacs_loader.py
-- **End Condition**: Loader moved to data_loaders/python/mat_loader.py
-- **Success Criteria**:
-  - [ ] Create scripts/data_loaders/python/mat_loader.py
-  - [ ] Copy functionality from existing DIMACS loader
-  - [ ] Rename class to MATLoader for generality
-  - [ ] Update imports and ensure it works
-- **Files to Create**: `scripts/data_loaders/python/mat_loader.py`
-- **Test**: MAT loader can load .mat files successfully
-- **Estimated Time**: 20 minutes
+**Test Criteria**:
+- [ ] Solver implements SolverInterface correctly
+- [ ] SDPA backend properly configured in CVXPY
+- [ ] SDP problem compatibility verified
+- [ ] Error handling follows project patterns
+- [ ] Results formatted consistently
 
-### Task 3.3: Move DAT Loader to New Location
-- **Objective**: Move SDPLIB .dat-s file loader to new data_loaders structure
-- **Start Condition**: Existing external/sdplib_loader.py
-- **End Condition**: Loader moved to data_loaders/python/dat_loader.py
-- **Success Criteria**:
-  - [ ] Create scripts/data_loaders/python/dat_loader.py
-  - [ ] Copy functionality from existing SDPLIB loader
-  - [ ] Rename class to DATLoader for generality
-  - [ ] Update imports and ensure it works
-- **Files to Create**: `scripts/data_loaders/python/dat_loader.py`
-- **Test**: DAT loader can load .dat-s files successfully
-- **Estimated Time**: 20 minutes
-
-### Task 3.4: Create MPS Loader
-- **Objective**: Implement MPS file format loader for linear programming
-- **Start Condition**: No MPS loader exists
-- **End Condition**: Working MPS loader for .mps files
-- **Success Criteria**:
-  - [ ] Create scripts/data_loaders/python/mps_loader.py
-  - [ ] Implement MPSLoader class with load() method
-  - [ ] Use existing MPS reading utilities if available
-  - [ ] Return standardized ProblemData format
-- **Files to Create**: `scripts/data_loaders/python/mps_loader.py`
-- **Test**: MPS loader can load simple .mps files
-- **Estimated Time**: 25 minutes
-
-### Task 3.5: Create QPS Loader
-- **Objective**: Implement QPS file format loader for quadratic programming
-- **Start Condition**: No QPS loader exists
-- **End Condition**: Working QPS loader for .qps files
-- **Success Criteria**:
-  - [ ] Create scripts/data_loaders/python/qps_loader.py
-  - [ ] Implement QPSLoader class with load() method
-  - [ ] Use existing QPS reading utilities if available
-  - [ ] Return standardized ProblemData format
-- **Files to Create**: `scripts/data_loaders/python/qps_loader.py`
-- **Test**: QPS loader can load simple .qps files
-- **Estimated Time**: 25 minutes
-
-### Task 3.6: Create Python Problem Loader
-- **Objective**: Implement loader for Python-defined problems
-- **Start Condition**: Existing Python problem loading logic
-- **End Condition**: Dedicated Python problem loader
-- **Success Criteria**:
-  - [ ] Create scripts/data_loaders/python/python_loader.py
-  - [ ] Implement PythonLoader class with load() method
-  - [ ] Handle execution of Python problem files safely
-  - [ ] Return standardized ProblemData format
-- **Files to Create**: `scripts/data_loaders/python/python_loader.py`
-- **Test**: Python loader can load existing Python problems
-- **Estimated Time**: 25 minutes
-
-### Task 3.7: Create CVXPY Converter
-- **Objective**: Implement unified converter to CVXPY format
-- **Start Condition**: Scattered conversion logic
-- **End Condition**: Centralized CVXPY converter
-- **Success Criteria**:
-  - [ ] Create scripts/data_loaders/python/cvxpy_converter.py
-  - [ ] Implement CVXPYConverter class with convert() method
-  - [ ] Handle conversion from all problem formats to CVXPY
-  - [ ] Test with different problem types
-- **Files to Create**: `scripts/data_loaders/python/cvxpy_converter.py`
-- **Test**: Converter can convert problems to CVXPY format
-- **Estimated Time**: 30 minutes
+**Definition of Done**: Working SDPA solver wrapper optimized for SDP problems
 
 ---
 
-## Phase 4: Solver Architecture (Week 2)
+### **Task 7: Add Solver Dependencies**
+**Objective**: Update requirements files to include CVXOPT and SDPA dependencies  
+**Context**: New solvers need proper dependency management
 
-### Task 4.1: Create Solver Directory Structure
-- **Objective**: Set up new solver directory with subdirectories
-- **Start Condition**: Existing scripts/solvers/ structure
-- **End Condition**: Clean solver structure with python/ and matlab_octave/ subdirectories
-- **Success Criteria**:
-  - [ ] Create scripts/solvers/matlab_octave/ subdirectory with .gitkeep
-  - [ ] Ensure scripts/solvers/python/ subdirectory exists
-  - [ ] Add proper __init__.py files
-- **Files to Create**: Directory structure and .gitkeep file
-- **Test**: Directories exist and are properly structured
-- **Estimated Time**: 10 minutes
+**Steps**:
+1. Identify current requirements file structure
+2. Add CVXOPT package to appropriate requirements file
+3. Add SDPA package (if available via pip) or document installation
+4. Verify version compatibility with existing CVXPY installation
+5. Update any conda/development environment files if present
 
-### Task 4.2: Create Standardized Solver Result Class
-- **Objective**: Define standardized result format for all solvers
-- **Start Condition**: No standardized result format
-- **End Condition**: SolverResult class with all required fields
-- **Success Criteria**:
-  - [ ] Create scripts/solvers/solver_interface.py
-  - [ ] Define SolverResult class with standardized fields
-  - [ ] Include solve_time, status, primal_objective_value, dual_objective_value, duality_gap, primal_infeasibility, dual_infeasibility, iterations
-  - [ ] Add validation and error handling
-- **Files to Create**: `scripts/solvers/solver_interface.py`
-- **Test**: SolverResult class can be instantiated with expected fields
-- **Estimated Time**: 20 minutes
+**Test Criteria**:
+- [ ] CVXOPT added to requirements with appropriate version
+- [ ] SDPA dependency properly handled
+- [ ] No conflicts with existing dependencies
+- [ ] Installation instructions updated if needed
 
-### Task 4.3: Create Abstract Solver Interface
-- **Objective**: Define abstract base class for all solvers
-- **Start Condition**: SolverResult class exists
-- **End Condition**: Abstract SolverInterface with solve() method
-- **Success Criteria**:
-  - [ ] Add SolverInterface abstract base class to solver_interface.py
-  - [ ] Define abstract solve() method
-  - [ ] Include version detection methods
-  - [ ] Add error handling patterns
-- **Files to Modify**: `scripts/solvers/solver_interface.py`
-- **Test**: Interface can be imported and abstract methods are properly defined
-- **Estimated Time**: 15 minutes
-
-### Task 4.4: Implement SciPy Solver with Standardized Output
-- **Objective**: Update SciPy solver to use new standardized interface
-- **Start Condition**: Existing SciPy solver implementation
-- **End Condition**: SciPy solver with new interface and standardized output
-- **Success Criteria**:
-  - [ ] Update scripts/solvers/python/scipy_runner.py
-  - [ ] Implement SolverInterface
-  - [ ] Return standardized SolverResult
-  - [ ] Add version detection
-  - [ ] Test with simple LP problem
-- **Files to Modify**: `scripts/solvers/python/scipy_runner.py`
-- **Test**: SciPy solver returns SolverResult with all required fields
-- **Estimated Time**: 25 minutes
-
-### Task 4.5: Implement CVXPY Solver with Standardized Output
-- **Objective**: Update CVXPY solver to use new standardized interface
-- **Start Condition**: Existing CVXPY solver implementation
-- **End Condition**: CVXPY solver with new interface and backend support
-- **Success Criteria**:
-  - [ ] Update scripts/solvers/python/cvxpy_runner.py
-  - [ ] Implement SolverInterface
-  - [ ] Support backend parameter in constructor
-  - [ ] Return standardized SolverResult
-  - [ ] Add version detection for CVXPY and backend
-- **Files to Modify**: `scripts/solvers/python/cvxpy_runner.py`
-- **Test**: CVXPY solver returns SolverResult for different backends
-- **Estimated Time**: 30 minutes
+**Definition of Done**: Dependency management properly configured for new solvers
 
 ---
 
-## Phase 5: Benchmark Execution Engine (Week 3)
+### **Task 8: Validate New Solver Integration**
+**Objective**: Test new solvers work correctly with validation system  
+**Context**: System has built-in validation via `python main.py --validate`
 
-### Task 5.1: Create Environment Info Collector
-- **Objective**: Implement environment information collection
-- **Start Condition**: Scattered environment collection logic
-- **End Condition**: Centralized environment info collection
-- **Success Criteria**:
-  - [ ] Create scripts/benchmark/environment_info.py
-  - [ ] Implement EnvironmentInfo.gather() static method
-  - [ ] Collect platform, python_version, cpu_cores, memory_gb, hostname, user, timestamp, timezone
-  - [ ] Add get_git_commit_hash() static method
-  - [ ] Test information collection
-- **Files to Create**: `scripts/benchmark/environment_info.py`
-- **Test**: Environment info collection returns expected data structure
-- **Estimated Time**: 25 minutes
+**Steps**:
+1. Run validation command to test new solver integration
+2. Verify solvers can be instantiated without errors
+3. Test with small problems marked `for_test_flag: true`
+4. Check that results are properly formatted and stored
+5. Validate solver version detection works correctly
+6. Ensure no regressions in existing solver functionality
 
-### Task 5.2: Create Basic Benchmark Runner Structure
-- **Objective**: Create main benchmark runner class with initialization
-- **Start Condition**: No new benchmark runner exists
-- **End Condition**: BenchmarkRunner class with basic structure
-- **Success Criteria**:
-  - [ ] Create scripts/benchmark/runner.py
-  - [ ] Implement BenchmarkRunner.__init__() with DatabaseManager
-  - [ ] Add methods to load solver and problem registries
-  - [ ] Include environment info and git hash collection
-  - [ ] Add basic error handling
-- **Files to Create**: `scripts/benchmark/runner.py`
-- **Test**: BenchmarkRunner can be instantiated and load configurations
-- **Estimated Time**: 25 minutes
+**Test Criteria**:
+- [ ] `python main.py --validate` passes with new solvers
+- [ ] Both CVXOPT and SDPA solvers initialize correctly
+- [ ] Test problems solve successfully where appropriate
+- [ ] Results stored in database with proper metadata
+- [ ] Existing solvers still function correctly
+- [ ] No error messages or warnings for working functionality
 
-### Task 5.3: Implement Solver Creation Logic
-- **Objective**: Add solver creation method to BenchmarkRunner
-- **Start Condition**: BenchmarkRunner basic structure exists
-- **End Condition**: create_solver() method with direct logic
-- **Success Criteria**:
-  - [ ] Add create_solver() method to BenchmarkRunner
-  - [ ] Implement if-elif logic for scipy_linprog, cvxpy_clarabel, cvxpy_scs, cvxpy_ecos, cvxpy_osqp
-  - [ ] Instantiate appropriate solver classes
-  - [ ] Add error handling for unknown solvers
-  - [ ] Test solver creation
-- **Files to Modify**: `scripts/benchmark/runner.py`
-- **Test**: create_solver() returns correct solver instances for all registered solvers
-- **Estimated Time**: 20 minutes
-
-### Task 5.4: Implement Problem Loading Logic
-- **Objective**: Add problem loading method to BenchmarkRunner
-- **Start Condition**: Data loaders exist and BenchmarkRunner has basic structure
-- **End Condition**: load_problem() method with format detection
-- **Success Criteria**:
-  - [ ] Add load_problem() method to BenchmarkRunner
-  - [ ] Implement file_type detection (mat, dat-s, mps, qps, python)
-  - [ ] Instantiate appropriate loader classes
-  - [ ] Return standardized problem data
-  - [ ] Test problem loading
-- **Files to Modify**: `scripts/benchmark/runner.py`
-- **Test**: load_problem() can load problems of different formats
-- **Estimated Time**: 25 minutes
-
-### Task 5.5: Implement Single Benchmark Execution
-- **Objective**: Add method to run single problem-solver combination
-- **Start Condition**: BenchmarkRunner can create solvers and load problems
-- **End Condition**: run_single_benchmark() method working
-- **Success Criteria**:
-  - [ ] Add run_single_benchmark() method to BenchmarkRunner
-  - [ ] Load problem, create solver, convert to CVXPY, execute, store result
-  - [ ] Include timing measurement
-  - [ ] Add error handling and error result storage
-  - [ ] Test with simple problem-solver pair
-- **Files to Modify**: `scripts/benchmark/runner.py`
-- **Test**: Single benchmark execution completes and stores result in database
-- **Estimated Time**: 30 minutes
-
-### Task 5.6: Implement Batch Benchmark Execution
-- **Objective**: Add method to run multiple problem-solver combinations
-- **Start Condition**: Single benchmark execution works
-- **End Condition**: run_benchmark_batch() method working
-- **Success Criteria**:
-  - [ ] Add run_benchmark_batch() method to BenchmarkRunner
-  - [ ] Loop through problems and solvers
-  - [ ] Call run_single_benchmark() for each combination
-  - [ ] Add progress reporting
-  - [ ] Include error handling to continue on failures
-- **Files to Modify**: `scripts/benchmark/runner.py`
-- **Test**: Batch execution runs multiple combinations and handles failures gracefully
-- **Estimated Time**: 20 minutes
+**Definition of Done**: Complete validation passes, new solvers operational and integrated
 
 ---
 
-## Phase 6: Simplified Reporting ✅ **COMPLETED**
+## Testing Protocol
 
-### Task 6.1: Create Result Processor ✅ **COMPLETED**
-- **Objective**: Implement latest results extraction for reporting
-- **Start Condition**: Database has latest results query capability
-- **End Condition**: ResultProcessor class for report data preparation
-- **Success Criteria**:
-  - [x] Create scripts/reporting/result_processor.py
-  - [x] Implement ResultProcessor class
-  - [x] Add get_latest_results_for_reporting() method
-  - [x] Process database results into report-friendly format
-  - [x] Test with sample database data
-- **Files Created**: `scripts/reporting/result_processor.py` (300 lines)
-- **Test**: ✅ ResultProcessor extracts and formats latest results correctly
-- **Implementation**: BenchmarkResult dataclass + comprehensive statistics calculation
+**After Each Task**:
+1. Validate syntax/format of any modified config files
+2. Run `python main.py --validate` to check for integration issues
+3. Verify no regressions in existing functionality
+4. Check git status for clean state before proceeding
 
-### Task 6.2: Create Simplified HTML Generator Structure ✅ **COMPLETED**
-- **Objective**: Create basic HTML generator for three report types
-- **Start Condition**: Complex HTML generator exists
-- **End Condition**: Simple HTMLGenerator class structure
-- **Success Criteria**:
-  - [x] Create scripts/reporting/html_generator.py
-  - [x] Implement HTMLGenerator class with basic structure
-  - [x] Add method stubs for generate_overview(), generate_results_matrix(), generate_raw_data()
-  - [x] Include basic HTML template structure
-  - [x] Test class instantiation
-- **Files Created**: `scripts/reporting/html_generator.py` (1,163 lines)
-- **Test**: ✅ HTMLGenerator class instantiated with complete implementation
-- **Implementation**: Professional CSS with gradients, embedded styling, navigation
+**Final Integration Test**:
+```bash
+# Full system validation
+python main.py --validate
 
-### Task 6.3: Implement Overview Report Generation ✅ **COMPLETED**
-- **Objective**: Generate overview dashboard HTML
-- **Start Condition**: HTMLGenerator structure exists
-- **End Condition**: Working overview report generation
-- **Success Criteria**:
-  - [x] Implement generate_overview() method
-  - [x] Create summary statistics table
-  - [x] Include solver and problem counts
-  - [x] Add basic success rate information
-  - [x] Test with sample data
-- **Files Modified**: `scripts/reporting/html_generator.py`
-- **Test**: ✅ Overview report generates valid HTML with professional styling
-- **Implementation**: Summary cards, solver performance table, responsive design
+# Test specific problem sets
+python main.py --benchmark --problem-set dimacs
 
-### Task 6.4: Implement Results Matrix Report ✅ **COMPLETED**
-- **Objective**: Generate problems × solvers matrix HTML
-- **Start Condition**: HTMLGenerator has overview capability
-- **End Condition**: Working results matrix report
-- **Success Criteria**:
-  - [x] Implement generate_results_matrix() method
-  - [x] Create table with problems as rows, solvers as columns
-  - [x] Show solve times and status in cells
-  - [x] Include color coding for status
-  - [x] Test with sample data
-- **Files Modified**: `scripts/reporting/html_generator.py`
-- **Test**: ✅ Results matrix generates valid HTML table with status visualization
-- **Implementation**: Color-coded status indicators, status legend, solve time display
-
-### Task 6.5: Implement Raw Data Report ✅ **COMPLETED**
-- **Objective**: Generate raw data table HTML
-- **Start Condition**: HTMLGenerator has overview and matrix capability
-- **End Condition**: Working raw data report
-- **Success Criteria**:
-  - [x] Implement generate_raw_data() method
-  - [x] Create detailed table with all result fields
-  - [x] Include sorting and filtering capabilities
-  - [x] Show all standardized result fields
-  - [x] Test with sample data
-- **Files Modified**: `scripts/reporting/html_generator.py`
-- **Test**: ✅ Raw data report generates complete data table with all fields
-- **Implementation**: Comprehensive data table, professional formatting, timestamp display
-
-### Task 6.6: Create Data Exporter ✅ **COMPLETED**
-- **Objective**: Implement JSON and CSV export functionality
-- **Start Condition**: HTML reports are working
-- **End Condition**: Working data export in multiple formats
-- **Success Criteria**:
-  - [x] Create scripts/reporting/data_exporter.py
-  - [x] Implement DataExporter class
-  - [x] Add export_json() and export_csv() methods
-  - [x] Include all standardized result fields
-  - [x] Test exports with sample data
-- **Files Created**: `scripts/reporting/data_exporter.py`
-- **Test**: ✅ Data exporter creates valid JSON and CSV files in docs/pages/data/
-- **Implementation**: Complete data export with metadata, summary statistics
+# Verify new solvers work
+python main.py --benchmark --problem-set external
+```
 
 ---
 
-## Phase 7: Main Entry Point and Integration (Week 4)
+## Dependencies & Prerequisites
 
-### Task 7.1: Create Simplified Main Entry Point
-- **Objective**: Create new main.py with simplified command line interface
-- **Start Condition**: Complex main.py exists
-- **End Condition**: Simple main.py with clear command structure
-- **Success Criteria**:
-  - [ ] Create new main.py (backup old one)
-  - [ ] Implement argument parsing for --benchmark, --problems, --solvers, --report
-  - [ ] Add basic help documentation
-  - [ ] Include configuration loading
-  - [ ] Test argument parsing
-- **Files to Create**: `main.py` (new version)
-- **Test**: Command line arguments parse correctly
-- **Estimated Time**: 25 minutes
+**Required Files**:
+- `problems/DIMACS/README.md` (problem source data)
+- `config/problem_registry.yaml` (target registry)
+- `config/solver_registry.yaml` (target registry)
+- `scripts/solvers/python/` (implementation directory)
 
-### Task 7.2: Integrate Benchmark Execution
-- **Objective**: Connect command line to benchmark execution
-- **Start Condition**: Main entry point exists, BenchmarkRunner works
-- **End Condition**: Command line can trigger benchmark execution
-- **Success Criteria**:
-  - [ ] Add benchmark execution logic to main.py
-  - [ ] Connect --problems and --solvers arguments to BenchmarkRunner
-  - [ ] Include progress reporting
-  - [ ] Add error handling and logging
-  - [ ] Test basic benchmark execution
-- **Files to Modify**: `main.py`
-- **Test**: `python main.py --benchmark --problems test_problem --solvers test_solver` works
-- **Estimated Time**: 25 minutes
-
-### Task 7.3: Integrate Report Generation
-- **Objective**: Connect command line to report generation
-- **Start Condition**: Main entry point works, HTMLGenerator and DataExporter work
-- **End Condition**: Command line can trigger report generation
-- **Success Criteria**:
-  - [ ] Add report generation logic to main.py
-  - [ ] Connect --report argument to reporting system
-  - [ ] Generate all three HTML reports
-  - [ ] Export JSON and CSV data
-  - [ ] Test report generation
-- **Files to Modify**: `main.py`
-- **Test**: `python main.py --report` generates all expected output files
-- **Estimated Time**: 20 minutes
-
-### Task 7.4: Create Output Directory Structure
-- **Objective**: Ensure proper output directory structure for reports
-- **Start Condition**: Reports can be generated
-- **End Condition**: Reports save to docs/pages/ structure
-- **Success Criteria**:
-  - [ ] Create docs/pages/ directory structure
-  - [ ] Create docs/pages/assets/ for CSS/JS
-  - [ ] Create docs/pages/data/ for JSON/CSV exports
-  - [ ] Update report generation to use correct paths
-  - [ ] Test directory creation and file placement
-- **Files to Create**: Directory structure in docs/pages/
-- **Test**: Reports generate in correct directory structure
-- **Estimated Time**: 15 minutes
-
-### Task 7.5: Add Basic CSS and Styling
-- **Objective**: Create basic CSS for HTML reports
-- **Start Condition**: HTML reports generate without styling
-- **End Condition**: HTML reports have basic professional styling
-- **Success Criteria**:
-  - [ ] Create docs/pages/assets/css/style.css
-  - [ ] Add basic Bootstrap-like styling
-  - [ ] Include table formatting and color coding
-  - [ ] Update HTML templates to include CSS
-  - [ ] Test styled reports
-- **Files to Create**: `docs/pages/assets/css/style.css`
-- **Test**: HTML reports display with professional styling
-- **Estimated Time**: 30 minutes
+**System Requirements**:
+- Python 3.12+
+- CVXPY installation  
+- Access to CVXOPT and SDPA packages
+- Existing solver implementation patterns
 
 ---
 
-## Phase 8: Testing and Validation ✅ **COMPLETED**
+## Success Criteria
 
-### Task 8.1: Create Test Problem Set ✅ **COMPLETED**
-- **Objective**: Create minimal test problems for validation
-- **Start Condition**: Problem registry structure exists
-- **End Condition**: At least one problem of each type for testing
-- **Success Criteria**:
-  - [x] Ensure problems/light_set/ has one problem each of LP, QP, SOCP, SDP
-  - [x] Update config/problem_registry.yaml with test problems
-  - [x] Mark test problems with for_test_flag: true
-  - [x] Add known_objective_value where possible
-  - [x] Test problem loading
-- **Files Modified**: `config/problem_registry.yaml`
-- **Test**: ✅ All test problems load successfully through new system
-- **Implementation**: Added simple_lp_test, simple_qp_test, portfolio_optimization_test, control_lmi_test
+**DIMACS Integration**:
+- All 47+ DIMACS problems accessible via registry
+- Problems correctly categorized with metadata
+- File paths resolve to actual problem files
 
-### Task 8.2: End-to-End System Test
-- **Objective**: Test complete workflow from CLI to report generation
-- **Start Condition**: All components implemented
-- **End Condition**: Complete workflow validates successfully
-- **Success Criteria**:
-  - [ ] Run benchmark with test problems and all solvers
-  - [ ] Verify database storage works correctly
-  - [ ] Generate all three HTML reports
-  - [ ] Export JSON and CSV data
-  - [ ] Validate all output files
-- **Files to Test**: Complete system
-- **Test**: `python main.py --benchmark --problems test_set --solvers all && python main.py --report` completes successfully
-- **Estimated Time**: 30 minutes
+**Solver Expansion**:
+- CVXOPT and SDPA solvers fully operational
+- Integration follows established patterns
+- No regressions in existing functionality
+- Dependencies properly managed
 
-### Task 8.3: Performance Validation
-- **Objective**: Ensure system performs adequately with test problems
-- **Start Condition**: End-to-end test passes
-- **End Condition**: Performance meets basic requirements
-- **Success Criteria**:
-  - [ ] Measure benchmark execution time
-  - [ ] Verify memory usage is reasonable
-  - [ ] Test timeout handling
-  - [ ] Validate error handling with problematic inputs
-  - [ ] Document performance characteristics
-- **Files to Test**: Complete system under load
-- **Test**: System completes benchmarks within reasonable time and handles errors gracefully
-- **Estimated Time**: 25 minutes
-
-### Task 8.4: Clean Up Old Architecture Files
-- **Objective**: Remove old complex architecture files
-- **Start Condition**: New system works, old files still exist
-- **End Condition**: Only new simplified architecture remains
-- **Success Criteria**:
-  - [ ] Remove old complex solver and benchmark files not used in new architecture
-  - [ ] Remove old reporting system files (analytics, complex generators)
-  - [ ] Remove unused configuration files
-  - [ ] Clean up any remaining temporary or backup files
-  - [ ] Test that new system still works after cleanup
-- **Files to Delete**: Old architecture files (analytics/, complex reporting, etc.)
-- **Test**: New system continues to work after old files removed
-- **Estimated Time**: 20 minutes
-
-### Task 8.5: Update Documentation
-- **Objective**: Update README.md to reflect new simplified architecture
-- **Start Condition**: README describes old complex system
-- **End Condition**: README accurately describes new system
-- **Success Criteria**:
-  - [ ] Update README.md with new command line interface
-  - [ ] Document simplified configuration structure
-  - [ ] Add quick start guide for new system
-  - [ ] Include examples of new commands
-  - [ ] Remove references to old complex features
-- **Files to Modify**: `README.md`
-- **Test**: README accurately describes how to use new system
-- **Estimated Time**: 30 minutes
+**System Validation**:
+- `python main.py --validate` passes completely
+- New solvers solve appropriate test problems
+- Results properly stored and formatted
 
 ---
 
-## 🎯 Success Criteria for Complete Implementation
-
-### ✅ Functional Requirements
-- [ ] **Simplified Configuration**: Three YAML files only (site_config, solver_registry, problem_registry)
-- [ ] **Single Database Table**: All results stored in denormalized results table
-- [ ] **Standardized Solver Output**: All solvers return SolverResult with 8 standardized fields
-- [ ] **Direct Problem Loading**: Format-specific loaders without dispatcher complexity
-- [ ] **Three HTML Reports**: Overview, results matrix, and raw data reports only
-- [ ] **Clean CLI**: Simple `--benchmark` and `--report` commands
-- [ ] **JSON/CSV Export**: Data export in standard formats
-
-### ✅ Quality Requirements  
-- [ ] **Under 30 Minutes per Task**: Each task completable in short time frame
-- [ ] **Immediately Testable**: Each task has clear validation criteria
-- [ ] **No Backward Compatibility**: Clean break from old architecture
-- [ ] **Error Resilience**: System continues despite individual solver/problem failures
-- [ ] **Performance**: Benchmark execution completes in reasonable time
-
-### ✅ Final Validation
-- [ ] **Complete Workflow**: `python main.py --benchmark --problems test_set --solvers all && python main.py --report` works
-- [ ] **All Outputs Generated**: HTML reports and data exports created successfully
-- [ ] **Documentation Current**: README accurately describes new system
-- [ ] **Clean Architecture**: Only new simplified files remain
-
----
-
-**Estimated Total Time**: 3-4 weeks of focused development  
-**Task Breakdown**: 50+ small, focused tasks averaging 20-25 minutes each  
-**Validation Strategy**: Test after each task to ensure incremental progress
-
-This granular approach ensures steady progress with immediate feedback and validation at each step, minimizing risk of integration issues while building a robust, simplified system.
+*Task-by-task execution ensures incremental progress with validation at each step*
