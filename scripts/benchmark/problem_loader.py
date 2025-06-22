@@ -21,7 +21,19 @@ def _get_structure_analyzer():
     return analyze_problem_structure
 
 class ProblemData:
-    """Container for optimization problem data."""
+    """
+    Container for optimization problem data.
+       SeDuMi-like format
+           Primal Problem:
+               minimize.   c.T x + (1/2) w^T P w
+               subject to  A_eq x + P w = b_eq
+                          x \in K              (Primal cone constraints)
+
+           Dual Problem:
+               maximize    b^T y - (1/2) y^T P y
+               subject to  z = c - A_eq.T y
+                           z \in K*             (Dual cone constraints)
+    """
     def __init__(self, name: str, problem_class: str, c: np.ndarray = None, 
                  A_eq: np.ndarray = None, b_eq: np.ndarray = None,
                  A_ub: np.ndarray = None, b_ub: np.ndarray = None,
