@@ -392,37 +392,6 @@ def load_problem(problem_name: str, problem_set: str = None) -> ProblemData:
         raise ValueError(f"Unsupported file type: {file_type}")
 
 
-def list_available_problems(problem_set: Optional[str] = None) -> Dict[str, List[str]]:
-    """
-    List all available problems in the registry.
-    
-    Args:
-        problem_set: Optional library filter ('DIMACS', 'SDPLIB', 'internal')
-        
-    Returns:
-        Dictionary mapping library names to lists of problem names
-    """
-    registry = load_problem_registry()
-    available = {}
-    
-    # Group problems by library_name from the flat structure
-    for problem_name, problem_info in registry["problem_libraries"].items():
-        library_name = problem_info.get("library_name", "unknown")
-        
-        # Filter by problem_set if specified
-        if problem_set and library_name != problem_set:
-            continue
-            
-        if library_name not in available:
-            available[library_name] = []
-        available[library_name].append(problem_name)
-    
-    # Sort problem names within each library
-    for library in available:
-        available[library] = sorted(available[library])
-    
-    return available
-
 if __name__ == "__main__":
     # Test script to load and validate problems
     try:
