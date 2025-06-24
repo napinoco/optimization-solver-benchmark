@@ -50,14 +50,17 @@ logger = get_logger("benchmark_runner")
 class BenchmarkRunner:
     """Main benchmark execution engine with direct database storage"""
     
-    def __init__(self, database_manager: Optional[DatabaseManager] = None):
+    def __init__(self, database_manager: Optional[DatabaseManager] = None, 
+                 dry_run: bool = False):
         """
         Initialize simplified benchmark runner.
         
         Args:
             database_manager: Optional database manager (creates default if None)
+            dry_run: If True, skip database operations (for testing)
         """
         self.db = database_manager or DatabaseManager()
+        self.dry_run = dry_run
         
         # Collect environment info and git hash once
         self.environment_info = collect_environment_info()
@@ -172,6 +175,11 @@ class BenchmarkRunner:
             problem_library = problem_config.get('library_name', 'internal')
             problem_type = problem_config.get('problem_type', 'UNKNOWN')
             
+            # Skip database operations in dry-run mode
+            if self.dry_run:
+                logger.info(f"[DRY-RUN] Would store result: {solver_name} on {problem_name} ({result.status})")
+                return
+            
             # Store in database using the simplified schema
             self.db.store_result(
                 solver_name=solver_name,
@@ -207,6 +215,11 @@ class BenchmarkRunner:
             error_message: Error description
             problem_config: Problem configuration for metadata
         """
+        # Skip database operations in dry-run mode
+        if self.dry_run:
+            logger.info(f"[DRY-RUN] Would store error result: {solver_name} on {problem_name} ({error_message})")
+            return
+            
         error_result = SolverResult.create_error_result(
             error_message=error_message,
             solve_time=0.0,

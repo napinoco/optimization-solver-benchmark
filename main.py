@@ -102,8 +102,16 @@ def validate_environment() -> bool:
 
 def run_benchmark(library_names: Optional[List[str]] = None,
                  problems: Optional[List[str]] = None,
-                 solvers: Optional[List[str]] = None) -> bool:
-    """Run the benchmark suite with simplified registry-based approach."""
+                 solvers: Optional[List[str]] = None,
+                 dry_run: bool = False) -> bool:
+    """Run the benchmark suite with simplified registry-based approach.
+    
+    Args:
+        library_names: List of library names to filter by
+        problems: List of specific problem names to run
+        solvers: List of solver names to run
+        dry_run: If True, skip database operations (for testing)
+    """
     
     logger = get_logger("benchmark")
     
@@ -133,7 +141,7 @@ def run_benchmark(library_names: Optional[List[str]] = None,
         
         # Create benchmark runner
         db_manager = DatabaseManager()
-        runner = BenchmarkRunner(db_manager)
+        runner = BenchmarkRunner(db_manager, dry_run=dry_run)
         
         # Filter problems based on library_names and problems arguments
         selected_problems = {}
@@ -284,6 +292,7 @@ Examples:
   python main.py --benchmark --solvers cvxpy_clarabel,scipy_linprog  # Run specific solvers
   python main.py --all --problems nb --solvers cvxpy_clarabel    # Run one problem with one solver
   python main.py --benchmark --library_names DIMACS --solvers cvxpy_scip  # Run DIMACS with SCIP
+  python main.py --benchmark --problems nb --dry-run  # Test nb problem without DB storage
         """
     )
     
@@ -327,6 +336,12 @@ Examples:
         '--solvers', '-s',
         type=str,
         help='Comma-separated list of solvers to run'
+    )
+    
+    parser.add_argument(
+        '--dry-run',
+        action='store_true',
+        help='Run benchmarks without storing results in database (for testing)'
     )
     
     # Logging options
@@ -380,7 +395,8 @@ Examples:
             success = run_benchmark(
                 library_names=library_names,
                 problems=problems,
-                solvers=solvers
+                solvers=solvers,
+                dry_run=args.dry_run
             )
             
         elif args.report:
@@ -391,7 +407,8 @@ Examples:
             benchmark_success = run_benchmark(
                 library_names=library_names,
                 problems=problems,
-                solvers=solvers
+                solvers=solvers,
+                dry_run=args.dry_run
             )
             
             if benchmark_success:
