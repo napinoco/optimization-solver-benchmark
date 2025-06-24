@@ -1,238 +1,203 @@
-# Development Tasks - DIMACS Registry & New Solvers
+# Development Tasks - Architecture Optimization & Maintenance
 
-**Phase**: DIMACS Integration & Solver Expansion  
-**Priority**: High - Adding DIMACS problem registry and CVXOPT/SDPA solver support  
-**Context**: Expanding problem coverage and solver options for comprehensive benchmarking
+**Phase**: Architecture Optimization & Maintenance  
+**Priority**: Medium - System is production-ready, focusing on optimization and maintenance  
+**Context**: Completed architecture simplification and external library focus
 
-This document provides a granular step-by-step plan to add all DIMACS problems to the registry and implement CVXOPT/SDPA solver support. Each task is incredibly small, testable, and focuses on one specific concern.
-
----
-
-## Task Queue (Execute in Order)
-
-### **Task 1: Extract DIMACS Problem Data** ⭐ HIGH PRIORITY
-**Objective**: Parse all DIMACS problems from README.md into structured format  
-**Context**: Need to extract 47+ problems from README tables for registry
-
-**Steps**:
-1. Read `problems/DIMACS/README.md` and identify all problem tables
-2. Extract problem names, file paths, and known optimal values from each table
-3. Create structured data list with fields: display_name, file_path, file_type, library_name, known_objective_value, for_test_flag
-4. Map file paths from README to actual paths in `problems/DIMACS/data/` directory structure
-
-**Test Criteria**:
-- [ ] All 47+ DIMACS problems identified and structured
-- [ ] File paths correctly mapped to actual directory structure
-- [ ] Known objective values preserved where available
-- [ ] Small problems marked with `for_test_flag: true`
-
-**Definition of Done**: Complete list of DIMACS problems in structured format ready for YAML insertion
-
-### **Task 2: Add DIMACS Problems to Registry** ⭐ HIGH PRIORITY  
-**Objective**: Insert all DIMACS problems into `config/problem_registry.yaml`  
-**Context**: Registry currently has only 4 DIMACS problems, need all 47+
-
-**Steps**:
-1. Open `config/problem_registry.yaml` 
-2. Add all DIMACS problems following existing format pattern
-3. Use fields: display_name, file_path, file_type, library_name, known_objective_value (if known), for_test_flag
-4. Omit problem_type field as requested
-5. Set appropriate for_test_flag values (smaller problems = true)
-
-**Test Criteria**:
-- [ ] All DIMACS problems added to registry
-- [ ] YAML syntax is valid
-- [ ] Fields match specification exactly
-- [ ] No problem_type fields included
-- [ ] File paths point to correct locations
-
-**Definition of Done**: `config/problem_registry.yaml` contains all DIMACS problems with correct metadata
-
-### **Task 3: Add New Solvers to Registry** ⭐ HIGH PRIORITY
-**Objective**: Add CVXOPT and SDPA solver entries to `config/solver_registry.yaml`  
-**Context**: Registry follows simple display_name pattern
-
-**Steps**:
-1. Open `config/solver_registry.yaml`
-2. Add entry for CVXOPT: `cvxpy_cvxopt` with display_name "CVXOPT (via CVXPY)"
-3. Add entry for SDPA: `cvxpy_sdpa` with display_name "SDPA (via CVXPY)"  
-4. Follow existing naming convention pattern
-
-**Test Criteria**:
-- [ ] Both solvers added to registry
-- [ ] Display names follow "(via CVXPY)" pattern
-- [ ] YAML syntax is valid
-- [ ] Keys follow existing naming convention
-
-**Definition of Done**: Registry contains new solver entries ready for implementation
-
-### **Task 4: Analyze Current Solver Implementation Pattern** 
-**Objective**: Understand existing solver wrapper architecture for consistent implementation  
-**Context**: Need to follow established patterns for new solver wrappers
-
-**Steps**:
-1. Examine existing solver implementations in `scripts/solvers/python/`
-2. Identify `SolverInterface` abstract base class structure
-3. Review how CVXPY integration works in existing solvers
-4. Understand error handling, result formatting, and configuration patterns
-5. Check how solvers are registered and initialized in the system
-
-**Test Criteria**:
-- [ ] SolverInterface requirements understood
-- [ ] CVXPY integration pattern identified
-- [ ] Result format requirements clear
-- [ ] Configuration approach documented
-
-**Definition of Done**: Clear understanding of implementation requirements for new solver wrappers
-
-### **Task 5: Implement CVXOPT Solver Wrapper**
-**Objective**: Create CVXOPT solver implementation following existing patterns  
-**Context**: CVXOPT is a Python optimization package that integrates with CVXPY
-
-**Steps**:
-1. Create new solver file following naming convention
-2. Implement SolverInterface abstract methods
-3. Configure CVXOPT as CVXPY backend
-4. Add appropriate error handling and logging
-5. Set minimal configuration parameters (verbose: false)
-6. Implement result parsing and status code mapping
-
-**Test Criteria**:
-- [ ] Solver implements SolverInterface correctly
-- [ ] CVXOPT backend properly configured in CVXPY
-- [ ] Error handling follows project patterns
-- [ ] Results formatted consistently
-- [ ] Logging uses appropriate levels
-
-**Definition of Done**: Working CVXOPT solver wrapper that can be instantiated and run
+The benchmark system has achieved production-ready status with comprehensive external problem libraries (DIMACS + SDPLIB) and 9 major solvers. Current development focuses on maintenance, optimization, and addressing any emerging needs.
 
 ---
 
-### **Task 6: Implement SDPA Solver Wrapper** 
-**Objective**: Create SDPA solver implementation following existing patterns  
-**Context**: SDPA is specialized for semidefinite programming
+## Current System Status ✅
 
-**Steps**:
-1. Create new solver file following naming convention
-2. Implement SolverInterface abstract methods  
-3. Configure SDPA as CVXPY backend
-4. Add appropriate error handling and logging
-5. Set minimal configuration parameters (verbose: false)
-6. Implement result parsing and status code mapping
-7. Handle SDPA-specific requirements for SDP problems
+**Completed Major Milestones**:
+- ✅ **Complete External Library Integration**: 139+ problems (DIMACS: 47, SDPLIB: 92+)
+- ✅ **Comprehensive Solver Support**: 9 solvers (SciPy, CLARABEL, SCS, ECOS, OSQP, CVXOPT, SDPA, SCIP, HiGHS)
+- ✅ **Architecture Simplification**: Direct registry iteration, --library_names separation
+- ✅ **Focused Problem Set**: External libraries only (removed internal synthetic problems)
+- ✅ **Testing Infrastructure**: --dry-run mode for development/testing
+- ✅ **Database Enhancements**: Memo column for result annotations
 
-**Test Criteria**:
-- [ ] Solver implements SolverInterface correctly
-- [ ] SDPA backend properly configured in CVXPY
-- [ ] SDP problem compatibility verified
-- [ ] Error handling follows project patterns
-- [ ] Results formatted consistently
-
-**Definition of Done**: Working SDPA solver wrapper optimized for SDP problems
+**Key Architecture Achievements**:
+- Simplified loader architecture (MAT + DAT loaders only)
+- Clean separation of library filtering (--library_names) vs problem filtering (--problems)
+- Dry-run mode for testing without database pollution
+- Streamlined codebase focused on real-world optimization problems
 
 ---
 
-### **Task 7: Add Solver Dependencies**
-**Objective**: Update requirements files to include CVXOPT and SDPA dependencies  
-**Context**: New solvers need proper dependency management
+## Active Task Queue (Execute if Needed)
+
+### **Task 1: Documentation Maintenance** ⭐ MEDIUM PRIORITY
+**Objective**: Keep documentation synchronized with recent architecture changes  
+**Context**: Recent simplification requires documentation updates
 
 **Steps**:
-1. Identify current requirements file structure
-2. Add CVXOPT package to appropriate requirements file
-3. Add SDPA package (if available via pip) or document installation
-4. Verify version compatibility with existing CVXPY installation
-5. Update any conda/development environment files if present
+1. ✅ Update tasks.md to reflect current system status
+2. Update detail_design.md to remove light_set references and unused loaders
+3. Update basic_design.md to reflect external-only problem approach  
+4. Update history.md to document recent architecture optimization phase
 
 **Test Criteria**:
-- [ ] CVXOPT added to requirements with appropriate version
-- [ ] SDPA dependency properly handled
-- [ ] No conflicts with existing dependencies
-- [ ] Installation instructions updated if needed
+- [ ] All documentation reflects current architecture (no light_set references)
+- [ ] CLI options documented correctly (--library_names, --dry-run)
+- [ ] Problem counts accurate (external libraries only)
+- [ ] Loader architecture correctly described (MAT/DAT only)
 
-**Definition of Done**: Dependency management properly configured for new solvers
+**Definition of Done**: Documentation accurately reflects current simplified architecture
+
+### **Task 2: Solver Performance Analysis** 🔍 LOW PRIORITY
+**Objective**: Analyze solver performance patterns across problem types  
+**Context**: Rich dataset available for performance insights
+
+**Steps**:
+1. Generate comprehensive benchmark reports with current solver set
+2. Identify solver strengths/weaknesses by problem type (LP, QP, SOCP, SDP)
+3. Document solver recommendations for different use cases
+4. Create performance comparison charts for publication
+
+**Test Criteria**:
+- [ ] Performance data collected across all problem types
+- [ ] Solver recommendations documented
+- [ ] Performance insights suitable for research publication
+
+**Definition of Done**: Comprehensive solver performance analysis available
+
+### **Task 3: Database Query Optimization** 🚀 LOW PRIORITY  
+**Objective**: Optimize database queries for better report generation performance
+**Context**: Large dataset may benefit from query optimization
+
+**Steps**:
+1. Profile current report generation performance
+2. Analyze database query patterns in HTMLGenerator and DataExporter
+3. Add database indexes for common query patterns
+4. Benchmark performance improvements
+
+**Test Criteria**:
+- [ ] Report generation time measured and optimized
+- [ ] Database queries efficiently indexed
+- [ ] No regressions in functionality
+
+**Definition of Done**: Improved report generation performance
 
 ---
 
-### **Task 8: Validate New Solver Integration**
-**Objective**: Test new solvers work correctly with validation system  
-**Context**: System has built-in validation via `python main.py --validate`
+## Maintenance Tasks (As Needed)
 
-**Steps**:
-1. Run validation command to test new solver integration
-2. Verify solvers can be instantiated without errors
-3. Test with small problems marked `for_test_flag: true`
-4. Check that results are properly formatted and stored
-5. Validate solver version detection works correctly
-6. Ensure no regressions in existing solver functionality
+### **External Library Updates**
+**When**: As new versions of DIMACS/SDPLIB become available
+- Update problem submodules to latest versions
+- Validate new/changed problems
+- Update known objective values if available
 
-**Test Criteria**:
-- [ ] `python main.py --validate` passes with new solvers
-- [ ] Both CVXOPT and SDPA solvers initialize correctly
-- [ ] Test problems solve successfully where appropriate
-- [ ] Results stored in database with proper metadata
-- [ ] Existing solvers still function correctly
-- [ ] No error messages or warnings for working functionality
+### **Solver Updates**  
+**When**: New solver backends become available or existing ones need updates
+- Test new CVXPY-supported solvers
+- Update solver version dependencies
+- Validate compatibility with existing problems
 
-**Definition of Done**: Complete validation passes, new solvers operational and integrated
+### **Platform Compatibility**
+**When**: Testing on new platforms or Python versions
+- Verify solver installation across platforms
+- Test GitHub Actions on different runners
+- Update CI/CD configurations as needed
+
+---
+
+## Future Enhancement Opportunities
+
+### **Advanced Analysis Features** (Optional)
+- Convergence analysis for iterative solvers
+- Memory usage profiling
+- Parallel solver execution
+- Advanced statistical analysis of results
+
+### **Problem Set Extensions** (Optional)  
+- Additional external problem libraries
+- Industry-specific problem collections
+- Larger-scale problems for scalability testing
+
+### **Reporting Enhancements** (Optional)
+- Interactive dashboards with filtering
+- Real-time benchmark monitoring
+- Automated performance regression detection
+- LaTeX report generation for academic publications
 
 ---
 
 ## Testing Protocol
 
-**After Each Task**:
-1. Validate syntax/format of any modified config files
-2. Run `python main.py --validate` to check for integration issues
-3. Verify no regressions in existing functionality
-4. Check git status for clean state before proceeding
-
-**Final Integration Test**:
+**Regular Validation**:
 ```bash
-# Full system validation
+# Environment validation
 python main.py --validate
 
-# Test specific problem sets
-python main.py --benchmark --problem-set dimacs
+# Quick dry-run test
+python main.py --benchmark --problems nb --dry-run
 
-# Verify new solvers work
-python main.py --benchmark --problem-set external
+# Full system test
+python main.py --benchmark --library_names DIMACS --solvers cvxpy_clarabel
+
+# Report generation test  
+python main.py --report
+```
+
+**Performance Monitoring**:
+```bash
+# Monitor benchmark performance
+time python main.py --benchmark --problems nb,arch0 --solvers cvxpy_clarabel,cvxpy_scs
+
+# Monitor report generation
+time python main.py --report
 ```
 
 ---
 
 ## Dependencies & Prerequisites
 
-**Required Files**:
-- `problems/DIMACS/README.md` (problem source data)
-- `config/problem_registry.yaml` (target registry)
-- `config/solver_registry.yaml` (target registry)
-- `scripts/solvers/python/` (implementation directory)
-
-**System Requirements**:
+**Current Production Environment**:
 - Python 3.12+
-- CVXPY installation  
-- Access to CVXOPT and SDPA packages
-- Existing solver implementation patterns
+- Complete CVXPY ecosystem (CLARABEL, SCS, ECOS, OSQP, CVXOPT, SDPA, SCIP, HiGHS)
+- DIMACS and SDPLIB problem libraries
+- SQLite database with memo column support
+
+**Development Environment**:
+- All production dependencies
+- Git access for documentation updates
+- Testing tools for performance analysis
 
 ---
 
 ## Success Criteria
 
-**DIMACS Integration**:
-- All 47+ DIMACS problems accessible via registry
-- Problems correctly categorized with metadata
-- File paths resolve to actual problem files
-
-**Solver Expansion**:
-- CVXOPT and SDPA solvers fully operational
-- Integration follows established patterns
+**System Stability**:
+- All validation tests pass consistently
 - No regressions in existing functionality
-- Dependencies properly managed
+- Documentation accuracy maintained
 
-**System Validation**:
-- `python main.py --validate` passes completely
-- New solvers solve appropriate test problems
-- Results properly stored and formatted
+**Performance Standards**:
+- Benchmark execution within expected time bounds
+- Report generation completes successfully
+- Database operations remain efficient
+
+**Code Quality**:
+- Clean architecture maintained
+- External-only problem focus preserved
+- Testing infrastructure remains functional
 
 ---
 
-*Task-by-task execution ensures incremental progress with validation at each step*
+## Notes
+
+**Current Architecture Strengths**:
+- Simplified and maintainable codebase
+- Focus on real-world optimization problems
+- Comprehensive solver coverage
+- Robust testing infrastructure with dry-run mode
+- Clean separation of concerns
+
+**System is Production-Ready**: The benchmark system successfully provides meaningful public reporting with external problem libraries and comprehensive solver support. Current tasks focus on maintenance and optimization rather than major feature development.
+
+---
+
+*System Status: Production Ready ✅ | Focus: Maintenance & Optimization*

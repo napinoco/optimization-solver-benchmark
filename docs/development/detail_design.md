@@ -76,13 +76,8 @@ optimization-solver-benchmark/
 │   └── problem_registry.yaml     # Available problems list (moved from problems/)
 │
 ├── problems/                    # Problem instances
-│   ├── light_set/               # Internal problems
-│   │   ├── lp/                  # Linear programming (.mps files)
-│   │   ├── qp/                  # Quadratic programming (.qps files)
-│   │   ├── socp/                # Second-order cone programming (Python)
-│   │   └── sdp/                 # Semidefinite programming (Python)
-│   ├── DIMACS/                  # External DIMACS library
-│   └── SDPLIB/                  # External SDPLIB library
+│   ├── DIMACS/                  # External DIMACS library (50 problems)
+│   └── SDPLIB/                  # External SDPLIB library (3 problems)
 │
 ├── scripts/
 │   ├── benchmark/               # Benchmark execution and database storage
@@ -96,9 +91,6 @@ optimization-solver-benchmark/
 │   │   │   ├── __init__.py
 │   │   │   ├── mat_loader.py     # DIMACS .mat file loader
 │   │   │   ├── dat_loader.py     # SDPLIB .dat-s file loader
-│   │   │   ├── mps_loader.py     # MPS format loader
-│   │   │   ├── qps_loader.py     # QPS format loader
-│   │   │   └── python_loader.py  # Python problem loader
 │   │   └── matlab_octave/        # MATLAB/Octave loaders (future)
 │   │       └── .gitkeep
 │   │
@@ -237,10 +229,10 @@ def create_solver(self, solver_name: str) -> SolverInterface:
         raise ValueError(f"Unknown solver: {solver_name}")
 ```
 
-#### config/problem_registry.yaml - Flat Problem Structure
+#### config/problem_registry.yaml - External Problems Only
 ```yaml
 # Flat problem structure - each problem is a top-level entry
-# Eliminates light_set in favor of real problems with test flags
+# Only external problems from DIMACS and SDPLIB libraries
 problem_libraries:
   
   # Small-scale test problems from DIMACS/SDPLIB  
@@ -291,14 +283,6 @@ problem_libraries:
     # known_objective_value: null  # Unknown - omit field
     
   # Linear programming problems
-  simple_lp_test:
-    display_name: "Simple LP Test (Internal)"
-    file_path: "problems/light_set/lp/simple_lp.mps"
-    file_type: "mps"
-    problem_type: "LP"
-    library_name: "internal"
-    for_test_flag: true  # Synthetic test problem
-    known_objective_value: 5.0  # Known optimal value
 ```
 
 This structure provides:
@@ -306,7 +290,7 @@ This structure provides:
 - **Test problem identification**: `for_test_flag` to identify small problems for quick testing
 - **Known objective values**: Optional field for result validation
 - **Library attribution**: Clear source library tracking
-- **Real problems for testing**: Eliminates synthetic light_set in favor of real small problems
+- **No synthetic problems**: All problems are from established optimization libraries
 
 ### 3. Re-architected Benchmark Execution
 
@@ -453,7 +437,7 @@ CREATE TABLE results (
     solver_version TEXT NOT NULL,
     
     -- Problem information  
-    problem_library TEXT NOT NULL,        -- 'light_set', 'DIMACS', 'SDPLIB'
+    problem_library TEXT NOT NULL,        -- 'DIMACS', 'SDPLIB'
     problem_name TEXT NOT NULL,
     problem_type TEXT NOT NULL,           -- 'LP', 'QP', 'SOCP', 'SDP'
     
@@ -471,6 +455,7 @@ CREATE TABLE results (
     primal_infeasibility REAL,          -- Primal infeasibility measure
     dual_infeasibility REAL,            -- Dual infeasibility measure
     iterations INTEGER,                  -- Number of solver iterations
+    memo TEXT,                           -- Additional notes or metadata
     
     -- Unique constraint to prevent exact duplicates
     UNIQUE(solver_name, solver_version, problem_library, problem_name, commit_hash, timestamp)
@@ -495,7 +480,7 @@ class BenchmarkResult:
     solver_version: str = ""
     
     # Problem information
-    problem_library: str = ""  # 'internal', 'DIMACS', 'SDPLIB'
+    problem_library: str = ""  # 'DIMACS', 'SDPLIB'
     problem_name: str = ""
     problem_type: str = ""     # 'LP', 'QP', 'SOCP', 'SDP'
     
@@ -513,6 +498,7 @@ class BenchmarkResult:
     primal_infeasibility: Optional[float] = None
     dual_infeasibility: Optional[float] = None
     iterations: Optional[int] = None
+    memo: Optional[str] = None
     
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary for JSON serialization"""
@@ -815,13 +801,15 @@ h5py>=3.8.0           # For .mat file loading
 ### Command Line Interface ✅ **IMPLEMENTED**
 ```bash
 # Main execution commands - simplified and working
-python main.py --benchmark --problems simple_lp_test,simple_qp_test --solvers cvxpy_clarabel,scipy_linprog
+python main.py --benchmark --problems nb,nb_L2,arch0 --solvers cvxpy_clarabel,scipy_linprog
 python main.py --benchmark --problem-set external  # All DIMACS + SDPLIB problems
 python main.py --benchmark --problem-set dimacs    # DIMACS problems only
 python main.py --benchmark --problem-set sdplib    # SDPLIB problems only
+python main.py --benchmark --library-names DIMACS,SDPLIB  # Filter by library names
 python main.py --report                            # Generate reports only
 python main.py --all                               # Full benchmark + report
 python main.py --validate                          # Validate environment
+python main.py --dry-run                           # Show what would be executed
 ```
 
 ### Execution Workflow ✅ **IMPLEMENTED**
@@ -870,9 +858,9 @@ python main.py --validate                          # Validate environment
 5. **External Libraries**: DIMACS (.mat) and SDPLIB (.dat-s) fully supported
 
 ### Adding New File Formats
-1. **Implement loader**: Create format parser in `scripts/data_loaders/`
+1. **Implement loader**: Create format parser in `scripts/data_loaders/python/`
 2. **Add converter**: Implement conversion to CVXPY representation
-3. **Update dispatcher**: Add format mapping to ProblemLoader
+3. **Update loader selection**: Add format mapping in BenchmarkRunner.load_problem()
 4. **Test pipeline**: Validate end-to-end problem loading and solving
 
 ---
