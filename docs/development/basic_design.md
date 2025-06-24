@@ -72,11 +72,11 @@ GITHUB ACTIONS (Publishing Only):
 - **External Libraries**: DIMACS and SDPLIB integration via git clone approach
 
 ### Supported Problem Types ✅
-- **LP**: Linear Programming (synthetic + DIMACS)
-- **QP**: Quadratic Programming (synthetic)
-- **SOCP**: Second-Order Cone Programming (synthetic + DIMACS)
-- **SDP**: Semidefinite Programming (synthetic + DIMACS + SDPLIB)
-- **Total Coverage**: 145 problems across 4 problem types
+- **LP**: Linear Programming (DIMACS)
+- **QP**: Quadratic Programming (DIMACS)
+- **SOCP**: Second-Order Cone Programming (DIMACS)
+- **SDP**: Semidefinite Programming (DIMACS + SDPLIB)
+- **Total Coverage**: 139+ problems from external libraries only
 
 ---
 
@@ -89,19 +89,16 @@ GITHUB ACTIONS (Publishing Only):
 
 ### Storage Strategy ✅ IMPLEMENTED
 ```yaml
-✅ Phase 1: Lightweight Problem Set - COMPLETED
-  - Direct GitHub storage for synthetic problems
-  - Small standard problems for rapid prototyping
-  
-✅ Phase 2: External Problem Libraries - COMPLETED
+✅ External Problem Libraries - COMPLETED
   - DIMACS library: 47 problems via git submodule
-  - SDPLIB library: 92 problems via git submodule  
+  - SDPLIB library: 92+ problems via git submodule  
   - CVXPY conversion for solver compatibility
   
-✅ Production Ready: Complete Problem Coverage
-  - 145 total problems across 4 problem types
+✅ Production Ready: External-Only Focus
+  - 139+ total problems from external libraries
   - Professional reporting with structure analysis
   - Comprehensive metadata and version tracking
+  - Simplified architecture with MAT/DAT loaders only
 ```
 
 ---
@@ -118,26 +115,37 @@ GITHUB ACTIONS (Publishing Only):
 - SQLite storage with structured schema
 - Comprehensive validation framework
 
-### Phase 2: Data Publishing Platform 🚧 IN PROGRESS
+### Phase 2: Data Publishing Platform ✅ COMPLETED
 **Goal**: Robust data publishing with expanded solver ecosystem
 
-**Current Focus**:
-- Multi-backend CVXPY (CLARABEL, SCS, ECOS, OSQP, etc.)
-- SOCP/SDP problem support with example implementations
+**Achievements**:
+- Multi-backend CVXPY (CLARABEL, SCS, ECOS, OSQP, CVXOPT, SDPA, SCIP, HiGHS)
+- Complete SOCP/SDP problem support via external libraries
 - Clean JSON/CSV data exports for research use
-- Octave integration for MATLAB compatibility
-- External storage framework for large problem sets
+- External library integration (DIMACS + SDPLIB)
+- Production-ready benchmark system
 
-**Expected Solver Coverage**:
+**Current Solver Coverage**:
 ```
 Problem Type | Solver Count | Backends
-LP          | 7            | SciPy + CLARABEL + SCS + ECOS + OSQP + CBC + GLOP + HiGHS
-QP          | 6            | SciPy + CLARABEL + SCS + ECOS + OSQP + (CVXPY default)
-SOCP        | 4            | CLARABEL + SCS + ECOS + OSQP
-SDP         | 2            | CLARABEL + SCS
+LP          | 9            | SciPy + CLARABEL + SCS + ECOS + OSQP + CVXOPT + SDPA + SCIP + HiGHS
+QP          | 8            | SciPy + CLARABEL + SCS + ECOS + OSQP + CVXOPT + SCIP + HiGHS
+SOCP        | 6            | CLARABEL + SCS + ECOS + CVXOPT + SDPA + SCIP
+SDP         | 5            | CLARABEL + SCS + CVXOPT + SDPA + SCIP
 ```
 
-### Phase 3: Advanced Ecosystem ⏳ PLANNED
+### Phase 3: Architecture Optimization ✅ COMPLETED
+**Goal**: Simplified architecture and enhanced testing capabilities
+
+**Achievements**:
+- Direct registry iteration (removed helper functions)
+- Clean separation of --library_names vs --problems filtering
+- Dry-run mode for testing without database pollution
+- Memo column for result annotations
+- Streamlined codebase focused on external libraries only
+- Removed internal synthetic problems for production clarity
+
+### Phase 4: Advanced Ecosystem ⏳ PLANNED
 **Goal**: Enhanced analysis capabilities and broader solver support
 
 **Planned Features**:
@@ -147,7 +155,7 @@ SDP         | 2            | CLARABEL + SCS
 - Advanced statistical analysis and performance profiling
 - Community problem sharing and solver recommendations
 
-### Phase 4: Production Platform ⏳ PLANNED  
+### Phase 5: Production Platform ⏳ PLANNED  
 **Goal**: Scalable cloud deployment with enterprise features
 
 **Planned Features**:
