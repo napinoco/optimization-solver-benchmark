@@ -203,8 +203,17 @@ class HTMLGenerator:
         solver_comparison = self.result_processor.get_solver_comparison(results)
         
         # Generate environment info from latest result
-        env_info = results[0].environment_info if results else {}
-        commit_hash = results[0].commit_hash if results else "unknown"
+        if results:
+            # Handle both dict and object result formats
+            if isinstance(results[0], dict):
+                env_info = results[0].get('environment_info', {})
+                commit_hash = results[0].get('commit_hash', 'unknown')
+            else:
+                env_info = getattr(results[0], 'environment_info', {})
+                commit_hash = getattr(results[0], 'commit_hash', 'unknown')
+        else:
+            env_info = {}
+            commit_hash = "unknown"
         
         html_content = f"""<!DOCTYPE html>
 <html lang="en">
@@ -530,9 +539,9 @@ class HTMLGenerator:
 
         <div class="metadata">
             <h3>🔧 Environment Information</h3>
-            <p><strong>Commit Hash:</strong> {commit_hash[:12]}...</p>
-            <p><strong>Platform:</strong> {env_info.get('platform', 'Unknown')}</p>
-            <p><strong>Python Version:</strong> {env_info.get('python_version', 'Unknown')}</p>
+            <p><strong>Commit Hash:</strong> {commit_hash}</p>
+            <p><strong>Platform:</strong> {env_info.get('os', {}).get('platform', 'Unknown')}</p>
+            <p><strong>Python Version:</strong> {env_info.get('python', {}).get('version', 'Unknown')}</p>
         </div>
     </main>
 

@@ -1,63 +1,127 @@
 {
   "metadata": {
-    "generated_at": "2025-06-20T21:02:26.701708",
-    "total_results": 20,
+    "generated_at": "2025-06-25T08:43:43.391245",
+    "total_results": 40,
     "format": "summary_only"
   },
   "overall_statistics": {
-    "total_results": 20,
-    "total_solvers": 2,
-    "total_problems": 8,
-    "success_rate": 0.4,
-    "avg_solve_time": 0.0023459196090698242,
+    "total_results": 40,
+    "total_solvers": 9,
+    "total_problems": 6,
+    "success_rate": 0.675,
+    "avg_solve_time": 946.3270222365857,
     "problem_type_distribution": {
-      "SDP": 12,
-      "SOCP": 2,
-      "LP": 4,
-      "QP": 2
+      "UNKNOWN": 40
     },
     "library_distribution": {
-      "DIMACS": 5,
-      "SDPLIB": 5,
-      "internal": 10
+      "DIMACS": 38,
+      "internal": 2
     },
     "solver_names": [
       "cvxpy_clarabel",
+      "cvxpy_cvxopt",
+      "cvxpy_ecos",
+      "cvxpy_highs",
+      "cvxpy_osqp",
+      "cvxpy_scip",
+      "cvxpy_scs",
+      "cvxpy_sdpa",
       "scipy_linprog"
     ],
     "problem_names": [
-      "arch0",
-      "control1",
-      "control_lmi_test",
-      "hinf12",
+      "bm1",
       "nb",
-      "portfolio_optimization_test",
-      "simple_lp_test",
-      "simple_qp_test"
+      "nb_L1",
+      "nb_L2",
+      "nb_L2_bessel",
+      "simple_lp_test"
     ]
   },
   "solver_performance": [
     {
-      "solver_name": "cvxpy_clarabel",
-      "problems_attempted": 11,
+      "solver_name": "cvxpy_sdpa",
+      "problems_attempted": 5,
       "problems_solved": 5,
-      "success_rate": 0.45454545454545453,
-      "avg_solve_time": 0.0030175447463989258,
-      "min_solve_time": 1.0013580322265625e-05,
-      "max_solve_time": 0.0049741268157958984
+      "success_rate": 1.0,
+      "avg_solve_time": 17.876109409332276,
+      "min_solve_time": 1.3061511516571045,
+      "max_solve_time": 79.02675819396973
+    },
+    {
+      "solver_name": "cvxpy_scip",
+      "problems_attempted": 2,
+      "problems_solved": 2,
+      "success_rate": 1.0,
+      "avg_solve_time": 24.193716526031494,
+      "min_solve_time": 0.005051851272583008,
+      "max_solve_time": 48.382381200790405
+    },
+    {
+      "solver_name": "cvxpy_cvxopt",
+      "problems_attempted": 5,
+      "problems_solved": 5,
+      "success_rate": 1.0,
+      "avg_solve_time": 177.6611117839813,
+      "min_solve_time": 1.3183510303497314,
+      "max_solve_time": 880.0794627666473
+    },
+    {
+      "solver_name": "cvxpy_scs",
+      "problems_attempted": 5,
+      "problems_solved": 5,
+      "success_rate": 1.0,
+      "avg_solve_time": 7343.709583997726,
+      "min_solve_time": 1.1490800380706787,
+      "max_solve_time": 36704.034167051315
+    },
+    {
+      "solver_name": "cvxpy_ecos",
+      "problems_attempted": 6,
+      "problems_solved": 5,
+      "success_rate": 0.8333333333333334,
+      "avg_solve_time": 1.244086503982544,
+      "min_solve_time": 3.814697265625e-05,
+      "max_solve_time": 1.9608960151672363
+    },
+    {
+      "solver_name": "cvxpy_clarabel",
+      "problems_attempted": 5,
+      "problems_solved": 4,
+      "success_rate": 0.8,
+      "avg_solve_time": 20.198103523254396,
+      "min_solve_time": 1.5329699516296387,
+      "max_solve_time": 48.13991713523865
+    },
+    {
+      "solver_name": "cvxpy_highs",
+      "problems_attempted": 2,
+      "problems_solved": 1,
+      "success_rate": 0.5,
+      "avg_solve_time": 0.0019685029983520508,
+      "min_solve_time": 5.793571472167969e-05,
+      "max_solve_time": 0.003879070281982422
+    },
+    {
+      "solver_name": "cvxpy_osqp",
+      "problems_attempted": 5,
+      "problems_solved": 0,
+      "success_rate": 0.0,
+      "avg_solve_time": 4.267692565917969e-05,
+      "min_solve_time": 3.3855438232421875e-05,
+      "max_solve_time": 6.29425048828125e-05
     },
     {
       "solver_name": "scipy_linprog",
-      "problems_attempted": 9,
-      "problems_solved": 3,
-      "success_rate": 0.3333333333333333,
-      "avg_solve_time": 0.0014504194259643555,
-      "min_solve_time": 2.7894973754882812e-05,
-      "max_solve_time": 0.0042171478271484375
+      "problems_attempted": 5,
+      "problems_solved": 0,
+      "success_rate": 0.0,
+      "avg_solve_time": 4.868507385253906e-05,
+      "min_solve_time": 3.719329833984375e-05,
+      "max_solve_time": 7.891654968261719e-05
     }
   ],
   "environment": {
-    "commit_hash": "35f9a7f41d622a27cfbd8f3bffd43730d3116e55",
+    "commit_hash": "ce1969a22cbeb1ef396d49cbf1142984143d1297",
     "platform": "Unknown"
   }
 }
