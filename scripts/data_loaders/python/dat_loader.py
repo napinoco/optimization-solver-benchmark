@@ -251,16 +251,19 @@ class DATLoader:
     def analyze_block_structure(self, block_sizes: List[int]) -> Dict[str, Any]:
         """
         Analyze block structure to determine cone types.
+        Uses SeDuMi standard field names for consistency.
         
         Args:
             block_sizes: List of block sizes
             
         Returns:
-            Dictionary with cone structure information
+            Dictionary with cone structure information in SeDuMi format
         """
         cone_info = {
-            'linear_vars': 0,
-            'sdp_cones': []
+            'free_vars': 0,        # SeDuMi standard name
+            'nonneg_vars': 0,      # SeDuMi standard name  
+            'soc_cones': [],       # SeDuMi standard name
+            'sdp_cones': []        # SeDuMi standard name
         }
         
         for block_size in block_sizes:
@@ -269,7 +272,8 @@ class DATLoader:
                 cone_info['sdp_cones'].append(block_size)
             else:
                 # Negative size = diagonal (linear) block
-                cone_info['linear_vars'] += abs(block_size)
+                # In SDPLIB, these are typically non-negative variables
+                cone_info['nonneg_vars'] += abs(block_size)
         
         return cone_info
     
@@ -287,7 +291,26 @@ class DATLoader:
         """
         # Build constraint matrices
         A, b = self.build_constraint_matrices(parsed_data)
-        c = parsed_data['c']
+        
+        # Fix: Build correct objective vector for variable space (not constraint space)
+        n_vars = A.shape[1]  # Number of decision variables 
+        m = A.shape[0]       # Number of constraints
+        
+        # SDPA format: min c1*x1 + c2*x2 + ... + cm*xm (c has length m)
+        # SeDuMi format: min c^T*x (c should have length n_vars)
+        # For SDP problems, we typically want to minimize trace, so c = 0 for structure vars
+        # and the SDPA objective coefficients become the RHS vector
+        c = np.zeros(n_vars)  # Initialize objective for decision variables
+        
+        # The SDPA objective coefficients are used differently:
+        # They represent the constraint RHS values, not variable coefficients
+        sdpa_c = parsed_data['c']
+        
+        # Correct the constraint formulation:
+        # SDPA: F1*x1 + F2*x2 + ... + Fm*xm - F0 = X >= 0 with min c1*x1 + c2*x2 + ... + cm*xm
+        # SeDuMi: A*x = b with min c^T*x where x ∈ K
+        # The SDPA c coefficients become constraint bounds, not objective coefficients
+        b = sdpa_c  # Use SDPA objective as constraint RHS (length m)
         
         # Analyze cone structure
         cone_info = self.analyze_block_structure(parsed_data['block_sizes'])
@@ -298,7 +321,7 @@ class DATLoader:
         else:
             problem_class = 'LP'
         
-        # Create metadata
+        # Create metadata with corrected cone structure field names
         metadata = {
             'source': 'DAT file',
             'format': 'SDPA .dat-s',
@@ -308,8 +331,12 @@ class DATLoader:
                 'block_sizes': parsed_data['block_sizes']
             },
             'original_dimensions': {
-                'variables': A.shape[1],
-                'constraints': A.shape[0]
+                'variables': A.shape[1],  # n_vars (correct)
+                'constraints': A.shape[0]  # m (correct)
+            },
+            'sdpa_original': {
+                'objective_coeffs': sdpa_c,  # Original SDPA c vector for reference
+                'constraint_count': m
             }
         }
         
@@ -327,6 +354,7 @@ class DATLoader:
             A_ub=None,  # SDPA uses equality constraints
             b_ub=None,
             bounds=None,  # Bounds handled by cone structure
+            cone_structure=cone_info,  # NEW: Pass cone_structure directly
             metadata=metadata
         )
 

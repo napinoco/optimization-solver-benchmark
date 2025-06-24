@@ -119,8 +119,8 @@ class ProblemStructureAnalyzer:
                 'cone_structure' in problem_data.metadata and 
                 problem_data.metadata.get('source') in ['DIMACS', 'SDPLIB']):
                 return self._analyze_external_library_problem(problem_data)
-            elif problem_data.cvxpy_problem is not None:
-                # Analyze CVXPY problem directly
+            elif hasattr(problem_data, 'cvxpy_problem') and problem_data.cvxpy_problem is not None:
+                # Analyze CVXPY problem directly (legacy support)
                 return self._analyze_cvxpy_problem(problem_data)
             else:
                 # Analyze from matrix data

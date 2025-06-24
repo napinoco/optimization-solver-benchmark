@@ -223,38 +223,29 @@ class CvxpySolver(SolverInterface):
         """
         Convert ProblemData to CVXPY Problem format (unified for all problem types).
         
+        This method now works entirely from SeDuMi format (A_eq/b_eq + cone_structure)
+        without requiring legacy CVXPY fields.
+        
         Args:
-            problem_data: Problem data from any loader
+            problem_data: Problem data from any loader (SeDuMi format)
             
         Returns:
             CVXPY Problem object ready for solving
         """
-        # If already a CVXPY problem, return as-is
-        if hasattr(problem_data, 'cvxpy_problem') and problem_data.cvxpy_problem is not None:
-            self.logger.debug("Problem already in CVXPY format")
-            return problem_data.cvxpy_problem
-
-        # Determine number of variables
-        # n_vars = self._get_variable_count(problem_data)
-
-        # Create decision variables
-        # x = cp.Variable(n_vars, name="x")
-
-        # Build objective
-        # objective = self._build_objective(problem_data, x)
-
-        # Build constraints
-        # constraints = self._build_constraints(problem_data, x)
-
-        # Create CVXPY problem
-        # cvx_problem = cp.Problem(objective, constraints)
-
-        # Check if cone structure is available (needed for DIMACS/SDPLIB problems)
-        if 'cone_structure' not in problem_data.metadata:
-            # For standard LP/QP problems without cone structure, use simple conversion
-            return self._convert_simple_problem(problem_data)
+        # Get cone structure from first-class field (Phase 2 enhancement)
+        cone_structure = None
+        if hasattr(problem_data, 'cone_structure') and problem_data.cone_structure:
+            cone_structure = problem_data.cone_structure
+        elif hasattr(problem_data, 'metadata') and 'cone_structure' in problem_data.metadata:
+            # Backward compatibility fallback
+            cone_structure = problem_data.metadata['cone_structure']
+            self.logger.debug("Using cone_structure from metadata (legacy)")
         
-        cone_structure = problem_data.metadata['cone_structure']
+        # Validate SeDuMi format inputs
+        if problem_data.A_eq is None or problem_data.b_eq is None or problem_data.c is None:
+            raise ValueError("SeDuMi format requires A_eq, b_eq, and c to be non-None")
+        
+        self.logger.debug(f"Converting SeDuMi problem with cone_structure: {cone_structure}")
         A_eq = problem_data.A_eq
         b_eq = problem_data.b_eq
         c = problem_data.c
@@ -309,113 +300,7 @@ class CvxpySolver(SolverInterface):
         self.logger.debug(f"Converted {problem_data.problem_class} problem: {n_vars} vars, {len(constraints)} constraints")
         
         return cvx_problem
-    
-    def _convert_simple_problem(self, problem_data: ProblemData) -> cp.Problem:
-        """
-        Convert simple LP/QP problems without cone structure to CVXPY format.
-        
-        Args:
-            problem_data: Problem data for LP/QP problems
-            
-        Returns:
-            CVXPY Problem object
-        """
-        if problem_data.c is None:
-            raise ValueError("Problem must have objective coefficients")
-        
-        n_vars = len(problem_data.c)
-        x = cp.Variable(n_vars)
-        
-        # Build objective
-        if problem_data.P is not None:
-            # Quadratic objective: 0.5 * x^T P x + c^T x
-            objective = cp.Minimize(0.5 * cp.quad_form(x, problem_data.P) + problem_data.c.T @ x)
-        else:
-            # Linear objective: c^T x
-            objective = cp.Minimize(problem_data.c.T @ x)
-        
-        # Build constraints
-        constraints = []
-        
-        # Equality constraints: A_eq x = b_eq
-        if problem_data.A_eq is not None and problem_data.b_eq is not None:
-            constraints.append(problem_data.A_eq @ x == problem_data.b_eq)
-        
-        # Inequality constraints: A_ub x <= b_ub
-        if problem_data.A_ub is not None and problem_data.b_ub is not None:
-            constraints.append(problem_data.A_ub @ x <= problem_data.b_ub)
-        
-        # Variable bounds
-        if problem_data.bounds:
-            for i, (lb, ub) in enumerate(problem_data.bounds):
-                if lb is not None:
-                    constraints.append(x[i] >= lb)
-                if ub is not None:
-                    constraints.append(x[i] <= ub)
-        
-        return cp.Problem(objective, constraints)
-    
-    def _get_variable_count(self, problem_data: ProblemData) -> int:
-        """Determine the number of variables in the problem."""
-        if problem_data.c is not None:
-            return len(problem_data.c)
-        elif problem_data.A_eq is not None:
-            return problem_data.A_eq.shape[1]
-        elif problem_data.A_ub is not None:
-            return problem_data.A_ub.shape[1]
-        elif hasattr(problem_data, 'P') and problem_data.P is not None:
-            return problem_data.P.shape[0]
-        elif problem_data.bounds:
-            return len(problem_data.bounds)
-        else:
-            raise ValueError("Cannot determine number of variables from problem data")
-    
-    def _build_objective(self, problem_data: ProblemData, x: cp.Variable) -> cp.Minimize:
-        """Build objective function based on problem type."""
-        c = problem_data.c if problem_data.c is not None else np.zeros(x.shape[0])
-        
-        if problem_data.problem_class == "QP":
-            # Quadratic objective: minimize 0.5 * x^T * P * x + c^T * x
-            P = getattr(problem_data, 'P', None)
-            if P is None:
-                self.logger.warning("QP problem missing quadratic matrix P, treating as LP")
-                return cp.Minimize(c.T @ x)
-            else:
-                return cp.Minimize(0.5 * cp.quad_form(x, P) + c.T @ x)
-        else:
-            # Linear objective for LP, SOCP, SDP: minimize c^T * x
-            return cp.Minimize(c.T @ x)
-    
-    def _build_constraints(self, problem_data: ProblemData, x: cp.Variable) -> List:
-        """Build constraints based on problem data."""
-        constraints = []
-        
-        # Equality constraints: A_eq @ x == b_eq
-        if problem_data.A_eq is not None and problem_data.b_eq is not None:
-            constraints.append(problem_data.A_eq @ x == problem_data.b_eq)
-        
-        # Inequality constraints: A_ub @ x <= b_ub  
-        if problem_data.A_ub is not None and problem_data.b_ub is not None:
-            constraints.append(problem_data.A_ub @ x <= problem_data.b_ub)
-        
-        # Variable bounds
-        if problem_data.bounds:
-            for i, bound in enumerate(problem_data.bounds):
-                if bound is not None and isinstance(bound, tuple):
-                    lower, upper = bound
-                    if lower is not None and lower != float('-inf'):
-                        constraints.append(x[i] >= lower)
-                    if upper is not None and upper != float('inf'):
-                        constraints.append(x[i] <= upper)
-                else:
-                    # Default to non-negative
-                    constraints.append(x[i] >= 0)
-        else:
-            # Default bounds: non-negative (standard for optimization problems)
-            constraints.append(x >= 0)
-        
-        return constraints
-    
+
     def _create_result_from_cvxpy(self, cvx_problem: cp.Problem, start_time: float) -> SolverResult:
         """Create standardized result from CVXPY problem."""
         
