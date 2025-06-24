@@ -225,22 +225,20 @@ class BenchmarkRunner:
         
         self.store_result(solver_name, problem_name, error_result, problem_config)
     
-    def run_single_benchmark(self, problem_name: str, solver_name: str) -> None:
+    def run_single_benchmark(self, problem_name: str, problem_config: Dict[str, Any], 
+                            solver_name: str, solver_config: Dict[str, Any]) -> None:
         """
         Execute single problem-solver combination and store result.
         
         Args:
             problem_name: Name of the problem to solve
-            solver_name: Name of the solver to use
+            problem_config: Problem configuration from registry
+            solver_name: Name of the solver to use  
+            solver_config: Solver configuration from registry
         """
         logger.info(f"Running {solver_name} on {problem_name}")
         
         try:
-            # Get problem configuration
-            if problem_name not in self.problem_registry['problem_libraries']:
-                raise ValueError(f"Problem {problem_name} not found in registry")
-                
-            problem_config = self.problem_registry['problem_libraries'][problem_name]
             
             # Load problem using appropriate loader
             problem_data = self.load_problem(problem_name, problem_config)

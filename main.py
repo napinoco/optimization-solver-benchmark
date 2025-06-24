@@ -32,7 +32,6 @@ try:
     from scripts.database.database_manager import DatabaseManager
     from scripts.reporting.html_generator import HTMLGenerator
     from scripts.reporting.data_exporter import DataExporter
-    from scripts.data_loaders.problem_loader import list_available_problems
     from scripts.utils.logger import get_logger
 except ImportError as e:
     print(f"Error importing modules: {e}")
@@ -101,109 +100,99 @@ def validate_environment() -> bool:
     return True
 
 
-def run_benchmark(problems: Optional[List[str]] = None,
+def run_benchmark(library_names: Optional[List[str]] = None,
+                 problems: Optional[List[str]] = None,
                  solvers: Optional[List[str]] = None) -> bool:
-    """Run the benchmark suite."""
+    """Run the benchmark suite with simplified registry-based approach."""
     
     logger = get_logger("benchmark")
     
     try:
         logger.info("Starting benchmark execution...")
         
-        # Create database manager
-        db_manager = DatabaseManager()
+        # Load registries directly
+        import yaml
+        
+        # Load problem registry
+        problem_registry_path = Path("config/problem_registry.yaml")
+        if not problem_registry_path.exists():
+            logger.error("Problem registry not found")
+            return False
+        
+        with open(problem_registry_path, 'r') as f:
+            problem_registry = yaml.safe_load(f)
+        
+        # Load solver registry
+        solver_registry_path = Path("config/solver_registry.yaml")
+        if not solver_registry_path.exists():
+            logger.error("Solver registry not found")
+            return False
+        
+        with open(solver_registry_path, 'r') as f:
+            solver_registry = yaml.safe_load(f)
         
         # Create benchmark runner
+        db_manager = DatabaseManager()
         runner = BenchmarkRunner(db_manager)
         
-        # Determine which problems to run
-        problems_to_run = []
-        
-        if problems:
-            available_problems = list_available_problems()
-            all_available = []
-            for lib_problems in available_problems.values():
-                all_available.extend(lib_problems)
+        # Filter problems based on library_names and problems arguments
+        selected_problems = {}
+        for problem_name, problem_config in problem_registry["problem_libraries"].items():
+            # Filter by library_names if specified
+            if library_names and problem_config.get("library_name") not in library_names:
+                continue
             
-            # Check if any of the specified problems are library names
-            library_names = list(available_problems.keys())
+            # Filter by specific problem names if specified
+            if problems and problem_name not in problems:
+                continue
             
-            for problem in problems:
-                if problem in library_names:
-                    # This is a library name, add all problems from that library
-                    problems_to_run.extend(available_problems[problem])
-                    logger.info(f"Added all problems from library '{problem}': {len(available_problems[problem])} problems")
-                elif problem in all_available:
-                    # This is an individual problem name
-                    problems_to_run.append(problem)
-                else:
-                    # Invalid problem name
-                    logger.error(f"Invalid problem or library name: {problem}")
-                    logger.error(f"Available libraries: {library_names}")
-                    logger.error(f"Available individual problems: {all_available}")
-                    return False
+            selected_problems[problem_name] = problem_config
+        
+        if not selected_problems:
+            logger.error("No problems selected. Check your --library_names and --problems filters.")
+            return False
+        
+        logger.info(f"Selected {len(selected_problems)} problems")
+        
+        # Filter solvers and test availability
+        selected_solvers = {}
+        for solver_name, solver_config in solver_registry["solvers"].items():
+            # Filter by solver names if specified
+            if solvers and solver_name not in solvers:
+                continue
             
-            # Remove duplicates while preserving order
-            problems_to_run = list(dict.fromkeys(problems_to_run))
-            logger.info(f"Using specified problems: {problems_to_run} ({len(problems_to_run)} total)")
-            
-        else:
-            # Run all available problems
-            available_problems = list_available_problems()
-            for lib_problems in available_problems.values():
-                problems_to_run.extend(lib_problems)
-            logger.info(f"Using all available problems: {len(problems_to_run)} problems")
+            # Test if solver is available
+            try:
+                runner.create_solver(solver_name)
+                selected_solvers[solver_name] = solver_config
+                logger.debug(f"Solver {solver_name} is available")
+            except Exception as solver_error:
+                logger.debug(f"Solver {solver_name} not available: {solver_error}")
         
-        # Determine which solvers to run - dynamically check availability
-        available_solvers = []
-        runner = BenchmarkRunner()
+        if not selected_solvers:
+            logger.error("No solvers available. Check your --solvers filter or install solver dependencies.")
+            return False
         
-        # Load solver registry and test each solver
-        import yaml
-        registry_path = Path("config/solver_registry.yaml")
-        if registry_path.exists():
-            with open(registry_path, 'r') as f:
-                solver_registry = yaml.safe_load(f)
-            
-            for solver_id in solver_registry.get('solvers', {}):
-                try:
-                    runner.create_solver(solver_id)
-                    available_solvers.append(solver_id)
-                    logger.debug(f"Solver {solver_id} is available")
-                except Exception as e:
-                    logger.debug(f"Solver {solver_id} not available: {e}")
-        else:
-            # Fallback to hardcoded list if registry not found
-            available_solvers = ["scipy_linprog", "cvxpy_clarabel", "cvxpy_scs", "cvxpy_ecos", "cvxpy_osqp", "cvxpy_cvxopt", "cvxpy_sdpa"]
-            logger.warning("Solver registry not found, using fallback list")
-        if solvers:
-            # Validate requested solvers
-            invalid_solvers = [s for s in solvers if s not in available_solvers]
-            if invalid_solvers:
-                logger.error(f"Invalid solvers: {invalid_solvers}. Available: {available_solvers}")
-                return False
-            solvers_to_run = solvers
-        else:
-            solvers_to_run = available_solvers
+        logger.info(f"Selected {len(selected_solvers)} available solvers")
         
-        logger.info(f"Using solvers: {solvers_to_run}")
-        
-        # Run the benchmark
+        # Run benchmarks using simple nested loop
         start_time = time.time()
-        total_combinations = len(problems_to_run) * len(solvers_to_run)
+        total_combinations = len(selected_problems) * len(selected_solvers)
         logger.info(f"Running {total_combinations} problem-solver combinations...")
         
         success_count = 0
-        for i, problem_name in enumerate(problems_to_run):
-            for j, solver_name in enumerate(solvers_to_run):
-                combination_num = i * len(solvers_to_run) + j + 1
+        combination_num = 0
+        
+        for problem_name, problem_config in selected_problems.items():
+            for solver_name, solver_config in selected_solvers.items():
+                combination_num += 1
                 logger.info(f"[{combination_num}/{total_combinations}] Running {solver_name} on {problem_name}")
                 
                 try:
-                    runner.run_single_benchmark(problem_name, solver_name)
+                    runner.run_single_benchmark(problem_name, problem_config, solver_name, solver_config)
                     success_count += 1
-                except Exception as e:
-                    logger.warning(f"Failed to run {solver_name} on {problem_name}: {e}")
+                except Exception as benchmark_error:
+                    logger.warning(f"Failed to run {solver_name} on {problem_name}: {benchmark_error}")
         
         duration = time.time() - start_time
         success_rate = (success_count / total_combinations) * 100 if total_combinations > 0 else 0
@@ -213,8 +202,8 @@ def run_benchmark(problems: Optional[List[str]] = None,
         
         return success_count > 0
         
-    except Exception as e:
-        logger.error(f"Benchmark execution failed: {e}")
+    except Exception as main_error:
+        logger.error(f"Benchmark execution failed: {main_error}")
         return False
 
 
@@ -284,15 +273,17 @@ def main():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
-  python main.py --all                          # Run benchmarks and generate reports
-  python main.py --benchmark                    # Run benchmarks only
-  python main.py --report                       # Generate reports only
-  python main.py --validate                     # Validate environment setup
-  python main.py --benchmark --problems DIMACS  # Run all DIMACS problems
-  python main.py --benchmark --problems nb,arch0,simple_lp_test  # Run specific problems
-  python main.py --benchmark --problems DIMACS,simple_lp_test  # Mix library and individual problems
+  python main.py --all                                           # Run benchmarks and generate reports
+  python main.py --benchmark                                     # Run benchmarks only
+  python main.py --report                                        # Generate reports only
+  python main.py --validate                                      # Validate environment setup
+  python main.py --benchmark --library_names DIMACS             # Run all DIMACS problems
+  python main.py --benchmark --library_names DIMACS,SDPLIB      # Run DIMACS and SDPLIB problems
+  python main.py --benchmark --problems nb,arch0,simple_lp_test  # Run specific problems by name
+  python main.py --benchmark --library_names internal           # Run internal library problems
   python main.py --benchmark --solvers cvxpy_clarabel,scipy_linprog  # Run specific solvers
-  python main.py --all --problems nb --solvers cvxpy_clarabel  # Run one problem with one solver
+  python main.py --all --problems nb --solvers cvxpy_clarabel    # Run one problem with one solver
+  python main.py --benchmark --library_names DIMACS --solvers cvxpy_scip  # Run DIMACS with SCIP
         """
     )
     
@@ -321,9 +312,15 @@ Examples:
     
     # Options
     parser.add_argument(
+        '--library_names', '-l',
+        type=str,
+        help='Comma-separated list of library names to run (DIMACS, SDPLIB, internal)'
+    )
+    
+    parser.add_argument(
         '--problems', '-p',
         type=str,
-        help='Comma-separated list of problem names or library names (DIMACS, SDPLIB, internal) to run'
+        help='Comma-separated list of specific problem names to run'
     )
     
     parser.add_argument(
@@ -355,6 +352,11 @@ Examples:
     if args.solvers:
         solvers = [s.strip() for s in args.solvers.split(',')]
     
+    # Parse library names list
+    library_names = None
+    if args.library_names:
+        library_names = [l.strip() for l in args.library_names.split(',')]
+    
     # Parse problem list
     problems = None
     if args.problems:
@@ -376,6 +378,7 @@ Examples:
             
         elif args.benchmark:
             success = run_benchmark(
+                library_names=library_names,
                 problems=problems,
                 solvers=solvers
             )
@@ -386,6 +389,7 @@ Examples:
         elif args.all:
             # Run benchmarks first
             benchmark_success = run_benchmark(
+                library_names=library_names,
                 problems=problems,
                 solvers=solvers
             )
