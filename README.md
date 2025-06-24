@@ -2,6 +2,10 @@
 
 A comprehensive open-source platform for benchmarking optimization solvers across multiple problem types (LP, QP, SOCP, SDP). Automated execution via GitHub Actions with interactive HTML reports published to GitHub Pages.
 
+**Project Vision**: Create the leading open-source platform for benchmarking optimization solvers across multiple problem types, providing researchers and practitioners with comprehensive performance insights through automated execution, transparent reporting, and fair baseline comparisons.
+
+**Core Mission**: "Regularly benchmark publicly available solvers and publish the results as data"
+
 ## External Problem Libraries
 
 This benchmark system uses the following external problem libraries:
@@ -19,20 +23,23 @@ This benchmark system uses the following external problem libraries:
 Both libraries are included as Git submodules and automatically loaded by the benchmark system.
 
 ## 🎯 Current Status: Production Ready
-- ✅ **Phase 1 Complete**: MVP with Python solvers (SciPy, CVXPY), GitHub Actions CI/CD, interactive reports
-- ✅ **Phase 2 Complete**: Multi-backend CVXPY support, external problem libraries, comprehensive reporting
-- 🚀 **Production Ready**: Meaningful public reporting system with DIMACS/SDPLIB libraries
+
+- ✅ **Complete External Library Integration**: 139+ problems (DIMACS + SDPLIB)
+- ✅ **Comprehensive Solver Support**: 9 solvers (SciPy, CLARABEL, SCS, ECOS, OSQP, CVXOPT, SDPA, SCIP, HiGHS via CVXPY)
+- ✅ **Unified ProblemData Architecture**: SeDuMi-like format for all problem types
+- ✅ **Professional Reporting**: Interactive HTML dashboards with problem structure analysis
+- ✅ **GitHub Actions CI/CD**: Automated benchmarking and report publishing
 
 ## 🚀 Quick Start
 
 ### Prerequisites
-- Python 3.10+ 
+- Python 3.12+
 - Git and GitHub account
 - Virtual environment recommended
 
 ### Installation
 ```bash
-git clone https://github.com/your-username/optimization-solver-benchmark.git
+git clone --recursive https://github.com/napinoco/optimization-solver-benchmark.git
 cd optimization-solver-benchmark
 python -m venv venv
 source venv/bin/activate  # On Windows: venv\Scripts\activate
@@ -42,276 +49,231 @@ pip install -r requirements/python.txt
 
 ### Run Benchmarks
 ```bash
-# Complete benchmark with reports
+# Validate environment and external libraries
+python main.py --validate
+
+# Complete benchmark with all libraries
 python main.py --all
 
-# Benchmark specific problem sets
-python main.py --benchmark --solvers scipy,cvxpy --problem-set light_set
-python main.py --benchmark --solvers cvxpy --problem-set external  # DIMACS/SDPLIB
+# Benchmark specific libraries
+python main.py --benchmark --problem-set dimacs
+python main.py --benchmark --problem-set sdplib
 
 # Generate reports only  
 python main.py --report
 
-# Validate environment and external libraries
-python main.py --validate
+# Dry-run mode for testing
+python main.py --benchmark --problems nb --dry-run
 ```
 
-## 🎯 Design Philosophy: Minimal Configuration for Fair Benchmarking
+## 🎯 Design Philosophy: Fair Baseline Benchmarking
 
-This system prioritizes **fair, unbiased solver comparison** through minimal configuration:
+This system prioritizes **unbiased solver comparison** through minimal configuration:
 
 - **Solver Defaults**: Uses each solver's default parameters to avoid optimization bias
-- **Baseline Performance**: Establishes "out of the box" performance baselines
-- **Transparent Comparison**: Prevents inadvertent parameter tuning that favors specific solvers
-- **Future Extensibility**: Advanced parameter optimization available but clearly separated from baseline benchmarks
+- **Baseline Performance**: Establishes genuine "out of the box" capabilities
+- **Transparent Comparison**: Prevents inadvertent parameter tuning favoring specific solvers
+- **Reproducible Results**: Standardized environments ensure consistent benchmarking
+- **Open Data**: Results published as accessible JSON/CSV for research use
 
-This approach ensures that benchmarking results reflect genuine solver capabilities rather than configuration expertise.
+## 📊 Current System Capabilities
 
-## 📊 Current Capabilities
+### Supported Solvers ✅
+- **SciPy**: Linear programming solver
+- **CVXPY Multi-Backend**: 
+  - CLARABEL (modern Rust-based solver)
+  - SCS (Splitting Conic Solver)
+  - ECOS (Embedded Conic Solver)
+  - OSQP (Operator Splitting QP)
+  - CVXOPT (Convex optimization)
+  - SDPA (Semidefinite programming)
+  - SCIP (Mixed-integer programming)
+  - HiGHS (Linear/mixed-integer programming)
 
-### Solvers Supported ✅
-- **SciPy**: `linprog` for LP, `quadprog` for QP
-- **CVXPY Multi-Backend**: CLARABEL, SCS, ECOS, OSQP with automatic version detection
-- **Solver Version Tracking**: Comprehensive version detection and Git commit tracking
-- **Fair Baseline Comparison**: Using solver defaults for unbiased benchmarking
+### Problem Type Coverage ✅
+- **LP**: Linear Programming (12+ results, 100% success rate)
+- **QP**: Quadratic Programming (6+ results, 100% success rate)
+- **SOCP**: Second-Order Cone Programming (31+ results, ~43% success rate)
+- **SDP**: Semidefinite Programming (38+ results, ~29% success rate)
 
-### Problem Libraries ✅
-**Internal Problems:**
-- **LP**: Linear Programming with synthetic test cases
-- **QP**: Quadratic Programming with synthetic test cases
-- **SOCP**: Portfolio optimization, robust optimization, facility location
-- **SDP**: Matrix completion, control theory LMI, Max Cut relaxation
-
-**External Libraries:**
-- **DIMACS**: 47 optimization problems in SeDuMi .mat format
-- **SDPLIB**: 92 semidefinite programming problems in SDPA format
-- **Automatic Structure Analysis**: Variable/constraint counting and problem classification
-- **Library Attribution**: Source information displayed in all reports  
-
-### Features ✅
-- **Automated Benchmarking**: GitHub Actions CI/CD with manual triggers
-- **Interactive Reports**: Bootstrap 5 dashboards with problem structure analysis
-- **GitHub Pages**: Automatic report publishing with comprehensive data exports
-- **External Library Integration**: DIMACS and SDPLIB via git clone approach
+### Key Features ✅
+- **External Library Integration**: DIMACS (47 problems) + SDPLIB (92+ problems)
+- **Unified Problem Format**: SeDuMi-like architecture for all problem types
+- **Comprehensive Version Tracking**: Solver backend versions and Git commit recording
+- **Interactive Reports**: Bootstrap 5 dashboards with Chart.js visualizations
 - **Problem Structure Analysis**: Automatic variable/constraint counting and classification
-- **Solver Version Tracking**: Backend version detection and Git commit tracking
-- **Comprehensive Data Exports**: JSON/CSV files for external consumption
-- **Library Source Attribution**: Problem origins clearly displayed in reports
+- **GitHub Pages Deployment**: Automatic report publishing with data exports
 - **Validation Framework**: Data quality checks and error detection
-- **Fair Baseline Benchmarking**: Minimal configuration using solver defaults
-
-## 🎯 System Accomplishments ✅
-
-### Complete Solver Ecosystem
-- **5 Major Solvers**: CLARABEL, SCS, ECOS, OSQP, SciPy with automatic version detection
-- **Solver Version Tracking**: Complete backend version detection and Git commit tracking
-- **Fair Baseline Comparison**: Using solver defaults for unbiased benchmarking
-
-### Comprehensive Problem Coverage
-- **4 Problem Types**: LP, QP, SOCP, SDP with automatic classification
-- **External Libraries**: DIMACS (47 problems) and SDPLIB (92 problems) integrated
-- **Problem Structure Analysis**: Automatic variable/constraint counting and classification
-- **139 Total Problems**: From synthetic test cases to real-world optimization challenges
-
-### Production-Ready Features
-- **Meaningful Public Reporting**: Professional HTML reports with comprehensive data
-- **External Library Integration**: Git clone approach for DIMACS/SDPLIB
-- **Comprehensive Data Exports**: JSON/CSV files with structure analysis and library attribution
-- **Interactive Dashboards**: Bootstrap 5 reports with problem breakdown and solver comparison
+- **Dry-Run Mode**: Testing without database pollution
 
 ## 📁 Project Structure
 
 ```
 optimization-solver-benchmark/
-├── 📋 Core Documentation
-│   ├── README.md                # This file
-│   ├── architecture.md          # System architecture 
-│   └── CLAUDE.md               # AI development context
+├── 📋 Documentation
+│   ├── README.md                    # This file
+│   ├── CLAUDE.md                   # AI development context
+│   └── docs/
+│       ├── guides/                 # Setup and usage guides
+│       └── development/            # Development documentation
 │
-├── 📚 Extended Documentation
-│   ├── docs/guides/             # Setup and usage guides
-│   └── docs/development/        # Development roadmap and history
-│
-├── ⚙️  Configuration
-│   ├── config/
-│   │   ├── benchmark_config.yaml
-│   │   └── solvers.yaml
-│   └── requirements/
-│       ├── base.txt
-│       └── python.txt
+├── ⚙️ Configuration
+│   └── config/
+│       ├── site_config.yaml        # Site and overview settings
+│       ├── solver_registry.yaml    # Solver display names
+│       └── problem_registry.yaml   # Problem metadata
 │
 ├── 🧪 Core System
-│   ├── main.py                  # Entry point
-│   ├── scripts/
-│   │   ├── benchmark/           # Benchmark execution
-│   │   ├── solvers/             # Solver implementations  
-│   │   ├── database/            # Data models
-│   │   ├── reporting/           # HTML generation
-│   │   └── utils/               # Utilities
-│   └── templates/               # Jinja2 templates
+│   ├── main.py                     # Main entry point
+│   └── scripts/
+│       ├── benchmark/              # Benchmark execution engine
+│       ├── solvers/python/         # Solver implementations
+│       ├── data_loaders/           # Problem loading (MAT/DAT)
+│       │   ├── problem_loader.py   # Unified ProblemData class
+│       │   └── python/             # Format-specific loaders
+│       ├── external/               # External library loaders
+│       ├── utils/                  # Problem structure analysis
+│       ├── database/               # SQLite data models
+│       └── reporting/              # HTML report generation
 │
-├── 📊 Data & Results  
-│   ├── problems/                # Problem files
-│   │   ├── DIMACS/             # External DIMACS library (47 problems)
-│   │   ├── SDPLIB/             # External SDPLIB library (92 problems)
-│   │   └── light_set/          # Internal synthetic problems
-│   ├── database/                # SQLite results with version tracking
-│   └── docs/                    # Generated HTML reports and data exports
+├── 📊 Problems & Results
+│   ├── problems/
+│   │   ├── DIMACS/                 # External DIMACS library (47 problems)
+│   │   ├── SDPLIB/                 # External SDPLIB library (92+ problems)
+│   │   └── light_set/              # Internal synthetic problems
+│   ├── database/                   # SQLite results with version tracking
+│   └── docs/                       # Generated reports and data exports
 │
-└── 🔧 CI/CD
-    └── .github/workflows/       # GitHub Actions
+├── 🔧 Dependencies
+│   └── requirements/
+│       ├── base.txt                # Core dependencies
+│       └── python.txt              # Python solver dependencies
+│
+└── 🚀 CI/CD
+    └── .github/
+        └── workflows/              # GitHub Actions and documentation
 ```
 
-## 📈 Benchmark Results
+## 📈 Performance Results
 
-Access live benchmark results at: `https://your-username.github.io/optimization-solver-benchmark/`
+### Current Success Rates
+```
+Problem Type | Total Results | Success Rate | Top Performers
+LP           | 12 results   | 100%        | SciPy + CLARABEL + SCS + ECOS + OSQP
+QP           | 6 results    | 100%        | SciPy + CLARABEL + SCS + ECOS + OSQP  
+SOCP         | 31 results   | ~43%        | CLARABEL + SCS + ECOS
+SDP          | 38 results   | ~29%        | CLARABEL + SCS
+```
 
-### Sample Reports
-- **Dashboard**: Overall performance metrics with 90+ results from 18 problems
-- **Solver Comparison**: Detailed performance breakdown showing success rates and timing
-- **Problem Analysis**: Problem structure analysis with variable/constraint counts and library sources
-- **Results Matrix**: Comprehensive solver vs problem performance matrix
-- **Environment Info**: System specifications with solver versions and Git commit tracking
-- **Data Exports**: Complete JSON/CSV exports for external analysis
+### External Library Performance
+```
+Library  | Problems | Format        | Success Rate | Notes
+DIMACS   | 47       | SeDuMi .mat   | Variable     | Mixed problem types
+SDPLIB   | 92+      | SDPA .dat-s   | ~30%         | Challenging SDP problems
+Total    | 139+     | Mixed         | ~37%         | System average
+```
 
 ## 🔧 GitHub Actions Integration
 
-### Automatic Triggers
-- **Push to main**: Runs light benchmark set (~2 minutes)
-- **Pull requests**: Validation and light testing
-- **Scheduled**: Daily comprehensive benchmarks (optional)
+### Automatic Execution
+- **Push to main**: Triggers comprehensive benchmarking
+- **Pull requests**: Validation and testing
+- **Manual triggers**: Custom solver/problem selection
 
-### Manual Triggers
+### Manual Trigger Options
 Access via GitHub Actions tab → "Run workflow":
-- **Solvers**: Choose specific solvers to benchmark
-- **Problem Set**: Select from light/medium/large problem sets  
-- **Timeout**: Configure solver timeout (10-3600 seconds)
-- **Cross-Platform**: Optional testing on Ubuntu/macOS/Windows
-- **Verbose Logging**: Enable detailed debug output
+- **Problem Set**: Choose from external, dimacs, sdplib, or light_set
+- **Solvers**: Select specific solvers to benchmark
+- **Library Names**: Filter by library (DIMACS, SDPLIB)
+- **Dry Run**: Test without database updates
 
 ## 🛠️ Configuration
 
-### Solver Configuration (`config/solvers.yaml`)
-```yaml
-solvers:
-  scipy:
-    type: python
-    module: scripts.solvers.python.scipy_runner
-    class: ScipySolver
-    
-  cvxpy:
-    type: python  
-    module: scripts.solvers.python.cvxpy_runner
-    class: CVXPYSolver
-    backends: [default]  # Phase 2: [CLARABEL, SCS, ECOS, OSQP, ...]
-```
+### Core Configuration Files
+- **`config/site_config.yaml`**: Site metadata and overview content
+- **`config/solver_registry.yaml`**: Solver display names for reports
+- **`config/problem_registry.yaml`**: Problem metadata and classification
 
-### Benchmark Configuration (`config/benchmark_config.yaml`)
-```yaml
-benchmark:
-  timeout: 300
-  problem_sets:
-    light_set: "problems/light_set"        # Internal synthetic problems
-    external: "problems/external"          # DIMACS/SDPLIB libraries
-    dimacs: "problems/DIMACS"             # DIMACS problems only
-    sdplib: "problems/SDPLIB"             # SDPLIB problems only
+### Main Entry Point Options
+```bash
+# Validation
+python main.py --validate                    # Verify environment and libraries
+
+# Benchmarking
+python main.py --all                         # Complete benchmark
+python main.py --benchmark --problem-set external  # External libraries only
+python main.py --benchmark --library_names DIMACS  # DIMACS problems only
+python main.py --benchmark --problems nb,arch0     # Specific problems
+
+# Reporting
+python main.py --report                      # Generate HTML reports
+
+# Testing
+python main.py --benchmark --dry-run         # Test without database changes
 ```
 
 ## 🧪 Development
 
-### Running Tests
-```bash
-# Validate environment
-python main.py --validate
+### Architecture Highlights
+- **Unified ProblemData**: SeDuMi-like format with first-class cone structure support
+- **Modular Loaders**: Separate MAT and DAT loaders for different formats
+- **CVXPY Integration**: Unified solver interface supporting multiple backends
+- **Version Tracking**: Complete solver backend and Git commit recording
+- **Error Resilience**: Continues benchmarking despite individual solver failures
 
-# Test GitHub Actions simulation
-python test_github_actions.py
-
-# Test validation framework
-python test_validation.py
-```
-
-### Adding New Solvers (Phase 2)
-1. Implement solver class inheriting from `SolverInterface`
-2. Add solver configuration to `config/solvers.yaml`
-3. Add dependencies to appropriate requirements file
-4. Test with `python main.py --benchmark --solvers new_solver`
+### Adding New Solvers
+1. Extend the CVXPY runner with new backend
+2. Add solver configuration to `config/solver_registry.yaml`
+3. Test with validation framework
+4. Update documentation
 
 ### Adding New Problems
-1. **Internal Problems**: Place in `problems/light_set/type/` directory
-2. **External Libraries**: Add git submodule or use existing DIMACS/SDPLIB
-3. Update `problems/problem_registry.yaml` with problem metadata
-4. Validate with `python main.py --validate`
+1. **External Libraries**: Add as Git submodules in `problems/`
+2. **Format Support**: Extend loaders in `scripts/data_loaders/python/`
+3. **Validation**: Test with `python main.py --validate`
 
-## 📊 Performance Metrics
+## 📊 System Achievements
 
-### Current Solver Coverage ✅
-```
-Problem Type | SciPy | CLARABEL | SCS | ECOS | OSQP | Total Problems
-LP           |   ✅   |    ✅     | ✅  |  ✅   |  ✅   | 12 results
-QP           |   ✅   |    ✅     | ✅  |  ✅   |  ✅   | 6 results  
-SOCP         |   ❌   |    ✅     | ✅  |  ✅   |  ❌   | 31 results
-SDP          |   ❌   |    ✅     | ✅  |  ❌   |  ❌   | 38 results
-```
+### Technical Accomplishments ✅
+- **Unified Architecture**: Single ProblemData format for all optimization types
+- **External Library Integration**: Professional-grade problem sets (DIMACS + SDPLIB)
+- **Comprehensive Solver Support**: 9 major optimization solvers
+- **Production-Ready Reporting**: Interactive dashboards suitable for research publication
+- **Fair Baseline Benchmarking**: Minimal configuration for unbiased comparison
 
-### Real-World Problem Performance
-```
-Problem Source | Problems | Success Rate | Top Performer
-DIMACS        | 47       | ~40%        | CLARABEL
-SDPLIB        | 92       | ~35%        | CLARABEL  
-Internal      | 6        | 95%         | Multiple
-Total         | 145      | 37.8%       | System Average
-```
-
-## 🤝 Contributing
-
-### Development Process
-1. **Follow task-based development** from `docs/development/PHASE2_TASKS.md`
-2. **Test thoroughly** before submitting changes
-3. **Update documentation** for new features
-4. **Maintain backward compatibility** with Phase 1
-
-### Pull Request Guidelines
-- Include comprehensive tests for new solvers/features
-- Update configuration examples
-- Add problem examples for new types
-- Update relevant documentation
+### Real-World Impact
+- **Research-Ready Data**: Complete JSON/CSV exports for external analysis
+- **Reproducible Results**: Version tracking and standardized environments
+- **Open Science**: Public reporting with comprehensive problem attribution
+- **Community Resource**: Accessible benchmarking platform for optimization research
 
 ## 📚 Documentation
 
-### Core Documentation
-- **[README.md](README.md)**: Project overview and quick start guide
-- **[CLAUDE.md](CLAUDE.md)**: AI assistant integration and development context
-
-### Setup & Usage Guides
-- **[MANUAL_TRIGGER_GUIDE.md](docs/guides/MANUAL_TRIGGER_GUIDE.md)**: GitHub Actions usage guide
-- **[GITHUB_ACTIONS_SETUP.md](docs/guides/GITHUB_ACTIONS_SETUP.md)**: CI/CD setup instructions
-- **[PR_PREVIEW_GUIDE.md](docs/guides/PR_PREVIEW_GUIDE.md)**: Pull request preview system usage
-- **[EXPORT_GUIDE.md](docs/guides/EXPORT_GUIDE.md)**: Data export and integration guide
-- **[EXTERNAL_LIBRARIES.md](docs/guides/EXTERNAL_LIBRARIES.md)**: External library setup guide
+### User Guides
+- **[CLAUDE.md](CLAUDE.md)**: AI development context and project instructions
+- **[docs/guides/](docs/guides/)**: Setup, usage, and integration guides
 
 ### Development Documentation
-- **[basic_design.md](docs/development/basic_design.md)**: High-level concepts and project vision
-- **[detail_design.md](docs/development/detail_design.md)**: Technical architecture and implementation
-- **[conventions.md](docs/development/conventions.md)**: Coding standards and development protocols  
-- **[history.md](docs/development/history.md)**: Complete development history (Phases 1-2)
-- **[tasks.md](docs/development/tasks.md)**: Current development tasks
+- **[docs/development/basic_design.md](docs/development/basic_design.md)**: Project vision and architecture
+- **[docs/development/detail_design.md](docs/development/detail_design.md)**: Technical implementation details
+- **[docs/development/conventions.md](docs/development/conventions.md)**: Development standards and protocols
+- **[docs/development/tasks.md](docs/development/tasks.md)**: Current development tasks
+- **[docs/development/history.md](docs/development/history.md)**: Complete development history
 
-## 🏆 Achievements & Recognition
+## 🏆 Production Ready Status
 
-### Complete Implementation Accomplishments ✅
-- ✅ **Phase 1 MVP**: 20 tasks with Python solvers, CI/CD, interactive reports
-- ✅ **Phase 2 Enhanced**: Multi-backend CVXPY, SOCP/SDP support, external libraries
-- ✅ **5 Major Solvers**: CLARABEL, SCS, ECOS, OSQP, SciPy with version tracking
-- ✅ **139 Total Problems**: Internal synthetic + DIMACS (47) + SDPLIB (92)
-- ✅ **Meaningful Public Reporting**: Professional HTML with structure analysis
-- ✅ **Production Ready**: Comprehensive data exports, library attribution, Git tracking
+### System Completeness ✅
+- **139+ External Problems**: Real-world optimization challenges
+- **9 Major Solvers**: Comprehensive coverage across optimization types
+- **Professional Reporting**: Publication-ready HTML dashboards
+- **CI/CD Integration**: Automated benchmarking and deployment
+- **Fair Benchmarking Philosophy**: Unbiased solver comparison using defaults
 
-### System Impact
-- 🎯 **Real-World Problems**: DIMACS and SDPLIB optimization libraries
-- 🎯 **Comprehensive Analysis**: Automatic problem structure analysis and classification
-- 🎯 **Reproducibility**: Solver version tracking and Git commit recording
-- 🎯 **Public Reporting**: Professional dashboards suitable for research publication
+### Quality Assurance
+- **Validation Framework**: Data quality checks and error detection
+- **Version Tracking**: Complete reproducibility with Git commit recording
+- **Testing Infrastructure**: Dry-run mode and comprehensive validation
+- **Documentation**: Complete development history and usage guides
 
 ## 📄 License
 
@@ -319,15 +281,15 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 🙏 Acknowledgments
 
-- **Open-Source Solvers**: SciPy, CVXPY, CLARABEL, SCS, ECOS, OSQP, CBC, HiGHS, GLOP
+- **External Problem Libraries**: VSDP team for DIMACS and SDPLIB repositories
+- **Open-Source Solvers**: SciPy, CVXPY, CLARABEL, SCS, ECOS, OSQP, CVXOPT, SDPA, SCIP, HiGHS
 - **Web Technologies**: Bootstrap 5, Chart.js for interactive visualizations
-- **CI/CD Platform**: GitHub Actions for automated benchmarking
-- **Community**: Contributors and users providing feedback and improvements
+- **CI/CD Platform**: GitHub Actions for automated benchmarking and deployment
 
 ---
 
-**Status**: Production Ready ✅ | Meaningful Public Reporting System Complete ✅  
+**Status**: Production Ready ✅ | Fair Baseline Benchmarking System Complete ✅  
 **Last Updated**: June 2025  
-**Achievement**: Comprehensive optimization solver benchmarking platform with external libraries
+**Achievement**: Comprehensive optimization solver benchmarking platform with unified architecture
 
-For questions, issues, or contributions, please visit our [GitHub repository](https://github.com/your-username/optimization-solver-benchmark) or check the documentation above.
+For questions, issues, or contributions, please visit our [GitHub repository](https://github.com/napinoco/optimization-solver-benchmark) or check the documentation links above.
