@@ -3,6 +3,14 @@ site:
   author: "Naoki Ito"
   description: "Benchmarking optimization solvers with fair comparison"
   url: "https://napinoco.github.io/optimization-solver-benchmark"
+  overview: |
+    **Project Vision**
+    Create the leading open-source platform for benchmarking optimization solvers across multiple problem types, providing researchers and practitioners with comprehensive performance insights through automated execution, transparent reporting, and fair baseline comparisons.
+    
+    **Core Mission**
+    "Regularly benchmark publicly available solvers and publish the results as data"
+    
+    This system prioritizes unbiased solver comparison through minimal configuration, establishing "out of the box" performance baselines rather than optimized configurations.
 
 github:
   username: "napinoco"
