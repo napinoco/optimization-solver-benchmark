@@ -20,7 +20,7 @@ This benchmark system uses the following external problem libraries:
 - **Current Commit**: `2e568e1` - README.md: Remove dead link.
 - **Problems**: 92+ semidefinite programming problems in SDPA .dat-s format
 
-Both libraries are included as Git submodules and automatically loaded by the benchmark system.
+Both libraries are included as fixed snapshots (committed on June 25, 2025) for reproducibility and automatically loaded by the benchmark system. This ensures consistent benchmarking results over time.
 
 ## 🎯 Current Status: Production Ready
 
@@ -39,7 +39,7 @@ Both libraries are included as Git submodules and automatically loaded by the be
 
 ### Installation
 ```bash
-git clone --recursive https://github.com/napinoco/optimization-solver-benchmark.git
+git clone https://github.com/napinoco/optimization-solver-benchmark.git
 cd optimization-solver-benchmark
 python -m venv venv
 source venv/bin/activate  # On Windows: venv\Scripts\activate
