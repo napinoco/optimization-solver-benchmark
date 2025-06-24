@@ -369,8 +369,55 @@ class CvxpySolver(SolverInterface):
         )
     
     def get_version(self) -> str:
-        """Get CVXPY version information."""
-        return f"cvxpy-{cp.__version__}-{self.backend}"
+        """Get CVXPY version information with backend package version."""
+        backend_version = self._get_backend_version()
+        return f"cvxpy-{cp.__version__}-{self.backend}-{backend_version}"
+    
+    def _get_backend_version(self) -> str:
+        """Get version of the actual backend solver package."""
+        try:
+            # Map backend names to their package names and version attributes
+            backend_version_map = {
+                "CLARABEL": self._get_package_version("clarabel"),
+                "SCS": self._get_package_version("scs"),
+                "ECOS": self._get_package_version("ecos"),
+                "OSQP": self._get_package_version("osqp"),
+                "CVXOPT": self._get_package_version("cvxopt"),
+                "SDPA": self._get_package_version("sdpa"),
+                "SCIP": self._get_package_version("pyscipopt"),
+                "HIGHS": self._get_package_version("highspy")
+            }
+            
+            return backend_version_map.get(self.backend, "unknown")
+            
+        except Exception as e:
+            self.logger.debug(f"Failed to get backend version for {self.backend}: {e}")
+            return "unknown"
+    
+    def _get_package_version(self, package_name: str) -> str:
+        """Get version of a specific Python package."""
+        try:
+            import importlib.metadata
+            return importlib.metadata.version(package_name)
+        except ImportError:
+            # Fallback for Python < 3.8
+            try:
+                import pkg_resources
+                return pkg_resources.get_distribution(package_name).version
+            except:
+                pass
+        except:
+            pass
+        
+        # Try direct import with __version__ attribute
+        try:
+            module = __import__(package_name)
+            if hasattr(module, '__version__'):
+                return module.__version__
+        except:
+            pass
+        
+        return "unknown"
     
     def validate_problem_compatibility(self, problem_data: ProblemData) -> bool:
         """Check if the solver can handle the given problem type."""

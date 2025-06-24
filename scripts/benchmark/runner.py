@@ -243,12 +243,17 @@ class BenchmarkRunner:
         logger.info(f"Running {solver_name} on {problem_name}")
         
         try:
-            
             # Load problem using appropriate loader
             problem_data = self.load_problem(problem_name, problem_config)
             
             # Create solver
             solver = self.create_solver(solver_name)
+            
+            # Check solver compatibility with problem type BEFORE execution
+            if not solver.validate_problem_compatibility(problem_data):
+                problem_type = problem_data.problem_class
+                logger.info(f"Skipping {solver_name} on {problem_name}: solver cannot handle {problem_type} problems")
+                return  # Skip execution entirely - no database entry
             
             # Execute solver with timing
             start_time = time.time()
