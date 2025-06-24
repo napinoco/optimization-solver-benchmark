@@ -28,6 +28,7 @@ CREATE TABLE results (
     primal_infeasibility REAL,          -- Primal infeasibility measure
     dual_infeasibility REAL,            -- Dual infeasibility measure
     iterations INTEGER,                  -- Number of solver iterations
+    memo TEXT,                           -- User memo/notes field for annotations
     
     -- Unique constraint to prevent exact duplicates
     UNIQUE(solver_name, solver_version, problem_library, problem_name, commit_hash, timestamp)

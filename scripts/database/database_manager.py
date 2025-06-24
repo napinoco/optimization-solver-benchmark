@@ -72,7 +72,8 @@ class DatabaseManager:
                     duality_gap: Optional[float] = None,
                     primal_infeasibility: Optional[float] = None,
                     dual_infeasibility: Optional[float] = None,
-                    iterations: Optional[int] = None) -> None:
+                    iterations: Optional[int] = None,
+                    memo: Optional[str] = None) -> None:
         """
         Store single benchmark result (append-only).
         
@@ -92,6 +93,7 @@ class DatabaseManager:
             primal_infeasibility: Primal infeasibility measure
             dual_infeasibility: Dual infeasibility measure
             iterations: Number of solver iterations
+            memo: Optional user memo/notes for this result
         """
         try:
             # Convert environment_info to JSON string
@@ -102,8 +104,8 @@ class DatabaseManager:
                 solver_name, solver_version, problem_library, problem_name, problem_type,
                 environment_info, commit_hash, solve_time, status,
                 primal_objective_value, dual_objective_value, duality_gap,
-                primal_infeasibility, dual_infeasibility, iterations
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                primal_infeasibility, dual_infeasibility, iterations, memo
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """
             
             with sqlite3.connect(self.db_path) as conn:
@@ -111,7 +113,7 @@ class DatabaseManager:
                     solver_name, solver_version, problem_library, problem_name, problem_type,
                     environment_json, commit_hash, solve_time, status,
                     primal_objective_value, dual_objective_value, duality_gap,
-                    primal_infeasibility, dual_infeasibility, iterations
+                    primal_infeasibility, dual_infeasibility, iterations, memo
                 ))
                 conn.commit()
                 
