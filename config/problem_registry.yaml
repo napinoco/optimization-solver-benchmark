@@ -1,5 +1,5 @@
 # Flat problem structure - each problem is a top-level entry
-# Eliminates light_set in favor of real problems with test flags
+# Only external problems from DIMACS and SDPLIB libraries
 problem_libraries:
   
   # DIMACS Library Problems - Complete Set (47 problems)
@@ -431,32 +431,3 @@ problem_libraries:
     library_name: "SDPLIB" 
     for_test_flag: false
     
-  # Internal Test Problems
-  simple_lp_test:
-    display_name: "Simple LP Test (Internal)"
-    file_path: "problems/light_set/lp/simple_lp.mps"
-    file_type: "mps"
-    library_name: "internal"
-    for_test_flag: false
-    known_objective_value: 5.0
-    
-  simple_qp_test:
-    display_name: "Simple QP Test (Internal)"
-    file_path: "problems/light_set/qp/simple_qp.qps"
-    file_type: "qps"
-    library_name: "internal"
-    for_test_flag: false
-    
-  portfolio_optimization_test:
-    display_name: "Portfolio Optimization Test (Internal)"
-    file_path: "problems/light_set/socp/portfolio_optimization.py"
-    file_type: "python"
-    library_name: "internal"
-    for_test_flag: false
-    
-  control_lmi_test:
-    display_name: "Control LMI Test (Internal)"
-    file_path: "problems/light_set/sdp/control_lmi.py"
-    file_type: "python"
-    library_name: "internal"
-    for_test_flag: false

@@ -43,9 +43,6 @@ from scripts.solvers.solver_interface import SolverInterface, SolverResult
 # Data loader imports
 from scripts.data_loaders.python.mat_loader import MATLoader
 from scripts.data_loaders.python.dat_loader import DATLoader
-from scripts.data_loaders.python.mps_loader import MPSLoader
-from scripts.data_loaders.python.qps_loader import QPSLoader
-from scripts.data_loaders.python.python_loader import PythonLoader
 
 logger = get_logger("benchmark_runner")
 
@@ -154,12 +151,6 @@ class BenchmarkRunner:
             loader = MATLoader()
         elif file_type == 'dat-s':
             loader = DATLoader()
-        elif file_type == 'mps':
-            loader = MPSLoader()
-        elif file_type == 'qps':
-            loader = QPSLoader()
-        elif file_type == 'python':
-            loader = PythonLoader()
         else:
             raise ValueError(f"Unsupported file type: {file_type}")
         
