@@ -2,6 +2,22 @@
 
 A comprehensive open-source platform for benchmarking optimization solvers across multiple problem types (LP, QP, SOCP, SDP). Automated execution via GitHub Actions with interactive HTML reports published to GitHub Pages.
 
+## External Problem Libraries
+
+This benchmark system uses the following external problem libraries:
+
+### DIMACS Library
+- **Repository**: [https://github.com/vsdp/DIMACS.git](https://github.com/vsdp/DIMACS.git)
+- **Current Commit**: `a1a14d1` - FILTER/filtinf1.mat.gz: Fix problem vector 'c'.
+- **Problems**: 47 optimization challenge problems in SeDuMi .mat format
+
+### SDPLIB Library  
+- **Repository**: [https://github.com/vsdp/SDPLIB.git](https://github.com/vsdp/SDPLIB.git)
+- **Current Commit**: `2e568e1` - README.md: Remove dead link.
+- **Problems**: 92+ semidefinite programming problems in SDPA .dat-s format
+
+Both libraries are included as Git submodules and automatically loaded by the benchmark system.
+
 ## 🎯 Current Status: Production Ready
 - ✅ **Phase 1 Complete**: MVP with Python solvers (SciPy, CVXPY), GitHub Actions CI/CD, interactive reports
 - ✅ **Phase 2 Complete**: Multi-backend CVXPY support, external problem libraries, comprehensive reporting
