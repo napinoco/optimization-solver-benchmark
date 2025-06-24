@@ -1,70 +1,134 @@
 {
   "metadata": {
-    "generated_at": "2025-06-20T21:02:26.697706",
-    "total_results": 20,
+    "generated_at": "2025-06-25T08:43:43.384695",
+    "total_results": 40,
     "export_format": "simplified_benchmark_results",
     "version": "1.0"
   },
   "summary": {
-    "total_results": 20,
-    "total_solvers": 2,
-    "total_problems": 8,
-    "success_rate": 0.4,
-    "avg_solve_time": 0.0023459196090698242,
+    "total_results": 40,
+    "total_solvers": 9,
+    "total_problems": 6,
+    "success_rate": 0.675,
+    "avg_solve_time": 946.3270222365857,
     "problem_type_distribution": {
-      "SDP": 12,
-      "SOCP": 2,
-      "LP": 4,
-      "QP": 2
+      "UNKNOWN": 40
     },
     "library_distribution": {
-      "DIMACS": 5,
-      "SDPLIB": 5,
-      "internal": 10
+      "DIMACS": 38,
+      "internal": 2
     },
     "solver_names": [
       "cvxpy_clarabel",
+      "cvxpy_cvxopt",
+      "cvxpy_ecos",
+      "cvxpy_highs",
+      "cvxpy_osqp",
+      "cvxpy_scip",
+      "cvxpy_scs",
+      "cvxpy_sdpa",
       "scipy_linprog"
     ],
     "problem_names": [
-      "arch0",
-      "control1",
-      "control_lmi_test",
-      "hinf12",
+      "bm1",
       "nb",
-      "portfolio_optimization_test",
-      "simple_lp_test",
-      "simple_qp_test"
+      "nb_L1",
+      "nb_L2",
+      "nb_L2_bessel",
+      "simple_lp_test"
     ]
   },
   "solver_comparison": [
     {
-      "solver_name": "cvxpy_clarabel",
-      "problems_attempted": 11,
+      "solver_name": "cvxpy_sdpa",
+      "problems_attempted": 5,
       "problems_solved": 5,
-      "success_rate": 0.45454545454545453,
-      "avg_solve_time": 0.0030175447463989258,
-      "min_solve_time": 1.0013580322265625e-05,
-      "max_solve_time": 0.0049741268157958984
+      "success_rate": 1.0,
+      "avg_solve_time": 17.876109409332276,
+      "min_solve_time": 1.3061511516571045,
+      "max_solve_time": 79.02675819396973
+    },
+    {
+      "solver_name": "cvxpy_scip",
+      "problems_attempted": 2,
+      "problems_solved": 2,
+      "success_rate": 1.0,
+      "avg_solve_time": 24.193716526031494,
+      "min_solve_time": 0.005051851272583008,
+      "max_solve_time": 48.382381200790405
+    },
+    {
+      "solver_name": "cvxpy_cvxopt",
+      "problems_attempted": 5,
+      "problems_solved": 5,
+      "success_rate": 1.0,
+      "avg_solve_time": 177.6611117839813,
+      "min_solve_time": 1.3183510303497314,
+      "max_solve_time": 880.0794627666473
+    },
+    {
+      "solver_name": "cvxpy_scs",
+      "problems_attempted": 5,
+      "problems_solved": 5,
+      "success_rate": 1.0,
+      "avg_solve_time": 7343.709583997726,
+      "min_solve_time": 1.1490800380706787,
+      "max_solve_time": 36704.034167051315
+    },
+    {
+      "solver_name": "cvxpy_ecos",
+      "problems_attempted": 6,
+      "problems_solved": 5,
+      "success_rate": 0.8333333333333334,
+      "avg_solve_time": 1.244086503982544,
+      "min_solve_time": 3.814697265625e-05,
+      "max_solve_time": 1.9608960151672363
+    },
+    {
+      "solver_name": "cvxpy_clarabel",
+      "problems_attempted": 5,
+      "problems_solved": 4,
+      "success_rate": 0.8,
+      "avg_solve_time": 20.198103523254396,
+      "min_solve_time": 1.5329699516296387,
+      "max_solve_time": 48.13991713523865
+    },
+    {
+      "solver_name": "cvxpy_highs",
+      "problems_attempted": 2,
+      "problems_solved": 1,
+      "success_rate": 0.5,
+      "avg_solve_time": 0.0019685029983520508,
+      "min_solve_time": 5.793571472167969e-05,
+      "max_solve_time": 0.003879070281982422
+    },
+    {
+      "solver_name": "cvxpy_osqp",
+      "problems_attempted": 5,
+      "problems_solved": 0,
+      "success_rate": 0.0,
+      "avg_solve_time": 4.267692565917969e-05,
+      "min_solve_time": 3.3855438232421875e-05,
+      "max_solve_time": 6.29425048828125e-05
     },
     {
       "solver_name": "scipy_linprog",
-      "problems_attempted": 9,
-      "problems_solved": 3,
-      "success_rate": 0.3333333333333333,
-      "avg_solve_time": 0.0014504194259643555,
-      "min_solve_time": 2.7894973754882812e-05,
-      "max_solve_time": 0.0042171478271484375
+      "problems_attempted": 5,
+      "problems_solved": 0,
+      "success_rate": 0.0,
+      "avg_solve_time": 4.868507385253906e-05,
+      "min_solve_time": 3.719329833984375e-05,
+      "max_solve_time": 7.891654968261719e-05
     }
   ],
   "results": [
     {
-      "id": 31,
+      "id": 153,
       "solver_name": "cvxpy_clarabel",
       "solver_version": "cvxpy-1.6.5-CLARABEL",
       "problem_library": "DIMACS",
-      "problem_name": "hinf12",
-      "problem_type": "SDP",
+      "problem_name": "bm1",
+      "problem_type": "UNKNOWN",
       "environment_info": {
         "cpu": {
           "cpu_count": 8,
@@ -77,27 +141,27 @@
           "processor": "arm"
         },
         "disk": {
-          "free": 609209733120,
-          "free_gb": 567.37,
+          "free": 618503622656,
+          "free_gb": 576.03,
           "percent": 1.34,
           "total": 994662584320,
           "total_gb": 926.35,
-          "used": 13331030016
+          "used": 13331341312
         },
         "git": {
           "available": true,
           "branch": "update-documentation-main",
-          "commit_hash": "35f9a7f41d622a27cfbd8f3bffd43730d3116e55",
+          "commit_hash": "ce1969a22cbeb1ef396d49cbf1142984143d1297",
           "is_dirty": true
         },
         "memory": {
-          "available": 9315729408,
-          "available_gb": 8.68,
-          "free": 255868928,
-          "percent": 63.9,
+          "available": 11161616384,
+          "available_gb": 10.4,
+          "free": 22298624,
+          "percent": 56.7,
           "total": 25769803776,
           "total_gb": 24.0,
-          "used": 11560124416
+          "used": 13200670720
         },
         "os": {
           "architecture": "64bit",
@@ -113,95 +177,19 @@
           "version": "3.12.2",
           "version_info": "3.12.2"
         },
-        "timestamp": 1748267776.0,
+        "timestamp": 1750582016.0,
         "timezone": {
-          "current_time_local": "2025-06-20T20:56:09.020536",
-          "current_time_utc": "2025-06-20T11:56:09.020524+00:00",
+          "current_time_local": "2025-06-22T19:29:29.703864",
+          "current_time_utc": "2025-06-22T10:29:29.703855+00:00",
           "daylight_saving": false,
           "timezone_name": "JST",
           "utc_offset_hours": 9.0,
           "utc_offset_seconds": -32400
         }
       },
-      "commit_hash": "35f9a7f41d622a27cfbd8f3bffd43730d3116e55",
-      "timestamp": "2025-06-20T11:56:09",
-      "solve_time": 0.0049741268157958984,
-      "status": "UNBOUNDED",
-      "primal_objective_value": -Infinity,
-      "dual_objective_value": null,
-      "duality_gap": null,
-      "primal_infeasibility": null,
-      "dual_infeasibility": null,
-      "iterations": 5
-    },
-    {
-      "id": 9,
-      "solver_name": "cvxpy_clarabel",
-      "solver_version": "cvxpy-1.6.5-CLARABEL",
-      "problem_library": "DIMACS",
-      "problem_name": "hinf12",
-      "problem_type": "SDP",
-      "environment_info": {
-        "cpu": {
-          "cpu_count": 8,
-          "cpu_count_physical": 8,
-          "cpu_freq": {
-            "current": 3504,
-            "max": 3504,
-            "min": 600
-          },
-          "processor": "arm"
-        },
-        "disk": {
-          "free": 610265743360,
-          "free_gb": 568.35,
-          "percent": 1.34,
-          "total": 994662584320,
-          "total_gb": 926.35,
-          "used": 13331030016
-        },
-        "git": {
-          "available": true,
-          "branch": "update-documentation-main",
-          "commit_hash": "b13af6c54afb59fcc4b00f10b6450804736a0060",
-          "is_dirty": true
-        },
-        "memory": {
-          "available": 9519218688,
-          "available_gb": 8.87,
-          "free": 609026048,
-          "percent": 63.1,
-          "total": 25769803776,
-          "total_gb": 24.0,
-          "used": 11353751552
-        },
-        "os": {
-          "architecture": "64bit",
-          "machine": "arm64",
-          "platform": "macOS-14.5-arm64-arm-64bit",
-          "release": "23.5.0",
-          "system": "Darwin",
-          "version": "Darwin Kernel Version 23.5.0: Wed May  1 20:19:05 PDT 2024; root:xnu-10063.121.3~5/RELEASE_ARM64_T8112"
-        },
-        "python": {
-          "executable": "/Users/naoki/PycharmProjects/optimization-solver-benchmark/venv/bin/python",
-          "implementation": "CPython",
-          "version": "3.12.2",
-          "version_info": "3.12.2"
-        },
-        "timestamp": 1748267776.0,
-        "timezone": {
-          "current_time_local": "2025-06-17T22:35:49.806830",
-          "current_time_utc": "2025-06-17T13:35:49.806823+00:00",
-          "daylight_saving": false,
-          "timezone_name": "JST",
-          "utc_offset_hours": 9.0,
-          "utc_offset_seconds": -32400
-        }
-      },
-      "commit_hash": "b13af6c54afb59fcc4b00f10b6450804736a0060",
-      "timestamp": "2025-06-17T13:35:49",
-      "solve_time": 1.0013580322265625e-05,
+      "commit_hash": "ce1969a22cbeb1ef396d49cbf1142984143d1297",
+      "timestamp": "2025-06-22T10:30:18",
+      "solve_time": 48.13991713523865,
       "status": "ERROR",
       "primal_objective_value": null,
       "dual_objective_value": null,
@@ -211,12 +199,392 @@
       "iterations": null
     },
     {
-      "id": 8,
+      "id": 161,
+      "solver_name": "cvxpy_cvxopt",
+      "solver_version": "cvxpy-1.6.5-CVXOPT",
+      "problem_library": "DIMACS",
+      "problem_name": "bm1",
+      "problem_type": "UNKNOWN",
+      "environment_info": {
+        "cpu": {
+          "cpu_count": 8,
+          "cpu_count_physical": 8,
+          "cpu_freq": {
+            "current": 3504,
+            "max": 3504,
+            "min": 600
+          },
+          "processor": "arm"
+        },
+        "disk": {
+          "free": 612674191360,
+          "free_gb": 570.6,
+          "percent": 1.34,
+          "total": 994662584320,
+          "total_gb": 926.35,
+          "used": 13331341312
+        },
+        "git": {
+          "available": true,
+          "branch": "update-documentation-main",
+          "commit_hash": "ce1969a22cbeb1ef396d49cbf1142984143d1297",
+          "is_dirty": true
+        },
+        "memory": {
+          "available": 17617010688,
+          "available_gb": 16.41,
+          "free": 13361168384,
+          "percent": 31.6,
+          "total": 25769803776,
+          "total_gb": 24.0,
+          "used": 6734643200
+        },
+        "os": {
+          "architecture": "64bit",
+          "machine": "arm64",
+          "platform": "macOS-14.5-arm64-arm-64bit",
+          "release": "23.5.0",
+          "system": "Darwin",
+          "version": "Darwin Kernel Version 23.5.0: Wed May  1 20:19:05 PDT 2024; root:xnu-10063.121.3~5/RELEASE_ARM64_T8112"
+        },
+        "python": {
+          "executable": "/Users/naoki/PycharmProjects/optimization-solver-benchmark/venv/bin/python",
+          "implementation": "CPython",
+          "version": "3.12.2",
+          "version_info": "3.12.2"
+        },
+        "timestamp": 1750582016.0,
+        "timezone": {
+          "current_time_local": "2025-06-22T22:12:36.530687",
+          "current_time_utc": "2025-06-22T13:12:36.530677+00:00",
+          "daylight_saving": false,
+          "timezone_name": "JST",
+          "utc_offset_hours": 9.0,
+          "utc_offset_seconds": -32400
+        }
+      },
+      "commit_hash": "ce1969a22cbeb1ef396d49cbf1142984143d1297",
+      "timestamp": "2025-06-22T23:39:01",
+      "solve_time": 880.0794627666473,
+      "status": "OPTIMAL",
+      "primal_objective_value": 23.439801459798208,
+      "dual_objective_value": null,
+      "duality_gap": null,
+      "primal_infeasibility": null,
+      "dual_infeasibility": null,
+      "iterations": null
+    },
+    {
+      "id": 159,
+      "solver_name": "cvxpy_ecos",
+      "solver_version": "cvxpy-1.6.5-ECOS",
+      "problem_library": "DIMACS",
+      "problem_name": "bm1",
+      "problem_type": "UNKNOWN",
+      "environment_info": {
+        "cpu": {
+          "cpu_count": 8,
+          "cpu_count_physical": 8,
+          "cpu_freq": {
+            "current": 3504,
+            "max": 3504,
+            "min": 600
+          },
+          "processor": "arm"
+        },
+        "disk": {
+          "free": 612674191360,
+          "free_gb": 570.6,
+          "percent": 1.34,
+          "total": 994662584320,
+          "total_gb": 926.35,
+          "used": 13331341312
+        },
+        "git": {
+          "available": true,
+          "branch": "update-documentation-main",
+          "commit_hash": "ce1969a22cbeb1ef396d49cbf1142984143d1297",
+          "is_dirty": true
+        },
+        "memory": {
+          "available": 17617010688,
+          "available_gb": 16.41,
+          "free": 13361168384,
+          "percent": 31.6,
+          "total": 25769803776,
+          "total_gb": 24.0,
+          "used": 6734643200
+        },
+        "os": {
+          "architecture": "64bit",
+          "machine": "arm64",
+          "platform": "macOS-14.5-arm64-arm-64bit",
+          "release": "23.5.0",
+          "system": "Darwin",
+          "version": "Darwin Kernel Version 23.5.0: Wed May  1 20:19:05 PDT 2024; root:xnu-10063.121.3~5/RELEASE_ARM64_T8112"
+        },
+        "python": {
+          "executable": "/Users/naoki/PycharmProjects/optimization-solver-benchmark/venv/bin/python",
+          "implementation": "CPython",
+          "version": "3.12.2",
+          "version_info": "3.12.2"
+        },
+        "timestamp": 1750582016.0,
+        "timezone": {
+          "current_time_local": "2025-06-22T22:12:36.530687",
+          "current_time_utc": "2025-06-22T13:12:36.530677+00:00",
+          "daylight_saving": false,
+          "timezone_name": "JST",
+          "utc_offset_hours": 9.0,
+          "utc_offset_seconds": -32400
+        }
+      },
+      "commit_hash": "ce1969a22cbeb1ef396d49cbf1142984143d1297",
+      "timestamp": "2025-06-22T23:24:20",
+      "solve_time": 3.814697265625e-05,
+      "status": "ERROR",
+      "primal_objective_value": null,
+      "dual_objective_value": null,
+      "duality_gap": null,
+      "primal_infeasibility": null,
+      "dual_infeasibility": null,
+      "iterations": null
+    },
+    {
+      "id": 160,
+      "solver_name": "cvxpy_osqp",
+      "solver_version": "cvxpy-1.6.5-OSQP",
+      "problem_library": "DIMACS",
+      "problem_name": "bm1",
+      "problem_type": "UNKNOWN",
+      "environment_info": {
+        "cpu": {
+          "cpu_count": 8,
+          "cpu_count_physical": 8,
+          "cpu_freq": {
+            "current": 3504,
+            "max": 3504,
+            "min": 600
+          },
+          "processor": "arm"
+        },
+        "disk": {
+          "free": 612674191360,
+          "free_gb": 570.6,
+          "percent": 1.34,
+          "total": 994662584320,
+          "total_gb": 926.35,
+          "used": 13331341312
+        },
+        "git": {
+          "available": true,
+          "branch": "update-documentation-main",
+          "commit_hash": "ce1969a22cbeb1ef396d49cbf1142984143d1297",
+          "is_dirty": true
+        },
+        "memory": {
+          "available": 17617010688,
+          "available_gb": 16.41,
+          "free": 13361168384,
+          "percent": 31.6,
+          "total": 25769803776,
+          "total_gb": 24.0,
+          "used": 6734643200
+        },
+        "os": {
+          "architecture": "64bit",
+          "machine": "arm64",
+          "platform": "macOS-14.5-arm64-arm-64bit",
+          "release": "23.5.0",
+          "system": "Darwin",
+          "version": "Darwin Kernel Version 23.5.0: Wed May  1 20:19:05 PDT 2024; root:xnu-10063.121.3~5/RELEASE_ARM64_T8112"
+        },
+        "python": {
+          "executable": "/Users/naoki/PycharmProjects/optimization-solver-benchmark/venv/bin/python",
+          "implementation": "CPython",
+          "version": "3.12.2",
+          "version_info": "3.12.2"
+        },
+        "timestamp": 1750582016.0,
+        "timezone": {
+          "current_time_local": "2025-06-22T22:12:36.530687",
+          "current_time_utc": "2025-06-22T13:12:36.530677+00:00",
+          "daylight_saving": false,
+          "timezone_name": "JST",
+          "utc_offset_hours": 9.0,
+          "utc_offset_seconds": -32400
+        }
+      },
+      "commit_hash": "ce1969a22cbeb1ef396d49cbf1142984143d1297",
+      "timestamp": "2025-06-22T23:24:20",
+      "solve_time": 3.3855438232421875e-05,
+      "status": "ERROR",
+      "primal_objective_value": null,
+      "dual_objective_value": null,
+      "duality_gap": null,
+      "primal_infeasibility": null,
+      "dual_infeasibility": null,
+      "iterations": null
+    },
+    {
+      "id": 158,
+      "solver_name": "cvxpy_scs",
+      "solver_version": "cvxpy-1.6.5-SCS",
+      "problem_library": "DIMACS",
+      "problem_name": "bm1",
+      "problem_type": "UNKNOWN",
+      "environment_info": {
+        "cpu": {
+          "cpu_count": 8,
+          "cpu_count_physical": 8,
+          "cpu_freq": {
+            "current": 3504,
+            "max": 3504,
+            "min": 600
+          },
+          "processor": "arm"
+        },
+        "disk": {
+          "free": 612674191360,
+          "free_gb": 570.6,
+          "percent": 1.34,
+          "total": 994662584320,
+          "total_gb": 926.35,
+          "used": 13331341312
+        },
+        "git": {
+          "available": true,
+          "branch": "update-documentation-main",
+          "commit_hash": "ce1969a22cbeb1ef396d49cbf1142984143d1297",
+          "is_dirty": true
+        },
+        "memory": {
+          "available": 17617010688,
+          "available_gb": 16.41,
+          "free": 13361168384,
+          "percent": 31.6,
+          "total": 25769803776,
+          "total_gb": 24.0,
+          "used": 6734643200
+        },
+        "os": {
+          "architecture": "64bit",
+          "machine": "arm64",
+          "platform": "macOS-14.5-arm64-arm-64bit",
+          "release": "23.5.0",
+          "system": "Darwin",
+          "version": "Darwin Kernel Version 23.5.0: Wed May  1 20:19:05 PDT 2024; root:xnu-10063.121.3~5/RELEASE_ARM64_T8112"
+        },
+        "python": {
+          "executable": "/Users/naoki/PycharmProjects/optimization-solver-benchmark/venv/bin/python",
+          "implementation": "CPython",
+          "version": "3.12.2",
+          "version_info": "3.12.2"
+        },
+        "timestamp": 1750582016.0,
+        "timezone": {
+          "current_time_local": "2025-06-22T22:12:36.530687",
+          "current_time_utc": "2025-06-22T13:12:36.530677+00:00",
+          "daylight_saving": false,
+          "timezone_name": "JST",
+          "utc_offset_hours": 9.0,
+          "utc_offset_seconds": -32400
+        }
+      },
+      "commit_hash": "ce1969a22cbeb1ef396d49cbf1142984143d1297",
+      "timestamp": "2025-06-22T23:24:20",
+      "solve_time": 36704.034167051315,
+      "status": "OPTIMAL",
+      "primal_objective_value": 23.59206340887288,
+      "dual_objective_value": null,
+      "duality_gap": null,
+      "primal_infeasibility": null,
+      "dual_infeasibility": null,
+      "iterations": 100000
+    },
+    {
+      "id": 154,
+      "solver_name": "cvxpy_sdpa",
+      "solver_version": "cvxpy-1.6.5-SDPA",
+      "problem_library": "DIMACS",
+      "problem_name": "bm1",
+      "problem_type": "UNKNOWN",
+      "environment_info": {
+        "cpu": {
+          "cpu_count": 8,
+          "cpu_count_physical": 8,
+          "cpu_freq": {
+            "current": 3504,
+            "max": 3504,
+            "min": 600
+          },
+          "processor": "arm"
+        },
+        "disk": {
+          "free": 610525900800,
+          "free_gb": 568.6,
+          "percent": 1.34,
+          "total": 994662584320,
+          "total_gb": 926.35,
+          "used": 13331341312
+        },
+        "git": {
+          "available": true,
+          "branch": "update-documentation-main",
+          "commit_hash": "ce1969a22cbeb1ef396d49cbf1142984143d1297",
+          "is_dirty": true
+        },
+        "memory": {
+          "available": 18815434752,
+          "available_gb": 17.52,
+          "free": 15589376000,
+          "percent": 27.0,
+          "total": 25769803776,
+          "total_gb": 24.0,
+          "used": 5296226304
+        },
+        "os": {
+          "architecture": "64bit",
+          "machine": "arm64",
+          "platform": "macOS-14.5-arm64-arm-64bit",
+          "release": "23.5.0",
+          "system": "Darwin",
+          "version": "Darwin Kernel Version 23.5.0: Wed May  1 20:19:05 PDT 2024; root:xnu-10063.121.3~5/RELEASE_ARM64_T8112"
+        },
+        "python": {
+          "executable": "/Users/naoki/PycharmProjects/optimization-solver-benchmark/venv/bin/python",
+          "implementation": "CPython",
+          "version": "3.12.2",
+          "version_info": "3.12.2"
+        },
+        "timestamp": 1750582016.0,
+        "timezone": {
+          "current_time_local": "2025-06-22T22:07:46.242236",
+          "current_time_utc": "2025-06-22T13:07:46.242224+00:00",
+          "daylight_saving": false,
+          "timezone_name": "JST",
+          "utc_offset_hours": 9.0,
+          "utc_offset_seconds": -32400
+        }
+      },
+      "commit_hash": "ce1969a22cbeb1ef396d49cbf1142984143d1297",
+      "timestamp": "2025-06-22T13:09:05",
+      "solve_time": 79.02675819396973,
+      "status": "OPTIMAL",
+      "primal_objective_value": 23.439818435224183,
+      "dual_objective_value": null,
+      "duality_gap": null,
+      "primal_infeasibility": null,
+      "dual_infeasibility": null,
+      "iterations": null
+    },
+    {
+      "id": 155,
       "solver_name": "scipy_linprog",
       "solver_version": "scipy-1.15.3",
       "problem_library": "DIMACS",
-      "problem_name": "hinf12",
-      "problem_type": "SDP",
+      "problem_name": "bm1",
+      "problem_type": "UNKNOWN",
       "environment_info": {
         "cpu": {
           "cpu_count": 8,
@@ -229,27 +597,27 @@
           "processor": "arm"
         },
         "disk": {
-          "free": 610265743360,
-          "free_gb": 568.35,
+          "free": 612672356352,
+          "free_gb": 570.6,
           "percent": 1.34,
           "total": 994662584320,
           "total_gb": 926.35,
-          "used": 13331030016
+          "used": 13331341312
         },
         "git": {
           "available": true,
           "branch": "update-documentation-main",
-          "commit_hash": "b13af6c54afb59fcc4b00f10b6450804736a0060",
+          "commit_hash": "ce1969a22cbeb1ef396d49cbf1142984143d1297",
           "is_dirty": true
         },
         "memory": {
-          "available": 9519218688,
-          "available_gb": 8.87,
-          "free": 609026048,
-          "percent": 63.1,
+          "available": 18043584512,
+          "available_gb": 16.8,
+          "free": 13845577728,
+          "percent": 30.0,
           "total": 25769803776,
           "total_gb": 24.0,
-          "used": 11353751552
+          "used": 6162300928
         },
         "os": {
           "architecture": "64bit",
@@ -265,19 +633,19 @@
           "version": "3.12.2",
           "version_info": "3.12.2"
         },
-        "timestamp": 1748267776.0,
+        "timestamp": 1750582016.0,
         "timezone": {
-          "current_time_local": "2025-06-17T22:35:49.806830",
-          "current_time_utc": "2025-06-17T13:35:49.806823+00:00",
+          "current_time_local": "2025-06-22T22:10:16.613944",
+          "current_time_utc": "2025-06-22T13:10:16.613937+00:00",
           "daylight_saving": false,
           "timezone_name": "JST",
           "utc_offset_hours": 9.0,
           "utc_offset_seconds": -32400
         }
       },
-      "commit_hash": "b13af6c54afb59fcc4b00f10b6450804736a0060",
-      "timestamp": "2025-06-17T13:35:49",
-      "solve_time": 2.7894973754882812e-05,
+      "commit_hash": "ce1969a22cbeb1ef396d49cbf1142984143d1297",
+      "timestamp": "2025-06-22T13:10:16",
+      "solve_time": 4.7206878662109375e-05,
       "status": "ERROR",
       "primal_objective_value": null,
       "dual_objective_value": null,
@@ -287,12 +655,12 @@
       "iterations": null
     },
     {
-      "id": 23,
+      "id": 171,
       "solver_name": "cvxpy_clarabel",
-      "solver_version": "unknown",
+      "solver_version": "cvxpy-1.6.5-CLARABEL",
       "problem_library": "DIMACS",
       "problem_name": "nb",
-      "problem_type": "SDP",
+      "problem_type": "UNKNOWN",
       "environment_info": {
         "cpu": {
           "cpu_count": 8,
@@ -305,27 +673,27 @@
           "processor": "arm"
         },
         "disk": {
-          "free": 606414237696,
-          "free_gb": 564.77,
+          "free": 615784427520,
+          "free_gb": 573.49,
           "percent": 1.34,
           "total": 994662584320,
           "total_gb": 926.35,
-          "used": 13331030016
+          "used": 13331341312
         },
         "git": {
           "available": true,
           "branch": "update-documentation-main",
-          "commit_hash": "a39e8aa3fbfc3c53d2877149d56b43e0d341199b",
+          "commit_hash": "5dd7d288c2dc25a8a93c03c618639bdd090f209a",
           "is_dirty": true
         },
         "memory": {
-          "available": 9631727616,
-          "available_gb": 8.97,
-          "free": 484720640,
-          "percent": 62.6,
+          "available": 10879762432,
+          "available_gb": 10.13,
+          "free": 448331776,
+          "percent": 57.8,
           "total": 25769803776,
           "total_gb": 24.0,
-          "used": 11566694400
+          "used": 12693176320
         },
         "os": {
           "architecture": "64bit",
@@ -341,34 +709,34 @@
           "version": "3.12.2",
           "version_info": "3.12.2"
         },
-        "timestamp": 1748267776.0,
+        "timestamp": 1750582016.0,
         "timezone": {
-          "current_time_local": "2025-06-18T11:27:11.812372",
-          "current_time_utc": "2025-06-18T02:27:11.812361+00:00",
+          "current_time_local": "2025-06-24T22:22:19.590007",
+          "current_time_utc": "2025-06-24T13:22:19.589995+00:00",
           "daylight_saving": false,
           "timezone_name": "JST",
           "utc_offset_hours": 9.0,
           "utc_offset_seconds": -32400
         }
       },
-      "commit_hash": "a39e8aa3fbfc3c53d2877149d56b43e0d341199b",
-      "timestamp": "2025-06-18T02:27:11",
-      "solve_time": 0.0,
-      "status": "ERROR",
-      "primal_objective_value": null,
+      "commit_hash": "5dd7d288c2dc25a8a93c03c618639bdd090f209a",
+      "timestamp": "2025-06-24T13:22:21",
+      "solve_time": 2.133723258972168,
+      "status": "OPTIMAL",
+      "primal_objective_value": -0.05070309464849496,
       "dual_objective_value": null,
       "duality_gap": null,
       "primal_infeasibility": null,
       "dual_infeasibility": null,
-      "iterations": null
+      "iterations": 21
     },
     {
-      "id": 11,
-      "solver_name": "scipy_linprog",
-      "solver_version": "unknown",
+      "id": 173,
+      "solver_name": "cvxpy_cvxopt",
+      "solver_version": "cvxpy-1.6.5-CVXOPT",
       "problem_library": "DIMACS",
       "problem_name": "nb",
-      "problem_type": "SDP",
+      "problem_type": "UNKNOWN",
       "environment_info": {
         "cpu": {
           "cpu_count": 8,
@@ -381,8 +749,8 @@
           "processor": "arm"
         },
         "disk": {
-          "free": 609767211008,
-          "free_gb": 567.89,
+          "free": 615114862592,
+          "free_gb": 572.87,
           "percent": 1.34,
           "total": 994662584320,
           "total_gb": 926.35,
@@ -391,17 +759,17 @@
         "git": {
           "available": true,
           "branch": "update-documentation-main",
-          "commit_hash": "b13af6c54afb59fcc4b00f10b6450804736a0060",
+          "commit_hash": "ca42e835dbea708cc1dcf95987b5a2e56df60642",
           "is_dirty": true
         },
         "memory": {
-          "available": 9493495808,
-          "available_gb": 8.84,
-          "free": 468484096,
-          "percent": 63.2,
+          "available": 11006181376,
+          "available_gb": 10.25,
+          "free": 980025344,
+          "percent": 57.3,
           "total": 25769803776,
           "total_gb": 24.0,
-          "used": 11512872960
+          "used": 12446842880
         },
         "os": {
           "architecture": "64bit",
@@ -417,490 +785,566 @@
           "version": "3.12.2",
           "version_info": "3.12.2"
         },
-        "timestamp": 1748267776.0,
+        "timestamp": 1750582016.0,
         "timezone": {
-          "current_time_local": "2025-06-17T23:49:30.122688",
-          "current_time_utc": "2025-06-17T14:49:30.122679+00:00",
+          "current_time_local": "2025-06-25T00:06:31.316523",
+          "current_time_utc": "2025-06-24T15:06:31.316514+00:00",
           "daylight_saving": false,
           "timezone_name": "JST",
           "utc_offset_hours": 9.0,
           "utc_offset_seconds": -32400
         }
       },
-      "commit_hash": "b13af6c54afb59fcc4b00f10b6450804736a0060",
-      "timestamp": "2025-06-17T14:49:30",
-      "solve_time": 0.0,
-      "status": "ERROR",
-      "primal_objective_value": null,
-      "dual_objective_value": null,
-      "duality_gap": null,
-      "primal_infeasibility": null,
-      "dual_infeasibility": null,
-      "iterations": null
-    },
-    {
-      "id": 24,
-      "solver_name": "cvxpy_clarabel",
-      "solver_version": "cvxpy-1.6.5-CLARABEL",
-      "problem_library": "SDPLIB",
-      "problem_name": "arch0",
-      "problem_type": "SDP",
-      "environment_info": {
-        "cpu": {
-          "cpu_count": 8,
-          "cpu_count_physical": 8,
-          "cpu_freq": {
-            "current": 3504,
-            "max": 3504,
-            "min": 600
-          },
-          "processor": "arm"
-        },
-        "disk": {
-          "free": 606414237696,
-          "free_gb": 564.77,
-          "percent": 1.34,
-          "total": 994662584320,
-          "total_gb": 926.35,
-          "used": 13331030016
-        },
-        "git": {
-          "available": true,
-          "branch": "update-documentation-main",
-          "commit_hash": "a39e8aa3fbfc3c53d2877149d56b43e0d341199b",
-          "is_dirty": true
-        },
-        "memory": {
-          "available": 9631727616,
-          "available_gb": 8.97,
-          "free": 484720640,
-          "percent": 62.6,
-          "total": 25769803776,
-          "total_gb": 24.0,
-          "used": 11566694400
-        },
-        "os": {
-          "architecture": "64bit",
-          "machine": "arm64",
-          "platform": "macOS-14.5-arm64-arm-64bit",
-          "release": "23.5.0",
-          "system": "Darwin",
-          "version": "Darwin Kernel Version 23.5.0: Wed May  1 20:19:05 PDT 2024; root:xnu-10063.121.3~5/RELEASE_ARM64_T8112"
-        },
-        "python": {
-          "executable": "/Users/naoki/PycharmProjects/optimization-solver-benchmark/venv/bin/python",
-          "implementation": "CPython",
-          "version": "3.12.2",
-          "version_info": "3.12.2"
-        },
-        "timestamp": 1748267776.0,
-        "timezone": {
-          "current_time_local": "2025-06-18T11:27:11.812372",
-          "current_time_utc": "2025-06-18T02:27:11.812361+00:00",
-          "daylight_saving": false,
-          "timezone_name": "JST",
-          "utc_offset_hours": 9.0,
-          "utc_offset_seconds": -32400
-        }
-      },
-      "commit_hash": "a39e8aa3fbfc3c53d2877149d56b43e0d341199b",
-      "timestamp": "2025-06-18T02:27:11",
-      "solve_time": 1.6927719116210938e-05,
-      "status": "ERROR",
-      "primal_objective_value": null,
-      "dual_objective_value": null,
-      "duality_gap": null,
-      "primal_infeasibility": null,
-      "dual_infeasibility": null,
-      "iterations": null
-    },
-    {
-      "id": 7,
-      "solver_name": "cvxpy_clarabel",
-      "solver_version": "unknown",
-      "problem_library": "SDPLIB",
-      "problem_name": "arch0",
-      "problem_type": "SDP",
-      "environment_info": {
-        "cpu": {
-          "cpu_count": 8,
-          "cpu_count_physical": 8,
-          "cpu_freq": {
-            "current": 3504,
-            "max": 3504,
-            "min": 600
-          },
-          "processor": "arm"
-        },
-        "disk": {
-          "free": 610265743360,
-          "free_gb": 568.35,
-          "percent": 1.34,
-          "total": 994662584320,
-          "total_gb": 926.35,
-          "used": 13331030016
-        },
-        "git": {
-          "available": true,
-          "branch": "update-documentation-main",
-          "commit_hash": "b13af6c54afb59fcc4b00f10b6450804736a0060",
-          "is_dirty": true
-        },
-        "memory": {
-          "available": 9519218688,
-          "available_gb": 8.87,
-          "free": 609026048,
-          "percent": 63.1,
-          "total": 25769803776,
-          "total_gb": 24.0,
-          "used": 11353751552
-        },
-        "os": {
-          "architecture": "64bit",
-          "machine": "arm64",
-          "platform": "macOS-14.5-arm64-arm-64bit",
-          "release": "23.5.0",
-          "system": "Darwin",
-          "version": "Darwin Kernel Version 23.5.0: Wed May  1 20:19:05 PDT 2024; root:xnu-10063.121.3~5/RELEASE_ARM64_T8112"
-        },
-        "python": {
-          "executable": "/Users/naoki/PycharmProjects/optimization-solver-benchmark/venv/bin/python",
-          "implementation": "CPython",
-          "version": "3.12.2",
-          "version_info": "3.12.2"
-        },
-        "timestamp": 1748267776.0,
-        "timezone": {
-          "current_time_local": "2025-06-17T22:35:49.806830",
-          "current_time_utc": "2025-06-17T13:35:49.806823+00:00",
-          "daylight_saving": false,
-          "timezone_name": "JST",
-          "utc_offset_hours": 9.0,
-          "utc_offset_seconds": -32400
-        }
-      },
-      "commit_hash": "b13af6c54afb59fcc4b00f10b6450804736a0060",
-      "timestamp": "2025-06-17T13:35:49",
-      "solve_time": 0.0,
-      "status": "ERROR",
-      "primal_objective_value": null,
-      "dual_objective_value": null,
-      "duality_gap": null,
-      "primal_infeasibility": null,
-      "dual_infeasibility": null,
-      "iterations": null
-    },
-    {
-      "id": 10,
-      "solver_name": "scipy_linprog",
-      "solver_version": "unknown",
-      "problem_library": "SDPLIB",
-      "problem_name": "arch0",
-      "problem_type": "SDP",
-      "environment_info": {
-        "cpu": {
-          "cpu_count": 8,
-          "cpu_count_physical": 8,
-          "cpu_freq": {
-            "current": 3504,
-            "max": 3504,
-            "min": 600
-          },
-          "processor": "arm"
-        },
-        "disk": {
-          "free": 609767211008,
-          "free_gb": 567.89,
-          "percent": 1.34,
-          "total": 994662584320,
-          "total_gb": 926.35,
-          "used": 13331030016
-        },
-        "git": {
-          "available": true,
-          "branch": "update-documentation-main",
-          "commit_hash": "b13af6c54afb59fcc4b00f10b6450804736a0060",
-          "is_dirty": true
-        },
-        "memory": {
-          "available": 9493495808,
-          "available_gb": 8.84,
-          "free": 468484096,
-          "percent": 63.2,
-          "total": 25769803776,
-          "total_gb": 24.0,
-          "used": 11512872960
-        },
-        "os": {
-          "architecture": "64bit",
-          "machine": "arm64",
-          "platform": "macOS-14.5-arm64-arm-64bit",
-          "release": "23.5.0",
-          "system": "Darwin",
-          "version": "Darwin Kernel Version 23.5.0: Wed May  1 20:19:05 PDT 2024; root:xnu-10063.121.3~5/RELEASE_ARM64_T8112"
-        },
-        "python": {
-          "executable": "/Users/naoki/PycharmProjects/optimization-solver-benchmark/venv/bin/python",
-          "implementation": "CPython",
-          "version": "3.12.2",
-          "version_info": "3.12.2"
-        },
-        "timestamp": 1748267776.0,
-        "timezone": {
-          "current_time_local": "2025-06-17T23:49:30.122688",
-          "current_time_utc": "2025-06-17T14:49:30.122679+00:00",
-          "daylight_saving": false,
-          "timezone_name": "JST",
-          "utc_offset_hours": 9.0,
-          "utc_offset_seconds": -32400
-        }
-      },
-      "commit_hash": "b13af6c54afb59fcc4b00f10b6450804736a0060",
-      "timestamp": "2025-06-17T14:49:30",
-      "solve_time": 0.0,
-      "status": "ERROR",
-      "primal_objective_value": null,
-      "dual_objective_value": null,
-      "duality_gap": null,
-      "primal_infeasibility": null,
-      "dual_infeasibility": null,
-      "iterations": null
-    },
-    {
-      "id": 6,
-      "solver_name": "scipy_linprog",
-      "solver_version": "unknown",
-      "problem_library": "SDPLIB",
-      "problem_name": "arch0",
-      "problem_type": "SDP",
-      "environment_info": {
-        "cpu": {
-          "cpu_count": 8,
-          "cpu_count_physical": 8,
-          "cpu_freq": {
-            "current": 3504,
-            "max": 3504,
-            "min": 600
-          },
-          "processor": "arm"
-        },
-        "disk": {
-          "free": 610265743360,
-          "free_gb": 568.35,
-          "percent": 1.34,
-          "total": 994662584320,
-          "total_gb": 926.35,
-          "used": 13331030016
-        },
-        "git": {
-          "available": true,
-          "branch": "update-documentation-main",
-          "commit_hash": "b13af6c54afb59fcc4b00f10b6450804736a0060",
-          "is_dirty": true
-        },
-        "memory": {
-          "available": 9519218688,
-          "available_gb": 8.87,
-          "free": 609026048,
-          "percent": 63.1,
-          "total": 25769803776,
-          "total_gb": 24.0,
-          "used": 11353751552
-        },
-        "os": {
-          "architecture": "64bit",
-          "machine": "arm64",
-          "platform": "macOS-14.5-arm64-arm-64bit",
-          "release": "23.5.0",
-          "system": "Darwin",
-          "version": "Darwin Kernel Version 23.5.0: Wed May  1 20:19:05 PDT 2024; root:xnu-10063.121.3~5/RELEASE_ARM64_T8112"
-        },
-        "python": {
-          "executable": "/Users/naoki/PycharmProjects/optimization-solver-benchmark/venv/bin/python",
-          "implementation": "CPython",
-          "version": "3.12.2",
-          "version_info": "3.12.2"
-        },
-        "timestamp": 1748267776.0,
-        "timezone": {
-          "current_time_local": "2025-06-17T22:35:49.806830",
-          "current_time_utc": "2025-06-17T13:35:49.806823+00:00",
-          "daylight_saving": false,
-          "timezone_name": "JST",
-          "utc_offset_hours": 9.0,
-          "utc_offset_seconds": -32400
-        }
-      },
-      "commit_hash": "b13af6c54afb59fcc4b00f10b6450804736a0060",
-      "timestamp": "2025-06-17T13:35:49",
-      "solve_time": 0.0,
-      "status": "ERROR",
-      "primal_objective_value": null,
-      "dual_objective_value": null,
-      "duality_gap": null,
-      "primal_infeasibility": null,
-      "dual_infeasibility": null,
-      "iterations": null
-    },
-    {
-      "id": 3,
-      "solver_name": "cvxpy_clarabel",
-      "solver_version": "unknown",
-      "problem_library": "SDPLIB",
-      "problem_name": "control1",
-      "problem_type": "SDP",
-      "environment_info": {
-        "cpu": {
-          "cpu_count": 8,
-          "cpu_count_physical": 8,
-          "cpu_freq": {
-            "current": 3504,
-            "max": 3504,
-            "min": 600
-          },
-          "processor": "arm"
-        },
-        "disk": {
-          "free": 610266984448,
-          "free_gb": 568.36,
-          "percent": 1.34,
-          "total": 994662584320,
-          "total_gb": 926.35,
-          "used": 13331030016
-        },
-        "git": {
-          "available": true,
-          "branch": "update-documentation-main",
-          "commit_hash": "b13af6c54afb59fcc4b00f10b6450804736a0060",
-          "is_dirty": true
-        },
-        "memory": {
-          "available": 9542582272,
-          "available_gb": 8.89,
-          "free": 647823360,
-          "percent": 63.0,
-          "total": 25769803776,
-          "total_gb": 24.0,
-          "used": 11328602112
-        },
-        "os": {
-          "architecture": "64bit",
-          "machine": "arm64",
-          "platform": "macOS-14.5-arm64-arm-64bit",
-          "release": "23.5.0",
-          "system": "Darwin",
-          "version": "Darwin Kernel Version 23.5.0: Wed May  1 20:19:05 PDT 2024; root:xnu-10063.121.3~5/RELEASE_ARM64_T8112"
-        },
-        "python": {
-          "executable": "/Users/naoki/PycharmProjects/optimization-solver-benchmark/venv/bin/python",
-          "implementation": "CPython",
-          "version": "3.12.2",
-          "version_info": "3.12.2"
-        },
-        "timestamp": 1748267776.0,
-        "timezone": {
-          "current_time_local": "2025-06-17T22:35:05.013190",
-          "current_time_utc": "2025-06-17T13:35:05.013182+00:00",
-          "daylight_saving": false,
-          "timezone_name": "JST",
-          "utc_offset_hours": 9.0,
-          "utc_offset_seconds": -32400
-        }
-      },
-      "commit_hash": "b13af6c54afb59fcc4b00f10b6450804736a0060",
-      "timestamp": "2025-06-17T13:35:05",
-      "solve_time": 0.0,
-      "status": "ERROR",
-      "primal_objective_value": null,
-      "dual_objective_value": null,
-      "duality_gap": null,
-      "primal_infeasibility": null,
-      "dual_infeasibility": null,
-      "iterations": null
-    },
-    {
-      "id": 40,
-      "solver_name": "cvxpy_clarabel",
-      "solver_version": "cvxpy-1.6.5-CLARABEL",
-      "problem_library": "internal",
-      "problem_name": "control_lmi_test",
-      "problem_type": "SDP",
-      "environment_info": {
-        "cpu": {
-          "cpu_count": 8,
-          "cpu_count_physical": 8,
-          "cpu_freq": {
-            "current": 3504,
-            "max": 3504,
-            "min": 600
-          },
-          "processor": "arm"
-        },
-        "disk": {
-          "free": 609202327552,
-          "free_gb": 567.36,
-          "percent": 1.34,
-          "total": 994662584320,
-          "total_gb": 926.35,
-          "used": 13331030016
-        },
-        "git": {
-          "available": true,
-          "branch": "update-documentation-main",
-          "commit_hash": "a13f8ca5f469be57f913bca3214bdf515c65b1dd",
-          "is_dirty": true
-        },
-        "memory": {
-          "available": 9348808704,
-          "available_gb": 8.71,
-          "free": 485048320,
-          "percent": 63.7,
-          "total": 25769803776,
-          "total_gb": 24.0,
-          "used": 11363696640
-        },
-        "os": {
-          "architecture": "64bit",
-          "machine": "arm64",
-          "platform": "macOS-14.5-arm64-arm-64bit",
-          "release": "23.5.0",
-          "system": "Darwin",
-          "version": "Darwin Kernel Version 23.5.0: Wed May  1 20:19:05 PDT 2024; root:xnu-10063.121.3~5/RELEASE_ARM64_T8112"
-        },
-        "python": {
-          "executable": "/Users/naoki/PycharmProjects/optimization-solver-benchmark/venv/bin/python",
-          "implementation": "CPython",
-          "version": "3.12.2",
-          "version_info": "3.12.2"
-        },
-        "timestamp": 1748267776.0,
-        "timezone": {
-          "current_time_local": "2025-06-20T21:02:18.513683",
-          "current_time_utc": "2025-06-20T12:02:18.513661+00:00",
-          "daylight_saving": false,
-          "timezone_name": "JST",
-          "utc_offset_hours": 9.0,
-          "utc_offset_seconds": -32400
-        }
-      },
-      "commit_hash": "a13f8ca5f469be57f913bca3214bdf515c65b1dd",
-      "timestamp": "2025-06-20T12:02:18",
-      "solve_time": 0.004650115966796875,
+      "commit_hash": "ca42e835dbea708cc1dcf95987b5a2e56df60642",
+      "timestamp": "2025-06-24T15:06:34",
+      "solve_time": 1.4811620712280273,
       "status": "OPTIMAL",
-      "primal_objective_value": 0.9999999999693434,
+      "primal_objective_value": -0.05070309469591302,
       "dual_objective_value": null,
       "duality_gap": null,
       "primal_infeasibility": null,
       "dual_infeasibility": null,
-      "iterations": 6
+      "iterations": null
     },
     {
-      "id": 41,
+      "id": 165,
+      "solver_name": "cvxpy_ecos",
+      "solver_version": "cvxpy-1.6.5-ECOS",
+      "problem_library": "DIMACS",
+      "problem_name": "nb",
+      "problem_type": "UNKNOWN",
+      "environment_info": {
+        "cpu": {
+          "cpu_count": 8,
+          "cpu_count_physical": 8,
+          "cpu_freq": {
+            "current": 3504,
+            "max": 3504,
+            "min": 600
+          },
+          "processor": "arm"
+        },
+        "disk": {
+          "free": 615791091712,
+          "free_gb": 573.5,
+          "percent": 1.34,
+          "total": 994662584320,
+          "total_gb": 926.35,
+          "used": 13331341312
+        },
+        "git": {
+          "available": true,
+          "branch": "update-documentation-main",
+          "commit_hash": "82612d7c8346e9f418e4c4fb79124a2f7c3a48d4",
+          "is_dirty": true
+        },
+        "memory": {
+          "available": 10725998592,
+          "available_gb": 9.99,
+          "free": 138133504,
+          "percent": 58.4,
+          "total": 25769803776,
+          "total_gb": 24.0,
+          "used": 12792610816
+        },
+        "os": {
+          "architecture": "64bit",
+          "machine": "arm64",
+          "platform": "macOS-14.5-arm64-arm-64bit",
+          "release": "23.5.0",
+          "system": "Darwin",
+          "version": "Darwin Kernel Version 23.5.0: Wed May  1 20:19:05 PDT 2024; root:xnu-10063.121.3~5/RELEASE_ARM64_T8112"
+        },
+        "python": {
+          "executable": "/Users/naoki/PycharmProjects/optimization-solver-benchmark/venv/bin/python",
+          "implementation": "CPython",
+          "version": "3.12.2",
+          "version_info": "3.12.2"
+        },
+        "timestamp": 1750582016.0,
+        "timezone": {
+          "current_time_local": "2025-06-24T22:11:59.086794",
+          "current_time_utc": "2025-06-24T13:11:59.086776+00:00",
+          "daylight_saving": false,
+          "timezone_name": "JST",
+          "utc_offset_hours": 9.0,
+          "utc_offset_seconds": -32400
+        }
+      },
+      "commit_hash": "82612d7c8346e9f418e4c4fb79124a2f7c3a48d4",
+      "timestamp": "2025-06-24T13:12:07",
+      "solve_time": 1.9608960151672363,
+      "status": "OPTIMAL",
+      "primal_objective_value": -0.050703094648322636,
+      "dual_objective_value": null,
+      "duality_gap": null,
+      "primal_infeasibility": null,
+      "dual_infeasibility": null,
+      "iterations": 20
+    },
+    {
+      "id": 172,
+      "solver_name": "cvxpy_ecos",
+      "solver_version": "cvxpy-1.6.5-ECOS",
+      "problem_library": "DIMACS",
+      "problem_name": "nb",
+      "problem_type": "UNKNOWN",
+      "environment_info": {
+        "cpu": {
+          "cpu_count": 8,
+          "cpu_count_physical": 8,
+          "cpu_freq": {
+            "current": 3504,
+            "max": 3504,
+            "min": 600
+          },
+          "processor": "arm"
+        },
+        "disk": {
+          "free": 615114862592,
+          "free_gb": 572.87,
+          "percent": 1.34,
+          "total": 994662584320,
+          "total_gb": 926.35,
+          "used": 13331030016
+        },
+        "git": {
+          "available": true,
+          "branch": "update-documentation-main",
+          "commit_hash": "ca42e835dbea708cc1dcf95987b5a2e56df60642",
+          "is_dirty": true
+        },
+        "memory": {
+          "available": 11006181376,
+          "available_gb": 10.25,
+          "free": 980025344,
+          "percent": 57.3,
+          "total": 25769803776,
+          "total_gb": 24.0,
+          "used": 12446842880
+        },
+        "os": {
+          "architecture": "64bit",
+          "machine": "arm64",
+          "platform": "macOS-14.5-arm64-arm-64bit",
+          "release": "23.5.0",
+          "system": "Darwin",
+          "version": "Darwin Kernel Version 23.5.0: Wed May  1 20:19:05 PDT 2024; root:xnu-10063.121.3~5/RELEASE_ARM64_T8112"
+        },
+        "python": {
+          "executable": "/Users/naoki/PycharmProjects/optimization-solver-benchmark/venv/bin/python",
+          "implementation": "CPython",
+          "version": "3.12.2",
+          "version_info": "3.12.2"
+        },
+        "timestamp": 1750582016.0,
+        "timezone": {
+          "current_time_local": "2025-06-25T00:06:31.316523",
+          "current_time_utc": "2025-06-24T15:06:31.316514+00:00",
+          "daylight_saving": false,
+          "timezone_name": "JST",
+          "utc_offset_hours": 9.0,
+          "utc_offset_seconds": -32400
+        }
+      },
+      "commit_hash": "ca42e835dbea708cc1dcf95987b5a2e56df60642",
+      "timestamp": "2025-06-24T15:06:32",
+      "solve_time": 1.1467840671539307,
+      "status": "OPTIMAL",
+      "primal_objective_value": -0.050703094648322636,
+      "dual_objective_value": null,
+      "duality_gap": null,
+      "primal_infeasibility": null,
+      "dual_infeasibility": null,
+      "iterations": 20
+    },
+    {
+      "id": 170,
+      "solver_name": "cvxpy_highs",
+      "solver_version": "cvxpy-1.6.5-HIGHS",
+      "problem_library": "DIMACS",
+      "problem_name": "nb",
+      "problem_type": "UNKNOWN",
+      "environment_info": {
+        "cpu": {
+          "cpu_count": 8,
+          "cpu_count_physical": 8,
+          "cpu_freq": {
+            "current": 3504,
+            "max": 3504,
+            "min": 600
+          },
+          "processor": "arm"
+        },
+        "disk": {
+          "free": 615791091712,
+          "free_gb": 573.5,
+          "percent": 1.34,
+          "total": 994662584320,
+          "total_gb": 926.35,
+          "used": 13331341312
+        },
+        "git": {
+          "available": true,
+          "branch": "update-documentation-main",
+          "commit_hash": "82612d7c8346e9f418e4c4fb79124a2f7c3a48d4",
+          "is_dirty": true
+        },
+        "memory": {
+          "available": 10725998592,
+          "available_gb": 9.99,
+          "free": 138133504,
+          "percent": 58.4,
+          "total": 25769803776,
+          "total_gb": 24.0,
+          "used": 12792610816
+        },
+        "os": {
+          "architecture": "64bit",
+          "machine": "arm64",
+          "platform": "macOS-14.5-arm64-arm-64bit",
+          "release": "23.5.0",
+          "system": "Darwin",
+          "version": "Darwin Kernel Version 23.5.0: Wed May  1 20:19:05 PDT 2024; root:xnu-10063.121.3~5/RELEASE_ARM64_T8112"
+        },
+        "python": {
+          "executable": "/Users/naoki/PycharmProjects/optimization-solver-benchmark/venv/bin/python",
+          "implementation": "CPython",
+          "version": "3.12.2",
+          "version_info": "3.12.2"
+        },
+        "timestamp": 1750582016.0,
+        "timezone": {
+          "current_time_local": "2025-06-24T22:11:59.086794",
+          "current_time_utc": "2025-06-24T13:11:59.086776+00:00",
+          "daylight_saving": false,
+          "timezone_name": "JST",
+          "utc_offset_hours": 9.0,
+          "utc_offset_seconds": -32400
+        }
+      },
+      "commit_hash": "82612d7c8346e9f418e4c4fb79124a2f7c3a48d4",
+      "timestamp": "2025-06-24T13:13:03",
+      "solve_time": 5.793571472167969e-05,
+      "status": "ERROR",
+      "primal_objective_value": null,
+      "dual_objective_value": null,
+      "duality_gap": null,
+      "primal_infeasibility": null,
+      "dual_infeasibility": null,
+      "iterations": null
+    },
+    {
+      "id": 166,
+      "solver_name": "cvxpy_osqp",
+      "solver_version": "cvxpy-1.6.5-OSQP",
+      "problem_library": "DIMACS",
+      "problem_name": "nb",
+      "problem_type": "UNKNOWN",
+      "environment_info": {
+        "cpu": {
+          "cpu_count": 8,
+          "cpu_count_physical": 8,
+          "cpu_freq": {
+            "current": 3504,
+            "max": 3504,
+            "min": 600
+          },
+          "processor": "arm"
+        },
+        "disk": {
+          "free": 615791091712,
+          "free_gb": 573.5,
+          "percent": 1.34,
+          "total": 994662584320,
+          "total_gb": 926.35,
+          "used": 13331341312
+        },
+        "git": {
+          "available": true,
+          "branch": "update-documentation-main",
+          "commit_hash": "82612d7c8346e9f418e4c4fb79124a2f7c3a48d4",
+          "is_dirty": true
+        },
+        "memory": {
+          "available": 10725998592,
+          "available_gb": 9.99,
+          "free": 138133504,
+          "percent": 58.4,
+          "total": 25769803776,
+          "total_gb": 24.0,
+          "used": 12792610816
+        },
+        "os": {
+          "architecture": "64bit",
+          "machine": "arm64",
+          "platform": "macOS-14.5-arm64-arm-64bit",
+          "release": "23.5.0",
+          "system": "Darwin",
+          "version": "Darwin Kernel Version 23.5.0: Wed May  1 20:19:05 PDT 2024; root:xnu-10063.121.3~5/RELEASE_ARM64_T8112"
+        },
+        "python": {
+          "executable": "/Users/naoki/PycharmProjects/optimization-solver-benchmark/venv/bin/python",
+          "implementation": "CPython",
+          "version": "3.12.2",
+          "version_info": "3.12.2"
+        },
+        "timestamp": 1750582016.0,
+        "timezone": {
+          "current_time_local": "2025-06-24T22:11:59.086794",
+          "current_time_utc": "2025-06-24T13:11:59.086776+00:00",
+          "daylight_saving": false,
+          "timezone_name": "JST",
+          "utc_offset_hours": 9.0,
+          "utc_offset_seconds": -32400
+        }
+      },
+      "commit_hash": "82612d7c8346e9f418e4c4fb79124a2f7c3a48d4",
+      "timestamp": "2025-06-24T13:12:07",
+      "solve_time": 6.29425048828125e-05,
+      "status": "ERROR",
+      "primal_objective_value": null,
+      "dual_objective_value": null,
+      "duality_gap": null,
+      "primal_infeasibility": null,
+      "dual_infeasibility": null,
+      "iterations": null
+    },
+    {
+      "id": 169,
+      "solver_name": "cvxpy_scip",
+      "solver_version": "cvxpy-1.6.5-SCIP",
+      "problem_library": "DIMACS",
+      "problem_name": "nb",
+      "problem_type": "UNKNOWN",
+      "environment_info": {
+        "cpu": {
+          "cpu_count": 8,
+          "cpu_count_physical": 8,
+          "cpu_freq": {
+            "current": 3504,
+            "max": 3504,
+            "min": 600
+          },
+          "processor": "arm"
+        },
+        "disk": {
+          "free": 615791091712,
+          "free_gb": 573.5,
+          "percent": 1.34,
+          "total": 994662584320,
+          "total_gb": 926.35,
+          "used": 13331341312
+        },
+        "git": {
+          "available": true,
+          "branch": "update-documentation-main",
+          "commit_hash": "82612d7c8346e9f418e4c4fb79124a2f7c3a48d4",
+          "is_dirty": true
+        },
+        "memory": {
+          "available": 10725998592,
+          "available_gb": 9.99,
+          "free": 138133504,
+          "percent": 58.4,
+          "total": 25769803776,
+          "total_gb": 24.0,
+          "used": 12792610816
+        },
+        "os": {
+          "architecture": "64bit",
+          "machine": "arm64",
+          "platform": "macOS-14.5-arm64-arm-64bit",
+          "release": "23.5.0",
+          "system": "Darwin",
+          "version": "Darwin Kernel Version 23.5.0: Wed May  1 20:19:05 PDT 2024; root:xnu-10063.121.3~5/RELEASE_ARM64_T8112"
+        },
+        "python": {
+          "executable": "/Users/naoki/PycharmProjects/optimization-solver-benchmark/venv/bin/python",
+          "implementation": "CPython",
+          "version": "3.12.2",
+          "version_info": "3.12.2"
+        },
+        "timestamp": 1750582016.0,
+        "timezone": {
+          "current_time_local": "2025-06-24T22:11:59.086794",
+          "current_time_utc": "2025-06-24T13:11:59.086776+00:00",
+          "daylight_saving": false,
+          "timezone_name": "JST",
+          "utc_offset_hours": 9.0,
+          "utc_offset_seconds": -32400
+        }
+      },
+      "commit_hash": "82612d7c8346e9f418e4c4fb79124a2f7c3a48d4",
+      "timestamp": "2025-06-24T13:13:03",
+      "solve_time": 48.382381200790405,
+      "status": "OPTIMAL",
+      "primal_objective_value": -0.0507029966950411,
+      "dual_objective_value": null,
+      "duality_gap": null,
+      "primal_infeasibility": null,
+      "dual_infeasibility": null,
+      "iterations": null
+    },
+    {
+      "id": 164,
+      "solver_name": "cvxpy_scs",
+      "solver_version": "cvxpy-1.6.5-SCS",
+      "problem_library": "DIMACS",
+      "problem_name": "nb",
+      "problem_type": "UNKNOWN",
+      "environment_info": {
+        "cpu": {
+          "cpu_count": 8,
+          "cpu_count_physical": 8,
+          "cpu_freq": {
+            "current": 3504,
+            "max": 3504,
+            "min": 600
+          },
+          "processor": "arm"
+        },
+        "disk": {
+          "free": 615791091712,
+          "free_gb": 573.5,
+          "percent": 1.34,
+          "total": 994662584320,
+          "total_gb": 926.35,
+          "used": 13331341312
+        },
+        "git": {
+          "available": true,
+          "branch": "update-documentation-main",
+          "commit_hash": "82612d7c8346e9f418e4c4fb79124a2f7c3a48d4",
+          "is_dirty": true
+        },
+        "memory": {
+          "available": 10725998592,
+          "available_gb": 9.99,
+          "free": 138133504,
+          "percent": 58.4,
+          "total": 25769803776,
+          "total_gb": 24.0,
+          "used": 12792610816
+        },
+        "os": {
+          "architecture": "64bit",
+          "machine": "arm64",
+          "platform": "macOS-14.5-arm64-arm-64bit",
+          "release": "23.5.0",
+          "system": "Darwin",
+          "version": "Darwin Kernel Version 23.5.0: Wed May  1 20:19:05 PDT 2024; root:xnu-10063.121.3~5/RELEASE_ARM64_T8112"
+        },
+        "python": {
+          "executable": "/Users/naoki/PycharmProjects/optimization-solver-benchmark/venv/bin/python",
+          "implementation": "CPython",
+          "version": "3.12.2",
+          "version_info": "3.12.2"
+        },
+        "timestamp": 1750582016.0,
+        "timezone": {
+          "current_time_local": "2025-06-24T22:11:59.086794",
+          "current_time_utc": "2025-06-24T13:11:59.086776+00:00",
+          "daylight_saving": false,
+          "timezone_name": "JST",
+          "utc_offset_hours": 9.0,
+          "utc_offset_seconds": -32400
+        }
+      },
+      "commit_hash": "82612d7c8346e9f418e4c4fb79124a2f7c3a48d4",
+      "timestamp": "2025-06-24T13:12:05",
+      "solve_time": 4.004631996154785,
+      "status": "OPTIMAL",
+      "primal_objective_value": -0.05070061603883091,
+      "dual_objective_value": null,
+      "duality_gap": null,
+      "primal_infeasibility": null,
+      "dual_infeasibility": null,
+      "iterations": 5425
+    },
+    {
+      "id": 168,
+      "solver_name": "cvxpy_sdpa",
+      "solver_version": "cvxpy-1.6.5-SDPA",
+      "problem_library": "DIMACS",
+      "problem_name": "nb",
+      "problem_type": "UNKNOWN",
+      "environment_info": {
+        "cpu": {
+          "cpu_count": 8,
+          "cpu_count_physical": 8,
+          "cpu_freq": {
+            "current": 3504,
+            "max": 3504,
+            "min": 600
+          },
+          "processor": "arm"
+        },
+        "disk": {
+          "free": 615791091712,
+          "free_gb": 573.5,
+          "percent": 1.34,
+          "total": 994662584320,
+          "total_gb": 926.35,
+          "used": 13331341312
+        },
+        "git": {
+          "available": true,
+          "branch": "update-documentation-main",
+          "commit_hash": "82612d7c8346e9f418e4c4fb79124a2f7c3a48d4",
+          "is_dirty": true
+        },
+        "memory": {
+          "available": 10725998592,
+          "available_gb": 9.99,
+          "free": 138133504,
+          "percent": 58.4,
+          "total": 25769803776,
+          "total_gb": 24.0,
+          "used": 12792610816
+        },
+        "os": {
+          "architecture": "64bit",
+          "machine": "arm64",
+          "platform": "macOS-14.5-arm64-arm-64bit",
+          "release": "23.5.0",
+          "system": "Darwin",
+          "version": "Darwin Kernel Version 23.5.0: Wed May  1 20:19:05 PDT 2024; root:xnu-10063.121.3~5/RELEASE_ARM64_T8112"
+        },
+        "python": {
+          "executable": "/Users/naoki/PycharmProjects/optimization-solver-benchmark/venv/bin/python",
+          "implementation": "CPython",
+          "version": "3.12.2",
+          "version_info": "3.12.2"
+        },
+        "timestamp": 1750582016.0,
+        "timezone": {
+          "current_time_local": "2025-06-24T22:11:59.086794",
+          "current_time_utc": "2025-06-24T13:11:59.086776+00:00",
+          "daylight_saving": false,
+          "timezone_name": "JST",
+          "utc_offset_hours": 9.0,
+          "utc_offset_seconds": -32400
+        }
+      },
+      "commit_hash": "82612d7c8346e9f418e4c4fb79124a2f7c3a48d4",
+      "timestamp": "2025-06-24T13:12:15",
+      "solve_time": 5.21799898147583,
+      "status": "OPTIMAL",
+      "primal_objective_value": -1.8772174263594055,
+      "dual_objective_value": null,
+      "duality_gap": null,
+      "primal_infeasibility": null,
+      "dual_infeasibility": null,
+      "iterations": null
+    },
+    {
+      "id": 162,
       "solver_name": "scipy_linprog",
       "solver_version": "scipy-1.15.3",
-      "problem_library": "internal",
-      "problem_name": "control_lmi_test",
-      "problem_type": "SDP",
+      "problem_library": "DIMACS",
+      "problem_name": "nb",
+      "problem_type": "UNKNOWN",
       "environment_info": {
         "cpu": {
           "cpu_count": 8,
@@ -913,27 +1357,27 @@
           "processor": "arm"
         },
         "disk": {
-          "free": 609202327552,
-          "free_gb": 567.36,
+          "free": 615791091712,
+          "free_gb": 573.5,
           "percent": 1.34,
           "total": 994662584320,
           "total_gb": 926.35,
-          "used": 13331030016
+          "used": 13331341312
         },
         "git": {
           "available": true,
           "branch": "update-documentation-main",
-          "commit_hash": "a13f8ca5f469be57f913bca3214bdf515c65b1dd",
+          "commit_hash": "82612d7c8346e9f418e4c4fb79124a2f7c3a48d4",
           "is_dirty": true
         },
         "memory": {
-          "available": 9348808704,
-          "available_gb": 8.71,
-          "free": 485048320,
-          "percent": 63.7,
+          "available": 10725998592,
+          "available_gb": 9.99,
+          "free": 138133504,
+          "percent": 58.4,
           "total": 25769803776,
           "total_gb": 24.0,
-          "used": 11363696640
+          "used": 12792610816
         },
         "os": {
           "architecture": "64bit",
@@ -949,19 +1393,19 @@
           "version": "3.12.2",
           "version_info": "3.12.2"
         },
-        "timestamp": 1748267776.0,
+        "timestamp": 1750582016.0,
         "timezone": {
-          "current_time_local": "2025-06-20T21:02:18.513683",
-          "current_time_utc": "2025-06-20T12:02:18.513661+00:00",
+          "current_time_local": "2025-06-24T22:11:59.086794",
+          "current_time_utc": "2025-06-24T13:11:59.086776+00:00",
           "daylight_saving": false,
           "timezone_name": "JST",
           "utc_offset_hours": 9.0,
           "utc_offset_seconds": -32400
         }
       },
-      "commit_hash": "a13f8ca5f469be57f913bca3214bdf515c65b1dd",
-      "timestamp": "2025-06-20T12:02:18",
-      "solve_time": 4.506111145019531e-05,
+      "commit_hash": "82612d7c8346e9f418e4c4fb79124a2f7c3a48d4",
+      "timestamp": "2025-06-24T13:11:59",
+      "solve_time": 7.891654968261719e-05,
       "status": "ERROR",
       "primal_objective_value": null,
       "dual_objective_value": null,
@@ -971,12 +1415,12 @@
       "iterations": null
     },
     {
-      "id": 38,
+      "id": 118,
       "solver_name": "cvxpy_clarabel",
       "solver_version": "cvxpy-1.6.5-CLARABEL",
-      "problem_library": "internal",
-      "problem_name": "portfolio_optimization_test",
-      "problem_type": "SOCP",
+      "problem_library": "DIMACS",
+      "problem_name": "nb_L1",
+      "problem_type": "UNKNOWN",
       "environment_info": {
         "cpu": {
           "cpu_count": 8,
@@ -989,27 +1433,27 @@
           "processor": "arm"
         },
         "disk": {
-          "free": 609202327552,
-          "free_gb": 567.36,
+          "free": 619116646400,
+          "free_gb": 576.6,
           "percent": 1.34,
           "total": 994662584320,
           "total_gb": 926.35,
-          "used": 13331030016
+          "used": 13331341312
         },
         "git": {
           "available": true,
           "branch": "update-documentation-main",
-          "commit_hash": "a13f8ca5f469be57f913bca3214bdf515c65b1dd",
+          "commit_hash": "ce1969a22cbeb1ef396d49cbf1142984143d1297",
           "is_dirty": true
         },
         "memory": {
-          "available": 9348808704,
-          "available_gb": 8.71,
-          "free": 485048320,
-          "percent": 63.7,
+          "available": 11585191936,
+          "available_gb": 10.79,
+          "free": 351895552,
+          "percent": 55.0,
           "total": 25769803776,
           "total_gb": 24.0,
-          "used": 11363696640
+          "used": 13087555584
         },
         "os": {
           "architecture": "64bit",
@@ -1025,34 +1469,34 @@
           "version": "3.12.2",
           "version_info": "3.12.2"
         },
-        "timestamp": 1748267776.0,
+        "timestamp": 1750582016.0,
         "timezone": {
-          "current_time_local": "2025-06-20T21:02:18.513683",
-          "current_time_utc": "2025-06-20T12:02:18.513661+00:00",
+          "current_time_local": "2025-06-22T18:46:38.189343",
+          "current_time_utc": "2025-06-22T09:46:38.189325+00:00",
           "daylight_saving": false,
           "timezone_name": "JST",
           "utc_offset_hours": 9.0,
           "utc_offset_seconds": -32400
         }
       },
-      "commit_hash": "a13f8ca5f469be57f913bca3214bdf515c65b1dd",
-      "timestamp": "2025-06-20T12:02:18",
-      "solve_time": 0.004327058792114258,
+      "commit_hash": "ce1969a22cbeb1ef396d49cbf1142984143d1297",
+      "timestamp": "2025-06-22T09:46:39",
+      "solve_time": 1.5329699516296387,
       "status": "OPTIMAL",
-      "primal_objective_value": 0.9035403450376618,
+      "primal_objective_value": -13.012270672238593,
       "dual_objective_value": null,
       "duality_gap": null,
       "primal_infeasibility": null,
       "dual_infeasibility": null,
-      "iterations": 9
+      "iterations": 17
     },
     {
-      "id": 39,
-      "solver_name": "scipy_linprog",
-      "solver_version": "scipy-1.15.3",
-      "problem_library": "internal",
-      "problem_name": "portfolio_optimization_test",
-      "problem_type": "SOCP",
+      "id": 122,
+      "solver_name": "cvxpy_cvxopt",
+      "solver_version": "cvxpy-1.6.5-CVXOPT",
+      "problem_library": "DIMACS",
+      "problem_name": "nb_L1",
+      "problem_type": "UNKNOWN",
       "environment_info": {
         "cpu": {
           "cpu_count": 8,
@@ -1065,27 +1509,27 @@
           "processor": "arm"
         },
         "disk": {
-          "free": 609202327552,
-          "free_gb": 567.36,
+          "free": 619116646400,
+          "free_gb": 576.6,
           "percent": 1.34,
           "total": 994662584320,
           "total_gb": 926.35,
-          "used": 13331030016
+          "used": 13331341312
         },
         "git": {
           "available": true,
           "branch": "update-documentation-main",
-          "commit_hash": "a13f8ca5f469be57f913bca3214bdf515c65b1dd",
+          "commit_hash": "ce1969a22cbeb1ef396d49cbf1142984143d1297",
           "is_dirty": true
         },
         "memory": {
-          "available": 9348808704,
-          "available_gb": 8.71,
-          "free": 485048320,
-          "percent": 63.7,
+          "available": 11585191936,
+          "available_gb": 10.79,
+          "free": 351895552,
+          "percent": 55.0,
           "total": 25769803776,
           "total_gb": 24.0,
-          "used": 11363696640
+          "used": 13087555584
         },
         "os": {
           "architecture": "64bit",
@@ -1101,19 +1545,171 @@
           "version": "3.12.2",
           "version_info": "3.12.2"
         },
-        "timestamp": 1748267776.0,
+        "timestamp": 1750582016.0,
         "timezone": {
-          "current_time_local": "2025-06-20T21:02:18.513683",
-          "current_time_utc": "2025-06-20T12:02:18.513661+00:00",
+          "current_time_local": "2025-06-22T18:46:38.189343",
+          "current_time_utc": "2025-06-22T09:46:38.189325+00:00",
           "daylight_saving": false,
           "timezone_name": "JST",
           "utc_offset_hours": 9.0,
           "utc_offset_seconds": -32400
         }
       },
-      "commit_hash": "a13f8ca5f469be57f913bca3214bdf515c65b1dd",
-      "timestamp": "2025-06-20T12:02:18",
-      "solve_time": 5.030632019042969e-05,
+      "commit_hash": "ce1969a22cbeb1ef396d49cbf1142984143d1297",
+      "timestamp": "2025-06-22T09:46:51",
+      "solve_time": 3.0801711082458496,
+      "status": "OPTIMAL",
+      "primal_objective_value": -13.012270457304474,
+      "dual_objective_value": null,
+      "duality_gap": null,
+      "primal_infeasibility": null,
+      "dual_infeasibility": null,
+      "iterations": null
+    },
+    {
+      "id": 120,
+      "solver_name": "cvxpy_ecos",
+      "solver_version": "cvxpy-1.6.5-ECOS",
+      "problem_library": "DIMACS",
+      "problem_name": "nb_L1",
+      "problem_type": "UNKNOWN",
+      "environment_info": {
+        "cpu": {
+          "cpu_count": 8,
+          "cpu_count_physical": 8,
+          "cpu_freq": {
+            "current": 3504,
+            "max": 3504,
+            "min": 600
+          },
+          "processor": "arm"
+        },
+        "disk": {
+          "free": 619116646400,
+          "free_gb": 576.6,
+          "percent": 1.34,
+          "total": 994662584320,
+          "total_gb": 926.35,
+          "used": 13331341312
+        },
+        "git": {
+          "available": true,
+          "branch": "update-documentation-main",
+          "commit_hash": "ce1969a22cbeb1ef396d49cbf1142984143d1297",
+          "is_dirty": true
+        },
+        "memory": {
+          "available": 11585191936,
+          "available_gb": 10.79,
+          "free": 351895552,
+          "percent": 55.0,
+          "total": 25769803776,
+          "total_gb": 24.0,
+          "used": 13087555584
+        },
+        "os": {
+          "architecture": "64bit",
+          "machine": "arm64",
+          "platform": "macOS-14.5-arm64-arm-64bit",
+          "release": "23.5.0",
+          "system": "Darwin",
+          "version": "Darwin Kernel Version 23.5.0: Wed May  1 20:19:05 PDT 2024; root:xnu-10063.121.3~5/RELEASE_ARM64_T8112"
+        },
+        "python": {
+          "executable": "/Users/naoki/PycharmProjects/optimization-solver-benchmark/venv/bin/python",
+          "implementation": "CPython",
+          "version": "3.12.2",
+          "version_info": "3.12.2"
+        },
+        "timestamp": 1750582016.0,
+        "timezone": {
+          "current_time_local": "2025-06-22T18:46:38.189343",
+          "current_time_utc": "2025-06-22T09:46:38.189325+00:00",
+          "daylight_saving": false,
+          "timezone_name": "JST",
+          "utc_offset_hours": 9.0,
+          "utc_offset_seconds": -32400
+        }
+      },
+      "commit_hash": "ce1969a22cbeb1ef396d49cbf1142984143d1297",
+      "timestamp": "2025-06-22T09:46:48",
+      "solve_time": 1.4623680114746094,
+      "status": "OPTIMAL",
+      "primal_objective_value": -13.012270674894536,
+      "dual_objective_value": null,
+      "duality_gap": null,
+      "primal_infeasibility": null,
+      "dual_infeasibility": null,
+      "iterations": 19
+    },
+    {
+      "id": 121,
+      "solver_name": "cvxpy_osqp",
+      "solver_version": "cvxpy-1.6.5-OSQP",
+      "problem_library": "DIMACS",
+      "problem_name": "nb_L1",
+      "problem_type": "UNKNOWN",
+      "environment_info": {
+        "cpu": {
+          "cpu_count": 8,
+          "cpu_count_physical": 8,
+          "cpu_freq": {
+            "current": 3504,
+            "max": 3504,
+            "min": 600
+          },
+          "processor": "arm"
+        },
+        "disk": {
+          "free": 619116646400,
+          "free_gb": 576.6,
+          "percent": 1.34,
+          "total": 994662584320,
+          "total_gb": 926.35,
+          "used": 13331341312
+        },
+        "git": {
+          "available": true,
+          "branch": "update-documentation-main",
+          "commit_hash": "ce1969a22cbeb1ef396d49cbf1142984143d1297",
+          "is_dirty": true
+        },
+        "memory": {
+          "available": 11585191936,
+          "available_gb": 10.79,
+          "free": 351895552,
+          "percent": 55.0,
+          "total": 25769803776,
+          "total_gb": 24.0,
+          "used": 13087555584
+        },
+        "os": {
+          "architecture": "64bit",
+          "machine": "arm64",
+          "platform": "macOS-14.5-arm64-arm-64bit",
+          "release": "23.5.0",
+          "system": "Darwin",
+          "version": "Darwin Kernel Version 23.5.0: Wed May  1 20:19:05 PDT 2024; root:xnu-10063.121.3~5/RELEASE_ARM64_T8112"
+        },
+        "python": {
+          "executable": "/Users/naoki/PycharmProjects/optimization-solver-benchmark/venv/bin/python",
+          "implementation": "CPython",
+          "version": "3.12.2",
+          "version_info": "3.12.2"
+        },
+        "timestamp": 1750582016.0,
+        "timezone": {
+          "current_time_local": "2025-06-22T18:46:38.189343",
+          "current_time_utc": "2025-06-22T09:46:38.189325+00:00",
+          "daylight_saving": false,
+          "timezone_name": "JST",
+          "utc_offset_hours": 9.0,
+          "utc_offset_seconds": -32400
+        }
+      },
+      "commit_hash": "ce1969a22cbeb1ef396d49cbf1142984143d1297",
+      "timestamp": "2025-06-22T09:46:48",
+      "solve_time": 3.719329833984375e-05,
       "status": "ERROR",
       "primal_objective_value": null,
       "dual_objective_value": null,
@@ -1123,12 +1719,12 @@
       "iterations": null
     },
     {
-      "id": 34,
-      "solver_name": "cvxpy_clarabel",
-      "solver_version": "cvxpy-1.6.5-CLARABEL",
-      "problem_library": "internal",
-      "problem_name": "simple_lp_test",
-      "problem_type": "LP",
+      "id": 119,
+      "solver_name": "cvxpy_scs",
+      "solver_version": "cvxpy-1.6.5-SCS",
+      "problem_library": "DIMACS",
+      "problem_name": "nb_L1",
+      "problem_type": "UNKNOWN",
       "environment_info": {
         "cpu": {
           "cpu_count": 8,
@@ -1141,27 +1737,27 @@
           "processor": "arm"
         },
         "disk": {
-          "free": 609202327552,
-          "free_gb": 567.36,
+          "free": 619116646400,
+          "free_gb": 576.6,
           "percent": 1.34,
           "total": 994662584320,
           "total_gb": 926.35,
-          "used": 13331030016
+          "used": 13331341312
         },
         "git": {
           "available": true,
           "branch": "update-documentation-main",
-          "commit_hash": "a13f8ca5f469be57f913bca3214bdf515c65b1dd",
+          "commit_hash": "ce1969a22cbeb1ef396d49cbf1142984143d1297",
           "is_dirty": true
         },
         "memory": {
-          "available": 9348808704,
-          "available_gb": 8.71,
-          "free": 485048320,
-          "percent": 63.7,
+          "available": 11585191936,
+          "available_gb": 10.79,
+          "free": 351895552,
+          "percent": 55.0,
           "total": 25769803776,
           "total_gb": 24.0,
-          "used": 11363696640
+          "used": 13087555584
         },
         "os": {
           "architecture": "64bit",
@@ -1177,34 +1773,34 @@
           "version": "3.12.2",
           "version_info": "3.12.2"
         },
-        "timestamp": 1748267776.0,
+        "timestamp": 1750582016.0,
         "timezone": {
-          "current_time_local": "2025-06-20T21:02:18.513683",
-          "current_time_utc": "2025-06-20T12:02:18.513661+00:00",
+          "current_time_local": "2025-06-22T18:46:38.189343",
+          "current_time_utc": "2025-06-22T09:46:38.189325+00:00",
           "daylight_saving": false,
           "timezone_name": "JST",
           "utc_offset_hours": 9.0,
           "utc_offset_seconds": -32400
         }
       },
-      "commit_hash": "a13f8ca5f469be57f913bca3214bdf515c65b1dd",
-      "timestamp": "2025-06-20T12:02:18",
-      "solve_time": 0.0030591487884521484,
+      "commit_hash": "ce1969a22cbeb1ef396d49cbf1142984143d1297",
+      "timestamp": "2025-06-22T09:46:47",
+      "solve_time": 7.499206066131592,
       "status": "OPTIMAL",
-      "primal_objective_value": -1.9633649676875667e-09,
+      "primal_objective_value": -13.01220020450462,
       "dual_objective_value": null,
       "duality_gap": null,
       "primal_infeasibility": null,
       "dual_infeasibility": null,
-      "iterations": 5
+      "iterations": 20575
     },
     {
-      "id": 5,
-      "solver_name": "cvxpy_clarabel",
+      "id": 123,
+      "solver_name": "cvxpy_sdpa",
       "solver_version": "cvxpy-1.6.5-CLARABEL",
-      "problem_library": "internal",
-      "problem_name": "simple_lp_test",
-      "problem_type": "LP",
+      "problem_library": "DIMACS",
+      "problem_name": "nb_L1",
+      "problem_type": "UNKNOWN",
       "environment_info": {
         "cpu": {
           "cpu_count": 8,
@@ -1217,27 +1813,27 @@
           "processor": "arm"
         },
         "disk": {
-          "free": 610266984448,
-          "free_gb": 568.36,
+          "free": 619116646400,
+          "free_gb": 576.6,
           "percent": 1.34,
           "total": 994662584320,
           "total_gb": 926.35,
-          "used": 13331030016
+          "used": 13331341312
         },
         "git": {
           "available": true,
           "branch": "update-documentation-main",
-          "commit_hash": "b13af6c54afb59fcc4b00f10b6450804736a0060",
+          "commit_hash": "ce1969a22cbeb1ef396d49cbf1142984143d1297",
           "is_dirty": true
         },
         "memory": {
-          "available": 9542582272,
-          "available_gb": 8.89,
-          "free": 647823360,
-          "percent": 63.0,
+          "available": 11585191936,
+          "available_gb": 10.79,
+          "free": 351895552,
+          "percent": 55.0,
           "total": 25769803776,
           "total_gb": 24.0,
-          "used": 11328602112
+          "used": 13087555584
         },
         "os": {
           "architecture": "64bit",
@@ -1253,34 +1849,34 @@
           "version": "3.12.2",
           "version_info": "3.12.2"
         },
-        "timestamp": 1748267776.0,
+        "timestamp": 1750582016.0,
         "timezone": {
-          "current_time_local": "2025-06-17T22:35:05.013190",
-          "current_time_utc": "2025-06-17T13:35:05.013182+00:00",
+          "current_time_local": "2025-06-22T18:46:38.189343",
+          "current_time_utc": "2025-06-22T09:46:38.189325+00:00",
           "daylight_saving": false,
           "timezone_name": "JST",
           "utc_offset_hours": 9.0,
           "utc_offset_seconds": -32400
         }
       },
-      "commit_hash": "b13af6c54afb59fcc4b00f10b6450804736a0060",
-      "timestamp": "2025-06-17T13:35:05",
-      "solve_time": 0.0031769275665283203,
+      "commit_hash": "ce1969a22cbeb1ef396d49cbf1142984143d1297",
+      "timestamp": "2025-06-22T09:46:53",
+      "solve_time": 1.5245318412780762,
       "status": "OPTIMAL",
-      "primal_objective_value": -1.9633649676875667e-09,
+      "primal_objective_value": -13.012270672238593,
       "dual_objective_value": null,
       "duality_gap": null,
       "primal_infeasibility": null,
       "dual_infeasibility": null,
-      "iterations": 5
+      "iterations": 17
     },
     {
-      "id": 35,
+      "id": 117,
       "solver_name": "scipy_linprog",
       "solver_version": "scipy-1.15.3",
-      "problem_library": "internal",
-      "problem_name": "simple_lp_test",
-      "problem_type": "LP",
+      "problem_library": "DIMACS",
+      "problem_name": "nb_L1",
+      "problem_type": "UNKNOWN",
       "environment_info": {
         "cpu": {
           "cpu_count": 8,
@@ -1293,27 +1889,27 @@
           "processor": "arm"
         },
         "disk": {
-          "free": 609202327552,
-          "free_gb": 567.36,
+          "free": 619116646400,
+          "free_gb": 576.6,
           "percent": 1.34,
           "total": 994662584320,
           "total_gb": 926.35,
-          "used": 13331030016
+          "used": 13331341312
         },
         "git": {
           "available": true,
           "branch": "update-documentation-main",
-          "commit_hash": "a13f8ca5f469be57f913bca3214bdf515c65b1dd",
+          "commit_hash": "ce1969a22cbeb1ef396d49cbf1142984143d1297",
           "is_dirty": true
         },
         "memory": {
-          "available": 9348808704,
-          "available_gb": 8.71,
-          "free": 485048320,
-          "percent": 63.7,
+          "available": 11585191936,
+          "available_gb": 10.79,
+          "free": 351895552,
+          "percent": 55.0,
           "total": 25769803776,
           "total_gb": 24.0,
-          "used": 11363696640
+          "used": 13087555584
         },
         "os": {
           "architecture": "64bit",
@@ -1329,19 +1925,1159 @@
           "version": "3.12.2",
           "version_info": "3.12.2"
         },
-        "timestamp": 1748267776.0,
+        "timestamp": 1750582016.0,
         "timezone": {
-          "current_time_local": "2025-06-20T21:02:18.513683",
-          "current_time_utc": "2025-06-20T12:02:18.513661+00:00",
+          "current_time_local": "2025-06-22T18:46:38.189343",
+          "current_time_utc": "2025-06-22T09:46:38.189325+00:00",
           "daylight_saving": false,
           "timezone_name": "JST",
           "utc_offset_hours": 9.0,
           "utc_offset_seconds": -32400
         }
       },
-      "commit_hash": "a13f8ca5f469be57f913bca3214bdf515c65b1dd",
-      "timestamp": "2025-06-20T12:02:18",
-      "solve_time": 0.0042171478271484375,
+      "commit_hash": "ce1969a22cbeb1ef396d49cbf1142984143d1297",
+      "timestamp": "2025-06-22T09:46:38",
+      "solve_time": 3.719329833984375e-05,
+      "status": "ERROR",
+      "primal_objective_value": null,
+      "dual_objective_value": null,
+      "duality_gap": null,
+      "primal_infeasibility": null,
+      "dual_infeasibility": null,
+      "iterations": null
+    },
+    {
+      "id": 132,
+      "solver_name": "cvxpy_clarabel",
+      "solver_version": "cvxpy-1.6.5-CLARABEL",
+      "problem_library": "DIMACS",
+      "problem_name": "nb_L2",
+      "problem_type": "UNKNOWN",
+      "environment_info": {
+        "cpu": {
+          "cpu_count": 8,
+          "cpu_count_physical": 8,
+          "cpu_freq": {
+            "current": 3504,
+            "max": 3504,
+            "min": 600
+          },
+          "processor": "arm"
+        },
+        "disk": {
+          "free": 618572591104,
+          "free_gb": 576.09,
+          "percent": 1.34,
+          "total": 994662584320,
+          "total_gb": 926.35,
+          "used": 13331341312
+        },
+        "git": {
+          "available": true,
+          "branch": "update-documentation-main",
+          "commit_hash": "ce1969a22cbeb1ef396d49cbf1142984143d1297",
+          "is_dirty": true
+        },
+        "memory": {
+          "available": 11274469376,
+          "available_gb": 10.5,
+          "free": 148684800,
+          "percent": 56.2,
+          "total": 25769803776,
+          "total_gb": 24.0,
+          "used": 13165117440
+        },
+        "os": {
+          "architecture": "64bit",
+          "machine": "arm64",
+          "platform": "macOS-14.5-arm64-arm-64bit",
+          "release": "23.5.0",
+          "system": "Darwin",
+          "version": "Darwin Kernel Version 23.5.0: Wed May  1 20:19:05 PDT 2024; root:xnu-10063.121.3~5/RELEASE_ARM64_T8112"
+        },
+        "python": {
+          "executable": "/Users/naoki/PycharmProjects/optimization-solver-benchmark/venv/bin/python",
+          "implementation": "CPython",
+          "version": "3.12.2",
+          "version_info": "3.12.2"
+        },
+        "timestamp": 1750582016.0,
+        "timezone": {
+          "current_time_local": "2025-06-22T19:19:37.743760",
+          "current_time_utc": "2025-06-22T10:19:37.743751+00:00",
+          "daylight_saving": false,
+          "timezone_name": "JST",
+          "utc_offset_hours": 9.0,
+          "utc_offset_seconds": -32400
+        }
+      },
+      "commit_hash": "ce1969a22cbeb1ef396d49cbf1142984143d1297",
+      "timestamp": "2025-06-22T10:19:40",
+      "solve_time": 2.2409873008728027,
+      "status": "OPTIMAL",
+      "primal_objective_value": -1.6289719808523724,
+      "dual_objective_value": null,
+      "duality_gap": null,
+      "primal_infeasibility": null,
+      "dual_infeasibility": null,
+      "iterations": 12
+    },
+    {
+      "id": 136,
+      "solver_name": "cvxpy_cvxopt",
+      "solver_version": "cvxpy-1.6.5-CVXOPT",
+      "problem_library": "DIMACS",
+      "problem_name": "nb_L2",
+      "problem_type": "UNKNOWN",
+      "environment_info": {
+        "cpu": {
+          "cpu_count": 8,
+          "cpu_count_physical": 8,
+          "cpu_freq": {
+            "current": 3504,
+            "max": 3504,
+            "min": 600
+          },
+          "processor": "arm"
+        },
+        "disk": {
+          "free": 618572591104,
+          "free_gb": 576.09,
+          "percent": 1.34,
+          "total": 994662584320,
+          "total_gb": 926.35,
+          "used": 13331341312
+        },
+        "git": {
+          "available": true,
+          "branch": "update-documentation-main",
+          "commit_hash": "ce1969a22cbeb1ef396d49cbf1142984143d1297",
+          "is_dirty": true
+        },
+        "memory": {
+          "available": 11274469376,
+          "available_gb": 10.5,
+          "free": 148684800,
+          "percent": 56.2,
+          "total": 25769803776,
+          "total_gb": 24.0,
+          "used": 13165117440
+        },
+        "os": {
+          "architecture": "64bit",
+          "machine": "arm64",
+          "platform": "macOS-14.5-arm64-arm-64bit",
+          "release": "23.5.0",
+          "system": "Darwin",
+          "version": "Darwin Kernel Version 23.5.0: Wed May  1 20:19:05 PDT 2024; root:xnu-10063.121.3~5/RELEASE_ARM64_T8112"
+        },
+        "python": {
+          "executable": "/Users/naoki/PycharmProjects/optimization-solver-benchmark/venv/bin/python",
+          "implementation": "CPython",
+          "version": "3.12.2",
+          "version_info": "3.12.2"
+        },
+        "timestamp": 1750582016.0,
+        "timezone": {
+          "current_time_local": "2025-06-22T19:19:37.743760",
+          "current_time_utc": "2025-06-22T10:19:37.743751+00:00",
+          "daylight_saving": false,
+          "timezone_name": "JST",
+          "utc_offset_hours": 9.0,
+          "utc_offset_seconds": -32400
+        }
+      },
+      "commit_hash": "ce1969a22cbeb1ef396d49cbf1142984143d1297",
+      "timestamp": "2025-06-22T10:19:46",
+      "solve_time": 2.346411943435669,
+      "status": "OPTIMAL",
+      "primal_objective_value": -1.628971989187589,
+      "dual_objective_value": null,
+      "duality_gap": null,
+      "primal_infeasibility": null,
+      "dual_infeasibility": null,
+      "iterations": null
+    },
+    {
+      "id": 134,
+      "solver_name": "cvxpy_ecos",
+      "solver_version": "cvxpy-1.6.5-ECOS",
+      "problem_library": "DIMACS",
+      "problem_name": "nb_L2",
+      "problem_type": "UNKNOWN",
+      "environment_info": {
+        "cpu": {
+          "cpu_count": 8,
+          "cpu_count_physical": 8,
+          "cpu_freq": {
+            "current": 3504,
+            "max": 3504,
+            "min": 600
+          },
+          "processor": "arm"
+        },
+        "disk": {
+          "free": 618572591104,
+          "free_gb": 576.09,
+          "percent": 1.34,
+          "total": 994662584320,
+          "total_gb": 926.35,
+          "used": 13331341312
+        },
+        "git": {
+          "available": true,
+          "branch": "update-documentation-main",
+          "commit_hash": "ce1969a22cbeb1ef396d49cbf1142984143d1297",
+          "is_dirty": true
+        },
+        "memory": {
+          "available": 11274469376,
+          "available_gb": 10.5,
+          "free": 148684800,
+          "percent": 56.2,
+          "total": 25769803776,
+          "total_gb": 24.0,
+          "used": 13165117440
+        },
+        "os": {
+          "architecture": "64bit",
+          "machine": "arm64",
+          "platform": "macOS-14.5-arm64-arm-64bit",
+          "release": "23.5.0",
+          "system": "Darwin",
+          "version": "Darwin Kernel Version 23.5.0: Wed May  1 20:19:05 PDT 2024; root:xnu-10063.121.3~5/RELEASE_ARM64_T8112"
+        },
+        "python": {
+          "executable": "/Users/naoki/PycharmProjects/optimization-solver-benchmark/venv/bin/python",
+          "implementation": "CPython",
+          "version": "3.12.2",
+          "version_info": "3.12.2"
+        },
+        "timestamp": 1750582016.0,
+        "timezone": {
+          "current_time_local": "2025-06-22T19:19:37.743760",
+          "current_time_utc": "2025-06-22T10:19:37.743751+00:00",
+          "daylight_saving": false,
+          "timezone_name": "JST",
+          "utc_offset_hours": 9.0,
+          "utc_offset_seconds": -32400
+        }
+      },
+      "commit_hash": "ce1969a22cbeb1ef396d49cbf1142984143d1297",
+      "timestamp": "2025-06-22T10:19:43",
+      "solve_time": 1.7350881099700928,
+      "status": "OPTIMAL",
+      "primal_objective_value": -1.628971980444936,
+      "dual_objective_value": null,
+      "duality_gap": null,
+      "primal_infeasibility": null,
+      "dual_infeasibility": null,
+      "iterations": 11
+    },
+    {
+      "id": 135,
+      "solver_name": "cvxpy_osqp",
+      "solver_version": "cvxpy-1.6.5-OSQP",
+      "problem_library": "DIMACS",
+      "problem_name": "nb_L2",
+      "problem_type": "UNKNOWN",
+      "environment_info": {
+        "cpu": {
+          "cpu_count": 8,
+          "cpu_count_physical": 8,
+          "cpu_freq": {
+            "current": 3504,
+            "max": 3504,
+            "min": 600
+          },
+          "processor": "arm"
+        },
+        "disk": {
+          "free": 618572591104,
+          "free_gb": 576.09,
+          "percent": 1.34,
+          "total": 994662584320,
+          "total_gb": 926.35,
+          "used": 13331341312
+        },
+        "git": {
+          "available": true,
+          "branch": "update-documentation-main",
+          "commit_hash": "ce1969a22cbeb1ef396d49cbf1142984143d1297",
+          "is_dirty": true
+        },
+        "memory": {
+          "available": 11274469376,
+          "available_gb": 10.5,
+          "free": 148684800,
+          "percent": 56.2,
+          "total": 25769803776,
+          "total_gb": 24.0,
+          "used": 13165117440
+        },
+        "os": {
+          "architecture": "64bit",
+          "machine": "arm64",
+          "platform": "macOS-14.5-arm64-arm-64bit",
+          "release": "23.5.0",
+          "system": "Darwin",
+          "version": "Darwin Kernel Version 23.5.0: Wed May  1 20:19:05 PDT 2024; root:xnu-10063.121.3~5/RELEASE_ARM64_T8112"
+        },
+        "python": {
+          "executable": "/Users/naoki/PycharmProjects/optimization-solver-benchmark/venv/bin/python",
+          "implementation": "CPython",
+          "version": "3.12.2",
+          "version_info": "3.12.2"
+        },
+        "timestamp": 1750582016.0,
+        "timezone": {
+          "current_time_local": "2025-06-22T19:19:37.743760",
+          "current_time_utc": "2025-06-22T10:19:37.743751+00:00",
+          "daylight_saving": false,
+          "timezone_name": "JST",
+          "utc_offset_hours": 9.0,
+          "utc_offset_seconds": -32400
+        }
+      },
+      "commit_hash": "ce1969a22cbeb1ef396d49cbf1142984143d1297",
+      "timestamp": "2025-06-22T10:19:43",
+      "solve_time": 4.124641418457031e-05,
+      "status": "ERROR",
+      "primal_objective_value": null,
+      "dual_objective_value": null,
+      "duality_gap": null,
+      "primal_infeasibility": null,
+      "dual_infeasibility": null,
+      "iterations": null
+    },
+    {
+      "id": 133,
+      "solver_name": "cvxpy_scs",
+      "solver_version": "cvxpy-1.6.5-SCS",
+      "problem_library": "DIMACS",
+      "problem_name": "nb_L2",
+      "problem_type": "UNKNOWN",
+      "environment_info": {
+        "cpu": {
+          "cpu_count": 8,
+          "cpu_count_physical": 8,
+          "cpu_freq": {
+            "current": 3504,
+            "max": 3504,
+            "min": 600
+          },
+          "processor": "arm"
+        },
+        "disk": {
+          "free": 618572591104,
+          "free_gb": 576.09,
+          "percent": 1.34,
+          "total": 994662584320,
+          "total_gb": 926.35,
+          "used": 13331341312
+        },
+        "git": {
+          "available": true,
+          "branch": "update-documentation-main",
+          "commit_hash": "ce1969a22cbeb1ef396d49cbf1142984143d1297",
+          "is_dirty": true
+        },
+        "memory": {
+          "available": 11274469376,
+          "available_gb": 10.5,
+          "free": 148684800,
+          "percent": 56.2,
+          "total": 25769803776,
+          "total_gb": 24.0,
+          "used": 13165117440
+        },
+        "os": {
+          "architecture": "64bit",
+          "machine": "arm64",
+          "platform": "macOS-14.5-arm64-arm-64bit",
+          "release": "23.5.0",
+          "system": "Darwin",
+          "version": "Darwin Kernel Version 23.5.0: Wed May  1 20:19:05 PDT 2024; root:xnu-10063.121.3~5/RELEASE_ARM64_T8112"
+        },
+        "python": {
+          "executable": "/Users/naoki/PycharmProjects/optimization-solver-benchmark/venv/bin/python",
+          "implementation": "CPython",
+          "version": "3.12.2",
+          "version_info": "3.12.2"
+        },
+        "timestamp": 1750582016.0,
+        "timezone": {
+          "current_time_local": "2025-06-22T19:19:37.743760",
+          "current_time_utc": "2025-06-22T10:19:37.743751+00:00",
+          "daylight_saving": false,
+          "timezone_name": "JST",
+          "utc_offset_hours": 9.0,
+          "utc_offset_seconds": -32400
+        }
+      },
+      "commit_hash": "ce1969a22cbeb1ef396d49cbf1142984143d1297",
+      "timestamp": "2025-06-22T10:19:41",
+      "solve_time": 1.8608348369598389,
+      "status": "OPTIMAL",
+      "primal_objective_value": -1.6289817153541597,
+      "dual_objective_value": null,
+      "duality_gap": null,
+      "primal_infeasibility": null,
+      "dual_infeasibility": null,
+      "iterations": 775
+    },
+    {
+      "id": 137,
+      "solver_name": "cvxpy_sdpa",
+      "solver_version": "cvxpy-1.6.5-CLARABEL",
+      "problem_library": "DIMACS",
+      "problem_name": "nb_L2",
+      "problem_type": "UNKNOWN",
+      "environment_info": {
+        "cpu": {
+          "cpu_count": 8,
+          "cpu_count_physical": 8,
+          "cpu_freq": {
+            "current": 3504,
+            "max": 3504,
+            "min": 600
+          },
+          "processor": "arm"
+        },
+        "disk": {
+          "free": 618572591104,
+          "free_gb": 576.09,
+          "percent": 1.34,
+          "total": 994662584320,
+          "total_gb": 926.35,
+          "used": 13331341312
+        },
+        "git": {
+          "available": true,
+          "branch": "update-documentation-main",
+          "commit_hash": "ce1969a22cbeb1ef396d49cbf1142984143d1297",
+          "is_dirty": true
+        },
+        "memory": {
+          "available": 11274469376,
+          "available_gb": 10.5,
+          "free": 148684800,
+          "percent": 56.2,
+          "total": 25769803776,
+          "total_gb": 24.0,
+          "used": 13165117440
+        },
+        "os": {
+          "architecture": "64bit",
+          "machine": "arm64",
+          "platform": "macOS-14.5-arm64-arm-64bit",
+          "release": "23.5.0",
+          "system": "Darwin",
+          "version": "Darwin Kernel Version 23.5.0: Wed May  1 20:19:05 PDT 2024; root:xnu-10063.121.3~5/RELEASE_ARM64_T8112"
+        },
+        "python": {
+          "executable": "/Users/naoki/PycharmProjects/optimization-solver-benchmark/venv/bin/python",
+          "implementation": "CPython",
+          "version": "3.12.2",
+          "version_info": "3.12.2"
+        },
+        "timestamp": 1750582016.0,
+        "timezone": {
+          "current_time_local": "2025-06-22T19:19:37.743760",
+          "current_time_utc": "2025-06-22T10:19:37.743751+00:00",
+          "daylight_saving": false,
+          "timezone_name": "JST",
+          "utc_offset_hours": 9.0,
+          "utc_offset_seconds": -32400
+        }
+      },
+      "commit_hash": "ce1969a22cbeb1ef396d49cbf1142984143d1297",
+      "timestamp": "2025-06-22T10:19:48",
+      "solve_time": 2.3051068782806396,
+      "status": "OPTIMAL",
+      "primal_objective_value": -1.6289719808523724,
+      "dual_objective_value": null,
+      "duality_gap": null,
+      "primal_infeasibility": null,
+      "dual_infeasibility": null,
+      "iterations": 12
+    },
+    {
+      "id": 131,
+      "solver_name": "scipy_linprog",
+      "solver_version": "scipy-1.15.3",
+      "problem_library": "DIMACS",
+      "problem_name": "nb_L2",
+      "problem_type": "UNKNOWN",
+      "environment_info": {
+        "cpu": {
+          "cpu_count": 8,
+          "cpu_count_physical": 8,
+          "cpu_freq": {
+            "current": 3504,
+            "max": 3504,
+            "min": 600
+          },
+          "processor": "arm"
+        },
+        "disk": {
+          "free": 618572591104,
+          "free_gb": 576.09,
+          "percent": 1.34,
+          "total": 994662584320,
+          "total_gb": 926.35,
+          "used": 13331341312
+        },
+        "git": {
+          "available": true,
+          "branch": "update-documentation-main",
+          "commit_hash": "ce1969a22cbeb1ef396d49cbf1142984143d1297",
+          "is_dirty": true
+        },
+        "memory": {
+          "available": 11274469376,
+          "available_gb": 10.5,
+          "free": 148684800,
+          "percent": 56.2,
+          "total": 25769803776,
+          "total_gb": 24.0,
+          "used": 13165117440
+        },
+        "os": {
+          "architecture": "64bit",
+          "machine": "arm64",
+          "platform": "macOS-14.5-arm64-arm-64bit",
+          "release": "23.5.0",
+          "system": "Darwin",
+          "version": "Darwin Kernel Version 23.5.0: Wed May  1 20:19:05 PDT 2024; root:xnu-10063.121.3~5/RELEASE_ARM64_T8112"
+        },
+        "python": {
+          "executable": "/Users/naoki/PycharmProjects/optimization-solver-benchmark/venv/bin/python",
+          "implementation": "CPython",
+          "version": "3.12.2",
+          "version_info": "3.12.2"
+        },
+        "timestamp": 1750582016.0,
+        "timezone": {
+          "current_time_local": "2025-06-22T19:19:37.743760",
+          "current_time_utc": "2025-06-22T10:19:37.743751+00:00",
+          "daylight_saving": false,
+          "timezone_name": "JST",
+          "utc_offset_hours": 9.0,
+          "utc_offset_seconds": -32400
+        }
+      },
+      "commit_hash": "ce1969a22cbeb1ef396d49cbf1142984143d1297",
+      "timestamp": "2025-06-22T10:19:37",
+      "solve_time": 4.100799560546875e-05,
+      "status": "ERROR",
+      "primal_objective_value": null,
+      "dual_objective_value": null,
+      "duality_gap": null,
+      "primal_infeasibility": null,
+      "dual_infeasibility": null,
+      "iterations": null
+    },
+    {
+      "id": 152,
+      "solver_name": "cvxpy_clarabel",
+      "solver_version": "cvxpy-1.6.5-CLARABEL",
+      "problem_library": "DIMACS",
+      "problem_name": "nb_L2_bessel",
+      "problem_type": "UNKNOWN",
+      "environment_info": {
+        "cpu": {
+          "cpu_count": 8,
+          "cpu_count_physical": 8,
+          "cpu_freq": {
+            "current": 3504,
+            "max": 3504,
+            "min": 600
+          },
+          "processor": "arm"
+        },
+        "disk": {
+          "free": 618501091328,
+          "free_gb": 576.02,
+          "percent": 1.34,
+          "total": 994662584320,
+          "total_gb": 926.35,
+          "used": 13331341312
+        },
+        "git": {
+          "available": true,
+          "branch": "update-documentation-main",
+          "commit_hash": "ce1969a22cbeb1ef396d49cbf1142984143d1297",
+          "is_dirty": true
+        },
+        "memory": {
+          "available": 11157028864,
+          "available_gb": 10.39,
+          "free": 63111168,
+          "percent": 56.7,
+          "total": 25769803776,
+          "total_gb": 24.0,
+          "used": 13211516928
+        },
+        "os": {
+          "architecture": "64bit",
+          "machine": "arm64",
+          "platform": "macOS-14.5-arm64-arm-64bit",
+          "release": "23.5.0",
+          "system": "Darwin",
+          "version": "Darwin Kernel Version 23.5.0: Wed May  1 20:19:05 PDT 2024; root:xnu-10063.121.3~5/RELEASE_ARM64_T8112"
+        },
+        "python": {
+          "executable": "/Users/naoki/PycharmProjects/optimization-solver-benchmark/venv/bin/python",
+          "implementation": "CPython",
+          "version": "3.12.2",
+          "version_info": "3.12.2"
+        },
+        "timestamp": 1750582016.0,
+        "timezone": {
+          "current_time_local": "2025-06-22T19:28:07.021778",
+          "current_time_utc": "2025-06-22T10:28:07.021769+00:00",
+          "daylight_saving": false,
+          "timezone_name": "JST",
+          "utc_offset_hours": 9.0,
+          "utc_offset_seconds": -32400
+        }
+      },
+      "commit_hash": "ce1969a22cbeb1ef396d49cbf1142984143d1297",
+      "timestamp": "2025-06-22T10:28:54",
+      "solve_time": 46.942919969558716,
+      "status": "OPTIMAL",
+      "primal_objective_value": -0.10256951121204069,
+      "dual_objective_value": null,
+      "duality_gap": null,
+      "primal_infeasibility": null,
+      "dual_infeasibility": null,
+      "iterations": 14
+    },
+    {
+      "id": 143,
+      "solver_name": "cvxpy_cvxopt",
+      "solver_version": "cvxpy-1.6.5-CVXOPT",
+      "problem_library": "DIMACS",
+      "problem_name": "nb_L2_bessel",
+      "problem_type": "UNKNOWN",
+      "environment_info": {
+        "cpu": {
+          "cpu_count": 8,
+          "cpu_count_physical": 8,
+          "cpu_freq": {
+            "current": 3504,
+            "max": 3504,
+            "min": 600
+          },
+          "processor": "arm"
+        },
+        "disk": {
+          "free": 618571415552,
+          "free_gb": 576.09,
+          "percent": 1.34,
+          "total": 994662584320,
+          "total_gb": 926.35,
+          "used": 13331341312
+        },
+        "git": {
+          "available": true,
+          "branch": "update-documentation-main",
+          "commit_hash": "ce1969a22cbeb1ef396d49cbf1142984143d1297",
+          "is_dirty": true
+        },
+        "memory": {
+          "available": 11372331008,
+          "available_gb": 10.59,
+          "free": 312983552,
+          "percent": 55.9,
+          "total": 25769803776,
+          "total_gb": 24.0,
+          "used": 13071433728
+        },
+        "os": {
+          "architecture": "64bit",
+          "machine": "arm64",
+          "platform": "macOS-14.5-arm64-arm-64bit",
+          "release": "23.5.0",
+          "system": "Darwin",
+          "version": "Darwin Kernel Version 23.5.0: Wed May  1 20:19:05 PDT 2024; root:xnu-10063.121.3~5/RELEASE_ARM64_T8112"
+        },
+        "python": {
+          "executable": "/Users/naoki/PycharmProjects/optimization-solver-benchmark/venv/bin/python",
+          "implementation": "CPython",
+          "version": "3.12.2",
+          "version_info": "3.12.2"
+        },
+        "timestamp": 1750582016.0,
+        "timezone": {
+          "current_time_local": "2025-06-22T19:20:42.687504",
+          "current_time_utc": "2025-06-22T10:20:42.687496+00:00",
+          "daylight_saving": false,
+          "timezone_name": "JST",
+          "utc_offset_hours": 9.0,
+          "utc_offset_seconds": -32400
+        }
+      },
+      "commit_hash": "ce1969a22cbeb1ef396d49cbf1142984143d1297",
+      "timestamp": "2025-06-22T10:20:47",
+      "solve_time": 1.3183510303497314,
+      "status": "OPTIMAL",
+      "primal_objective_value": -0.10256951114752975,
+      "dual_objective_value": null,
+      "duality_gap": null,
+      "primal_infeasibility": null,
+      "dual_infeasibility": null,
+      "iterations": null
+    },
+    {
+      "id": 141,
+      "solver_name": "cvxpy_ecos",
+      "solver_version": "cvxpy-1.6.5-ECOS",
+      "problem_library": "DIMACS",
+      "problem_name": "nb_L2_bessel",
+      "problem_type": "UNKNOWN",
+      "environment_info": {
+        "cpu": {
+          "cpu_count": 8,
+          "cpu_count_physical": 8,
+          "cpu_freq": {
+            "current": 3504,
+            "max": 3504,
+            "min": 600
+          },
+          "processor": "arm"
+        },
+        "disk": {
+          "free": 618571415552,
+          "free_gb": 576.09,
+          "percent": 1.34,
+          "total": 994662584320,
+          "total_gb": 926.35,
+          "used": 13331341312
+        },
+        "git": {
+          "available": true,
+          "branch": "update-documentation-main",
+          "commit_hash": "ce1969a22cbeb1ef396d49cbf1142984143d1297",
+          "is_dirty": true
+        },
+        "memory": {
+          "available": 11372331008,
+          "available_gb": 10.59,
+          "free": 312983552,
+          "percent": 55.9,
+          "total": 25769803776,
+          "total_gb": 24.0,
+          "used": 13071433728
+        },
+        "os": {
+          "architecture": "64bit",
+          "machine": "arm64",
+          "platform": "macOS-14.5-arm64-arm-64bit",
+          "release": "23.5.0",
+          "system": "Darwin",
+          "version": "Darwin Kernel Version 23.5.0: Wed May  1 20:19:05 PDT 2024; root:xnu-10063.121.3~5/RELEASE_ARM64_T8112"
+        },
+        "python": {
+          "executable": "/Users/naoki/PycharmProjects/optimization-solver-benchmark/venv/bin/python",
+          "implementation": "CPython",
+          "version": "3.12.2",
+          "version_info": "3.12.2"
+        },
+        "timestamp": 1750582016.0,
+        "timezone": {
+          "current_time_local": "2025-06-22T19:20:42.687504",
+          "current_time_utc": "2025-06-22T10:20:42.687496+00:00",
+          "daylight_saving": false,
+          "timezone_name": "JST",
+          "utc_offset_hours": 9.0,
+          "utc_offset_seconds": -32400
+        }
+      },
+      "commit_hash": "ce1969a22cbeb1ef396d49cbf1142984143d1297",
+      "timestamp": "2025-06-22T10:20:46",
+      "solve_time": 1.1593446731567383,
+      "status": "OPTIMAL",
+      "primal_objective_value": -0.10256951120226779,
+      "dual_objective_value": null,
+      "duality_gap": null,
+      "primal_infeasibility": null,
+      "dual_infeasibility": null,
+      "iterations": 13
+    },
+    {
+      "id": 142,
+      "solver_name": "cvxpy_osqp",
+      "solver_version": "cvxpy-1.6.5-OSQP",
+      "problem_library": "DIMACS",
+      "problem_name": "nb_L2_bessel",
+      "problem_type": "UNKNOWN",
+      "environment_info": {
+        "cpu": {
+          "cpu_count": 8,
+          "cpu_count_physical": 8,
+          "cpu_freq": {
+            "current": 3504,
+            "max": 3504,
+            "min": 600
+          },
+          "processor": "arm"
+        },
+        "disk": {
+          "free": 618571415552,
+          "free_gb": 576.09,
+          "percent": 1.34,
+          "total": 994662584320,
+          "total_gb": 926.35,
+          "used": 13331341312
+        },
+        "git": {
+          "available": true,
+          "branch": "update-documentation-main",
+          "commit_hash": "ce1969a22cbeb1ef396d49cbf1142984143d1297",
+          "is_dirty": true
+        },
+        "memory": {
+          "available": 11372331008,
+          "available_gb": 10.59,
+          "free": 312983552,
+          "percent": 55.9,
+          "total": 25769803776,
+          "total_gb": 24.0,
+          "used": 13071433728
+        },
+        "os": {
+          "architecture": "64bit",
+          "machine": "arm64",
+          "platform": "macOS-14.5-arm64-arm-64bit",
+          "release": "23.5.0",
+          "system": "Darwin",
+          "version": "Darwin Kernel Version 23.5.0: Wed May  1 20:19:05 PDT 2024; root:xnu-10063.121.3~5/RELEASE_ARM64_T8112"
+        },
+        "python": {
+          "executable": "/Users/naoki/PycharmProjects/optimization-solver-benchmark/venv/bin/python",
+          "implementation": "CPython",
+          "version": "3.12.2",
+          "version_info": "3.12.2"
+        },
+        "timestamp": 1750582016.0,
+        "timezone": {
+          "current_time_local": "2025-06-22T19:20:42.687504",
+          "current_time_utc": "2025-06-22T10:20:42.687496+00:00",
+          "daylight_saving": false,
+          "timezone_name": "JST",
+          "utc_offset_hours": 9.0,
+          "utc_offset_seconds": -32400
+        }
+      },
+      "commit_hash": "ce1969a22cbeb1ef396d49cbf1142984143d1297",
+      "timestamp": "2025-06-22T10:20:46",
+      "solve_time": 3.814697265625e-05,
+      "status": "ERROR",
+      "primal_objective_value": null,
+      "dual_objective_value": null,
+      "duality_gap": null,
+      "primal_infeasibility": null,
+      "dual_infeasibility": null,
+      "iterations": null
+    },
+    {
+      "id": 140,
+      "solver_name": "cvxpy_scs",
+      "solver_version": "cvxpy-1.6.5-SCS",
+      "problem_library": "DIMACS",
+      "problem_name": "nb_L2_bessel",
+      "problem_type": "UNKNOWN",
+      "environment_info": {
+        "cpu": {
+          "cpu_count": 8,
+          "cpu_count_physical": 8,
+          "cpu_freq": {
+            "current": 3504,
+            "max": 3504,
+            "min": 600
+          },
+          "processor": "arm"
+        },
+        "disk": {
+          "free": 618571415552,
+          "free_gb": 576.09,
+          "percent": 1.34,
+          "total": 994662584320,
+          "total_gb": 926.35,
+          "used": 13331341312
+        },
+        "git": {
+          "available": true,
+          "branch": "update-documentation-main",
+          "commit_hash": "ce1969a22cbeb1ef396d49cbf1142984143d1297",
+          "is_dirty": true
+        },
+        "memory": {
+          "available": 11372331008,
+          "available_gb": 10.59,
+          "free": 312983552,
+          "percent": 55.9,
+          "total": 25769803776,
+          "total_gb": 24.0,
+          "used": 13071433728
+        },
+        "os": {
+          "architecture": "64bit",
+          "machine": "arm64",
+          "platform": "macOS-14.5-arm64-arm-64bit",
+          "release": "23.5.0",
+          "system": "Darwin",
+          "version": "Darwin Kernel Version 23.5.0: Wed May  1 20:19:05 PDT 2024; root:xnu-10063.121.3~5/RELEASE_ARM64_T8112"
+        },
+        "python": {
+          "executable": "/Users/naoki/PycharmProjects/optimization-solver-benchmark/venv/bin/python",
+          "implementation": "CPython",
+          "version": "3.12.2",
+          "version_info": "3.12.2"
+        },
+        "timestamp": 1750582016.0,
+        "timezone": {
+          "current_time_local": "2025-06-22T19:20:42.687504",
+          "current_time_utc": "2025-06-22T10:20:42.687496+00:00",
+          "daylight_saving": false,
+          "timezone_name": "JST",
+          "utc_offset_hours": 9.0,
+          "utc_offset_seconds": -32400
+        }
+      },
+      "commit_hash": "ce1969a22cbeb1ef396d49cbf1142984143d1297",
+      "timestamp": "2025-06-22T10:20:45",
+      "solve_time": 1.1490800380706787,
+      "status": "OPTIMAL",
+      "primal_objective_value": -0.10257104661299753,
+      "dual_objective_value": null,
+      "duality_gap": null,
+      "primal_infeasibility": null,
+      "dual_infeasibility": null,
+      "iterations": 950
+    },
+    {
+      "id": 144,
+      "solver_name": "cvxpy_sdpa",
+      "solver_version": "cvxpy-1.6.5-CLARABEL",
+      "problem_library": "DIMACS",
+      "problem_name": "nb_L2_bessel",
+      "problem_type": "UNKNOWN",
+      "environment_info": {
+        "cpu": {
+          "cpu_count": 8,
+          "cpu_count_physical": 8,
+          "cpu_freq": {
+            "current": 3504,
+            "max": 3504,
+            "min": 600
+          },
+          "processor": "arm"
+        },
+        "disk": {
+          "free": 618571415552,
+          "free_gb": 576.09,
+          "percent": 1.34,
+          "total": 994662584320,
+          "total_gb": 926.35,
+          "used": 13331341312
+        },
+        "git": {
+          "available": true,
+          "branch": "update-documentation-main",
+          "commit_hash": "ce1969a22cbeb1ef396d49cbf1142984143d1297",
+          "is_dirty": true
+        },
+        "memory": {
+          "available": 11372331008,
+          "available_gb": 10.59,
+          "free": 312983552,
+          "percent": 55.9,
+          "total": 25769803776,
+          "total_gb": 24.0,
+          "used": 13071433728
+        },
+        "os": {
+          "architecture": "64bit",
+          "machine": "arm64",
+          "platform": "macOS-14.5-arm64-arm-64bit",
+          "release": "23.5.0",
+          "system": "Darwin",
+          "version": "Darwin Kernel Version 23.5.0: Wed May  1 20:19:05 PDT 2024; root:xnu-10063.121.3~5/RELEASE_ARM64_T8112"
+        },
+        "python": {
+          "executable": "/Users/naoki/PycharmProjects/optimization-solver-benchmark/venv/bin/python",
+          "implementation": "CPython",
+          "version": "3.12.2",
+          "version_info": "3.12.2"
+        },
+        "timestamp": 1750582016.0,
+        "timezone": {
+          "current_time_local": "2025-06-22T19:20:42.687504",
+          "current_time_utc": "2025-06-22T10:20:42.687496+00:00",
+          "daylight_saving": false,
+          "timezone_name": "JST",
+          "utc_offset_hours": 9.0,
+          "utc_offset_seconds": -32400
+        }
+      },
+      "commit_hash": "ce1969a22cbeb1ef396d49cbf1142984143d1297",
+      "timestamp": "2025-06-22T10:20:49",
+      "solve_time": 1.3061511516571045,
+      "status": "OPTIMAL",
+      "primal_objective_value": -0.10256951121204069,
+      "dual_objective_value": null,
+      "duality_gap": null,
+      "primal_infeasibility": null,
+      "dual_infeasibility": null,
+      "iterations": 14
+    },
+    {
+      "id": 138,
+      "solver_name": "scipy_linprog",
+      "solver_version": "scipy-1.15.3",
+      "problem_library": "DIMACS",
+      "problem_name": "nb_L2_bessel",
+      "problem_type": "UNKNOWN",
+      "environment_info": {
+        "cpu": {
+          "cpu_count": 8,
+          "cpu_count_physical": 8,
+          "cpu_freq": {
+            "current": 3504,
+            "max": 3504,
+            "min": 600
+          },
+          "processor": "arm"
+        },
+        "disk": {
+          "free": 618571415552,
+          "free_gb": 576.09,
+          "percent": 1.34,
+          "total": 994662584320,
+          "total_gb": 926.35,
+          "used": 13331341312
+        },
+        "git": {
+          "available": true,
+          "branch": "update-documentation-main",
+          "commit_hash": "ce1969a22cbeb1ef396d49cbf1142984143d1297",
+          "is_dirty": true
+        },
+        "memory": {
+          "available": 11372331008,
+          "available_gb": 10.59,
+          "free": 312983552,
+          "percent": 55.9,
+          "total": 25769803776,
+          "total_gb": 24.0,
+          "used": 13071433728
+        },
+        "os": {
+          "architecture": "64bit",
+          "machine": "arm64",
+          "platform": "macOS-14.5-arm64-arm-64bit",
+          "release": "23.5.0",
+          "system": "Darwin",
+          "version": "Darwin Kernel Version 23.5.0: Wed May  1 20:19:05 PDT 2024; root:xnu-10063.121.3~5/RELEASE_ARM64_T8112"
+        },
+        "python": {
+          "executable": "/Users/naoki/PycharmProjects/optimization-solver-benchmark/venv/bin/python",
+          "implementation": "CPython",
+          "version": "3.12.2",
+          "version_info": "3.12.2"
+        },
+        "timestamp": 1750582016.0,
+        "timezone": {
+          "current_time_local": "2025-06-22T19:20:42.687504",
+          "current_time_utc": "2025-06-22T10:20:42.687496+00:00",
+          "daylight_saving": false,
+          "timezone_name": "JST",
+          "utc_offset_hours": 9.0,
+          "utc_offset_seconds": -32400
+        }
+      },
+      "commit_hash": "ce1969a22cbeb1ef396d49cbf1142984143d1297",
+      "timestamp": "2025-06-22T10:20:42",
+      "solve_time": 3.910064697265625e-05,
+      "status": "ERROR",
+      "primal_objective_value": null,
+      "dual_objective_value": null,
+      "duality_gap": null,
+      "primal_infeasibility": null,
+      "dual_infeasibility": null,
+      "iterations": null
+    },
+    {
+      "id": 157,
+      "solver_name": "cvxpy_highs",
+      "solver_version": "cvxpy-1.6.5-HIGHS",
+      "problem_library": "internal",
+      "problem_name": "simple_lp_test",
+      "problem_type": "UNKNOWN",
+      "environment_info": {
+        "cpu": {
+          "cpu_count": 8,
+          "cpu_count_physical": 8,
+          "cpu_freq": {
+            "current": 3504,
+            "max": 3504,
+            "min": 600
+          },
+          "processor": "arm"
+        },
+        "disk": {
+          "free": 612479127552,
+          "free_gb": 570.42,
+          "percent": 1.34,
+          "total": 994662584320,
+          "total_gb": 926.35,
+          "used": 13331341312
+        },
+        "git": {
+          "available": true,
+          "branch": "update-documentation-main",
+          "commit_hash": "3dc1728a0d0428c00c35221f7a17fc1dd250035f",
+          "is_dirty": true
+        },
+        "memory": {
+          "available": 11203903488,
+          "available_gb": 10.43,
+          "free": 212271104,
+          "percent": 56.5,
+          "total": 25769803776,
+          "total_gb": 24.0,
+          "used": 13108084736
+        },
+        "os": {
+          "architecture": "64bit",
+          "machine": "arm64",
+          "platform": "macOS-14.5-arm64-arm-64bit",
+          "release": "23.5.0",
+          "system": "Darwin",
+          "version": "Darwin Kernel Version 23.5.0: Wed May  1 20:19:05 PDT 2024; root:xnu-10063.121.3~5/RELEASE_ARM64_T8112"
+        },
+        "python": {
+          "executable": "/Users/naoki/PycharmProjects/optimization-solver-benchmark/venv/bin/python",
+          "implementation": "CPython",
+          "version": "3.12.2",
+          "version_info": "3.12.2"
+        },
+        "timestamp": 1750582016.0,
+        "timezone": {
+          "current_time_local": "2025-06-23T00:20:41.135615",
+          "current_time_utc": "2025-06-22T15:20:41.135602+00:00",
+          "daylight_saving": false,
+          "timezone_name": "JST",
+          "utc_offset_hours": 9.0,
+          "utc_offset_seconds": -32400
+        }
+      },
+      "commit_hash": "3dc1728a0d0428c00c35221f7a17fc1dd250035f",
+      "timestamp": "2025-06-22T15:20:41",
+      "solve_time": 0.003879070281982422,
       "status": "OPTIMAL",
       "primal_objective_value": 0.0,
       "dual_objective_value": null,
@@ -1351,12 +3087,12 @@
       "iterations": 0
     },
     {
-      "id": 4,
-      "solver_name": "scipy_linprog",
-      "solver_version": "scipy-1.15.3",
+      "id": 156,
+      "solver_name": "cvxpy_scip",
+      "solver_version": "cvxpy-1.6.5-SCIP",
       "problem_library": "internal",
       "problem_name": "simple_lp_test",
-      "problem_type": "LP",
+      "problem_type": "UNKNOWN",
       "environment_info": {
         "cpu": {
           "cpu_count": 8,
@@ -1369,27 +3105,27 @@
           "processor": "arm"
         },
         "disk": {
-          "free": 610266984448,
-          "free_gb": 568.36,
+          "free": 612479131648,
+          "free_gb": 570.42,
           "percent": 1.34,
           "total": 994662584320,
           "total_gb": 926.35,
-          "used": 13331030016
+          "used": 13331341312
         },
         "git": {
           "available": true,
           "branch": "update-documentation-main",
-          "commit_hash": "b13af6c54afb59fcc4b00f10b6450804736a0060",
+          "commit_hash": "3dc1728a0d0428c00c35221f7a17fc1dd250035f",
           "is_dirty": true
         },
         "memory": {
-          "available": 9542582272,
-          "available_gb": 8.89,
-          "free": 647823360,
-          "percent": 63.0,
+          "available": 11293261824,
+          "available_gb": 10.52,
+          "free": 312590336,
+          "percent": 56.2,
           "total": 25769803776,
           "total_gb": 24.0,
-          "used": 11328602112
+          "used": 13019758592
         },
         "os": {
           "architecture": "64bit",
@@ -1405,178 +3141,26 @@
           "version": "3.12.2",
           "version_info": "3.12.2"
         },
-        "timestamp": 1748267776.0,
+        "timestamp": 1750582016.0,
         "timezone": {
-          "current_time_local": "2025-06-17T22:35:05.013190",
-          "current_time_utc": "2025-06-17T13:35:05.013182+00:00",
+          "current_time_local": "2025-06-23T00:20:31.817705",
+          "current_time_utc": "2025-06-22T15:20:31.817692+00:00",
           "daylight_saving": false,
           "timezone_name": "JST",
           "utc_offset_hours": 9.0,
           "utc_offset_seconds": -32400
         }
       },
-      "commit_hash": "b13af6c54afb59fcc4b00f10b6450804736a0060",
-      "timestamp": "2025-06-17T13:35:05",
-      "solve_time": 0.0015151500701904297,
+      "commit_hash": "3dc1728a0d0428c00c35221f7a17fc1dd250035f",
+      "timestamp": "2025-06-22T15:20:32",
+      "solve_time": 0.005051851272583008,
       "status": "OPTIMAL",
       "primal_objective_value": 0.0,
       "dual_objective_value": null,
       "duality_gap": null,
       "primal_infeasibility": null,
       "dual_infeasibility": null,
-      "iterations": 0
-    },
-    {
-      "id": 36,
-      "solver_name": "cvxpy_clarabel",
-      "solver_version": "cvxpy-1.6.5-CLARABEL",
-      "problem_library": "internal",
-      "problem_name": "simple_qp_test",
-      "problem_type": "QP",
-      "environment_info": {
-        "cpu": {
-          "cpu_count": 8,
-          "cpu_count_physical": 8,
-          "cpu_freq": {
-            "current": 3504,
-            "max": 3504,
-            "min": 600
-          },
-          "processor": "arm"
-        },
-        "disk": {
-          "free": 609202327552,
-          "free_gb": 567.36,
-          "percent": 1.34,
-          "total": 994662584320,
-          "total_gb": 926.35,
-          "used": 13331030016
-        },
-        "git": {
-          "available": true,
-          "branch": "update-documentation-main",
-          "commit_hash": "a13f8ca5f469be57f913bca3214bdf515c65b1dd",
-          "is_dirty": true
-        },
-        "memory": {
-          "available": 9348808704,
-          "available_gb": 8.71,
-          "free": 485048320,
-          "percent": 63.7,
-          "total": 25769803776,
-          "total_gb": 24.0,
-          "used": 11363696640
-        },
-        "os": {
-          "architecture": "64bit",
-          "machine": "arm64",
-          "platform": "macOS-14.5-arm64-arm-64bit",
-          "release": "23.5.0",
-          "system": "Darwin",
-          "version": "Darwin Kernel Version 23.5.0: Wed May  1 20:19:05 PDT 2024; root:xnu-10063.121.3~5/RELEASE_ARM64_T8112"
-        },
-        "python": {
-          "executable": "/Users/naoki/PycharmProjects/optimization-solver-benchmark/venv/bin/python",
-          "implementation": "CPython",
-          "version": "3.12.2",
-          "version_info": "3.12.2"
-        },
-        "timestamp": 1748267776.0,
-        "timezone": {
-          "current_time_local": "2025-06-20T21:02:18.513683",
-          "current_time_utc": "2025-06-20T12:02:18.513661+00:00",
-          "daylight_saving": false,
-          "timezone_name": "JST",
-          "utc_offset_hours": 9.0,
-          "utc_offset_seconds": -32400
-        }
-      },
-      "commit_hash": "a13f8ca5f469be57f913bca3214bdf515c65b1dd",
-      "timestamp": "2025-06-20T12:02:18",
-      "solve_time": 0.00392603874206543,
-      "status": "OPTIMAL",
-      "primal_objective_value": 0.0,
-      "dual_objective_value": null,
-      "duality_gap": null,
-      "primal_infeasibility": null,
-      "dual_infeasibility": null,
-      "iterations": 5
-    },
-    {
-      "id": 37,
-      "solver_name": "scipy_linprog",
-      "solver_version": "scipy-1.15.3",
-      "problem_library": "internal",
-      "problem_name": "simple_qp_test",
-      "problem_type": "QP",
-      "environment_info": {
-        "cpu": {
-          "cpu_count": 8,
-          "cpu_count_physical": 8,
-          "cpu_freq": {
-            "current": 3504,
-            "max": 3504,
-            "min": 600
-          },
-          "processor": "arm"
-        },
-        "disk": {
-          "free": 609202327552,
-          "free_gb": 567.36,
-          "percent": 1.34,
-          "total": 994662584320,
-          "total_gb": 926.35,
-          "used": 13331030016
-        },
-        "git": {
-          "available": true,
-          "branch": "update-documentation-main",
-          "commit_hash": "a13f8ca5f469be57f913bca3214bdf515c65b1dd",
-          "is_dirty": true
-        },
-        "memory": {
-          "available": 9348808704,
-          "available_gb": 8.71,
-          "free": 485048320,
-          "percent": 63.7,
-          "total": 25769803776,
-          "total_gb": 24.0,
-          "used": 11363696640
-        },
-        "os": {
-          "architecture": "64bit",
-          "machine": "arm64",
-          "platform": "macOS-14.5-arm64-arm-64bit",
-          "release": "23.5.0",
-          "system": "Darwin",
-          "version": "Darwin Kernel Version 23.5.0: Wed May  1 20:19:05 PDT 2024; root:xnu-10063.121.3~5/RELEASE_ARM64_T8112"
-        },
-        "python": {
-          "executable": "/Users/naoki/PycharmProjects/optimization-solver-benchmark/venv/bin/python",
-          "implementation": "CPython",
-          "version": "3.12.2",
-          "version_info": "3.12.2"
-        },
-        "timestamp": 1748267776.0,
-        "timezone": {
-          "current_time_local": "2025-06-20T21:02:18.513683",
-          "current_time_utc": "2025-06-20T12:02:18.513661+00:00",
-          "daylight_saving": false,
-          "timezone_name": "JST",
-          "utc_offset_hours": 9.0,
-          "utc_offset_seconds": -32400
-        }
-      },
-      "commit_hash": "a13f8ca5f469be57f913bca3214bdf515c65b1dd",
-      "timestamp": "2025-06-20T12:02:18",
-      "solve_time": 0.002846956253051758,
-      "status": "OPTIMAL",
-      "primal_objective_value": 0.0,
-      "dual_objective_value": null,
-      "duality_gap": null,
-      "primal_infeasibility": 0.0,
-      "dual_infeasibility": null,
-      "iterations": 1
+      "iterations": null
     }
   ]
 }

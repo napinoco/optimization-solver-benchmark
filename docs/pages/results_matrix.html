@@ -185,7 +185,7 @@
     <header>
         <h1>🔬 Optimization Solver Benchmark</h1>
         <p>Results Matrix - Problems × Solvers</p>
-        <p><small>Generated: 2025-06-20 21:02:26</small></p>
+        <p><small>Generated: 2025-06-25 08:43:43</small></p>
     </header>
     
     <nav>
@@ -203,26 +203,22 @@
                 <table class="matrix-table">
                     <thead>
                         <tr>
-                            <th>Problem</th><th>cvxpy_clarabel</th><th>scipy_linprog</th>
+                            <th>Problem</th><th>cvxpy_clarabel</th><th>cvxpy_cvxopt</th><th>cvxpy_ecos</th><th>cvxpy_highs</th><th>cvxpy_osqp</th><th>cvxpy_scip</th><th>cvxpy_scs</th><th>cvxpy_sdpa</th><th>scipy_linprog</th>
                         </tr>
                     </thead>
                     <tbody>
             <tr>
-                <td class="problem-name">arch0</td><td class="status-error">ERROR</td><td class="status-error">ERROR</td></tr>
+                <td class="problem-name">bm1</td><td class="status-error">ERROR<br><span class="solve-time">48.140s</span></td><td class="status-optimal">OPTIMAL<br><span class="solve-time">880.079s</span></td><td class="status-error">ERROR<br><span class="solve-time">0.000s</span></td><td class="status-unknown">—</td><td class="status-error">ERROR<br><span class="solve-time">0.000s</span></td><td class="status-unknown">—</td><td class="status-optimal">OPTIMAL<br><span class="solve-time">36704.034s</span></td><td class="status-optimal">OPTIMAL<br><span class="solve-time">79.027s</span></td><td class="status-error">ERROR<br><span class="solve-time">0.000s</span></td></tr>
             <tr>
-                <td class="problem-name">control1</td><td class="status-error">ERROR</td><td class="status-unknown">—</td></tr>
+                <td class="problem-name">nb</td><td class="status-optimal">OPTIMAL<br><span class="solve-time">2.134s</span></td><td class="status-optimal">OPTIMAL<br><span class="solve-time">1.481s</span></td><td class="status-optimal">OPTIMAL<br><span class="solve-time">1.147s</span></td><td class="status-error">ERROR<br><span class="solve-time">0.000s</span></td><td class="status-error">ERROR<br><span class="solve-time">0.000s</span></td><td class="status-optimal">OPTIMAL<br><span class="solve-time">48.382s</span></td><td class="status-optimal">OPTIMAL<br><span class="solve-time">4.005s</span></td><td class="status-optimal">OPTIMAL<br><span class="solve-time">5.218s</span></td><td class="status-error">ERROR<br><span class="solve-time">0.000s</span></td></tr>
             <tr>
-                <td class="problem-name">control_lmi_test</td><td class="status-optimal">OPTIMAL<br><span class="solve-time">0.005s</span></td><td class="status-error">ERROR<br><span class="solve-time">0.000s</span></td></tr>
+                <td class="problem-name">nb_L1</td><td class="status-optimal">OPTIMAL<br><span class="solve-time">1.533s</span></td><td class="status-optimal">OPTIMAL<br><span class="solve-time">3.080s</span></td><td class="status-optimal">OPTIMAL<br><span class="solve-time">1.462s</span></td><td class="status-unknown">—</td><td class="status-error">ERROR<br><span class="solve-time">0.000s</span></td><td class="status-unknown">—</td><td class="status-optimal">OPTIMAL<br><span class="solve-time">7.499s</span></td><td class="status-optimal">OPTIMAL<br><span class="solve-time">1.525s</span></td><td class="status-error">ERROR<br><span class="solve-time">0.000s</span></td></tr>
             <tr>
-                <td class="problem-name">hinf12</td><td class="status-error">ERROR<br><span class="solve-time">0.000s</span></td><td class="status-error">ERROR<br><span class="solve-time">0.000s</span></td></tr>
+                <td class="problem-name">nb_L2</td><td class="status-optimal">OPTIMAL<br><span class="solve-time">2.241s</span></td><td class="status-optimal">OPTIMAL<br><span class="solve-time">2.346s</span></td><td class="status-optimal">OPTIMAL<br><span class="solve-time">1.735s</span></td><td class="status-unknown">—</td><td class="status-error">ERROR<br><span class="solve-time">0.000s</span></td><td class="status-unknown">—</td><td class="status-optimal">OPTIMAL<br><span class="solve-time">1.861s</span></td><td class="status-optimal">OPTIMAL<br><span class="solve-time">2.305s</span></td><td class="status-error">ERROR<br><span class="solve-time">0.000s</span></td></tr>
             <tr>
-                <td class="problem-name">nb</td><td class="status-error">ERROR</td><td class="status-error">ERROR</td></tr>
+                <td class="problem-name">nb_L2_bessel</td><td class="status-optimal">OPTIMAL<br><span class="solve-time">46.943s</span></td><td class="status-optimal">OPTIMAL<br><span class="solve-time">1.318s</span></td><td class="status-optimal">OPTIMAL<br><span class="solve-time">1.159s</span></td><td class="status-unknown">—</td><td class="status-error">ERROR<br><span class="solve-time">0.000s</span></td><td class="status-unknown">—</td><td class="status-optimal">OPTIMAL<br><span class="solve-time">1.149s</span></td><td class="status-optimal">OPTIMAL<br><span class="solve-time">1.306s</span></td><td class="status-error">ERROR<br><span class="solve-time">0.000s</span></td></tr>
             <tr>
-                <td class="problem-name">portfolio_optimization_test</td><td class="status-optimal">OPTIMAL<br><span class="solve-time">0.004s</span></td><td class="status-error">ERROR<br><span class="solve-time">0.000s</span></td></tr>
-            <tr>
-                <td class="problem-name">simple_lp_test</td><td class="status-optimal">OPTIMAL<br><span class="solve-time">0.003s</span></td><td class="status-optimal">OPTIMAL<br><span class="solve-time">0.002s</span></td></tr>
-            <tr>
-                <td class="problem-name">simple_qp_test</td><td class="status-optimal">OPTIMAL<br><span class="solve-time">0.004s</span></td><td class="status-optimal">OPTIMAL<br><span class="solve-time">0.003s</span></td></tr>
+                <td class="problem-name">simple_lp_test</td><td class="status-unknown">—</td><td class="status-unknown">—</td><td class="status-unknown">—</td><td class="status-optimal">OPTIMAL<br><span class="solve-time">0.004s</span></td><td class="status-unknown">—</td><td class="status-optimal">OPTIMAL<br><span class="solve-time">0.005s</span></td><td class="status-unknown">—</td><td class="status-unknown">—</td><td class="status-unknown">—</td></tr>
                     </tbody>
                 </table>
             </div>
