@@ -4,7 +4,7 @@ import yaml
 import numpy as np
 import sys
 from pathlib import Path
-from typing import Dict, List, Tuple, Optional
+from typing import Dict, List, Tuple, Optional, Any
 
 # Add project root to path for imports
 project_root = Path(__file__).parent.parent.parent
@@ -38,8 +38,8 @@ class ProblemData:
                  A_eq: np.ndarray = None, b_eq: np.ndarray = None,
                  A_ub: np.ndarray = None, b_ub: np.ndarray = None,
                  bounds: List[Tuple] = None, P: np.ndarray = None,
-                 cvxpy_problem=None, variables=None, objective=None, 
-                 constraints=None, metadata=None, analyze_structure: bool = True):
+                 cone_structure: Dict[str, Any] = None,  # First-class cone structure field
+                 metadata=None, analyze_structure: bool = True):
         self.name = name
         self.problem_class = problem_class
         self.c = c  # objective coefficients
@@ -50,12 +50,27 @@ class ProblemData:
         self.bounds = bounds  # variable bounds
         self.P = P  # quadratic objective matrix for QP
         
-        # Enhanced support for CVXPY problems (SOCP, SDP, etc.)
-        self.cvxpy_problem = cvxpy_problem  # CVXPY Problem object
-        self.variables = variables or {}  # Dict of CVXPY variables
-        self.objective = objective  # CVXPY objective
-        self.constraints = constraints or []  # List of CVXPY constraints
+        # NEW: First-class cone structure support with backward compatibility
+        if cone_structure is not None:
+            self.cone_structure = cone_structure
+        elif metadata and 'cone_structure' in metadata:
+            # Backward compatibility: extract from metadata if not provided directly
+            self.cone_structure = metadata['cone_structure']
+        else:
+            # Default empty cone structure
+            self.cone_structure = {
+                'free_vars': 0,
+                'nonneg_vars': 0,
+                'soc_cones': [],
+                'sdp_cones': []
+            }
+        
+        # Additional problem metadata
         self.metadata = metadata or {}  # Additional problem metadata
+        
+        # Ensure cone_structure is also in metadata for backward compatibility
+        if 'cone_structure' not in self.metadata and self.cone_structure:
+            self.metadata['cone_structure'] = self.cone_structure
         
         # Problem structure analysis
         self._structure = None

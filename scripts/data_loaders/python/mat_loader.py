@@ -248,6 +248,7 @@ class MATLoader:
             A_ub=None,  # SeDuMi uses equality constraints
             b_ub=None,
             bounds=None,  # Bounds handled by cone structure
+            cone_structure=cone_info,  # NEW: Pass cone_structure directly
             metadata=metadata
         )
 

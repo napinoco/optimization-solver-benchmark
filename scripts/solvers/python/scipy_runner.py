@@ -34,6 +34,98 @@ class ScipySolver(SolverInterface):
         
         self.logger.info(f"Initialized SciPy solver with method '{method}'")
     
+    def _convert_sedumi_to_scipy_format(self, problem_data: ProblemData) -> Dict:
+        """
+        Convert SeDuMi format to SciPy-compatible format.
+        
+        SeDuMi format: min c^T x subject to A_eq x = b_eq, x ∈ K
+        SciPy format: min c^T x subject to A_ub x <= b_ub, A_eq x = b_eq, bounds on x
+        
+        Args:
+            problem_data: ProblemData object (potentially in SeDuMi format)
+            
+        Returns:
+            Dictionary with SciPy-compatible fields: A_ub, b_ub, bounds
+        """
+        # If already has inequality constraints, use them directly
+        if problem_data.A_ub is not None and problem_data.b_ub is not None:
+            return {
+                'A_ub': problem_data.A_ub,
+                'b_ub': problem_data.b_ub,
+                'bounds': problem_data.bounds
+            }
+        
+        # Convert from cone_structure to SciPy format
+        if hasattr(problem_data, 'cone_structure') and problem_data.cone_structure:
+            return self._derive_scipy_constraints_from_cones(problem_data)
+        
+        # Fallback: assume all variables are non-negative if no cone structure
+        n_vars = len(problem_data.c) if problem_data.c is not None else 0
+        return {
+            'A_ub': None,
+            'b_ub': None,
+            'bounds': [(0, None)] * n_vars
+        }
+    
+    def _derive_scipy_constraints_from_cones(self, problem_data: ProblemData) -> Dict:
+        """
+        Derive SciPy constraints from cone_structure.
+        
+        Args:
+            problem_data: ProblemData with cone_structure
+            
+        Returns:
+            Dictionary with SciPy-compatible constraints
+        """
+        cone_structure = problem_data.cone_structure
+        n_vars = len(problem_data.c) if problem_data.c is not None else 0
+        
+        # Build variable bounds based on cone structure
+        bounds = []
+        var_idx = 0
+        
+        # Free variables: no bounds
+        free_vars = cone_structure.get('free_vars', 0)
+        for _ in range(free_vars):
+            bounds.append((None, None))
+            var_idx += 1
+        
+        # Non-negative variables: lower bound 0
+        nonneg_vars = cone_structure.get('nonneg_vars', 0)
+        for _ in range(nonneg_vars):
+            bounds.append((0, None))
+            var_idx += 1
+        
+        # SOC cone variables: first variable >= ||(remaining variables)||
+        # For SciPy, we'll approximate as non-negative (conservative approach)
+        soc_cones = cone_structure.get('soc_cones', [])
+        for cone_dim in soc_cones:
+            for _ in range(cone_dim):
+                bounds.append((0, None))  # Conservative: all SOC variables >= 0
+                var_idx += 1
+        
+        # SDP cone variables: represent as non-negative (matrix entries)
+        # This is a simplification - full SDP constraints need specialized solvers
+        sdp_cones = cone_structure.get('sdp_cones', [])
+        for cone_dim in sdp_cones:
+            # SDP cone has cone_dim*(cone_dim+1)/2 variables (upper triangular)
+            sdp_vars = cone_dim * (cone_dim + 1) // 2
+            for _ in range(sdp_vars):
+                bounds.append((0, None))  # Conservative: all SDP variables >= 0
+                var_idx += 1
+        
+        # Pad bounds if necessary
+        while len(bounds) < n_vars:
+            bounds.append((0, None))
+        
+        # For LP problems, we don't need additional inequality constraints
+        # The cone structure is captured by the bounds
+        return {
+            'A_ub': None,
+            'b_ub': None,
+            'bounds': bounds
+        }
+    
     def _create_standardized_result(self, solve_time: float, status: str, 
                                   primal_objective_value: Optional[float] = None,
                                   dual_objective_value: Optional[float] = None,
@@ -94,13 +186,16 @@ class ScipySolver(SolverInterface):
         
         # Prepare problem data for linprog
         c = problem_data.c
-        A_ub = problem_data.A_ub
-        b_ub = problem_data.b_ub
         A_eq = problem_data.A_eq
         b_eq = problem_data.b_eq
-        bounds = problem_data.bounds
         
-        # Convert bounds to scipy format
+        # Convert SeDuMi format to SciPy format if needed
+        scipy_format = self._convert_sedumi_to_scipy_format(problem_data)
+        A_ub = scipy_format['A_ub']
+        b_ub = scipy_format['b_ub']
+        bounds = scipy_format['bounds']
+        
+        # Convert bounds to scipy format if they exist
         if bounds:
             bounds_list = []
             for bound in bounds:
@@ -111,10 +206,6 @@ class ScipySolver(SolverInterface):
                 else:
                     bounds_list.append((0, None))  # Default non-negative
             bounds = bounds_list
-        else:
-            # If no bounds specified, assume non-negative variables
-            n_vars = len(c) if c is not None else 0
-            bounds = [(0, None)] * n_vars
         
         self.logger.debug(f"LP problem dimensions: c={c.shape if c is not None else None}, "
                          f"A_ub={A_ub.shape if A_ub is not None else None}, "

@@ -1,203 +1,171 @@
-# Development Tasks - Architecture Optimization & Maintenance
+# Development Tasks - ProblemData Architecture Analysis
 
-**Phase**: Architecture Optimization & Maintenance  
-**Priority**: Medium - System is production-ready, focusing on optimization and maintenance  
-**Context**: Completed architecture simplification and external library focus
+**Phase**: Architecture Analysis & Planning  
+**Priority**: High - User-requested ProblemData unification analysis  
+**Context**: Investigate feasibility of SeDuMi-like ProblemData unification
 
-The benchmark system has achieved production-ready status with comprehensive external problem libraries (DIMACS + SDPLIB) and 9 major solvers. Current development focuses on maintenance, optimization, and addressing any emerging needs.
+The user has requested analysis of a major ProblemData refactoring to unify all optimization problems under a SeDuMi-like format. This requires careful analysis before implementation to ensure compatibility with current production system.
 
 ---
 
 ## Current System Status ✅
 
-**Completed Major Milestones**:
-- ✅ **Complete External Library Integration**: 139+ problems (DIMACS: 47, SDPLIB: 92+)
-- ✅ **Comprehensive Solver Support**: 9 solvers (SciPy, CLARABEL, SCS, ECOS, OSQP, CVXOPT, SDPA, SCIP, HiGHS)
-- ✅ **Architecture Simplification**: Direct registry iteration, --library_names separation
-- ✅ **Focused Problem Set**: External libraries only (removed internal synthetic problems)
-- ✅ **Testing Infrastructure**: --dry-run mode for development/testing
-- ✅ **Database Enhancements**: Memo column for result annotations
+**Production-Ready Status**:
+- ✅ 139+ external problems (DIMACS + SDPLIB) working correctly
+- ✅ 9 solvers with comprehensive backend support  
+- ✅ Stable MAT/DAT loader architecture
+- ✅ Working CVXPY integration for all problem types
+- ✅ Complete testing infrastructure with --dry-run mode
 
-**Key Architecture Achievements**:
-- Simplified loader architecture (MAT + DAT loaders only)
-- Clean separation of library filtering (--library_names) vs problem filtering (--problems)
-- Dry-run mode for testing without database pollution
-- Streamlined codebase focused on real-world optimization problems
+**Architecture Health**: Strong - Recent simplification completed successfully
 
 ---
 
-## Active Task Queue (Execute if Needed)
+## Active Task Queue (Execute Sequentially per conventions.md)
 
-### **Task 1: Documentation Maintenance** ⭐ MEDIUM PRIORITY
-**Objective**: Keep documentation synchronized with recent architecture changes  
-**Context**: Recent simplification requires documentation updates
+### **Task 1: Analyze Current ProblemData Usage** ⭐ HIGH PRIORITY
+**Objective**: Comprehensively analyze current ProblemData field usage across codebase  
+**Context**: User requests SeDuMi unification but must understand impact on existing system
 
 **Steps**:
-1. ✅ Update tasks.md to reflect current system status
-2. Update detail_design.md to remove light_set references and unused loaders
-3. Update basic_design.md to reflect external-only problem approach  
-4. Update history.md to document recent architecture optimization phase
+1. Document all current ProblemData field usage in loaders (MAT, DAT)
+2. Document all ProblemData field usage in solvers (SciPy, CVXPY) 
+3. Analyze which fields are essential vs optional for each problem type
+4. Identify potential breaking changes from removing A_ub, b_ub, bounds
+5. Document current CVXPY field usage (cvxpy_problem, variables, objective, constraints)
 
 **Test Criteria**:
-- [ ] All documentation reflects current architecture (no light_set references)
-- [ ] CLI options documented correctly (--library_names, --dry-run)
-- [ ] Problem counts accurate (external libraries only)
-- [ ] Loader architecture correctly described (MAT/DAT only)
+- [ ] Complete mapping of field usage across MAT/DAT loaders
+- [ ] Complete mapping of field usage across SciPy/CVXPY solvers
+- [ ] Impact assessment for A_ub/b_ub/bounds removal
+- [ ] Impact assessment for CVXPY field removal
+- [ ] Compatibility analysis with external libraries (DIMACS/SDPLIB)
 
-**Definition of Done**: Documentation accurately reflects current simplified architecture
+**Definition of Done**: Comprehensive analysis document showing current usage and refactoring impact
 
-### **Task 2: Solver Performance Analysis** 🔍 LOW PRIORITY
-**Objective**: Analyze solver performance patterns across problem types  
-**Context**: Rich dataset available for performance insights
+### **Task 2: Validate SeDuMi Compatibility** 🔍 HIGH PRIORITY  
+**Objective**: Verify that SeDuMi format can represent all current problem types
+**Context**: Must ensure no loss of functionality with format change
 
 **Steps**:
-1. Generate comprehensive benchmark reports with current solver set
-2. Identify solver strengths/weaknesses by problem type (LP, QP, SOCP, SDP)
-3. Document solver recommendations for different use cases
-4. Create performance comparison charts for publication
+1. Test current DIMACS problems: verify they have cone_structure in metadata
+2. Test current SDPLIB problems: verify they have cone_structure in metadata  
+3. Analyze if SeDuMi format can represent current LP/QP constraint patterns
+4. Verify that A_eq-only representation works for all current problems
+5. Test conversion of A_ub constraints to A_eq format with slack variables
 
 **Test Criteria**:
-- [ ] Performance data collected across all problem types
-- [ ] Solver recommendations documented
-- [ ] Performance insights suitable for research publication
+- [ ] All DIMACS problems have usable cone_structure data
+- [ ] All SDPLIB problems have usable cone_structure data
+- [ ] A_ub to A_eq conversion preserves problem semantics
+- [ ] No loss of problem representation capability
 
-**Definition of Done**: Comprehensive solver performance analysis available
+**Definition of Done**: Verification that all current problems are compatible with SeDuMi format
 
-### **Task 3: Database Query Optimization** 🚀 LOW PRIORITY  
-**Objective**: Optimize database queries for better report generation performance
-**Context**: Large dataset may benefit from query optimization
+### **Task 3: Design Migration Strategy** 📋 MEDIUM PRIORITY
+**Objective**: Create step-by-step migration plan with backward compatibility
+**Context**: Large refactoring requires careful planning to avoid system breakage
 
 **Steps**:
-1. Profile current report generation performance
-2. Analyze database query patterns in HTMLGenerator and DataExporter
-3. Add database indexes for common query patterns
-4. Benchmark performance improvements
+1. Design backward-compatible ProblemData interface
+2. Plan gradual migration of loaders (MAT first, then DAT)
+3. Plan gradual migration of solvers (test compatibility)
+4. Design validation tests for each migration step
+5. Create rollback plan if migration fails
 
 **Test Criteria**:
-- [ ] Report generation time measured and optimized
-- [ ] Database queries efficiently indexed
-- [ ] No regressions in functionality
+- [ ] Migration plan maintains system functionality at each step
+- [ ] Backward compatibility preserved during transition
+- [ ] Clear rollback procedure defined
+- [ ] All current tests continue to pass
 
-**Definition of Done**: Improved report generation performance
+**Definition of Done**: Detailed migration plan with risk mitigation
 
----
+### **Task 4: Create Proof of Concept** 🔬 MEDIUM PRIORITY
+**Objective**: Implement small-scale proof of concept for SeDuMi format
+**Context**: Validate approach before full implementation
 
-## Maintenance Tasks (As Needed)
+**Steps**:
+1. Create experimental ProblemData class with SeDuMi format
+2. Implement converter from current format to SeDuMi format
+3. Test with one DIMACS problem (nb) and one SDPLIB problem (arch0)
+4. Verify CVXPY solver can handle converted problems
+5. Compare results between old and new format
 
-### **External Library Updates**
-**When**: As new versions of DIMACS/SDPLIB become available
-- Update problem submodules to latest versions
-- Validate new/changed problems
-- Update known objective values if available
+**Test Criteria**:
+- [ ] Experimental class successfully created
+- [ ] Conversion preserves problem semantics
+- [ ] Solver produces identical results with both formats
+- [ ] No performance regression observed
 
-### **Solver Updates**  
-**When**: New solver backends become available or existing ones need updates
-- Test new CVXPY-supported solvers
-- Update solver version dependencies
-- Validate compatibility with existing problems
-
-### **Platform Compatibility**
-**When**: Testing on new platforms or Python versions
-- Verify solver installation across platforms
-- Test GitHub Actions on different runners
-- Update CI/CD configurations as needed
+**Definition of Done**: Working proof of concept with verified results
 
 ---
 
-## Future Enhancement Opportunities
+## Analysis Requirements (Per conventions.md)
 
-### **Advanced Analysis Features** (Optional)
-- Convergence analysis for iterative solvers
-- Memory usage profiling
-- Parallel solver execution
-- Advanced statistical analysis of results
+### **Sequential Execution Protocol**
+1. **Complete Task 1 first** - Full analysis before any implementation
+2. **Stop for user approval** after each task completion
+3. **No implementation** until analysis is complete and approved
+4. **Risk assessment** at each step to protect production system
 
-### **Problem Set Extensions** (Optional)  
-- Additional external problem libraries
-- Industry-specific problem collections
-- Larger-scale problems for scalability testing
+### **Success Criteria for Analysis Phase**
+- **Impact Assessment**: Clear understanding of refactoring scope and risks
+- **Compatibility Verification**: Proof that SeDuMi format works with all current problems
+- **Migration Plan**: Step-by-step approach with risk mitigation
+- **Proof of Concept**: Small-scale validation of approach
 
-### **Reporting Enhancements** (Optional)
-- Interactive dashboards with filtering
-- Real-time benchmark monitoring
-- Automated performance regression detection
-- LaTeX report generation for academic publications
-
----
-
-## Testing Protocol
-
-**Regular Validation**:
-```bash
-# Environment validation
-python main.py --validate
-
-# Quick dry-run test
-python main.py --benchmark --problems nb --dry-run
-
-# Full system test
-python main.py --benchmark --library_names DIMACS --solvers cvxpy_clarabel
-
-# Report generation test  
-python main.py --report
-```
-
-**Performance Monitoring**:
-```bash
-# Monitor benchmark performance
-time python main.py --benchmark --problems nb,arch0 --solvers cvxpy_clarabel,cvxpy_scs
-
-# Monitor report generation
-time python main.py --report
-```
+### **Risk Mitigation**
+- **Preserve Current System**: All analysis done without breaking existing functionality
+- **Gradual Approach**: No big-bang refactoring, incremental changes only
+- **Validation at Each Step**: Comprehensive testing before proceeding
+- **Rollback Capability**: Ability to revert if issues discovered
 
 ---
 
 ## Dependencies & Prerequisites
 
-**Current Production Environment**:
-- Python 3.12+
-- Complete CVXPY ecosystem (CLARABEL, SCS, ECOS, OSQP, CVXOPT, SDPA, SCIP, HiGHS)
-- DIMACS and SDPLIB problem libraries
-- SQLite database with memo column support
+**Current System Requirements**:
+- Production-ready system with 139+ working problems
+- Stable MAT/DAT loader architecture
+- Working CVXPY integration with 9 solvers
+- Complete testing infrastructure
 
-**Development Environment**:
-- All production dependencies
-- Git access for documentation updates
-- Testing tools for performance analysis
+**Analysis Requirements**:
+- Deep understanding of current ProblemData usage patterns
+- Knowledge of SeDuMi format requirements
+- Compatibility verification with external libraries
+- Performance impact assessment
 
 ---
 
 ## Success Criteria
 
-**System Stability**:
-- All validation tests pass consistently
-- No regressions in existing functionality
-- Documentation accuracy maintained
+**Analysis Completion**:
+- Complete understanding of current system dependencies
+- Verified compatibility of SeDuMi format with all problem types
+- Detailed migration plan with risk assessment
+- Proof of concept demonstrating feasibility
 
-**Performance Standards**:
-- Benchmark execution within expected time bounds
-- Report generation completes successfully
-- Database operations remain efficient
-
-**Code Quality**:
-- Clean architecture maintained
-- External-only problem focus preserved
-- Testing infrastructure remains functional
+**Decision Point**:
+- Clear recommendation on whether to proceed with refactoring
+- If proceeding: detailed implementation plan with milestones
+- If not proceeding: alternative approaches or modifications to original request
 
 ---
 
-## Notes
+## Important Notes
 
-**Current Architecture Strengths**:
-- Simplified and maintainable codebase
-- Focus on real-world optimization problems
-- Comprehensive solver coverage
-- Robust testing infrastructure with dry-run mode
-- Clean separation of concerns
+**Per conventions.md Requirements**:
+- **One task at a time**: Complete Task 1 before proceeding to Task 2
+- **User approval required**: Stop after each task for approval before continuing
+- **Production system protection**: No changes that risk current functionality
+- **Comprehensive testing**: Validate all assumptions before implementation
 
-**System is Production-Ready**: The benchmark system successfully provides meaningful public reporting with external problem libraries and comprehensive solver support. Current tasks focus on maintenance and optimization rather than major feature development.
+**This analysis phase ensures that the user's requested ProblemData unification is technically sound and implementable without risking the current production-ready system.**
 
 ---
 
-*System Status: Production Ready ✅ | Focus: Maintenance & Optimization*
+*Task Status: Ready for Task 1 - Analysis Phase*  
+*Next Action: Begin comprehensive ProblemData usage analysis*
