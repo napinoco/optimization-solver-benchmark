@@ -383,7 +383,7 @@ class CvxpySolver(SolverInterface):
                 "ECOS": self._get_package_version("ecos"),
                 "OSQP": self._get_package_version("osqp"),
                 "CVXOPT": self._get_package_version("cvxopt"),
-                "SDPA": self._get_package_version("sdpa"),
+                "SDPA": self._get_package_version("sdpa-python"),
                 "SCIP": self._get_package_version("pyscipopt"),
                 "HIGHS": self._get_package_version("highspy")
             }

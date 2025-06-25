@@ -8,6 +8,7 @@ Extracts latest results using commit_hash and environment_info with timestamp ti
 
 import sqlite3
 import json
+import yaml
 from pathlib import Path
 from typing import List, Dict, Any, Optional
 from dataclasses import dataclass
@@ -101,6 +102,16 @@ class ResultProcessor:
         
         self.db_path = str(db_path)
         self.logger = get_logger("result_processor")
+    
+    def _load_problem_registry(self) -> Dict[str, Any]:
+        """Load problem registry from config/problem_registry.yaml"""
+        try:
+            config_path = project_root / "config" / "problem_registry.yaml"
+            with open(config_path, 'r') as f:
+                return yaml.safe_load(f)
+        except Exception as e:
+            self.logger.warning(f"Failed to load problem registry: {e}")
+            return {'problem_libraries': {}}
     
     def get_latest_results_for_reporting(self) -> List[BenchmarkResult]:
         """
@@ -244,16 +255,102 @@ class ResultProcessor:
         
         return comparison_data
     
+    def get_solver_comparison_by_problem_type(self, results: List[BenchmarkResult]) -> Dict[str, List[Dict[str, Any]]]:
+        """Generate solver comparison data grouped by problem type"""
+        
+        # Group results by problem type
+        by_problem_type = {}
+        for result in results:
+            problem_type = result.problem_type or 'UNKNOWN'
+            if problem_type not in by_problem_type:
+                by_problem_type[problem_type] = []
+            by_problem_type[problem_type].append(result)
+        
+        # Generate comparison for each problem type
+        comparison_by_type = {}
+        for problem_type, type_results in by_problem_type.items():
+            solver_stats = {}
+            
+            for result in type_results:
+                solver = result.solver_name
+                if solver not in solver_stats:
+                    solver_stats[solver] = {
+                        'solver_name': solver,
+                        'problem_type': problem_type,
+                        'problems_attempted': 0,
+                        'problems_solved': 0,
+                        'solve_times': []
+                    }
+                
+                solver_stats[solver]['problems_attempted'] += 1
+                
+                if result.status and result.status.upper() == 'OPTIMAL':
+                    solver_stats[solver]['problems_solved'] += 1
+                
+                if result.solve_time is not None and result.solve_time > 0:
+                    solver_stats[solver]['solve_times'].append(result.solve_time)
+            
+            # Calculate derived statistics for this problem type
+            type_comparison = []
+            for solver_name, stats in solver_stats.items():
+                times = stats['solve_times']
+                
+                type_comparison.append({
+                    'solver_name': solver_name,
+                    'problem_type': problem_type,
+                    'problems_attempted': stats['problems_attempted'],
+                    'problems_solved': stats['problems_solved'],
+                    'success_rate': stats['problems_solved'] / stats['problems_attempted'] if stats['problems_attempted'] > 0 else 0.0,
+                    'avg_solve_time': sum(times) / len(times) if times else 0.0,
+                    'min_solve_time': min(times) if times else 0.0,
+                    'max_solve_time': max(times) if times else 0.0
+                })
+            
+            # Sort by success rate, then by average solve time
+            type_comparison.sort(key=lambda x: (-x['success_rate'], x['avg_solve_time']))
+            comparison_by_type[problem_type] = type_comparison
+        
+        return comparison_by_type
+    
     def get_results_matrix(self, results: List[BenchmarkResult]) -> Dict[str, Any]:
-        """Generate problems × solvers matrix data"""
+        """Generate problems × solvers matrix data with enhanced metadata and sorting"""
         
         # Get unique problems and solvers
-        problems = sorted(set(r.problem_name for r in results))
+        unique_problems = set(r.problem_name for r in results)
         solvers = sorted(set(r.solver_name for r in results))
         
-        # Create matrix
+        # Load problem registry to get known objective values
+        problem_registry = self._load_problem_registry()
+        
+        # Build problem metadata dictionary
+        problem_metadata = {}
+        for result in results:
+            if result.problem_name not in problem_metadata:
+                # Get known objective value from problem registry
+                known_objective = None
+                if result.problem_name in problem_registry.get('problem_libraries', {}):
+                    known_objective = problem_registry['problem_libraries'][result.problem_name].get('known_objective_value')
+                
+                problem_metadata[result.problem_name] = {
+                    'problem_name': result.problem_name,
+                    'problem_type': result.problem_type or 'UNKNOWN',
+                    'library_name': result.problem_library or 'unknown',
+                    'known_objective_value': known_objective
+                }
+        
+        # Sort problems by library_name, problem_type, problem_name
+        problems_sorted = sorted(
+            unique_problems,
+            key=lambda p: (
+                problem_metadata[p]['library_name'],
+                problem_metadata[p]['problem_type'], 
+                problem_metadata[p]['problem_name']
+            )
+        )
+        
+        # Create matrix with problem metadata
         matrix = {}
-        for problem in problems:
+        for problem in problems_sorted:
             matrix[problem] = {}
             for solver in solvers:
                 matrix[problem][solver] = None
@@ -271,9 +368,10 @@ class ResultProcessor:
             }
         
         return {
-            'problems': problems,
+            'problems': problems_sorted,
             'solvers': solvers,
-            'matrix': matrix
+            'matrix': matrix,
+            'problem_metadata': problem_metadata
         }
 
 
