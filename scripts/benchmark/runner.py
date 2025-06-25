@@ -160,7 +160,8 @@ class BenchmarkRunner:
         return loader.load(str(file_path))
     
     def store_result(self, solver_name: str, problem_name: str, 
-                    result: SolverResult, problem_config: Dict[str, Any]) -> None:
+                    result: SolverResult, problem_config: Dict[str, Any], 
+                    problem_data=None) -> None:
         """
         Store result in database using simplified schema.
         
@@ -169,11 +170,21 @@ class BenchmarkRunner:
             problem_name: Name of the problem  
             result: Standardized solver result
             problem_config: Problem configuration for metadata
+            problem_data: Optional problem data for type detection
         """
         try:
             # Determine problem library and type
             problem_library = problem_config.get('library_name', 'internal')
-            problem_type = problem_config.get('problem_type', 'UNKNOWN')
+            
+            # Get problem type from actual problem data (most reliable)
+            if problem_data and hasattr(problem_data, 'problem_class'):
+                problem_type = problem_data.problem_class
+            elif hasattr(result, 'additional_info') and result.additional_info:
+                # Try to get problem class from solver result
+                problem_type = result.additional_info.get('problem_class', 'UNKNOWN')
+            else:
+                # Fallback to config, then to UNKNOWN
+                problem_type = problem_config.get('problem_type', 'UNKNOWN')
             
             # Skip database operations in dry-run mode
             if self.dry_run:
@@ -265,10 +276,14 @@ class BenchmarkRunner:
             result.solver_name = solver_name
             result.solver_version = solver.get_version()
             
-            # Store result in database
-            self.store_result(solver_name, problem_name, result, problem_config)
+            # Store result in database with problem data for type detection
+            self.store_result(solver_name, problem_name, result, problem_config, problem_data)
             
-            logger.info(f"Completed {solver_name} on {problem_name}: {result.status} in {solve_time:.3f}s")
+            # Enhanced logging with computation time and optimal value
+            if result.primal_objective_value is not None:
+                logger.info(f"Completed {solver_name} on {problem_name}: {result.status} in {solve_time:.3f}s, objective: {result.primal_objective_value:.6e}")
+            else:
+                logger.info(f"Completed {solver_name} on {problem_name}: {result.status} in {solve_time:.3f}s")
             
         except Exception as e:
             error_msg = f"Benchmark execution failed: {str(e)}"

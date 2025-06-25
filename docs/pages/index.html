@@ -193,7 +193,7 @@
     <header>
         <h1>🔬 Optimization Solver Benchmark</h1>
         <p>Overview Dashboard - Latest Results</p>
-        <p><small>Generated: 2025-06-25 08:43:43</small></p>
+        <p><small>Generated: 2025-06-25 09:48:05</small></p>
     </header>
     
     <nav>
@@ -208,7 +208,7 @@
         <div class="stats-grid">
             <div class="stat-card">
                 <h3>Total Results</h3>
-                <span class="stat-value">40</span>
+                <span class="stat-value">41</span>
             </div>
             <div class="stat-card">
                 <h3>Solvers Tested</h3>
@@ -220,17 +220,14 @@
             </div>
             <div class="stat-card">
                 <h3>Success Rate</h3>
-                <span class="stat-value">67.5%</span>
-            </div>
-            <div class="stat-card">
-                <h3>Avg Solve Time</h3>
-                <span class="stat-value">946.327s</span>
+                <span class="stat-value">68.3%</span>
             </div>
         </div>
 
         <div class="section">
-            <h2>🏆 Solver Comparison</h2>
+            <h2>🏆 Solver Comparison by Problem Type</h2>
             <div class="section-content">
+                <h3>UNKNOWN Problems</h3>
                 <table>
                     <thead>
                         <tr>
@@ -239,94 +236,132 @@
                             <th>Problems Solved</th>
                             <th>Success Rate</th>
                             <th>Avg Solve Time</th>
-                            <th>Min Time</th>
-                            <th>Max Time</th>
                         </tr>
                     </thead>
                     <tbody>
-            <tr>
-                <td><strong>cvxpy_sdpa</strong></td>
-                <td>5</td>
-                <td>5</td>
-                <td class="success-rate">100.0%</td>
-                <td class="solve-time">17.8761s</td>
-                <td class="solve-time">1.3062s</td>
-                <td class="solve-time">79.0268s</td>
-            </tr>
-            <tr>
-                <td><strong>cvxpy_scip</strong></td>
-                <td>2</td>
-                <td>2</td>
-                <td class="success-rate">100.0%</td>
-                <td class="solve-time">24.1937s</td>
-                <td class="solve-time">0.0051s</td>
-                <td class="solve-time">48.3824s</td>
-            </tr>
-            <tr>
-                <td><strong>cvxpy_cvxopt</strong></td>
-                <td>5</td>
-                <td>5</td>
-                <td class="success-rate">100.0%</td>
-                <td class="solve-time">177.6611s</td>
-                <td class="solve-time">1.3184s</td>
-                <td class="solve-time">880.0795s</td>
-            </tr>
-            <tr>
-                <td><strong>cvxpy_scs</strong></td>
-                <td>5</td>
-                <td>5</td>
-                <td class="success-rate">100.0%</td>
-                <td class="solve-time">7343.7096s</td>
-                <td class="solve-time">1.1491s</td>
-                <td class="solve-time">36704.0342s</td>
-            </tr>
-            <tr>
-                <td><strong>cvxpy_ecos</strong></td>
-                <td>6</td>
-                <td>5</td>
-                <td class="success-rate">83.3%</td>
-                <td class="solve-time">1.2441s</td>
-                <td class="solve-time">0.0000s</td>
-                <td class="solve-time">1.9609s</td>
-            </tr>
-            <tr>
-                <td><strong>cvxpy_clarabel</strong></td>
-                <td>5</td>
-                <td>4</td>
-                <td class="success-rate">80.0%</td>
-                <td class="solve-time">20.1981s</td>
-                <td class="solve-time">1.5330s</td>
-                <td class="solve-time">48.1399s</td>
-            </tr>
-            <tr>
-                <td><strong>cvxpy_highs</strong></td>
-                <td>2</td>
-                <td>1</td>
-                <td class="success-rate">50.0%</td>
-                <td class="solve-time">0.0020s</td>
-                <td class="solve-time">0.0001s</td>
-                <td class="solve-time">0.0039s</td>
-            </tr>
-            <tr>
-                <td><strong>cvxpy_osqp</strong></td>
-                <td>5</td>
-                <td>0</td>
-                <td class="success-rate">0.0%</td>
-                <td class="solve-time">0.0000s</td>
-                <td class="solve-time">0.0000s</td>
-                <td class="solve-time">0.0001s</td>
-            </tr>
-            <tr>
-                <td><strong>scipy_linprog</strong></td>
-                <td>5</td>
-                <td>0</td>
-                <td class="success-rate">0.0%</td>
-                <td class="solve-time">0.0000s</td>
-                <td class="solve-time">0.0000s</td>
-                <td class="solve-time">0.0001s</td>
-            </tr>
+                <tr>
+                    <td><strong>cvxpy_scip</strong></td>
+                    <td>2</td>
+                    <td>2</td>
+                    <td class="success-rate">100.0%</td>
+                    <td class="solve-time">24.1937s</td>
+                </tr>
+                <tr>
+                    <td><strong>cvxpy_sdpa</strong></td>
+                    <td>3</td>
+                    <td>3</td>
+                    <td class="success-rate">100.0%</td>
+                    <td class="solve-time">27.5460s</td>
+                </tr>
+                <tr>
+                    <td><strong>cvxpy_cvxopt</strong></td>
+                    <td>4</td>
+                    <td>4</td>
+                    <td class="success-rate">100.0%</td>
+                    <td class="solve-time">221.7061s</td>
+                </tr>
+                <tr>
+                    <td><strong>cvxpy_scs</strong></td>
+                    <td>4</td>
+                    <td>4</td>
+                    <td class="success-rate">100.0%</td>
+                    <td class="solve-time">9178.6358s</td>
+                </tr>
+                <tr>
+                    <td><strong>cvxpy_ecos</strong></td>
+                    <td>5</td>
+                    <td>4</td>
+                    <td class="success-rate">80.0%</td>
+                    <td class="solve-time">1.2635s</td>
+                </tr>
+                <tr>
+                    <td><strong>cvxpy_clarabel</strong></td>
+                    <td>4</td>
+                    <td>3</td>
+                    <td class="success-rate">75.0%</td>
+                    <td class="solve-time">24.7142s</td>
+                </tr>
+                <tr>
+                    <td><strong>cvxpy_highs</strong></td>
+                    <td>2</td>
+                    <td>1</td>
+                    <td class="success-rate">50.0%</td>
+                    <td class="solve-time">0.0020s</td>
+                </tr>
+                <tr>
+                    <td><strong>cvxpy_osqp</strong></td>
+                    <td>5</td>
+                    <td>0</td>
+                    <td class="success-rate">0.0%</td>
+                    <td class="solve-time">0.0000s</td>
+                </tr>
+                <tr>
+                    <td><strong>scipy_linprog</strong></td>
+                    <td>5</td>
+                    <td>0</td>
+                    <td class="success-rate">0.0%</td>
+                    <td class="solve-time">0.0000s</td>
+                </tr>
                     </tbody>
                 </table>
+                <br>
+                <h3>SOCP Problems</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Solver</th>
+                            <th>Problems Attempted</th>
+                            <th>Problems Solved</th>
+                            <th>Success Rate</th>
+                            <th>Avg Solve Time</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                <tr>
+                    <td><strong>cvxpy_ecos</strong></td>
+                    <td>1</td>
+                    <td>1</td>
+                    <td class="success-rate">100.0%</td>
+                    <td class="solve-time">2.0738s</td>
+                </tr>
+                <tr>
+                    <td><strong>cvxpy_clarabel</strong></td>
+                    <td>1</td>
+                    <td>1</td>
+                    <td class="success-rate">100.0%</td>
+                    <td class="solve-time">2.3709s</td>
+                </tr>
+                <tr>
+                    <td><strong>cvxpy_cvxopt</strong></td>
+                    <td>1</td>
+                    <td>1</td>
+                    <td class="success-rate">100.0%</td>
+                    <td class="solve-time">2.5139s</td>
+                </tr>
+                <tr>
+                    <td><strong>cvxpy_scs</strong></td>
+                    <td>1</td>
+                    <td>1</td>
+                    <td class="success-rate">100.0%</td>
+                    <td class="solve-time">4.1585s</td>
+                </tr>
+                <tr>
+                    <td><strong>cvxpy_sdpa</strong></td>
+                    <td>2</td>
+                    <td>2</td>
+                    <td class="success-rate">100.0%</td>
+                    <td class="solve-time">8.8149s</td>
+                </tr>
+                <tr>
+                    <td><strong>cvxpy_scip</strong></td>
+                    <td>1</td>
+                    <td>1</td>
+                    <td class="success-rate">100.0%</td>
+                    <td class="solve-time">48.2575s</td>
+                </tr>
+                    </tbody>
+                </table>
+                <br>
             </div>
         </div>
 
@@ -344,8 +379,13 @@
                     <tbody>
             <tr>
                 <td><strong>UNKNOWN</strong></td>
-                <td>40</td>
-                <td>100.0%</td>
+                <td>34</td>
+                <td>82.9%</td>
+            </tr>
+            <tr>
+                <td><strong>SOCP</strong></td>
+                <td>7</td>
+                <td>17.1%</td>
             </tr>
                     </tbody>
                 </table>
@@ -366,13 +406,13 @@
                     <tbody>
             <tr>
                 <td><strong>DIMACS</strong></td>
-                <td>38</td>
-                <td>95.0%</td>
+                <td>39</td>
+                <td>95.1%</td>
             </tr>
             <tr>
                 <td><strong>internal</strong></td>
                 <td>2</td>
-                <td>5.0%</td>
+                <td>4.9%</td>
             </tr>
                     </tbody>
                 </table>
