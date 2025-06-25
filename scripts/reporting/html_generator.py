@@ -201,6 +201,7 @@ class HTMLGenerator:
         # Get summary statistics
         summary = self.result_processor.get_summary_statistics(results)
         solver_comparison = self.result_processor.get_solver_comparison(results)
+        solver_comparison_by_type = self.result_processor.get_solver_comparison_by_problem_type(results)
         
         # Generate environment info from latest result
         if results:
@@ -439,15 +440,16 @@ class HTMLGenerator:
                 <h3>Success Rate</h3>
                 <span class="stat-value">{summary['success_rate']:.1%}</span>
             </div>
-            <div class="stat-card">
-                <h3>Avg Solve Time</h3>
-                <span class="stat-value">{summary['avg_solve_time']:.3f}s</span>
-            </div>
         </div>
 
         <div class="section">
-            <h2>🏆 Solver Comparison</h2>
-            <div class="section-content">
+            <h2>🏆 Solver Comparison by Problem Type</h2>
+            <div class="section-content">"""
+        
+        # Generate comparison tables for each problem type
+        for problem_type, type_solvers in solver_comparison_by_type.items():
+            html_content += f"""
+                <h3>{problem_type} Problems</h3>
                 <table>
                     <thead>
                         <tr>
@@ -456,27 +458,26 @@ class HTMLGenerator:
                             <th>Problems Solved</th>
                             <th>Success Rate</th>
                             <th>Avg Solve Time</th>
-                            <th>Min Time</th>
-                            <th>Max Time</th>
                         </tr>
                     </thead>
                     <tbody>"""
-        
-        for solver in solver_comparison:
+            
+            for solver in type_solvers:
+                html_content += f"""
+                <tr>
+                    <td><strong>{solver['solver_name']}</strong></td>
+                    <td>{solver['problems_attempted']}</td>
+                    <td>{solver['problems_solved']}</td>
+                    <td class="success-rate">{solver['success_rate']:.1%}</td>
+                    <td class="solve-time">{solver['avg_solve_time']:.4f}s</td>
+                </tr>"""
+            
             html_content += f"""
-            <tr>
-                <td><strong>{solver['solver_name']}</strong></td>
-                <td>{solver['problems_attempted']}</td>
-                <td>{solver['problems_solved']}</td>
-                <td class="success-rate">{solver['success_rate']:.1%}</td>
-                <td class="solve-time">{solver['avg_solve_time']:.4f}s</td>
-                <td class="solve-time">{solver['min_solve_time']:.4f}s</td>
-                <td class="solve-time">{solver['max_solve_time']:.4f}s</td>
-            </tr>"""
-        
-        html_content += f"""
                     </tbody>
                 </table>
+                <br>"""
+        
+        html_content += f"""
             </div>
         </div>
 
@@ -574,6 +575,7 @@ class HTMLGenerator:
         problems = matrix_data['problems']
         solvers = matrix_data['solvers']
         matrix = matrix_data['matrix']
+        problem_metadata = matrix_data['problem_metadata']
         
         # Copy the same CSS from overview
         css_styles = """
@@ -715,6 +717,13 @@ class HTMLGenerator:
             font-family: 'Courier New', monospace;
         }
         
+        .objective-value {
+            font-size: 0.8em;
+            color: #2980b9;
+            font-family: 'Courier New', monospace;
+            font-weight: 500;
+        }
+        
         .legend {
             margin: 2rem 0;
             padding: 1.5rem;
@@ -783,7 +792,10 @@ class HTMLGenerator:
                 <table class="matrix-table">
                     <thead>
                         <tr>
-                            <th>Problem</th>"""
+                            <th>Problem</th>
+                            <th>Type</th>
+                            <th>Library</th>
+                            <th>Known Objective</th>"""
         
         for solver in solvers:
             html_content += f"<th>{solver}</th>"
@@ -794,9 +806,16 @@ class HTMLGenerator:
                     <tbody>"""
         
         for problem in problems:
+            metadata = problem_metadata[problem]
+            known_obj = metadata['known_objective_value']
+            known_obj_str = f"{known_obj:.6f}" if known_obj is not None else "—"
+            
             html_content += f"""
             <tr>
-                <td class="problem-name">{problem}</td>"""
+                <td class="problem-name">{problem}</td>
+                <td>{metadata['problem_type']}</td>
+                <td>{metadata['library_name']}</td>
+                <td>{known_obj_str}</td>"""
             
             for solver in solvers:
                 result = matrix[problem][solver]
@@ -821,6 +840,16 @@ class HTMLGenerator:
                     cell_content = status.upper()
                     if solve_time is not None and solve_time > 0:
                         cell_content += f'<br><span class="solve-time">{solve_time:.3f}s</span>'
+                    
+                    # Add objective value if available
+                    if result['objective_value'] is not None:
+                        obj_val = result['objective_value']
+                        if abs(obj_val) >= 1000 or abs(obj_val) <= 0.001 and obj_val != 0:
+                            # Use scientific notation for very large or very small numbers
+                            cell_content += f'<br><span class="objective-value">{obj_val:.2e}</span>'
+                        else:
+                            # Use regular notation for normal range numbers
+                            cell_content += f'<br><span class="objective-value">{obj_val:.6f}</span>'
                     
                     html_content += f'<td class="{css_class}">{cell_content}</td>'
             
@@ -1078,6 +1107,7 @@ class HTMLGenerator:
                     <thead>
                         <tr>
                             <th>Solver</th>
+                            <th>Version</th>
                             <th>Problem</th>
                             <th>Type</th>
                             <th>Library</th>
@@ -1091,7 +1121,17 @@ class HTMLGenerator:
                     </thead>
                     <tbody>"""
         
-        for result in results:
+        # Sort results by library_name, problem_type, problem_name
+        sorted_results = sorted(
+            results,
+            key=lambda r: (
+                r.problem_library or 'zzz',  # Put None/empty at end
+                r.problem_type or 'zzz',      # Put None/empty at end
+                r.problem_name or 'zzz'       # Put None/empty at end
+            )
+        )
+        
+        for result in sorted_results:
             # Format values
             solve_time = f"{result.solve_time:.4f}" if result.solve_time is not None else "—"
             objective = f"{result.primal_objective_value:.6e}" if result.primal_objective_value is not None else "—"
@@ -1114,6 +1154,7 @@ class HTMLGenerator:
             html_content += f"""
             <tr>
                 <td><span class="solver-name">{result.solver_name}</span></td>
+                <td><span class="solver-version">{result.solver_version or '—'}</span></td>
                 <td>{result.problem_name}</td>
                 <td><span class="problem-type">{result.problem_type}</span></td>
                 <td><span class="library-name">{result.problem_library}</span></td>
