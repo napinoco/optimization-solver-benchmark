@@ -144,6 +144,13 @@
             font-family: 'Courier New', monospace;
         }
         
+        .objective-value {
+            font-size: 0.8em;
+            color: #2980b9;
+            font-family: 'Courier New', monospace;
+            font-weight: 500;
+        }
+        
         .legend {
             margin: 2rem 0;
             padding: 1.5rem;
@@ -185,7 +192,7 @@
     <header>
         <h1>🔬 Optimization Solver Benchmark</h1>
         <p>Results Matrix - Problems × Solvers</p>
-        <p><small>Generated: 2025-06-25 08:43:43</small></p>
+        <p><small>Generated: 2025-06-25 09:48:05</small></p>
     </header>
     
     <nav>
@@ -203,22 +210,43 @@
                 <table class="matrix-table">
                     <thead>
                         <tr>
-                            <th>Problem</th><th>cvxpy_clarabel</th><th>cvxpy_cvxopt</th><th>cvxpy_ecos</th><th>cvxpy_highs</th><th>cvxpy_osqp</th><th>cvxpy_scip</th><th>cvxpy_scs</th><th>cvxpy_sdpa</th><th>scipy_linprog</th>
+                            <th>Problem</th>
+                            <th>Type</th>
+                            <th>Library</th>
+                            <th>Known Objective</th><th>cvxpy_clarabel</th><th>cvxpy_cvxopt</th><th>cvxpy_ecos</th><th>cvxpy_highs</th><th>cvxpy_osqp</th><th>cvxpy_scip</th><th>cvxpy_scs</th><th>cvxpy_sdpa</th><th>scipy_linprog</th>
                         </tr>
                     </thead>
                     <tbody>
             <tr>
-                <td class="problem-name">bm1</td><td class="status-error">ERROR<br><span class="solve-time">48.140s</span></td><td class="status-optimal">OPTIMAL<br><span class="solve-time">880.079s</span></td><td class="status-error">ERROR<br><span class="solve-time">0.000s</span></td><td class="status-unknown">—</td><td class="status-error">ERROR<br><span class="solve-time">0.000s</span></td><td class="status-unknown">—</td><td class="status-optimal">OPTIMAL<br><span class="solve-time">36704.034s</span></td><td class="status-optimal">OPTIMAL<br><span class="solve-time">79.027s</span></td><td class="status-error">ERROR<br><span class="solve-time">0.000s</span></td></tr>
+                <td class="problem-name">nb</td>
+                <td>SOCP</td>
+                <td>DIMACS</td>
+                <td>-0.050703</td><td class="status-optimal">OPTIMAL<br><span class="solve-time">2.371s</span><br><span class="objective-value">-0.050703</span></td><td class="status-optimal">OPTIMAL<br><span class="solve-time">2.514s</span><br><span class="objective-value">-0.050703</span></td><td class="status-optimal">OPTIMAL<br><span class="solve-time">2.074s</span><br><span class="objective-value">-0.050703</span></td><td class="status-error">ERROR<br><span class="solve-time">0.000s</span></td><td class="status-error">ERROR<br><span class="solve-time">0.000s</span></td><td class="status-optimal">OPTIMAL<br><span class="solve-time">48.258s</span><br><span class="objective-value">-0.050703</span></td><td class="status-optimal">OPTIMAL<br><span class="solve-time">4.158s</span><br><span class="objective-value">-0.050701</span></td><td class="status-optimal">OPTIMAL<br><span class="solve-time">5.959s</span><br><span class="objective-value">-1.877217</span></td><td class="status-error">ERROR<br><span class="solve-time">0.000s</span></td></tr>
             <tr>
-                <td class="problem-name">nb</td><td class="status-optimal">OPTIMAL<br><span class="solve-time">2.134s</span></td><td class="status-optimal">OPTIMAL<br><span class="solve-time">1.481s</span></td><td class="status-optimal">OPTIMAL<br><span class="solve-time">1.147s</span></td><td class="status-error">ERROR<br><span class="solve-time">0.000s</span></td><td class="status-error">ERROR<br><span class="solve-time">0.000s</span></td><td class="status-optimal">OPTIMAL<br><span class="solve-time">48.382s</span></td><td class="status-optimal">OPTIMAL<br><span class="solve-time">4.005s</span></td><td class="status-optimal">OPTIMAL<br><span class="solve-time">5.218s</span></td><td class="status-error">ERROR<br><span class="solve-time">0.000s</span></td></tr>
+                <td class="problem-name">bm1</td>
+                <td>UNKNOWN</td>
+                <td>DIMACS</td>
+                <td>23.443400</td><td class="status-error">ERROR<br><span class="solve-time">48.140s</span></td><td class="status-optimal">OPTIMAL<br><span class="solve-time">880.079s</span><br><span class="objective-value">23.439801</span></td><td class="status-error">ERROR<br><span class="solve-time">0.000s</span></td><td class="status-unknown">—</td><td class="status-error">ERROR<br><span class="solve-time">0.000s</span></td><td class="status-unknown">—</td><td class="status-optimal">OPTIMAL<br><span class="solve-time">36704.034s</span><br><span class="objective-value">23.592063</span></td><td class="status-optimal">OPTIMAL<br><span class="solve-time">79.027s</span><br><span class="objective-value">23.439818</span></td><td class="status-error">ERROR<br><span class="solve-time">0.000s</span></td></tr>
             <tr>
-                <td class="problem-name">nb_L1</td><td class="status-optimal">OPTIMAL<br><span class="solve-time">1.533s</span></td><td class="status-optimal">OPTIMAL<br><span class="solve-time">3.080s</span></td><td class="status-optimal">OPTIMAL<br><span class="solve-time">1.462s</span></td><td class="status-unknown">—</td><td class="status-error">ERROR<br><span class="solve-time">0.000s</span></td><td class="status-unknown">—</td><td class="status-optimal">OPTIMAL<br><span class="solve-time">7.499s</span></td><td class="status-optimal">OPTIMAL<br><span class="solve-time">1.525s</span></td><td class="status-error">ERROR<br><span class="solve-time">0.000s</span></td></tr>
+                <td class="problem-name">nb_L1</td>
+                <td>UNKNOWN</td>
+                <td>DIMACS</td>
+                <td>-13.012337</td><td class="status-optimal">OPTIMAL<br><span class="solve-time">1.533s</span><br><span class="objective-value">-13.012271</span></td><td class="status-optimal">OPTIMAL<br><span class="solve-time">3.080s</span><br><span class="objective-value">-13.012270</span></td><td class="status-optimal">OPTIMAL<br><span class="solve-time">1.462s</span><br><span class="objective-value">-13.012271</span></td><td class="status-unknown">—</td><td class="status-error">ERROR<br><span class="solve-time">0.000s</span></td><td class="status-unknown">—</td><td class="status-optimal">OPTIMAL<br><span class="solve-time">7.499s</span><br><span class="objective-value">-13.012200</span></td><td class="status-optimal">OPTIMAL<br><span class="solve-time">11.671s</span><br><span class="objective-value">-13.012153</span></td><td class="status-error">ERROR<br><span class="solve-time">0.000s</span></td></tr>
             <tr>
-                <td class="problem-name">nb_L2</td><td class="status-optimal">OPTIMAL<br><span class="solve-time">2.241s</span></td><td class="status-optimal">OPTIMAL<br><span class="solve-time">2.346s</span></td><td class="status-optimal">OPTIMAL<br><span class="solve-time">1.735s</span></td><td class="status-unknown">—</td><td class="status-error">ERROR<br><span class="solve-time">0.000s</span></td><td class="status-unknown">—</td><td class="status-optimal">OPTIMAL<br><span class="solve-time">1.861s</span></td><td class="status-optimal">OPTIMAL<br><span class="solve-time">2.305s</span></td><td class="status-error">ERROR<br><span class="solve-time">0.000s</span></td></tr>
+                <td class="problem-name">nb_L2</td>
+                <td>UNKNOWN</td>
+                <td>DIMACS</td>
+                <td>-1.628972</td><td class="status-optimal">OPTIMAL<br><span class="solve-time">2.241s</span><br><span class="objective-value">-1.628972</span></td><td class="status-optimal">OPTIMAL<br><span class="solve-time">2.346s</span><br><span class="objective-value">-1.628972</span></td><td class="status-optimal">OPTIMAL<br><span class="solve-time">1.735s</span><br><span class="objective-value">-1.628972</span></td><td class="status-unknown">—</td><td class="status-error">ERROR<br><span class="solve-time">0.000s</span></td><td class="status-unknown">—</td><td class="status-optimal">OPTIMAL<br><span class="solve-time">1.861s</span><br><span class="objective-value">-1.628982</span></td><td class="status-optimal">OPTIMAL<br><span class="solve-time">2.305s</span><br><span class="objective-value">-1.628972</span></td><td class="status-error">ERROR<br><span class="solve-time">0.000s</span></td></tr>
             <tr>
-                <td class="problem-name">nb_L2_bessel</td><td class="status-optimal">OPTIMAL<br><span class="solve-time">46.943s</span></td><td class="status-optimal">OPTIMAL<br><span class="solve-time">1.318s</span></td><td class="status-optimal">OPTIMAL<br><span class="solve-time">1.159s</span></td><td class="status-unknown">—</td><td class="status-error">ERROR<br><span class="solve-time">0.000s</span></td><td class="status-unknown">—</td><td class="status-optimal">OPTIMAL<br><span class="solve-time">1.149s</span></td><td class="status-optimal">OPTIMAL<br><span class="solve-time">1.306s</span></td><td class="status-error">ERROR<br><span class="solve-time">0.000s</span></td></tr>
+                <td class="problem-name">nb_L2_bessel</td>
+                <td>UNKNOWN</td>
+                <td>DIMACS</td>
+                <td>-0.102570</td><td class="status-optimal">OPTIMAL<br><span class="solve-time">46.943s</span><br><span class="objective-value">-0.102570</span></td><td class="status-optimal">OPTIMAL<br><span class="solve-time">1.318s</span><br><span class="objective-value">-0.102570</span></td><td class="status-optimal">OPTIMAL<br><span class="solve-time">1.159s</span><br><span class="objective-value">-0.102570</span></td><td class="status-unknown">—</td><td class="status-error">ERROR<br><span class="solve-time">0.000s</span></td><td class="status-unknown">—</td><td class="status-optimal">OPTIMAL<br><span class="solve-time">1.149s</span><br><span class="objective-value">-0.102571</span></td><td class="status-optimal">OPTIMAL<br><span class="solve-time">1.306s</span><br><span class="objective-value">-0.102570</span></td><td class="status-error">ERROR<br><span class="solve-time">0.000s</span></td></tr>
             <tr>
-                <td class="problem-name">simple_lp_test</td><td class="status-unknown">—</td><td class="status-unknown">—</td><td class="status-unknown">—</td><td class="status-optimal">OPTIMAL<br><span class="solve-time">0.004s</span></td><td class="status-unknown">—</td><td class="status-optimal">OPTIMAL<br><span class="solve-time">0.005s</span></td><td class="status-unknown">—</td><td class="status-unknown">—</td><td class="status-unknown">—</td></tr>
+                <td class="problem-name">simple_lp_test</td>
+                <td>UNKNOWN</td>
+                <td>internal</td>
+                <td>—</td><td class="status-unknown">—</td><td class="status-unknown">—</td><td class="status-unknown">—</td><td class="status-optimal">OPTIMAL<br><span class="solve-time">0.004s</span><br><span class="objective-value">0.000000</span></td><td class="status-unknown">—</td><td class="status-optimal">OPTIMAL<br><span class="solve-time">0.005s</span><br><span class="objective-value">0.000000</span></td><td class="status-unknown">—</td><td class="status-unknown">—</td><td class="status-unknown">—</td></tr>
                     </tbody>
                 </table>
             </div>

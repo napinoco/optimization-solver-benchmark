@@ -1,20 +1,21 @@
 {
   "metadata": {
-    "generated_at": "2025-06-25T08:43:43.391245",
-    "total_results": 40,
+    "generated_at": "2025-06-25T09:48:05.858961",
+    "total_results": 41,
     "format": "summary_only"
   },
   "overall_statistics": {
-    "total_results": 40,
+    "total_results": 41,
     "total_solvers": 9,
     "total_problems": 6,
-    "success_rate": 0.675,
-    "avg_solve_time": 946.3270222365857,
+    "success_rate": 0.6829268292682927,
+    "avg_solve_time": 924.7457687680314,
     "problem_type_distribution": {
-      "UNKNOWN": 40
+      "UNKNOWN": 34,
+      "SOCP": 7
     },
     "library_distribution": {
-      "DIMACS": 38,
+      "DIMACS": 39,
       "internal": 2
     },
     "solver_names": [
@@ -43,16 +44,16 @@
       "problems_attempted": 5,
       "problems_solved": 5,
       "success_rate": 1.0,
-      "avg_solve_time": 17.876109409332276,
+      "avg_solve_time": 20.053571271896363,
       "min_solve_time": 1.3061511516571045,
       "max_solve_time": 79.02675819396973
     },
     {
       "solver_name": "cvxpy_scip",
-      "problems_attempted": 2,
-      "problems_solved": 2,
+      "problems_attempted": 3,
+      "problems_solved": 3,
       "success_rate": 1.0,
-      "avg_solve_time": 24.193716526031494,
+      "avg_solve_time": 32.214994033177696,
       "min_solve_time": 0.005051851272583008,
       "max_solve_time": 48.382381200790405
     },
@@ -61,7 +62,7 @@
       "problems_attempted": 5,
       "problems_solved": 5,
       "success_rate": 1.0,
-      "avg_solve_time": 177.6611117839813,
+      "avg_solve_time": 177.8676633834839,
       "min_solve_time": 1.3183510303497314,
       "max_solve_time": 880.0794627666473
     },
@@ -70,7 +71,7 @@
       "problems_attempted": 5,
       "problems_solved": 5,
       "success_rate": 1.0,
-      "avg_solve_time": 7343.709583997726,
+      "avg_solve_time": 7343.74034819603,
       "min_solve_time": 1.1490800380706787,
       "max_solve_time": 36704.034167051315
     },
@@ -79,16 +80,16 @@
       "problems_attempted": 6,
       "problems_solved": 5,
       "success_rate": 0.8333333333333334,
-      "avg_solve_time": 1.244086503982544,
+      "avg_solve_time": 1.3985809882481892,
       "min_solve_time": 3.814697265625e-05,
-      "max_solve_time": 1.9608960151672363
+      "max_solve_time": 2.0737509727478027
     },
     {
       "solver_name": "cvxpy_clarabel",
       "problems_attempted": 5,
       "problems_solved": 4,
       "success_rate": 0.8,
-      "avg_solve_time": 20.198103523254396,
+      "avg_solve_time": 20.245548677444457,
       "min_solve_time": 1.5329699516296387,
       "max_solve_time": 48.13991713523865
     },
