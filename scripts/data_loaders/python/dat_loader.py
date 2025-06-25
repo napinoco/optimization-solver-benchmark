@@ -24,7 +24,7 @@ Where matno=0 is F0, matno=1,2,... are F1,F2,...
 
 import numpy as np
 from pathlib import Path
-from typing import Dict, List, Tuple, Optional, Any, Union
+from typing import Dict, List, Optional, Any
 import sys
 
 # Add project root to path for imports
@@ -121,7 +121,7 @@ class DATLoader:
                 raise ValueError(f"Objective vector length ({len(c)}) doesn't match m ({m})")
             
             # Parse matrix entries
-            matrices = {}
+            matrices = [[{'i': [], 'j': [], 'val': []} for _ in range(nblocks)] for _ in range(m + 1)]
             for line in data_lines[4:]:
                 parts = line.split()
                 if len(parts) >= 5:
@@ -130,16 +130,16 @@ class DATLoader:
                     i = int(parts[2])
                     j = int(parts[3])
                     value = float(parts[4])
-                    
-                    if matno not in matrices:
-                        matrices[matno] = {}
-                    if blkno not in matrices[matno]:
-                        matrices[matno][blkno] = {}
-                    if i not in matrices[matno][blkno]:
-                        matrices[matno][blkno][i] = {}
-                    
-                    matrices[matno][blkno][i][j] = value
-            
+
+                    matrices[matno][blkno - 1]['i'].append(i - 1)
+                    matrices[matno][blkno - 1]['j'].append(j - 1)
+                    matrices[matno][blkno - 1]['val'].append(value)
+                    if i != j:
+                        # Ensure symmetric entry is also stored
+                        matrices[matno][blkno - 1]['i'].append(j - 1)
+                        matrices[matno][blkno - 1]['j'].append(i - 1)
+                        matrices[matno][blkno - 1]['val'].append(value)
+
             parsed_data = {
                 'm': m,
                 'nblocks': nblocks,
@@ -155,99 +155,6 @@ class DATLoader:
             logger.error(f"Failed to parse {file_path}: {e}")
             raise
     
-    def build_constraint_matrices(self, parsed_data: Dict[str, Any]) -> Tuple[np.ndarray, np.ndarray]:
-        """
-        Build constraint matrices A and b from parsed SDPA data.
-        
-        Args:
-            parsed_data: Parsed SDPA problem data
-            
-        Returns:
-            Tuple of (A, b) matrices for the constraint Ax = b
-        """
-        m = parsed_data['m']
-        block_sizes = parsed_data['block_sizes']
-        matrices = parsed_data['matrices']
-        
-        # Calculate total variable dimension
-        n_vars = 0
-        block_starts = [0]
-        for block_size in block_sizes:
-            if block_size > 0:
-                # Symmetric matrix: n*(n+1)/2 variables (upper triangle)
-                n_vars += block_size * (block_size + 1) // 2
-            else:
-                # Diagonal matrix: |block_size| variables
-                n_vars += abs(block_size)
-            block_starts.append(n_vars)
-        
-        # Initialize constraint matrices
-        A = np.zeros((m, n_vars))
-        F0 = np.zeros(n_vars)  # F0 matrix vectorized
-        
-        # Build F0 vector from F0 (matno=0)
-        if 0 in matrices:
-            self._fill_constraint_vector(matrices[0], block_sizes, block_starts, F0)
-        
-        # Build A matrix from F1, F2, ..., Fm (matno=1,2,...,m)
-        for matno in range(1, m + 1):
-            if matno in matrices:
-                constraint_vector = np.zeros(n_vars)
-                self._fill_constraint_vector(matrices[matno], block_sizes, block_starts, constraint_vector)
-                A[matno - 1, :] = constraint_vector
-        
-        # In SDPA format: F1*x1 + F2*x2 + ... + Fm*xm - F0 = X
-        # Convert to standard form: Ax = b where b = vec(F0)
-        b = F0
-        return A, b
-    
-    def _fill_constraint_vector(self, matrix_data: Dict[int, Any], 
-                              block_sizes: List[int], 
-                              block_starts: List[int], 
-                              vector: np.ndarray):
-        """
-        Fill constraint vector from matrix data.
-        
-        Args:
-            matrix_data: Matrix data for one constraint
-            block_sizes: Block sizes
-            block_starts: Starting indices for each block
-            vector: Vector to fill (modified in place)
-        """
-        for blkno, block_data in matrix_data.items():
-            if blkno < 1 or blkno > len(block_sizes):
-                continue
-                
-            block_size = block_sizes[blkno - 1]  # SDPA uses 1-based indexing
-            block_start = block_starts[blkno - 1]
-            
-            for i, row_data in block_data.items():
-                for j, value in row_data.items():
-                    if block_size > 0:
-                        # Symmetric matrix case
-                        if i <= j:  # Upper triangle
-                            idx = self._symmetric_index(i - 1, j - 1, block_size)
-                            vector[block_start + idx] = value
-                    else:
-                        # Diagonal matrix case
-                        if i == j and i <= abs(block_size):
-                            vector[block_start + i - 1] = value
-    
-    def _symmetric_index(self, i: int, j: int, n: int) -> int:
-        """
-        Convert (i,j) position in symmetric matrix to vector index.
-        
-        Args:
-            i, j: Matrix indices (0-based)
-            n: Matrix size
-            
-        Returns:
-            Vector index for upper triangular storage
-        """
-        if i > j:
-            i, j = j, i  # Ensure i <= j for upper triangle
-        return i * n - i * (i + 1) // 2 + j
-    
     def analyze_block_structure(self, block_sizes: List[int]) -> Dict[str, Any]:
         """
         Analyze block structure to determine cone types.
@@ -260,21 +167,12 @@ class DATLoader:
             Dictionary with cone structure information in SeDuMi format
         """
         cone_info = {
-            'free_vars': 0,        # SeDuMi standard name
-            'nonneg_vars': 0,      # SeDuMi standard name  
-            'soc_cones': [],       # SeDuMi standard name
-            'sdp_cones': []        # SeDuMi standard name
+            'free_vars': 0,
+            'nonneg_vars': 0,
+            'soc_cones': [],
+            'sdp_cones': block_sizes
         }
-        
-        for block_size in block_sizes:
-            if block_size > 0:
-                # Positive size = SDP block
-                cone_info['sdp_cones'].append(block_size)
-            else:
-                # Negative size = diagonal (linear) block
-                # In SDPLIB, these are typically non-negative variables
-                cone_info['nonneg_vars'] += abs(block_size)
-        
+
         return cone_info
     
     def convert_to_problem_data(self, parsed_data: Dict[str, Any], 
@@ -289,38 +187,34 @@ class DATLoader:
         Returns:
             ProblemData object
         """
+
+        b = -parsed_data['c']
+
+        import scipy.sparse as sp
+        matrices = parsed_data['matrices']
+        block_sizes = parsed_data['block_sizes']
+        nblocks = parsed_data['nblocks']
+        m = parsed_data['m']
+
         # Build constraint matrices
-        A, b = self.build_constraint_matrices(parsed_data)
-        
-        # Fix: Build correct objective vector for variable space (not constraint space)
-        n_vars = A.shape[1]  # Number of decision variables 
-        m = A.shape[0]       # Number of constraints
-        
-        # SDPA format: min c1*x1 + c2*x2 + ... + cm*xm (c has length m)
-        # SeDuMi format: min c^T*x (c should have length n_vars)
-        # For SDP problems, we typically want to minimize trace, so c = 0 for structure vars
-        # and the SDPA objective coefficients become the RHS vector
-        c = np.zeros(n_vars)  # Initialize objective for decision variables
-        
-        # The SDPA objective coefficients are used differently:
-        # They represent the constraint RHS values, not variable coefficients
-        sdpa_c = parsed_data['c']
-        
-        # Correct the constraint formulation:
-        # SDPA: F1*x1 + F2*x2 + ... + Fm*xm - F0 = X >= 0 with min c1*x1 + c2*x2 + ... + cm*xm
-        # SeDuMi: A*x = b with min c^T*x where x ∈ K
-        # The SDPA c coefficients become constraint bounds, not objective coefficients
-        b = sdpa_c  # Use SDPA objective as constraint RHS (length m)
-        
+        for matno, blk_data in enumerate(matrices):
+            for blkno_, entries in enumerate(blk_data):
+                data = matrices[matno][blkno_]
+                mat = sp.csc_array((data['val'], (data['i'], data['j'])),
+                                   shape=(block_sizes[blkno_], block_sizes[blkno_]))
+                matrices[matno][blkno_] = mat
+
+        c = -sp.hstack([matrices[0][blkno_].reshape(1, -1) for blkno_ in range(nblocks)], format='csc')
+        A = -sp.vstack([sp.hstack(
+            [matrices[matno][blkno_].reshape(1, -1) for blkno_ in range(nblocks)]
+        ) for matno in range(1, m + 1)], format='csc')
+
         # Analyze cone structure
         cone_info = self.analyze_block_structure(parsed_data['block_sizes'])
         
         # Determine problem class
-        if len(cone_info['sdp_cones']) > 0:
-            problem_class = 'SDP'
-        else:
-            problem_class = 'LP'
-        
+        problem_class = 'SDP'
+
         # Create metadata with corrected cone structure field names
         metadata = {
             'source': 'DAT file',
@@ -333,10 +227,6 @@ class DATLoader:
             'original_dimensions': {
                 'variables': A.shape[1],  # n_vars (correct)
                 'constraints': A.shape[0]  # m (correct)
-            },
-            'sdpa_original': {
-                'objective_coeffs': sdpa_c,  # Original SDPA c vector for reference
-                'constraint_count': m
             }
         }
         
@@ -351,10 +241,10 @@ class DATLoader:
             c=c,
             A_eq=A,
             b_eq=b,
-            A_ub=None,  # SDPA uses equality constraints
+            A_ub=None,
             b_ub=None,
-            bounds=None,  # Bounds handled by cone structure
-            cone_structure=cone_info,  # NEW: Pass cone_structure directly
+            bounds=None,
+            cone_structure=cone_info,
             metadata=metadata
         )
 
