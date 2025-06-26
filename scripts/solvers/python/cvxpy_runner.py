@@ -53,8 +53,7 @@ class CvxpySolver(SolverInterface):
             raise RuntimeError(f"Requested backend {backend} not available. "
                              f"Available backends: {available_solvers}")
         
-        # Get backend capabilities
-        self.backend_capabilities = self._get_backend_capabilities()
+        # Backend capabilities are determined statically (no dynamic testing needed)
         
         self.logger.info(f"Initialized CVXPY solver '{self.solver_name}' with backend '{self.backend}'")
     
