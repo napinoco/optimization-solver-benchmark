@@ -20,8 +20,9 @@ import sys
 import os
 import argparse
 import time
+import yaml
 from pathlib import Path
-from typing import List, Optional
+from typing import List, Optional, Dict, Any
 
 # Add project root to path for imports
 project_root = Path(__file__).parent
@@ -55,6 +56,40 @@ def setup_logging(verbose: bool = False, quiet: bool = False):
         format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
         datefmt='%Y-%m-%d %H:%M:%S'
     )
+
+
+def load_registries() -> Optional[Dict[str, Any]]:
+    """Load all registries once to avoid redundant loading."""
+    logger = get_logger("registry_loader")
+    
+    try:
+        # Load problem registry
+        problem_registry_path = Path("config/problem_registry.yaml")
+        if not problem_registry_path.exists():
+            logger.error("Problem registry not found")
+            return None
+        
+        with open(problem_registry_path, 'r') as f:
+            problem_registry = yaml.safe_load(f)
+        
+        # Load solver registry
+        solver_registry_path = Path("config/solver_registry.yaml")
+        if not solver_registry_path.exists():
+            logger.error("Solver registry not found")
+            return None
+        
+        with open(solver_registry_path, 'r') as f:
+            solver_registry = yaml.safe_load(f)
+        
+        logger.info("Registries loaded successfully")
+        return {
+            'problem_registry': problem_registry,
+            'solver_registry': solver_registry
+        }
+        
+    except Exception as e:
+        logger.error(f"Failed to load registries: {e}")
+        return None
 
 
 def validate_environment() -> bool:
@@ -118,30 +153,18 @@ def run_benchmark(library_names: Optional[List[str]] = None,
     try:
         logger.info("Starting benchmark execution...")
         
-        # Load registries directly
-        import yaml
-        
-        # Load problem registry
-        problem_registry_path = Path("config/problem_registry.yaml")
-        if not problem_registry_path.exists():
-            logger.error("Problem registry not found")
+        # Load registries once
+        registries = load_registries()
+        if not registries:
+            logger.error("Failed to load registries")
             return False
         
-        with open(problem_registry_path, 'r') as f:
-            problem_registry = yaml.safe_load(f)
+        problem_registry = registries['problem_registry']
+        solver_registry = registries['solver_registry']
         
-        # Load solver registry
-        solver_registry_path = Path("config/solver_registry.yaml")
-        if not solver_registry_path.exists():
-            logger.error("Solver registry not found")
-            return False
-        
-        with open(solver_registry_path, 'r') as f:
-            solver_registry = yaml.safe_load(f)
-        
-        # Create benchmark runner
+        # Create benchmark runner with pre-loaded registries
         db_manager = DatabaseManager()
-        runner = BenchmarkRunner(db_manager, dry_run=dry_run)
+        runner = BenchmarkRunner(db_manager, registries=registries, dry_run=dry_run)
         
         # Filter problems based on library_names and problems arguments
         selected_problems = {}
