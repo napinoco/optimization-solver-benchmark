@@ -188,7 +188,7 @@ class DATLoader:
             ProblemData object
         """
 
-        b = -parsed_data['c']
+        b = -parsed_data['c'].reshape(-1, 1)
 
         import scipy.sparse as sp
         matrices = parsed_data['matrices']
@@ -201,16 +201,30 @@ class DATLoader:
             for blkno_, entries in enumerate(blk_data):
                 data = matrices[matno][blkno_]
                 mat = sp.csc_array((data['val'], (data['i'], data['j'])),
-                                   shape=(block_sizes[blkno_], block_sizes[blkno_]))
+                                   shape=(abs(block_sizes[blkno_]), abs(block_sizes[blkno_])))
                 matrices[matno][blkno_] = mat
 
-        c = -sp.hstack([matrices[0][blkno_].reshape(1, -1) for blkno_ in range(nblocks)], format='csc')
-        A = -sp.vstack([sp.hstack(
-            [matrices[matno][blkno_].reshape(1, -1) for blkno_ in range(nblocks)]
-        ) for matno in range(1, m + 1)], format='csc')
+        c = -sp.hstack([
+            matrices[0][blkno_].reshape(1, -1) if block_sizes[blkno_] > 0
+            else sp.csc_array(matrices[0][blkno_].diagonal().reshape(1, -1))
+            for blkno_ in range(nblocks)
+        ], format='csc').T
+        A = -sp.vstack([sp.hstack([
+            matrices[matno][blkno_].reshape(1, -1) if block_sizes[blkno_] > 0
+            else sp.csc_array(matrices[matno][blkno_].diagonal().reshape(1, -1))
+            for blkno_ in range(nblocks)
+        ]) for matno in range(1, m + 1)], format='csc')
 
         # Analyze cone structure
-        cone_info = self.analyze_block_structure(parsed_data['block_sizes'])
+        block_sizes = []
+        for block_size in parsed_data['block_sizes']:
+            block_sizes += [block_size] if block_size > 0 else [1] * abs(block_size)
+        cone_info = {
+            'free_vars': 0,
+            'nonneg_vars': 0,
+            'soc_cones': [],
+            'sdp_cones': block_sizes
+        }
         
         # Determine problem class
         problem_class = 'SDP'

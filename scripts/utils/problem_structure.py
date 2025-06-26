@@ -114,340 +114,96 @@ class ProblemStructureAnalyzer:
         self.logger.debug(f"Analyzing structure of problem: {problem_data.name}")
         
         try:
-            # Check if this is an external library problem with cone structure
-            if (problem_data.metadata and 
-                'cone_structure' in problem_data.metadata and 
-                problem_data.metadata.get('source') in ['DIMACS', 'SDPLIB']):
-                return self._analyze_external_library_problem(problem_data)
-            elif hasattr(problem_data, 'cvxpy_problem') and problem_data.cvxpy_problem is not None:
-                # Analyze CVXPY problem directly (legacy support)
-                return self._analyze_cvxpy_problem(problem_data)
-            else:
-                # Analyze from matrix data
-                return self._analyze_matrix_problem(problem_data)
-                
-        except Exception as e:
-            self.logger.error(f"Error analyzing problem structure: {e}")
-            return self._create_fallback_structure(problem_data)
-    
-    def _analyze_external_library_problem(self, problem_data: ProblemData) -> ProblemStructure:
-        """Analyze external library problem using metadata cone structure."""
-        cone_structure = problem_data.metadata['cone_structure']
-        
-        # Extract basic dimensions
-        num_vars = problem_data.metadata.get('original_dimensions', {}).get('variables', 0)
-        num_constraints = problem_data.metadata.get('original_dimensions', {}).get('constraints', 0)
-        
-        # Calculate sparsity if available
-        constraint_matrix_nnz = 0
-        if problem_data.A_eq is not None:
-            constraint_matrix_nnz = np.count_nonzero(problem_data.A_eq)
-        elif problem_data.A_ub is not None:
-            constraint_matrix_nnz = np.count_nonzero(problem_data.A_ub)
-        
-        total_elements = num_constraints * num_vars if num_constraints > 0 and num_vars > 0 else 1
-        sparsity_ratio = constraint_matrix_nnz / total_elements if total_elements > 0 else 0
-        
-        # Build cone information
-        cone_info = []
-        sdp_cones = []
-        soc_cones = []
-        
-        # Handle DIMACS/SDPLIB cone structures
-        if problem_data.metadata.get('source') == 'DIMACS':
+            cone_structure = problem_data.metadata['cone_structure']
+
+            # Extract basic dimensions
+            num_vars = problem_data.metadata.get('original_dimensions', {}).get('variables', 0)
+            num_constraints = problem_data.metadata.get('original_dimensions', {}).get('constraints', 0)
+
+            # Calculate sparsity if available
+            constraint_matrix_nnz = 0
+            if problem_data.A_eq is not None:
+                constraint_matrix_nnz = np.count_nonzero(problem_data.A_eq)
+            elif problem_data.A_ub is not None:
+                constraint_matrix_nnz = np.count_nonzero(problem_data.A_ub)
+
+            total_elements = num_constraints * num_vars if num_constraints > 0 and num_vars > 0 else 1
+            sparsity_ratio = constraint_matrix_nnz / total_elements if total_elements > 0 else 0
+
+            # Build cone information
+            cone_info = []
+            sdp_cones = []
+            soc_cones = []
+
+            # Handle DIMACS/SDPLIB cone structures
             # DIMACS SeDuMi format
             if 'sdp_cones' in cone_structure and cone_structure['sdp_cones']:
                 # Group SDP cones by size
                 sdp_size_counts = {}
                 for size in cone_structure['sdp_cones']:
                     sdp_size_counts[size] = sdp_size_counts.get(size, 0) + 1
-                
+
                 for size, count in sdp_size_counts.items():
                     sdp_cones.append((size, count))
                     cone_info.append(ConeInfo("semi_definite", size * size * count, (size, size)))
-            
+
             if 'soc_cones' in cone_structure and cone_structure['soc_cones']:
                 # Group SOC cones by dimension
                 soc_dim_counts = {}
                 for dim in cone_structure['soc_cones']:
                     soc_dim_counts[dim] = soc_dim_counts.get(dim, 0) + 1
-                
+
                 for dim, count in soc_dim_counts.items():
                     soc_cones.append((dim, count))
                     cone_info.append(ConeInfo("second_order", dim * count))
-            
+
             nonneg_vars = cone_structure.get('nonneg_vars', 0)
             free_vars = cone_structure.get('free_vars', 0)
-            
-        elif problem_data.metadata.get('source') == 'SDPLIB':
-            # SDPLIB SDPA format
-            if 'sdp_cones' in cone_structure and cone_structure['sdp_cones']:
-                # Group SDP cones by size
-                sdp_size_counts = {}
-                for size in cone_structure['sdp_cones']:
-                    sdp_size_counts[size] = sdp_size_counts.get(size, 0) + 1
-                
-                for size, count in sdp_size_counts.items():
-                    sdp_cones.append((size, count))
-                    cone_info.append(ConeInfo("semi_definite", size * size * count, (size, size)))
-            
-            nonneg_vars = cone_structure.get('linear_vars', 0)
-            free_vars = 0
-        else:
-            nonneg_vars = 0
-            free_vars = 0
-        
-        # Add linear cones
-        if nonneg_vars > 0:
-            cone_info.append(ConeInfo("non_negative", nonneg_vars))
-        if free_vars > 0:
-            cone_info.append(ConeInfo("unrestricted", free_vars))
-        
-        # Classify problem based on cone structure (prioritize SDP over mixed)
-        problem_class = self._classify_problem_type_from_cones(cone_info)
-        
-        return ProblemStructure(
-            num_variables=num_vars,
-            num_constraints=num_constraints,
-            problem_class=problem_class,
-            cone_info=cone_info,
-            semi_definite_cones=sdp_cones,
-            second_order_cones=soc_cones,
-            non_negative_dim=nonneg_vars,
-            unrestricted_dim=free_vars,
-            has_quadratic_objective=False,
-            quadratic_matrix_size=None,
-            constraint_matrix_nnz=constraint_matrix_nnz,
-            sparsity_ratio=sparsity_ratio
-        )
-    
-    def _classify_problem_type_from_cones(self, cone_info: List[ConeInfo]) -> str:
-        """Classify problem type based on cone structure (SDP takes priority)."""
-        cone_types = set(cone.cone_type for cone in cone_info)
-        
-        # SDP takes priority over mixed problems
-        if 'semi_definite' in cone_types:
-            return 'SDP'
-        
-        # Check for SOCP
-        if 'second_order' in cone_types:
-            return 'SOCP'
-        
-        # Default to LP
-        return 'LP'
-    
-    def _analyze_cvxpy_problem(self, problem_data: ProblemData) -> ProblemStructure:
-        """Analyze a CVXPY problem to determine structure."""
-        cvx_problem = problem_data.cvxpy_problem
-        
-        # Get basic dimensions
-        try:
-            num_vars = cvx_problem.size_metrics.num_scalar_variables
-        except AttributeError:
-            # Fallback for older CVXPY versions
-            num_vars = sum(var.size for var in cvx_problem.variables())
-        
-        try:
-            num_constraints = (cvx_problem.size_metrics.num_scalar_eq_constraints + 
-                             cvx_problem.size_metrics.num_scalar_leq_constraints)
-        except AttributeError:
-            num_constraints = len(cvx_problem.constraints)
-        
-        # Analyze cone structure
-        cone_info = []
-        semi_definite_cones = []
-        second_order_cones = []
-        non_negative_dim = 0
-        unrestricted_dim = 0
-        
-        # Analyze constraints to identify cone types
-        for constraint in cvx_problem.constraints:
-            cone_analysis = self._analyze_constraint_cone(constraint)
-            if cone_analysis:
-                cone_info.append(cone_analysis)
-                
-                if cone_analysis.cone_type == 'semi_definite':
-                    size = int(np.sqrt(cone_analysis.dimension))
-                    semi_definite_cones.append((size, cone_analysis.count))
-                elif cone_analysis.cone_type == 'second_order':
-                    second_order_cones.append((cone_analysis.dimension, cone_analysis.count))
-                elif cone_analysis.cone_type == 'non_negative':
-                    non_negative_dim += cone_analysis.dimension
-                elif cone_analysis.cone_type == 'unrestricted':
-                    unrestricted_dim += cone_analysis.dimension
-        
-        # Classify problem type
-        problem_class = self._classify_problem_type(
-            cone_info, 
-            has_quadratic_objective=self._has_quadratic_objective(cvx_problem)
-        )
-        
-        return ProblemStructure(
-            num_variables=num_vars,
-            num_constraints=num_constraints,
-            problem_class=problem_class,
-            cone_info=cone_info,
-            semi_definite_cones=semi_definite_cones,
-            second_order_cones=second_order_cones,
-            non_negative_dim=non_negative_dim,
-            unrestricted_dim=unrestricted_dim,
-            has_quadratic_objective=self._has_quadratic_objective(cvx_problem)
-        )
-    
-    def _analyze_matrix_problem(self, problem_data: ProblemData) -> ProblemStructure:
-        """Analyze problem from matrix data (LP/QP format)."""
-        
-        # Determine dimensions
-        if problem_data.c is not None:
-            num_vars = len(problem_data.c)
-        elif problem_data.P is not None:
-            num_vars = problem_data.P.shape[0]
-        else:
-            num_vars = 0
-        
-        # Count constraints
-        num_constraints = 0
-        constraint_matrix_nnz = 0
-        
-        if problem_data.A_ub is not None:
-            num_constraints += problem_data.A_ub.shape[0]
-            constraint_matrix_nnz += np.count_nonzero(problem_data.A_ub)
-        
-        if problem_data.A_eq is not None:
-            num_constraints += problem_data.A_eq.shape[0]
-            constraint_matrix_nnz += np.count_nonzero(problem_data.A_eq)
-        
-        # Calculate sparsity ratio
-        total_elements = num_constraints * num_vars if num_constraints > 0 and num_vars > 0 else 1
-        sparsity_ratio = constraint_matrix_nnz / total_elements if total_elements > 0 else 0
-        
-        # Analyze bounds to determine variable cone types
-        non_negative_dim = 0
-        unrestricted_dim = 0
-        
-        if problem_data.bounds:
-            for bound in problem_data.bounds:
-                if bound is None or bound == (None, None):
-                    unrestricted_dim += 1
-                elif isinstance(bound, tuple):
-                    lower, upper = bound
-                    if lower is not None and lower >= 0 and upper is None:
-                        non_negative_dim += 1
-                    else:
-                        unrestricted_dim += 1
-                else:
-                    non_negative_dim += 1  # Default assume non-negative
-        else:
-            # Default: all variables non-negative
-            non_negative_dim = num_vars
-        
-        # Determine problem class
-        has_quadratic = problem_data.P is not None
-        problem_class = "QP" if has_quadratic else "LP"
-        
-        # Create cone info
-        cone_info = []
-        if non_negative_dim > 0:
-            cone_info.append(ConeInfo("non_negative", non_negative_dim))
-        if unrestricted_dim > 0:
-            cone_info.append(ConeInfo("unrestricted", unrestricted_dim))
-        
-        quadratic_matrix_size = None
-        if has_quadratic and problem_data.P is not None:
-            quadratic_matrix_size = problem_data.P.shape
-        
-        return ProblemStructure(
-            num_variables=num_vars,
-            num_constraints=num_constraints,
-            problem_class=problem_class,
-            cone_info=cone_info,
-            semi_definite_cones=[],
-            second_order_cones=[],
-            non_negative_dim=non_negative_dim,
-            unrestricted_dim=unrestricted_dim,
-            has_quadratic_objective=has_quadratic,
-            quadratic_matrix_size=quadratic_matrix_size,
-            constraint_matrix_nnz=constraint_matrix_nnz,
-            sparsity_ratio=sparsity_ratio
-        )
-    
-    def _analyze_constraint_cone(self, constraint) -> Optional[ConeInfo]:
-        """Analyze a CVXPY constraint to determine its cone type."""
-        try:
-            # Check for PSD constraints
-            if hasattr(constraint, 'expr') and hasattr(constraint.expr, 'expr'):
-                expr = constraint.expr.expr if hasattr(constraint.expr, 'expr') else constraint.expr
-                
-                # Check for PSD (semi-definite) constraints
-                if hasattr(expr, 'args') and len(expr.args) > 0:
-                    for arg in expr.args:
-                        if hasattr(arg, 'shape') and len(arg.shape) == 2 and arg.shape[0] == arg.shape[1]:
-                            # Square matrix - likely PSD constraint
-                            matrix_size = arg.shape[0]
-                            return ConeInfo("semi_definite", matrix_size * matrix_size, (matrix_size, matrix_size))
-                
-                # Check for SOC (second-order cone) constraints
-                if 'norm' in str(constraint).lower():
-                    # Estimate dimension from constraint string representation
-                    constraint_str = str(constraint)
-                    # This is a heuristic - in practice we'd need more sophisticated parsing
-                    if hasattr(constraint.expr, 'shape'):
-                        dim = constraint.expr.shape[0] if len(constraint.expr.shape) > 0 else 1
-                        return ConeInfo("second_order", dim)
-            
-            # Check for simple inequality/equality constraints (non-negative cone)
-            if '>=' in str(constraint) or '<=' in str(constraint):
-                if hasattr(constraint, 'expr') and hasattr(constraint.expr, 'shape'):
-                    dim = constraint.expr.shape[0] if len(constraint.expr.shape) > 0 else 1
-                    return ConeInfo("non_negative", dim)
-            
-            return None
-            
-        except Exception as e:
-            self.logger.debug(f"Could not analyze constraint cone: {e}")
-            return None
-    
-    def _has_quadratic_objective(self, cvx_problem) -> bool:
-        """Check if CVXPY problem has quadratic objective."""
-        try:
-            obj_str = str(cvx_problem.objective)
-            return 'quad_form' in obj_str.lower() or 'quadratic' in obj_str.lower()
-        except Exception:
-            return False
-    
-    def _classify_problem_type(self, cone_info: List[ConeInfo], has_quadratic_objective: bool = False) -> str:
-        """Classify problem type based on cone structure."""
-        
-        cone_types = set(cone.cone_type for cone in cone_info)
-        
-        # Check for SDP
-        if 'semi_definite' in cone_types:
-            return 'SDP'
-        
-        # Check for SOCP
-        if 'second_order' in cone_types:
-            return 'SOCP'
-        
-        # Check for QP
-        if has_quadratic_objective:
-            return 'QP'
-        
-        # Default to LP
-        return 'LP'
-    
-    def _create_fallback_structure(self, problem_data: ProblemData) -> ProblemStructure:
-        """Create minimal structure info when analysis fails."""
-        return ProblemStructure(
-            num_variables=0,
-            num_constraints=0,
-            problem_class=problem_data.problem_class or 'UNKNOWN',
-            cone_info=[],
-            semi_definite_cones=[],
-            second_order_cones=[],
-            non_negative_dim=0,
-            unrestricted_dim=0
-        )
 
+            # Add linear cones
+            if nonneg_vars > 0:
+                cone_info.append(ConeInfo("non_negative", nonneg_vars))
+            if free_vars > 0:
+                cone_info.append(ConeInfo("unrestricted", free_vars))
+
+            # Classify problem based on cone structure (prioritize SDP over mixed)
+            cone_types = set(cone.cone_type for cone in cone_info)
+
+            if 'semi_definite' in cone_types:
+                problem_class = 'SDP'
+            elif 'second_order' in cone_types:
+                problem_class = 'SOCP'
+            else:
+                problem_class = 'LP'
+
+            return ProblemStructure(
+                num_variables=num_vars,
+                num_constraints=num_constraints,
+                problem_class=problem_class,
+                cone_info=cone_info,
+                semi_definite_cones=sdp_cones,
+                second_order_cones=soc_cones,
+                non_negative_dim=nonneg_vars,
+                unrestricted_dim=free_vars,
+                has_quadratic_objective=False,
+                quadratic_matrix_size=None,
+                constraint_matrix_nnz=constraint_matrix_nnz,
+                sparsity_ratio=sparsity_ratio
+            )
+
+        except Exception as e:
+            self.logger.error(f"Error analyzing problem structure: {e}")
+            return ProblemStructure(
+                num_variables=0,
+                num_constraints=0,
+                problem_class=problem_data.problem_class or 'UNKNOWN',
+                cone_info=[],
+                semi_definite_cones=[],
+                second_order_cones=[],
+                non_negative_dim=0,
+                unrestricted_dim=0
+            )
+    
 
 def analyze_problem_structure(problem_data: ProblemData) -> ProblemStructure:
     """
