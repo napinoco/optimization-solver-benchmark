@@ -51,24 +51,32 @@ class BenchmarkRunner:
     """Main benchmark execution engine with direct database storage"""
     
     def __init__(self, database_manager: Optional[DatabaseManager] = None, 
+                 registries: Optional[Dict[str, Any]] = None,
                  dry_run: bool = False):
         """
         Initialize simplified benchmark runner.
         
         Args:
             database_manager: Optional database manager (creates default if None)
+            registries: Pre-loaded registries to avoid redundant loading
             dry_run: If True, skip database operations (for testing)
         """
         self.db = database_manager or DatabaseManager()
         self.dry_run = dry_run
         
-        # Collect environment info and git hash once
+        # Collect environment info and git hash once (now cached)
         self.environment_info = collect_environment_info()
         self.commit_hash = get_git_commit_hash()
         
-        # Load configurations
-        self.solver_registry = self.load_solver_registry()
-        self.problem_registry = self.load_problem_registry()
+        # Use pre-loaded registries or load them
+        if registries:
+            self.solver_registry = registries['solver_registry']
+            self.problem_registry = registries['problem_registry']
+            logger.debug("Using pre-loaded registries")
+        else:
+            # Fallback to loading configurations
+            self.solver_registry = self.load_solver_registry()
+            self.problem_registry = self.load_problem_registry()
         
         
         logger.info("Benchmark runner initialized")

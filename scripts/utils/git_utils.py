@@ -18,14 +18,22 @@ from scripts.utils.logger import get_logger
 
 logger = get_logger("git_utils")
 
+# Global cache to avoid repeated git operations
+_git_info_cache = None
+
 
 def get_git_commit_hash() -> Optional[str]:
     """
-    Get the current Git commit hash.
+    Get the current Git commit hash with caching.
     
     Returns:
         Git commit hash or None if not available
     """
+    global _git_info_cache
+    
+    if _git_info_cache is not None:
+        return _git_info_cache.get('commit_hash')
+    
     try:
         result = subprocess.run(
             ['git', 'rev-parse', 'HEAD'],
@@ -37,6 +45,12 @@ def get_git_commit_hash() -> Optional[str]:
         if result.returncode == 0:
             commit_hash = result.stdout.strip()
             logger.debug(f"Detected Git commit hash: {commit_hash}")
+            
+            # Initialize cache if not exists
+            if _git_info_cache is None:
+                _git_info_cache = {}
+            _git_info_cache['commit_hash'] = commit_hash
+            
             return commit_hash
         else:
             logger.warning(f"Git command failed: {result.stderr.strip()}")

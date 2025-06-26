@@ -18,6 +18,9 @@ from scripts.utils.git_utils import get_git_info
 
 logger = get_logger("environment_info")
 
+# Global cache to avoid repeated expensive environment collection
+_environment_cache = None
+
 def get_os_info() -> Dict[str, str]:
     """Get operating system information with enhanced Ubuntu detection."""
     os_info = {
@@ -154,7 +157,13 @@ def get_timezone_info() -> Dict[str, Any]:
     return timezone_info
 
 def collect_environment_info() -> Dict[str, Any]:
-    """Collect all environment information for benchmark reproducibility."""
+    """Collect all environment information for benchmark reproducibility with caching."""
+    global _environment_cache
+    
+    if _environment_cache is not None:
+        logger.debug("Using cached environment information")
+        return _environment_cache
+    
     logger.info("Collecting environment information...")
     
     env_info = {
@@ -168,7 +177,8 @@ def collect_environment_info() -> Dict[str, Any]:
         "git": get_git_info()  # Add Git repository information
     }
     
-    logger.info("Environment information collected successfully")
+    _environment_cache = env_info
+    logger.info("Environment information collected and cached successfully")
     logger.debug(f"Environment details: {json.dumps(env_info, indent=2, default=str)}")
     
     return env_info
