@@ -39,6 +39,9 @@ except ImportError as e:
     print("Please ensure you're running from the repository root directory.")
     sys.exit(1)
 
+# Global cache for solver availability to avoid expensive testing
+_solver_availability_cache = {}
+
 
 def setup_logging(verbose: bool = False, quiet: bool = False):
     """Setup logging configuration."""
@@ -56,6 +59,22 @@ def setup_logging(verbose: bool = False, quiet: bool = False):
         format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
         datefmt='%Y-%m-%d %H:%M:%S'
     )
+
+
+def test_solver_availability(runner: BenchmarkRunner, solver_name: str) -> bool:
+    """Test if a solver is available with caching to avoid expensive repeated tests."""
+    global _solver_availability_cache
+    
+    if solver_name in _solver_availability_cache:
+        return _solver_availability_cache[solver_name]
+    
+    try:
+        runner.create_solver(solver_name)
+        _solver_availability_cache[solver_name] = True
+        return True
+    except Exception:
+        _solver_availability_cache[solver_name] = False
+        return False
 
 
 def load_registries() -> Optional[Dict[str, Any]]:
@@ -185,20 +204,19 @@ def run_benchmark(library_names: Optional[List[str]] = None,
         
         logger.info(f"Selected {len(selected_problems)} problems")
         
-        # Filter solvers and test availability
+        # Filter solvers and test availability with caching
         selected_solvers = {}
         for solver_name, solver_config in solver_registry["solvers"].items():
             # Filter by solver names if specified
             if solvers and solver_name not in solvers:
                 continue
             
-            # Test if solver is available
-            try:
-                runner.create_solver(solver_name)
+            # Test if solver is available using cached test
+            if test_solver_availability(runner, solver_name):
                 selected_solvers[solver_name] = solver_config
                 logger.debug(f"Solver {solver_name} is available")
-            except Exception as solver_error:
-                logger.debug(f"Solver {solver_name} not available: {solver_error}")
+            else:
+                logger.debug(f"Solver {solver_name} not available")
         
         if not selected_solvers:
             logger.error("No solvers available. Check your --solvers filter or install solver dependencies.")
