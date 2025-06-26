@@ -206,33 +206,37 @@ class ProblemStructureAnalyzer:
 
 
 if __name__ == "__main__":
-    # Test problem structure analysis
+    # Test problem structure analysis with real SDPLIB problems
     print("=== Problem Structure Analysis Test ===")
     
     try:
         from scripts.data_loaders.problem_loader import load_problem
         
-        # Test with different problem types
-        test_problems = ["simple_lp", "simple_qp"]
+        # Test with actual SDPLIB problems
+        test_problems = ["arch0", "qap5"]
         
         for problem_name in test_problems:
             try:
                 print(f"\nAnalyzing {problem_name}:")
-                problem = load_problem(problem_name, "light_set")
-                structure = analyze_problem_structure(problem)
+                problem = load_problem(problem_name)
+                
+                # Use the analyzer directly
+                analyzer = ProblemStructureAnalyzer()
+                structure = analyzer.analyze_problem_data(problem)
                 
                 print(f"  Problem Class: {structure.problem_class}")
                 print(f"  Variables: {structure.num_variables}")
                 print(f"  Constraints: {structure.num_constraints}")
                 print(f"  Non-negative dim: {structure.non_negative_dim}")
                 print(f"  Unrestricted dim: {structure.unrestricted_dim}")
+                print(f"  SDP cones: {structure.semi_definite_cones}")
                 
-                if structure.has_quadratic_objective:
+                if hasattr(structure, 'has_quadratic_objective') and structure.has_quadratic_objective:
                     print(f"  Quadratic objective: Yes")
                 
-                # Test user-requested format
-                summary = get_problem_structure_summary(problem)
-                print(f"  Summary format: {summary}")
+                # Test summary format
+                summary = structure.to_dict()
+                print(f"  Summary keys: {list(summary.keys())}")
                 
             except Exception as e:
                 print(f"  Error analyzing {problem_name}: {e}")
