@@ -24,15 +24,6 @@ logger = get_logger("problem_structure")
 
 
 @dataclass
-class ConeInfo:
-    """Information about a specific cone in the problem."""
-    cone_type: str  # 'semi_definite', 'second_order', 'non_negative', 'unrestricted'
-    dimension: int
-    size: Optional[Tuple[int, ...]] = None  # For matrix cones, e.g., (3, 3) for 3x3 PSD
-    count: int = 1  # Number of cones of this type with same dimension
-
-
-@dataclass
 class ProblemStructure:
     """Comprehensive problem structure information."""
     # Basic dimensions
@@ -41,9 +32,6 @@ class ProblemStructure:
     
     # Problem classification
     problem_class: str  # 'LP', 'QP', 'SOCP', 'SDP', 'MIXED'
-    
-    # Cone analysis
-    cone_info: List[ConeInfo]
     
     # Detailed cone summaries
     semi_definite_cones: List[Tuple[int, int]]  # [(size, count), ...]
@@ -130,8 +118,7 @@ class ProblemStructureAnalyzer:
             total_elements = num_constraints * num_vars if num_constraints > 0 and num_vars > 0 else 1
             sparsity_ratio = constraint_matrix_nnz / total_elements if total_elements > 0 else 0
 
-            # Build cone information
-            cone_info = []
+            # Build cone summaries
             sdp_cones = []
             soc_cones = []
 
@@ -145,7 +132,6 @@ class ProblemStructureAnalyzer:
 
                 for size, count in sdp_size_counts.items():
                     sdp_cones.append((size, count))
-                    cone_info.append(ConeInfo("semi_definite", size * size * count, (size, size)))
 
             if 'soc_cones' in cone_structure and cone_structure['soc_cones']:
                 # Group SOC cones by dimension
@@ -155,23 +141,14 @@ class ProblemStructureAnalyzer:
 
                 for dim, count in soc_dim_counts.items():
                     soc_cones.append((dim, count))
-                    cone_info.append(ConeInfo("second_order", dim * count))
 
             nonneg_vars = cone_structure.get('nonneg_vars', 0)
             free_vars = cone_structure.get('free_vars', 0)
 
-            # Add linear cones
-            if nonneg_vars > 0:
-                cone_info.append(ConeInfo("non_negative", nonneg_vars))
-            if free_vars > 0:
-                cone_info.append(ConeInfo("unrestricted", free_vars))
-
             # Classify problem based on cone structure (prioritize SDP over mixed)
-            cone_types = set(cone.cone_type for cone in cone_info)
-
-            if 'semi_definite' in cone_types:
+            if sdp_cones:
                 problem_class = 'SDP'
-            elif 'second_order' in cone_types:
+            elif soc_cones:
                 problem_class = 'SOCP'
             else:
                 problem_class = 'LP'
@@ -180,7 +157,6 @@ class ProblemStructureAnalyzer:
                 num_variables=num_vars,
                 num_constraints=num_constraints,
                 problem_class=problem_class,
-                cone_info=cone_info,
                 semi_definite_cones=sdp_cones,
                 second_order_cones=soc_cones,
                 non_negative_dim=nonneg_vars,
@@ -197,7 +173,6 @@ class ProblemStructureAnalyzer:
                 num_variables=0,
                 num_constraints=0,
                 problem_class=problem_data.problem_class or 'UNKNOWN',
-                cone_info=[],
                 semi_definite_cones=[],
                 second_order_cones=[],
                 non_negative_dim=0,
