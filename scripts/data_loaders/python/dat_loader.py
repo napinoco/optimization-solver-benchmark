@@ -294,10 +294,7 @@ if __name__ == "__main__":
         problem = load_dat_problem(file_path)
         print(f"Loaded problem: {problem}")
         
-        # Display structure summary if available
-        structure = problem.get_structure_summary()
-        if structure:
-            print(f"Structure analysis: {structure}")
+        # The problem is now loaded and ready for use
             
     except Exception as e:
         print(f"Error loading problem: {e}")

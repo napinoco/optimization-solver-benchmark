@@ -35,7 +35,7 @@ class ProblemData:
                  A_ub: np.ndarray = None, b_ub: np.ndarray = None,
                  bounds: List[Tuple] = None, P: np.ndarray = None,
                  cone_structure: Dict[str, Any] = None,  # First-class cone structure field
-                 metadata=None, analyze_structure: bool = True):
+                 metadata=None):
         self.name = name
         self.problem_class = problem_class
         self.c = c  # objective coefficients
@@ -68,41 +68,31 @@ class ProblemData:
         if 'cone_structure' not in self.metadata and self.cone_structure:
             self.metadata['cone_structure'] = self.cone_structure
         
-        # Problem structure analysis
-        self._structure = None
-        self._structure_summary = None
-        if analyze_structure:
-            try:
-                self._analyze_structure()
-            except Exception as e:
-                logger.debug(f"Could not analyze structure for {name}: {e}")
+        # Basic problem dimensions for display
+        self._num_variables = self._compute_num_variables()
+        self._num_constraints = self._compute_num_constraints()
         
-    def _analyze_structure(self):
-        """Analyze problem structure directly."""
-        try:
-            from scripts.utils.problem_structure import ProblemStructureAnalyzer
-            analyzer = ProblemStructureAnalyzer()
-            self._structure = analyzer.analyze_problem_data(self)
-            self._structure_summary = self._structure.to_dict()
-        except Exception as e:
-            logger.debug(f"Structure analysis failed: {e}")
-            self._structure = None
-            self._structure_summary = None
+    def _compute_num_variables(self):
+        """Compute number of variables from problem data."""
+        if self.c is not None:
+            return self.c.shape[0] if hasattr(self.c, 'shape') else len(self.c)
+        elif self.A_eq is not None:
+            return self.A_eq.shape[1]
+        elif self.A_ub is not None:
+            return self.A_ub.shape[1]
+        return 0
     
-    def get_structure(self):
-        """Get problem structure analysis."""
-        return self._structure
-    
-    def get_structure_summary(self):
-        """Get problem structure summary in user-requested format."""
-        return self._structure_summary
+    def _compute_num_constraints(self):
+        """Compute number of constraints from problem data."""
+        total = 0
+        if self.A_eq is not None:
+            total += self.A_eq.shape[0]
+        if self.A_ub is not None:
+            total += self.A_ub.shape[0]
+        return total
         
     def __repr__(self):
-        structure_info = ""
-        if self._structure_summary:
-            vars_count = self._structure_summary.get('variables', '?')
-            constraints_count = self._structure_summary.get('constraints', '?')
-            structure_info = f", {vars_count} vars, {constraints_count} constraints"
+        structure_info = f", {self._num_variables} vars, {self._num_constraints} constraints"
         return f"ProblemData(name='{self.name}', class='{self.problem_class}'{structure_info})"
 
 def load_mps_file(file_path: str, problem_name: str = None) -> ProblemData:
