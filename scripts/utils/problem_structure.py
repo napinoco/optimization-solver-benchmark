@@ -203,34 +203,6 @@ class ProblemStructureAnalyzer:
                 non_negative_dim=0,
                 unrestricted_dim=0
             )
-    
-
-def analyze_problem_structure(problem_data: ProblemData) -> ProblemStructure:
-    """
-    Convenience function to analyze problem structure.
-    
-    Args:
-        problem_data: Problem data to analyze
-        
-    Returns:
-        ProblemStructure with comprehensive analysis
-    """
-    analyzer = ProblemStructureAnalyzer()
-    return analyzer.analyze_problem_data(problem_data)
-
-
-def get_problem_structure_summary(problem_data: ProblemData) -> Dict[str, Any]:
-    """
-    Get problem structure summary in the format requested by user.
-    
-    Args:
-        problem_data: Problem data to analyze
-        
-    Returns:
-        Dictionary with structure information
-    """
-    structure = analyze_problem_structure(problem_data)
-    return structure.to_dict()
 
 
 if __name__ == "__main__":

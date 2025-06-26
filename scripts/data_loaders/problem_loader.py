@@ -15,10 +15,6 @@ from scripts.utils.logger import get_logger
 logger = get_logger("problem_loader")
 
 # Import for lazy loading to avoid circular imports
-def _get_structure_analyzer():
-    """Lazy import of structure analyzer to avoid circular dependencies."""
-    from scripts.utils.problem_structure import analyze_problem_structure
-    return analyze_problem_structure
 
 class ProblemData:
     """
@@ -82,10 +78,11 @@ class ProblemData:
                 logger.debug(f"Could not analyze structure for {name}: {e}")
         
     def _analyze_structure(self):
-        """Analyze problem structure using the structure analyzer."""
+        """Analyze problem structure directly."""
         try:
-            analyze_func = _get_structure_analyzer()
-            self._structure = analyze_func(self)
+            from scripts.utils.problem_structure import ProblemStructureAnalyzer
+            analyzer = ProblemStructureAnalyzer()
+            self._structure = analyzer.analyze_problem_data(self)
             self._structure_summary = self._structure.to_dict()
         except Exception as e:
             logger.debug(f"Structure analysis failed: {e}")
