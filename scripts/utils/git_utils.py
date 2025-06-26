@@ -192,19 +192,3 @@ def validate_git_commit_hash(commit_hash: str) -> bool:
     
     return False
 
-
-if __name__ == "__main__":
-    # Test Git utilities
-    print("=== Git Information Test ===")
-    
-    git_info = get_git_info()
-    print(f"Git Available: {git_info['available']}")
-    print(f"Commit Hash: {git_info['commit_hash']}")
-    print(f"Branch: {git_info['branch']}")
-    print(f"Repository Dirty: {git_info['is_dirty']}")
-    
-    if git_info['commit_hash']:
-        print(f"Formatted Hash: {format_git_commit_for_display(git_info['commit_hash'])}")
-        print(f"Hash Valid: {validate_git_commit_hash(git_info['commit_hash'])}")
-    
-    print(f"\nComplete Git Info: {git_info}")
