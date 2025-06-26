@@ -53,7 +53,8 @@ class CvxpySolver(SolverInterface):
             raise RuntimeError(f"Requested backend {backend} not available. "
                              f"Available backends: {available_solvers}")
         
-        # Backend capabilities are determined statically (no dynamic testing needed)
+        # Backend capabilities determined dynamically
+        self.backend_capabilities = self._get_backend_capabilities()
         
         self.logger.info(f"Initialized CVXPY solver '{self.solver_name}' with backend '{self.backend}'")
     
@@ -442,65 +443,3 @@ def create_cvxpy_solvers(verbose: bool = False) -> List[CvxpySolver]:
     
     return solver_instances
 
-
-if __name__ == "__main__":
-    # Test script to verify CVXPY solver
-    print("Testing CVXPY Solver...")
-    
-    # Test available solvers
-    print(f"\nAvailable CVXPY solvers: {cp.installed_solvers()}")
-    
-    # Test solver initialization
-    print("\nTesting solver initialization:")
-    try:
-        solver = CvxpySolver(backend="CLARABEL")
-        print(f"✓ {solver.solver_name} initialized")
-        print(f"  Version: {solver.get_version()}")
-        print(f"  Backend capabilities: {solver.backend_capabilities}")
-        
-    except Exception as e:
-        print(f"✗ Failed to initialize CLARABEL: {e}")
-        # Try fallback
-        try:
-            solver = CvxpySolver(backend="SCS")
-            print(f"✓ Fallback {solver.solver_name} initialized")
-        except Exception as e2:
-            print(f"✗ Failed to initialize any solver: {e2}")
-            exit(1)
-    
-    # Test LP solving
-    print("\nTesting LP solving:")
-    try:
-        # Create a simple LP problem: minimize x1 + 2*x2 subject to x1 + x2 <= 1, x1, x2 >= 0
-        simple_lp = ProblemData(
-            name="test_lp",
-            problem_class="LP",
-            c=np.array([1.0, 2.0]),
-            A_ub=np.array([[1.0, 1.0]]),
-            b_ub=np.array([1.0]),
-            bounds=[(0, None), (0, None)]
-        )
-        
-        result = solver.solve(simple_lp)
-        print(f"✓ LP result: {result.status}")
-        print(f"  Objective: {result.primal_objective_value}")
-        print(f"  Time: {result.solve_time:.3f}s")
-        if result.additional_info and 'backend_solver' in result.additional_info:
-            print(f"  Backend: {result.additional_info['backend_solver']}")
-        else:
-            print(f"  Backend: {solver.backend}")
-        
-    except Exception as e:
-        print(f"✗ LP test failed: {e}")
-    
-    # Test multiple solver creation
-    print("\nTesting multiple solver creation:")
-    try:
-        solvers = create_cvxpy_solvers()
-        print(f"Created {len(solvers)} CVXPY solver variants:")
-        for s in solvers:
-            print(f"  {s.solver_name}: {s.backend}")
-    except Exception as e:
-        print(f"✗ Multiple solver creation failed: {e}")
-    
-    print("\n✓ CVXPY solver test completed!")
