@@ -253,7 +253,7 @@ class CvxpySolver(SolverInterface):
         y = cp.Variable(m, name="y")
 
         P = problem_data.P if hasattr(problem_data, 'P') else None
-        obj_func = b_eq @ y - (cp.quad_form(y, P) / 2 if P is not None else 0)
+        obj_func = b_eq.T @ y - (cp.quad_form(y, P) / 2 if P is not None else 0)
 
         nvar_cnt = 0
         constraints = []
