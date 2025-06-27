@@ -63,7 +63,7 @@ This is an automated benchmark system for optimization solvers (LP, QP, SOCP, SD
 │   ├── SDPLIB/     # External SDPLIB library (92 problems)
 │   └── light_set/  # Internal synthetic problems
 ├── docs/           # Generated reports (GitHub Pages)
-└── requirements/   # Python dependencies
+└── requirements.txt # Python dependencies (single file)
 ```
 
 ### Current System Capabilities
@@ -106,8 +106,7 @@ python main.py --benchmark --problem-set sdplib
 python main.py --report
 
 # Install dependencies
-pip install -r requirements/base.txt
-pip install -r requirements/python.txt
+pip install -r requirements.txt
 ```
 
 ---
@@ -147,6 +146,7 @@ pip install -r requirements/python.txt
 
 ## ⚠️ Important Implementation Notes
 
+### Core System Requirements
 - **Solver Configurations**: Use minimal parameters (primarily `verbose: false`) for fair comparison
 - **Database Operations**: SQLite with comprehensive metadata and version tracking
 - **Result Validation**: Positive solve times, valid status codes, structure analysis
@@ -155,6 +155,26 @@ pip install -r requirements/python.txt
 - **Version Tracking**: Complete solver backend and Git commit recording
 - **Logging**: Structured with appropriate levels (DEBUG, INFO, WARNING, ERROR)
 - **Problem Formats**: MPS (LP), QPS (QP), Python (SOCP/SDP), SeDuMi .mat (DIMACS), SDPA .dat-s (SDPLIB)
+
+### 🚨 CRITICAL DEVELOPMENT CONSTRAINTS (DO NOT VIOLATE)
+
+#### Dependencies Management
+- **NEVER create new requirements files**: The project uses a single `requirements.txt` file at the root
+- **DO NOT create requirements/ directory**: All dependencies are managed through the existing `requirements.txt`
+- **DO NOT split requirements**: Never create separate base.txt, python.txt, or other requirement files
+- **Use existing requirements.txt**: All GitHub Actions workflows must reference the single `requirements.txt`
+
+#### CI/CD Philosophy  
+- **CI must fail when problems exist**: Continuous Integration is designed to detect issues, not hide them
+- **DO NOT mask solver installation failures**: If a solver cannot be installed, the CI should fail
+- **NO graceful degradation in CI**: Avoid `|| echo "warning"` patterns that mask real problems
+- **Validate all dependencies**: The purpose of validation workflows is to ensure all required components work
+
+#### File Structure Integrity
+- **Respect existing file organization**: Do not reorganize without explicit user instruction
+- **Generated reports location**: HTML reports are generated in `docs/pages/` directory
+- **Database location**: SQLite database is at `database/results.db`
+- **Configuration location**: YAML configs are in `config/` directory
 
 ---
 
@@ -186,7 +206,15 @@ pip install -r requirements/python.txt
 - [ ] Understood the fair benchmarking philosophy and minimal configuration approach
 - [ ] Familiarized yourself with the modular architecture and extension points
 
-**Failure to read these documents will result in implementation that doesn't align with project standards and philosophy.**
+**🚨 CRITICAL CONSTRAINTS CHECKLIST (MUST VERIFY):**
+
+- [ ] **Requirements Management**: Confirmed to use ONLY the existing `requirements.txt` (do not create requirements/ directory)
+- [ ] **CI/CD Philosophy**: Understood that CI should fail when problems exist (no graceful degradation)
+- [ ] **File Structure**: Verified existing file locations (docs/pages/, database/, config/) before modification
+- [ ] **GitHub Workflows**: Ensured any workflow changes reference existing `requirements.txt` file
+- [ ] **Solver Dependencies**: Acknowledged that solver installation failures should cause CI to fail
+
+**Failure to read these documents or violating critical constraints will result in implementation that doesn't align with project standards and philosophy.**
 
 ---
 
