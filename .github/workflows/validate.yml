@@ -69,18 +69,23 @@ jobs:
         
     - name: Check solver availability
       run: |
+        echo "### Solver Backend Availability" >> $GITHUB_STEP_SUMMARY
         python -c "
         import sys
         sys.path.insert(0, '.')
-        from scripts.utils.solver_validation import SolverValidator
-        from scripts.utils.logger import get_logger
-        
-        logger = get_logger('ci_validation')
-        validator = SolverValidator(logger)
-        
-        print('### Solver Backend Availability')
-        validator.validate_all_backends()
-        " >> $GITHUB_STEP_SUMMARY 2>&1 || echo "Solver validation completed with warnings"
+        try:
+            from scripts.utils.solver_validation import SolverValidator
+            from scripts.utils.logger import get_logger
+            
+            logger = get_logger('ci_validation')
+            validator = SolverValidator(logger)
+            validator.validate_all_backends()
+            print('✅ Solver validation completed')
+        except ImportError as e:
+            print(f'⚠️ Solver validation skipped: {e}')
+        except Exception as e:
+            print(f'⚠️ Solver validation warning: {e}')
+        " 2>&1 || echo "⚠️ Solver validation completed with warnings" >> $GITHUB_STEP_SUMMARY
         
     - name: Display validation summary
       if: success()

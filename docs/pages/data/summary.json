@@ -1,6 +1,6 @@
 {
   "metadata": {
-    "generated_at": "2025-06-27T11:49:45.958223",
+    "generated_at": "2025-06-27T16:56:07.957839",
     "total_results": 43,
     "format": "summary_only"
   },
@@ -126,6 +126,6 @@
   ],
   "environment": {
     "commit_hash": "ce1969a22cbeb1ef396d49cbf1142984143d1297",
-    "platform": "Unknown"
+    "platform": "macOS-14.5-arm64-arm-64bit"
   }
 }

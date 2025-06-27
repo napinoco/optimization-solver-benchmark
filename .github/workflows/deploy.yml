@@ -36,15 +36,15 @@ jobs:
     - name: Verify pre-built reports exist
       if: github.event.action != 'closed'
       run: |
-        if [ ! -f "docs/index.html" ]; then
-          echo "❌ Error: No pre-built index.html found"
-          echo "Please run 'python main.py --all' locally and commit the generated files."
+        if [ ! -f "docs/pages/index.html" ]; then
+          echo "❌ Error: No pre-built index.html found in docs/pages/"
+          echo "Please run 'python main.py --report' locally and commit the generated files."
           exit 1
         fi
         
-        if [ ! -d "docs/data" ]; then
-          echo "❌ Error: No pre-built data directory found"  
-          echo "Please run 'python main.py --all' locally and commit the generated files."
+        if [ ! -d "docs/pages/data" ]; then
+          echo "❌ Error: No pre-built data directory found in docs/pages/"  
+          echo "Please run 'python main.py --report' locally and commit the generated files."
           exit 1
         fi
         
@@ -54,7 +54,7 @@ jobs:
       if: github.event_name == 'pull_request' && github.event.action != 'closed'
       run: |
         # Add preview notice to all HTML files
-        find docs -name "*.html" -exec sed -i '/<header>/a\
+        find docs/pages -name "*.html" -exec sed -i '/<header>/a\
             <div style="background: #fff3cd; border: 1px solid #ffeaa7; padding: 10px; margin: 10px 0; border-radius: 5px; text-align: center;">\
                 <strong>🚧 Preview Environment</strong> - This is a preview of PR #${{ github.event.number }}. \
                 <a href="https://github.com/${{ github.repository }}/pull/${{ github.event.number }}">View Pull Request →</a>\
@@ -102,7 +102,7 @@ jobs:
       uses: JamesIves/github-pages-deploy-action@v4
       with:
         branch: gh-pages
-        folder: docs
+        folder: docs/pages
         token: ${{ secrets.GITHUB_TOKEN }}
         clean: false  # Preserve PR preview subdirectories
         
@@ -111,7 +111,7 @@ jobs:
       uses: JamesIves/github-pages-deploy-action@v4
       with:
         branch: gh-pages
-        folder: docs
+        folder: docs/pages
         target-folder: pr-preview/pr-${{ github.event.number }}
         token: ${{ secrets.GITHUB_TOKEN }}
         clean: false
