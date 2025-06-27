@@ -1,341 +1,131 @@
 {
   "metadata": {
-    "generated_at": "2025-06-16T00:34:15.071598",
-    "format_version": "1.0",
-    "description": "Summary statistics and solver comparison"
+    "generated_at": "2025-06-27T16:56:07.957839",
+    "total_results": 43,
+    "format": "summary_only"
   },
-  "summary": {
-    "overall": {
-      "total_results": 90,
-      "total_solvers": 9,
-      "total_problems": 18,
-      "total_benchmarks": 10,
-      "overall_success_rate": 0.37777777777777777,
-      "avg_solve_time": 0.015626242785983617,
-      "min_solve_time": 1.71661376953125e-05,
-      "max_solve_time": 1.234
-    },
+  "overall_statistics": {
+    "total_results": 43,
+    "total_solvers": 9,
+    "total_problems": 7,
+    "success_rate": 0.6976744186046512,
+    "avg_solve_time": 881.7378752231598,
     "problem_type_distribution": {
-      "SDP": 38,
-      "SOCP": 31,
-      "LP": 12,
-      "QP": 6,
-      "Unknown": 3
+      "UNKNOWN": 34,
+      "SOCP": 7,
+      "SDP": 2
     },
-    "last_updated": "2025-06-16T00:34:15.071876"
-  },
-  "solver_comparison": {
-    "solvers": [
-      {
-        "solver_name": "SciPy-Enhanced",
-        "problems_attempted": 1,
-        "problems_solved": 1,
-        "success_rate": 1.0,
-        "avg_solve_time": 0.0011219978332519531,
-        "best_time": 0.0011219978332519531,
-        "worst_time": 0.0011219978332519531,
-        "median_time": null
-      },
-      {
-        "solver_name": "CLARABEL-Enhanced",
-        "problems_attempted": 1,
-        "problems_solved": 1,
-        "success_rate": 1.0,
-        "avg_solve_time": 0.00396728515625,
-        "best_time": 0.00396728515625,
-        "worst_time": 0.00396728515625,
-        "median_time": null
-      },
-      {
-        "solver_name": "TestSolver",
-        "problems_attempted": 1,
-        "problems_solved": 1,
-        "success_rate": 1.0,
-        "avg_solve_time": 1.234,
-        "best_time": 1.234,
-        "worst_time": 1.234,
-        "median_time": null
-      },
-      {
-        "solver_name": "CLARABEL (via CVXPY)",
-        "problems_attempted": 16,
-        "problems_solved": 10,
-        "success_rate": 0.625,
-        "avg_solve_time": 0.004867300391197205,
-        "best_time": 2.09808349609375e-05,
-        "worst_time": 0.018752098083496094,
-        "median_time": null
-      },
-      {
-        "solver_name": "SCS (via CVXPY)",
-        "problems_attempted": 13,
-        "problems_solved": 8,
-        "success_rate": 0.6153846153846154,
-        "avg_solve_time": 0.0023561991178072416,
-        "best_time": 1.7881393432617188e-05,
-        "worst_time": 0.0106658935546875,
-        "median_time": null
-      },
-      {
-        "solver_name": "ECOS (via CVXPY)",
-        "problems_attempted": 13,
-        "problems_solved": 4,
-        "success_rate": 0.3076923076923077,
-        "avg_solve_time": 0.001407751670250526,
-        "best_time": 1.71661376953125e-05,
-        "worst_time": 0.010518074035644531,
-        "median_time": null
-      },
-      {
-        "solver_name": "SciPy",
-        "problems_attempted": 24,
-        "problems_solved": 7,
-        "success_rate": 0.2916666666666667,
-        "avg_solve_time": 0.0014102558294932048,
-        "best_time": 1.7881393432617188e-05,
-        "worst_time": 0.010107040405273438,
-        "median_time": null
-      },
-      {
-        "solver_name": "OSQP (via CVXPY)",
-        "problems_attempted": 13,
-        "problems_solved": 2,
-        "success_rate": 0.15384615384615385,
-        "avg_solve_time": 0.00047291242159329925,
-        "best_time": 1.7881393432617188e-05,
-        "worst_time": 0.0031130313873291016,
-        "median_time": null
-      },
-      {
-        "solver_name": "scipy",
-        "problems_attempted": 8,
-        "problems_solved": 0,
-        "success_rate": 0.0,
-        "avg_solve_time": 5.879998207092285e-05,
-        "best_time": 3.314018249511719e-05,
-        "worst_time": 0.0001518726348876953,
-        "median_time": null
-      }
+    "library_distribution": {
+      "DIMACS": 39,
+      "SDPLIB": 2,
+      "internal": 2
+    },
+    "solver_names": [
+      "cvxpy_clarabel",
+      "cvxpy_cvxopt",
+      "cvxpy_ecos",
+      "cvxpy_highs",
+      "cvxpy_osqp",
+      "cvxpy_scip",
+      "cvxpy_scs",
+      "cvxpy_sdpa",
+      "scipy_linprog"
+    ],
+    "problem_names": [
+      "bm1",
+      "nb",
+      "nb_L1",
+      "nb_L2",
+      "nb_L2_bessel",
+      "qap5",
+      "simple_lp_test"
     ]
   },
-  "problem_statistics": {
-    "problems": [
-      {
-        "problem_name": "SIMPLE_LP",
-        "problem_type": "LP",
-        "solver_attempts": 12,
-        "successful_solves": 12,
-        "success_rate": 1.0,
-        "avg_solve_time": 0.0038475791613260904,
-        "n_variables": 0,
-        "n_constraints": 0,
-        "difficulty_level": "Unknown",
-        "library_source": ""
-      },
-      {
-        "problem_name": "SIMPLE_QP",
-        "problem_type": "QP",
-        "solver_attempts": 6,
-        "successful_solves": 6,
-        "success_rate": 1.0,
-        "avg_solve_time": 0.004685640335083008,
-        "n_variables": 0,
-        "n_constraints": 0,
-        "difficulty_level": "Unknown",
-        "library_source": ""
-      },
-      {
-        "problem_name": "control1",
-        "problem_type": "SDP",
-        "solver_attempts": 1,
-        "successful_solves": 1,
-        "success_rate": 1.0,
-        "avg_solve_time": 0.018752098083496094,
-        "n_variables": 70,
-        "n_constraints": 21,
-        "difficulty_level": "Unknown",
-        "library_source": "control family"
-      },
-      {
-        "problem_name": "TestProblem",
-        "problem_type": "Unknown",
-        "solver_attempts": 1,
-        "successful_solves": 1,
-        "success_rate": 1.0,
-        "avg_solve_time": 1.234,
-        "n_variables": 0,
-        "n_constraints": 0,
-        "difficulty_level": "Unknown",
-        "library_source": null
-      },
-      {
-        "problem_name": "portfolio_optimization",
-        "problem_type": "SOCP",
-        "solver_attempts": 7,
-        "successful_solves": 3,
-        "success_rate": 0.42857142857142855,
-        "avg_solve_time": 0.001064164297921317,
-        "n_variables": 0,
-        "n_constraints": 0,
-        "difficulty_level": "Unknown",
-        "library_source": ""
-      },
-      {
-        "problem_name": "facility_location",
-        "problem_type": "SOCP",
-        "solver_attempts": 7,
-        "successful_solves": 3,
-        "success_rate": 0.42857142857142855,
-        "avg_solve_time": 0.0048367295946393695,
-        "n_variables": 0,
-        "n_constraints": 0,
-        "difficulty_level": "Unknown",
-        "library_source": ""
-      },
-      {
-        "problem_name": "control_lmi",
-        "problem_type": "SDP",
-        "solver_attempts": 7,
-        "successful_solves": 2,
-        "success_rate": 0.2857142857142857,
-        "avg_solve_time": 0.0007672991071428571,
-        "n_variables": 0,
-        "n_constraints": 0,
-        "difficulty_level": "Unknown",
-        "library_source": ""
-      },
-      {
-        "problem_name": "max_cut_relaxation",
-        "problem_type": "SDP",
-        "solver_attempts": 7,
-        "successful_solves": 2,
-        "success_rate": 0.2857142857142857,
-        "avg_solve_time": 0.000896249498639788,
-        "n_variables": 0,
-        "n_constraints": 0,
-        "difficulty_level": "Unknown",
-        "library_source": ""
-      },
-      {
-        "problem_name": "robust_optimization",
-        "problem_type": "SOCP",
-        "solver_attempts": 7,
-        "successful_solves": 2,
-        "success_rate": 0.2857142857142857,
-        "avg_solve_time": 0.001135519572666713,
-        "n_variables": 0,
-        "n_constraints": 0,
-        "difficulty_level": "Unknown",
-        "library_source": ""
-      },
-      {
-        "problem_name": "matrix_completion",
-        "problem_type": "SDP",
-        "solver_attempts": 7,
-        "successful_solves": 2,
-        "success_rate": 0.2857142857142857,
-        "avg_solve_time": 0.001218829836164202,
-        "n_variables": 0,
-        "n_constraints": 0,
-        "difficulty_level": "Unknown",
-        "library_source": ""
-      },
-      {
-        "problem_name": "qssp60",
-        "problem_type": "SOCP",
-        "solver_attempts": 5,
-        "successful_solves": 0,
-        "success_rate": 0.0,
-        "avg_solve_time": 1.9788742065429688e-05,
-        "n_variables": 29526,
-        "n_constraints": 14581,
-        "difficulty_level": "Unknown",
-        "library_source": "QSSP problem set"
-      },
-      {
-        "problem_name": "nql30",
-        "problem_type": "SOCP",
-        "solver_attempts": 5,
-        "successful_solves": 0,
-        "success_rate": 0.0,
-        "avg_solve_time": 2.002716064453125e-05,
-        "n_variables": 6302,
-        "n_constraints": 3680,
-        "difficulty_level": "Unknown",
-        "library_source": "NQL problem set"
-      },
-      {
-        "problem_name": "filter48_socp",
-        "problem_type": "SDP",
-        "solver_attempts": 5,
-        "successful_solves": 0,
-        "success_rate": 0.0,
-        "avg_solve_time": 2.0694732666015624e-05,
-        "n_variables": 3284,
-        "n_constraints": 969,
-        "difficulty_level": "Unknown",
-        "library_source": "FILTER problem set"
-      },
-      {
-        "problem_name": "hinf12",
-        "problem_type": "SDP",
-        "solver_attempts": 5,
-        "successful_solves": 0,
-        "success_rate": 0.0,
-        "avg_solve_time": 2.2363662719726562e-05,
-        "n_variables": 216,
-        "n_constraints": 43,
-        "difficulty_level": "Unknown",
-        "library_source": "HINF problem set"
-      },
-      {
-        "problem_name": "truss5",
-        "problem_type": "SDP",
-        "solver_attempts": 5,
-        "successful_solves": 0,
-        "success_rate": 0.0,
-        "avg_solve_time": 2.9850006103515626e-05,
-        "n_variables": 3301,
-        "n_constraints": 208,
-        "difficulty_level": "Unknown",
-        "library_source": "TRUSS problem set"
-      },
-      {
-        "problem_name": "simple_qp",
-        "problem_type": "Unknown",
-        "solver_attempts": 1,
-        "successful_solves": 0,
-        "success_rate": 0.0,
-        "avg_solve_time": 5.1975250244140625e-05,
-        "n_variables": 0,
-        "n_constraints": 0,
-        "difficulty_level": "Unknown",
-        "library_source": null
-      },
-      {
-        "problem_name": "simple_lp",
-        "problem_type": "Unknown",
-        "solver_attempts": 1,
-        "successful_solves": 0,
-        "success_rate": 0.0,
-        "avg_solve_time": 0.0001518726348876953,
-        "n_variables": 0,
-        "n_constraints": 0,
-        "difficulty_level": "Unknown",
-        "library_source": null
-      },
-      {
-        "problem_name": "truss1",
-        "problem_type": "SDP",
-        "solver_attempts": 1,
-        "successful_solves": 0,
-        "success_rate": 0.0,
-        "avg_solve_time": 0.009125947952270508,
-        "n_variables": 19,
-        "n_constraints": 6,
-        "difficulty_level": "Unknown",
-        "library_source": "truss family"
-      }
-    ]
+  "solver_performance": [
+    {
+      "solver_name": "cvxpy_sdpa",
+      "problems_attempted": 6,
+      "problems_solved": 6,
+      "success_rate": 1.0,
+      "avg_solve_time": 16.72089691956838,
+      "min_solve_time": 0.0575251579284668,
+      "max_solve_time": 79.02675819396973
+    },
+    {
+      "solver_name": "cvxpy_scip",
+      "problems_attempted": 3,
+      "problems_solved": 3,
+      "success_rate": 1.0,
+      "avg_solve_time": 32.214994033177696,
+      "min_solve_time": 0.005051851272583008,
+      "max_solve_time": 48.382381200790405
+    },
+    {
+      "solver_name": "cvxpy_cvxopt",
+      "problems_attempted": 6,
+      "problems_solved": 6,
+      "success_rate": 1.0,
+      "avg_solve_time": 148.23881781101227,
+      "min_solve_time": 0.0945899486541748,
+      "max_solve_time": 880.0794627666473
+    },
+    {
+      "solver_name": "cvxpy_scs",
+      "problems_attempted": 5,
+      "problems_solved": 5,
+      "success_rate": 1.0,
+      "avg_solve_time": 7343.74034819603,
+      "min_solve_time": 1.1490800380706787,
+      "max_solve_time": 36704.034167051315
+    },
+    {
+      "solver_name": "cvxpy_ecos",
+      "problems_attempted": 6,
+      "problems_solved": 5,
+      "success_rate": 0.8333333333333334,
+      "avg_solve_time": 1.3985809882481892,
+      "min_solve_time": 3.814697265625e-05,
+      "max_solve_time": 2.0737509727478027
+    },
+    {
+      "solver_name": "cvxpy_clarabel",
+      "problems_attempted": 5,
+      "problems_solved": 4,
+      "success_rate": 0.8,
+      "avg_solve_time": 20.245548677444457,
+      "min_solve_time": 1.5329699516296387,
+      "max_solve_time": 48.13991713523865
+    },
+    {
+      "solver_name": "cvxpy_highs",
+      "problems_attempted": 2,
+      "problems_solved": 1,
+      "success_rate": 0.5,
+      "avg_solve_time": 0.0019685029983520508,
+      "min_solve_time": 5.793571472167969e-05,
+      "max_solve_time": 0.003879070281982422
+    },
+    {
+      "solver_name": "cvxpy_osqp",
+      "problems_attempted": 5,
+      "problems_solved": 0,
+      "success_rate": 0.0,
+      "avg_solve_time": 4.267692565917969e-05,
+      "min_solve_time": 3.3855438232421875e-05,
+      "max_solve_time": 6.29425048828125e-05
+    },
+    {
+      "solver_name": "scipy_linprog",
+      "problems_attempted": 5,
+      "problems_solved": 0,
+      "success_rate": 0.0,
+      "avg_solve_time": 4.868507385253906e-05,
+      "min_solve_time": 3.719329833984375e-05,
+      "max_solve_time": 7.891654968261719e-05
+    }
+  ],
+  "environment": {
+    "commit_hash": "ce1969a22cbeb1ef396d49cbf1142984143d1297",
+    "platform": "macOS-14.5-arm64-arm-64bit"
   }
 }
