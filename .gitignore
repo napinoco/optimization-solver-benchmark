@@ -193,6 +193,4 @@ cython_debug/
 .cursorignore
 .cursorindexingignore.idea/
 
-# Database files (contain potentially sensitive environment information)
-database/*.db
-*.db
+# Note: Database files are now sanitized and safe for public sharing
