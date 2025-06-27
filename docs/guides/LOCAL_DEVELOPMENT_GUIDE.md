@@ -28,7 +28,7 @@ git clone https://github.com/your-org/optimization-solver-benchmark.git
 cd optimization-solver-benchmark
 
 # Install dependencies
-pip install -r requirements/base.txt -r requirements/python.txt
+pip install -r requirements.txt
 
 # Validate environment
 python main.py --validate
@@ -65,19 +65,9 @@ conda activate solver-benchmark
 
 ### 2. Install Dependencies
 
-**Core Dependencies**
+**All Dependencies**
 ```bash
-pip install -r requirements/base.txt
-```
-
-**Python Solver Dependencies**
-```bash
-pip install -r requirements/python.txt
-```
-
-**Optional: Export Dependencies (for advanced reporting)**
-```bash
-pip install -r requirements/export.txt
+pip install -r requirements.txt
 ```
 
 ### 3. Verify Installation
@@ -128,7 +118,7 @@ python main.py --all --verbose
 
 **Specific Solvers**
 ```bash
-python main.py --all --solvers scipy,clarabel_cvxpy
+python main.py --all --solvers scipy_linprog,cvxpy_clarabel
 ```
 
 **Custom Configuration**
@@ -213,7 +203,7 @@ optimization-solver-benchmark/
 │   ├── solvers/              # Solver implementations
 │   ├── reporting/            # Report generation
 │   └── utils/                # Utilities
-├── problems/light_set/       # Test problems
+├── problems/                 # Problem libraries (DIMACS, SDPLIB)
 ├── docs/                     # Generated reports (committed)
 ├── database/                 # SQLite database
 └── tests/                    # Test suite
@@ -262,7 +252,7 @@ python main.py --benchmark --solvers new_solver
 
 ### Adding New Problems
 
-1. **Add Problem Files** to `problems/light_set/[type]/`
+1. **Add Problem Files** to appropriate problem library directory
 2. **Update Registry** in `problems/problem_registry.yaml`
 ```yaml
 problems:

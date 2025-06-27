@@ -49,29 +49,26 @@ with open('problems/problem_registry.yaml') as f:
 
 ```bash
 # Run benchmarks on all external libraries
-python main.py --benchmark --solvers cvxpy --problem-set external
+python main.py --benchmark --library_names DIMACS,SDPLIB
 
 # Run only DIMACS problems
-python main.py --benchmark --solvers cvxpy --problem-set dimacs
+python main.py --benchmark --library_names DIMACS
 
 # Run only SDPLIB problems  
-python main.py --benchmark --solvers cvxpy --problem-set sdplib
+python main.py --benchmark --library_names SDPLIB
 
 # Full benchmark with reporting
-python main.py --all --problem-set external
+python main.py --all --library_names DIMACS,SDPLIB
 ```
 
 ### Advanced Usage
 
 ```bash
 # Test specific solvers on external problems
-python main.py --benchmark --solvers CLARABEL,SCS --problem-set external
+python main.py --benchmark --solvers cvxpy_clarabel,cvxpy_scs --library_names DIMACS,SDPLIB
 
-# Increase timeout for challenging problems
-python main.py --benchmark --problem-set external --timeout 600
-
-# Run with verbose logging
-python main.py --benchmark --problem-set external --log-level DEBUG
+# Run with verbose output
+python main.py --benchmark --library_names DIMACS,SDPLIB --verbose
 ```
 
 ## 📊 Understanding External Problem Results
