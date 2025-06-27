@@ -1,57 +1,55 @@
 # Export Functionality Guide
 
-The optimization solver benchmark system provides comprehensive data export capabilities for research and analysis. This guide explains how to use the various export formats and features.
+The optimization solver benchmark system provides basic data export capabilities for research and analysis.
 
 ## Overview
 
-Export functionality includes:
-- **CSV exports** for spreadsheet analysis
-- **JSON exports** for programmatic access
-- **PDF reports** for documentation
-- **RESTful API** for real-time data access
-- **Data validation** for quality assurance
+Currently available export functionality:
+- **JSON exports** for programmatic access (via reporting system)
+- **CSV exports** for spreadsheet analysis (generated reports)
+- **HTML reports** for interactive viewing
+
+**Note**: This system focuses on static HTML reports with embedded JSON/CSV data rather than standalone export utilities.
 
 ## Quick Start
 
-### Command Line Export
+### Generate Reports with Data Export
 ```bash
-# Export all formats
-python scripts/reporting/export.py --format all
+# Generate complete reports (includes embedded JSON/CSV data)
+python main.py --all
 
-# Export specific format
-python scripts/reporting/export.py --format csv
-python scripts/reporting/export.py --format json
-python scripts/reporting/export.py --format pdf
-
-# Export with custom output directory
-python scripts/reporting/export.py --format all --output-dir my_exports
+# Reports are generated in docs/ directory
+# JSON data available at: docs/pages/data/benchmark_results.json
+# CSV data available at: docs/pages/data/benchmark_results.csv
 ```
 
-### Python API
+### Accessing Exported Data
+```bash
+# View generated data files
+ls docs/pages/data/
+# benchmark_results.json  - Complete benchmark results
+# benchmark_results.csv   - Results in CSV format  
+# summary.json           - Summary statistics
+
+# Open HTML reports (contain interactive data access)
+open docs/pages/index.html
+```
+
+### Using Data Programmatically
 ```python
-from scripts.reporting.export import DataExporter
+import json
+import pandas as pd
 
-# Create exporter
-exporter = DataExporter()
+# Load JSON data
+with open('docs/pages/data/benchmark_results.json', 'r') as f:
+    results = json.load(f)
 
-# Export all formats
-results = exporter.export_all_formats()
+# Load CSV data
+df = pd.read_csv('docs/pages/data/benchmark_results.csv')
 
-# Export specific formats
-csv_path = exporter.export_solver_comparison_csv()
-json_path = exporter.export_json_data(include_raw_results=True)
-pdf_path = exporter.generate_summary_report_pdf()
-```
-
-### RESTful API Server
-```bash
-# Start API server
-python scripts/api/simple_api.py --host 0.0.0.0 --port 5000
-
-# Access endpoints
-curl http://localhost:5000/api/health
-curl http://localhost:5000/api/solvers
-curl http://localhost:5000/api/results?limit=10
+# Access summary statistics
+with open('docs/pages/data/summary.json', 'r') as f:
+    summary = json.load(f)
 ```
 
 ## Export Formats
