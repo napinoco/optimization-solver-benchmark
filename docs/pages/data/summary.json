@@ -1,21 +1,23 @@
 {
   "metadata": {
-    "generated_at": "2025-06-25T09:48:05.858961",
-    "total_results": 41,
+    "generated_at": "2025-06-27T11:49:45.958223",
+    "total_results": 43,
     "format": "summary_only"
   },
   "overall_statistics": {
-    "total_results": 41,
+    "total_results": 43,
     "total_solvers": 9,
-    "total_problems": 6,
-    "success_rate": 0.6829268292682927,
-    "avg_solve_time": 924.7457687680314,
+    "total_problems": 7,
+    "success_rate": 0.6976744186046512,
+    "avg_solve_time": 881.7378752231598,
     "problem_type_distribution": {
       "UNKNOWN": 34,
-      "SOCP": 7
+      "SOCP": 7,
+      "SDP": 2
     },
     "library_distribution": {
       "DIMACS": 39,
+      "SDPLIB": 2,
       "internal": 2
     },
     "solver_names": [
@@ -35,17 +37,18 @@
       "nb_L1",
       "nb_L2",
       "nb_L2_bessel",
+      "qap5",
       "simple_lp_test"
     ]
   },
   "solver_performance": [
     {
       "solver_name": "cvxpy_sdpa",
-      "problems_attempted": 5,
-      "problems_solved": 5,
+      "problems_attempted": 6,
+      "problems_solved": 6,
       "success_rate": 1.0,
-      "avg_solve_time": 20.053571271896363,
-      "min_solve_time": 1.3061511516571045,
+      "avg_solve_time": 16.72089691956838,
+      "min_solve_time": 0.0575251579284668,
       "max_solve_time": 79.02675819396973
     },
     {
@@ -59,11 +62,11 @@
     },
     {
       "solver_name": "cvxpy_cvxopt",
-      "problems_attempted": 5,
-      "problems_solved": 5,
+      "problems_attempted": 6,
+      "problems_solved": 6,
       "success_rate": 1.0,
-      "avg_solve_time": 177.8676633834839,
-      "min_solve_time": 1.3183510303497314,
+      "avg_solve_time": 148.23881781101227,
+      "min_solve_time": 0.0945899486541748,
       "max_solve_time": 880.0794627666473
     },
     {

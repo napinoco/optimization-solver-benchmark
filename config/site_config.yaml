@@ -11,6 +11,8 @@ site:
     "Regularly benchmark publicly available solvers and publish the results as data"
     
     This system prioritizes unbiased solver comparison through minimal configuration, establishing "out of the box" performance baselines rather than optimized configurations.
+  results_matrix_note: |
+    ⚠️ **Important Note**: The bm1 problem shows CLARABEL with an ERROR status and extended solve time (48.140s). This occurred because CLARABEL consumed excessive memory and was terminated by the system with SIGKILL (signal 9) before completing the optimization process.
 
 github:
   username: "napinoco"

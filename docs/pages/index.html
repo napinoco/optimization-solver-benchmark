@@ -187,13 +187,37 @@
         footer a:hover {
             text-decoration: underline;
         }
+        
+        .overview-section {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+        
+        .overview-section h2 {
+            color: #2c3e50;
+            margin-bottom: 1rem;
+            font-size: 1.5rem;
+        }
+        
+        .overview-content {
+            color: #34495e;
+            line-height: 1.8;
+            white-space: pre-line;
+        }
+        
+        .overview-content strong {
+            color: #2c3e50;
+        }
     </style>
 </head>
 <body>
     <header>
         <h1>🔬 Optimization Solver Benchmark</h1>
         <p>Overview Dashboard - Latest Results</p>
-        <p><small>Generated: 2025-06-25 09:48:05</small></p>
+        <p><small>Generated: 2025-06-27 11:49:45</small></p>
     </header>
     
     <nav>
@@ -204,11 +228,25 @@
     </nav>
     
     <main>
+        
+        <!-- Project Overview Section -->
+        
+        <div class="overview-section">
+            <h2>📋 Project Overview</h2>
+            <div class="overview-content">**Project Vision**
+Create the leading open-source platform for benchmarking optimization solvers across multiple problem types, providing researchers and practitioners with comprehensive performance insights through automated execution, transparent reporting, and fair baseline comparisons.
+
+**Core Mission**
+"Regularly benchmark publicly available solvers and publish the results as data"
+
+This system prioritizes unbiased solver comparison through minimal configuration, establishing "out of the box" performance baselines rather than optimized configurations.</div>
+        </div>
+        
 
         <div class="stats-grid">
             <div class="stat-card">
                 <h3>Total Results</h3>
-                <span class="stat-value">41</span>
+                <span class="stat-value">43</span>
             </div>
             <div class="stat-card">
                 <h3>Solvers Tested</h3>
@@ -216,11 +254,11 @@
             </div>
             <div class="stat-card">
                 <h3>Problems Tested</h3>
-                <span class="stat-value">6</span>
+                <span class="stat-value">7</span>
             </div>
             <div class="stat-card">
                 <h3>Success Rate</h3>
-                <span class="stat-value">68.3%</span>
+                <span class="stat-value">69.8%</span>
             </div>
         </div>
 
@@ -362,6 +400,35 @@
                     </tbody>
                 </table>
                 <br>
+                <h3>SDP Problems</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Solver</th>
+                            <th>Problems Attempted</th>
+                            <th>Problems Solved</th>
+                            <th>Success Rate</th>
+                            <th>Avg Solve Time</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                <tr>
+                    <td><strong>cvxpy_sdpa</strong></td>
+                    <td>1</td>
+                    <td>1</td>
+                    <td class="success-rate">100.0%</td>
+                    <td class="solve-time">0.0575s</td>
+                </tr>
+                <tr>
+                    <td><strong>cvxpy_cvxopt</strong></td>
+                    <td>1</td>
+                    <td>1</td>
+                    <td class="success-rate">100.0%</td>
+                    <td class="solve-time">0.0946s</td>
+                </tr>
+                    </tbody>
+                </table>
+                <br>
             </div>
         </div>
 
@@ -380,12 +447,17 @@
             <tr>
                 <td><strong>UNKNOWN</strong></td>
                 <td>34</td>
-                <td>82.9%</td>
+                <td>79.1%</td>
             </tr>
             <tr>
                 <td><strong>SOCP</strong></td>
                 <td>7</td>
-                <td>17.1%</td>
+                <td>16.3%</td>
+            </tr>
+            <tr>
+                <td><strong>SDP</strong></td>
+                <td>2</td>
+                <td>4.7%</td>
             </tr>
                     </tbody>
                 </table>
@@ -407,12 +479,17 @@
             <tr>
                 <td><strong>DIMACS</strong></td>
                 <td>39</td>
-                <td>95.1%</td>
+                <td>90.7%</td>
+            </tr>
+            <tr>
+                <td><strong>SDPLIB</strong></td>
+                <td>2</td>
+                <td>4.7%</td>
             </tr>
             <tr>
                 <td><strong>internal</strong></td>
                 <td>2</td>
-                <td>4.9%</td>
+                <td>4.7%</td>
             </tr>
                     </tbody>
                 </table>
@@ -421,9 +498,7 @@
 
         <div class="metadata">
             <h3>🔧 Environment Information</h3>
-            <p><strong>Commit Hash:</strong> ce1969a22cbeb1ef396d49cbf1142984143d1297</p>
-            <p><strong>Platform:</strong> macOS-14.5-arm64-arm-64bit</p>
-            <p><strong>Python Version:</strong> 3.12.2</p>
+            <p><strong>Commit Hashes:</strong> 3dc1728a, 82612d7c, ce1969a2, cfc13857, e945508d</p><p><em>⚠️ Multiple environments detected: Results from 5 different Git commits</em></p><p><strong>Platform:</strong> macOS-14.5-arm64-arm-64bit (8CPU, 24GB)</p><p><strong>Python Version:</strong> 3.12.2</p>
         </div>
     </main>
 
