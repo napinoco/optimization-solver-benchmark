@@ -1,6 +1,6 @@
 {
   "metadata": {
-    "generated_at": "2025-06-27T11:49:45.950103",
+    "generated_at": "2025-06-27T16:56:07.952156",
     "total_results": 43,
     "export_format": "simplified_benchmark_results",
     "version": "1.0"
@@ -137,59 +137,32 @@
         "cpu": {
           "cpu_count": 8,
           "cpu_count_physical": 8,
-          "cpu_freq": {
-            "current": 3504,
-            "max": 3504,
-            "min": 600
-          },
           "processor": "arm"
         },
-        "disk": {
-          "free": 618503622656,
-          "free_gb": 576.03,
-          "percent": 1.34,
-          "total": 994662584320,
-          "total_gb": 926.35,
-          "used": 13331341312
-        },
-        "git": {
-          "available": true,
-          "branch": "update-documentation-main",
-          "commit_hash": "ce1969a22cbeb1ef396d49cbf1142984143d1297",
-          "is_dirty": true
-        },
         "memory": {
-          "available": 11161616384,
-          "available_gb": 10.4,
-          "free": 22298624,
-          "percent": 56.7,
-          "total": 25769803776,
-          "total_gb": 24.0,
-          "used": 13200670720
+          "total_gb": 24.0
         },
         "os": {
           "architecture": "64bit",
           "machine": "arm64",
-          "platform": "macOS-14.5-arm64-arm-64bit",
-          "release": "23.5.0",
           "system": "Darwin",
-          "version": "Darwin Kernel Version 23.5.0: Wed May  1 20:19:05 PDT 2024; root:xnu-10063.121.3~5/RELEASE_ARM64_T8112"
+          "platform": "macOS-14.5-arm64-arm-64bit",
+          "release": "23.5.0"
         },
         "python": {
-          "executable": "/Users/naoki/PycharmProjects/optimization-solver-benchmark/venv/bin/python",
           "implementation": "CPython",
           "version": "3.12.2",
           "version_info": "3.12.2"
         },
-        "timestamp": 1750582016.0,
+        "git": {
+          "available": true,
+          "commit_hash": "ce1969a22cbeb1ef396d49cbf1142984143d1297"
+        },
         "timezone": {
-          "current_time_local": "2025-06-22T19:29:29.703864",
-          "current_time_utc": "2025-06-22T10:29:29.703855+00:00",
-          "daylight_saving": false,
           "timezone_name": "JST",
-          "utc_offset_hours": 9.0,
-          "utc_offset_seconds": -32400
-        }
+          "utc_offset_hours": 9.0
+        },
+        "timestamp": 1750582016.0
       },
       "commit_hash": "ce1969a22cbeb1ef396d49cbf1142984143d1297",
       "timestamp": "2025-06-22T10:30:18",
@@ -213,59 +186,32 @@
         "cpu": {
           "cpu_count": 8,
           "cpu_count_physical": 8,
-          "cpu_freq": {
-            "current": 3504,
-            "max": 3504,
-            "min": 600
-          },
           "processor": "arm"
         },
-        "disk": {
-          "free": 612674191360,
-          "free_gb": 570.6,
-          "percent": 1.34,
-          "total": 994662584320,
-          "total_gb": 926.35,
-          "used": 13331341312
-        },
-        "git": {
-          "available": true,
-          "branch": "update-documentation-main",
-          "commit_hash": "ce1969a22cbeb1ef396d49cbf1142984143d1297",
-          "is_dirty": true
-        },
         "memory": {
-          "available": 17617010688,
-          "available_gb": 16.41,
-          "free": 13361168384,
-          "percent": 31.6,
-          "total": 25769803776,
-          "total_gb": 24.0,
-          "used": 6734643200
+          "total_gb": 24.0
         },
         "os": {
           "architecture": "64bit",
           "machine": "arm64",
-          "platform": "macOS-14.5-arm64-arm-64bit",
-          "release": "23.5.0",
           "system": "Darwin",
-          "version": "Darwin Kernel Version 23.5.0: Wed May  1 20:19:05 PDT 2024; root:xnu-10063.121.3~5/RELEASE_ARM64_T8112"
+          "platform": "macOS-14.5-arm64-arm-64bit",
+          "release": "23.5.0"
         },
         "python": {
-          "executable": "/Users/naoki/PycharmProjects/optimization-solver-benchmark/venv/bin/python",
           "implementation": "CPython",
           "version": "3.12.2",
           "version_info": "3.12.2"
         },
-        "timestamp": 1750582016.0,
+        "git": {
+          "available": true,
+          "commit_hash": "ce1969a22cbeb1ef396d49cbf1142984143d1297"
+        },
         "timezone": {
-          "current_time_local": "2025-06-22T22:12:36.530687",
-          "current_time_utc": "2025-06-22T13:12:36.530677+00:00",
-          "daylight_saving": false,
           "timezone_name": "JST",
-          "utc_offset_hours": 9.0,
-          "utc_offset_seconds": -32400
-        }
+          "utc_offset_hours": 9.0
+        },
+        "timestamp": 1750582016.0
       },
       "commit_hash": "ce1969a22cbeb1ef396d49cbf1142984143d1297",
       "timestamp": "2025-06-22T23:39:01",
@@ -289,59 +235,32 @@
         "cpu": {
           "cpu_count": 8,
           "cpu_count_physical": 8,
-          "cpu_freq": {
-            "current": 3504,
-            "max": 3504,
-            "min": 600
-          },
           "processor": "arm"
         },
-        "disk": {
-          "free": 612674191360,
-          "free_gb": 570.6,
-          "percent": 1.34,
-          "total": 994662584320,
-          "total_gb": 926.35,
-          "used": 13331341312
-        },
-        "git": {
-          "available": true,
-          "branch": "update-documentation-main",
-          "commit_hash": "ce1969a22cbeb1ef396d49cbf1142984143d1297",
-          "is_dirty": true
-        },
         "memory": {
-          "available": 17617010688,
-          "available_gb": 16.41,
-          "free": 13361168384,
-          "percent": 31.6,
-          "total": 25769803776,
-          "total_gb": 24.0,
-          "used": 6734643200
+          "total_gb": 24.0
         },
         "os": {
           "architecture": "64bit",
           "machine": "arm64",
-          "platform": "macOS-14.5-arm64-arm-64bit",
-          "release": "23.5.0",
           "system": "Darwin",
-          "version": "Darwin Kernel Version 23.5.0: Wed May  1 20:19:05 PDT 2024; root:xnu-10063.121.3~5/RELEASE_ARM64_T8112"
+          "platform": "macOS-14.5-arm64-arm-64bit",
+          "release": "23.5.0"
         },
         "python": {
-          "executable": "/Users/naoki/PycharmProjects/optimization-solver-benchmark/venv/bin/python",
           "implementation": "CPython",
           "version": "3.12.2",
           "version_info": "3.12.2"
         },
-        "timestamp": 1750582016.0,
+        "git": {
+          "available": true,
+          "commit_hash": "ce1969a22cbeb1ef396d49cbf1142984143d1297"
+        },
         "timezone": {
-          "current_time_local": "2025-06-22T22:12:36.530687",
-          "current_time_utc": "2025-06-22T13:12:36.530677+00:00",
-          "daylight_saving": false,
           "timezone_name": "JST",
-          "utc_offset_hours": 9.0,
-          "utc_offset_seconds": -32400
-        }
+          "utc_offset_hours": 9.0
+        },
+        "timestamp": 1750582016.0
       },
       "commit_hash": "ce1969a22cbeb1ef396d49cbf1142984143d1297",
       "timestamp": "2025-06-22T23:24:20",
@@ -365,59 +284,32 @@
         "cpu": {
           "cpu_count": 8,
           "cpu_count_physical": 8,
-          "cpu_freq": {
-            "current": 3504,
-            "max": 3504,
-            "min": 600
-          },
           "processor": "arm"
         },
-        "disk": {
-          "free": 612674191360,
-          "free_gb": 570.6,
-          "percent": 1.34,
-          "total": 994662584320,
-          "total_gb": 926.35,
-          "used": 13331341312
-        },
-        "git": {
-          "available": true,
-          "branch": "update-documentation-main",
-          "commit_hash": "ce1969a22cbeb1ef396d49cbf1142984143d1297",
-          "is_dirty": true
-        },
         "memory": {
-          "available": 17617010688,
-          "available_gb": 16.41,
-          "free": 13361168384,
-          "percent": 31.6,
-          "total": 25769803776,
-          "total_gb": 24.0,
-          "used": 6734643200
+          "total_gb": 24.0
         },
         "os": {
           "architecture": "64bit",
           "machine": "arm64",
-          "platform": "macOS-14.5-arm64-arm-64bit",
-          "release": "23.5.0",
           "system": "Darwin",
-          "version": "Darwin Kernel Version 23.5.0: Wed May  1 20:19:05 PDT 2024; root:xnu-10063.121.3~5/RELEASE_ARM64_T8112"
+          "platform": "macOS-14.5-arm64-arm-64bit",
+          "release": "23.5.0"
         },
         "python": {
-          "executable": "/Users/naoki/PycharmProjects/optimization-solver-benchmark/venv/bin/python",
           "implementation": "CPython",
           "version": "3.12.2",
           "version_info": "3.12.2"
         },
-        "timestamp": 1750582016.0,
+        "git": {
+          "available": true,
+          "commit_hash": "ce1969a22cbeb1ef396d49cbf1142984143d1297"
+        },
         "timezone": {
-          "current_time_local": "2025-06-22T22:12:36.530687",
-          "current_time_utc": "2025-06-22T13:12:36.530677+00:00",
-          "daylight_saving": false,
           "timezone_name": "JST",
-          "utc_offset_hours": 9.0,
-          "utc_offset_seconds": -32400
-        }
+          "utc_offset_hours": 9.0
+        },
+        "timestamp": 1750582016.0
       },
       "commit_hash": "ce1969a22cbeb1ef396d49cbf1142984143d1297",
       "timestamp": "2025-06-22T23:24:20",
@@ -441,59 +333,32 @@
         "cpu": {
           "cpu_count": 8,
           "cpu_count_physical": 8,
-          "cpu_freq": {
-            "current": 3504,
-            "max": 3504,
-            "min": 600
-          },
           "processor": "arm"
         },
-        "disk": {
-          "free": 612674191360,
-          "free_gb": 570.6,
-          "percent": 1.34,
-          "total": 994662584320,
-          "total_gb": 926.35,
-          "used": 13331341312
-        },
-        "git": {
-          "available": true,
-          "branch": "update-documentation-main",
-          "commit_hash": "ce1969a22cbeb1ef396d49cbf1142984143d1297",
-          "is_dirty": true
-        },
         "memory": {
-          "available": 17617010688,
-          "available_gb": 16.41,
-          "free": 13361168384,
-          "percent": 31.6,
-          "total": 25769803776,
-          "total_gb": 24.0,
-          "used": 6734643200
+          "total_gb": 24.0
         },
         "os": {
           "architecture": "64bit",
           "machine": "arm64",
-          "platform": "macOS-14.5-arm64-arm-64bit",
-          "release": "23.5.0",
           "system": "Darwin",
-          "version": "Darwin Kernel Version 23.5.0: Wed May  1 20:19:05 PDT 2024; root:xnu-10063.121.3~5/RELEASE_ARM64_T8112"
+          "platform": "macOS-14.5-arm64-arm-64bit",
+          "release": "23.5.0"
         },
         "python": {
-          "executable": "/Users/naoki/PycharmProjects/optimization-solver-benchmark/venv/bin/python",
           "implementation": "CPython",
           "version": "3.12.2",
           "version_info": "3.12.2"
         },
-        "timestamp": 1750582016.0,
+        "git": {
+          "available": true,
+          "commit_hash": "ce1969a22cbeb1ef396d49cbf1142984143d1297"
+        },
         "timezone": {
-          "current_time_local": "2025-06-22T22:12:36.530687",
-          "current_time_utc": "2025-06-22T13:12:36.530677+00:00",
-          "daylight_saving": false,
           "timezone_name": "JST",
-          "utc_offset_hours": 9.0,
-          "utc_offset_seconds": -32400
-        }
+          "utc_offset_hours": 9.0
+        },
+        "timestamp": 1750582016.0
       },
       "commit_hash": "ce1969a22cbeb1ef396d49cbf1142984143d1297",
       "timestamp": "2025-06-22T23:24:20",
@@ -517,59 +382,32 @@
         "cpu": {
           "cpu_count": 8,
           "cpu_count_physical": 8,
-          "cpu_freq": {
-            "current": 3504,
-            "max": 3504,
-            "min": 600
-          },
           "processor": "arm"
         },
-        "disk": {
-          "free": 610525900800,
-          "free_gb": 568.6,
-          "percent": 1.34,
-          "total": 994662584320,
-          "total_gb": 926.35,
-          "used": 13331341312
-        },
-        "git": {
-          "available": true,
-          "branch": "update-documentation-main",
-          "commit_hash": "ce1969a22cbeb1ef396d49cbf1142984143d1297",
-          "is_dirty": true
-        },
         "memory": {
-          "available": 18815434752,
-          "available_gb": 17.52,
-          "free": 15589376000,
-          "percent": 27.0,
-          "total": 25769803776,
-          "total_gb": 24.0,
-          "used": 5296226304
+          "total_gb": 24.0
         },
         "os": {
           "architecture": "64bit",
           "machine": "arm64",
-          "platform": "macOS-14.5-arm64-arm-64bit",
-          "release": "23.5.0",
           "system": "Darwin",
-          "version": "Darwin Kernel Version 23.5.0: Wed May  1 20:19:05 PDT 2024; root:xnu-10063.121.3~5/RELEASE_ARM64_T8112"
+          "platform": "macOS-14.5-arm64-arm-64bit",
+          "release": "23.5.0"
         },
         "python": {
-          "executable": "/Users/naoki/PycharmProjects/optimization-solver-benchmark/venv/bin/python",
           "implementation": "CPython",
           "version": "3.12.2",
           "version_info": "3.12.2"
         },
-        "timestamp": 1750582016.0,
+        "git": {
+          "available": true,
+          "commit_hash": "ce1969a22cbeb1ef396d49cbf1142984143d1297"
+        },
         "timezone": {
-          "current_time_local": "2025-06-22T22:07:46.242236",
-          "current_time_utc": "2025-06-22T13:07:46.242224+00:00",
-          "daylight_saving": false,
           "timezone_name": "JST",
-          "utc_offset_hours": 9.0,
-          "utc_offset_seconds": -32400
-        }
+          "utc_offset_hours": 9.0
+        },
+        "timestamp": 1750582016.0
       },
       "commit_hash": "ce1969a22cbeb1ef396d49cbf1142984143d1297",
       "timestamp": "2025-06-22T13:09:05",
@@ -593,59 +431,32 @@
         "cpu": {
           "cpu_count": 8,
           "cpu_count_physical": 8,
-          "cpu_freq": {
-            "current": 3504,
-            "max": 3504,
-            "min": 600
-          },
           "processor": "arm"
         },
-        "disk": {
-          "free": 612672356352,
-          "free_gb": 570.6,
-          "percent": 1.34,
-          "total": 994662584320,
-          "total_gb": 926.35,
-          "used": 13331341312
-        },
-        "git": {
-          "available": true,
-          "branch": "update-documentation-main",
-          "commit_hash": "ce1969a22cbeb1ef396d49cbf1142984143d1297",
-          "is_dirty": true
-        },
         "memory": {
-          "available": 18043584512,
-          "available_gb": 16.8,
-          "free": 13845577728,
-          "percent": 30.0,
-          "total": 25769803776,
-          "total_gb": 24.0,
-          "used": 6162300928
+          "total_gb": 24.0
         },
         "os": {
           "architecture": "64bit",
           "machine": "arm64",
-          "platform": "macOS-14.5-arm64-arm-64bit",
-          "release": "23.5.0",
           "system": "Darwin",
-          "version": "Darwin Kernel Version 23.5.0: Wed May  1 20:19:05 PDT 2024; root:xnu-10063.121.3~5/RELEASE_ARM64_T8112"
+          "platform": "macOS-14.5-arm64-arm-64bit",
+          "release": "23.5.0"
         },
         "python": {
-          "executable": "/Users/naoki/PycharmProjects/optimization-solver-benchmark/venv/bin/python",
           "implementation": "CPython",
           "version": "3.12.2",
           "version_info": "3.12.2"
         },
-        "timestamp": 1750582016.0,
+        "git": {
+          "available": true,
+          "commit_hash": "ce1969a22cbeb1ef396d49cbf1142984143d1297"
+        },
         "timezone": {
-          "current_time_local": "2025-06-22T22:10:16.613944",
-          "current_time_utc": "2025-06-22T13:10:16.613937+00:00",
-          "daylight_saving": false,
           "timezone_name": "JST",
-          "utc_offset_hours": 9.0,
-          "utc_offset_seconds": -32400
-        }
+          "utc_offset_hours": 9.0
+        },
+        "timestamp": 1750582016.0
       },
       "commit_hash": "ce1969a22cbeb1ef396d49cbf1142984143d1297",
       "timestamp": "2025-06-22T13:10:16",
@@ -669,59 +480,32 @@
         "cpu": {
           "cpu_count": 8,
           "cpu_count_physical": 8,
-          "cpu_freq": {
-            "current": 3504,
-            "max": 3504,
-            "min": 600
-          },
           "processor": "arm"
         },
-        "disk": {
-          "free": 611902582784,
-          "free_gb": 569.88,
-          "percent": 1.34,
-          "total": 994662584320,
-          "total_gb": 926.35,
-          "used": 13331030016
-        },
-        "git": {
-          "available": true,
-          "branch": "refactor-problemdata-unified-architecture",
-          "commit_hash": "e945508d6718b1edb2f579ce0b5a56da98570dbd",
-          "is_dirty": true
-        },
         "memory": {
-          "available": 10698833920,
-          "available_gb": 9.96,
-          "free": 684523520,
-          "percent": 58.5,
-          "total": 25769803776,
-          "total_gb": 24.0,
-          "used": 12369739776
+          "total_gb": 24.0
         },
         "os": {
           "architecture": "64bit",
           "machine": "arm64",
-          "platform": "macOS-14.5-arm64-arm-64bit",
-          "release": "23.5.0",
           "system": "Darwin",
-          "version": "Darwin Kernel Version 23.5.0: Wed May  1 20:19:05 PDT 2024; root:xnu-10063.121.3~5/RELEASE_ARM64_T8112"
+          "platform": "macOS-14.5-arm64-arm-64bit",
+          "release": "23.5.0"
         },
         "python": {
-          "executable": "/Users/naoki/PycharmProjects/optimization-solver-benchmark/venv/bin/python",
           "implementation": "CPython",
           "version": "3.12.2",
           "version_info": "3.12.2"
         },
-        "timestamp": 1750582016.0,
+        "git": {
+          "available": true,
+          "commit_hash": "e945508d6718b1edb2f579ce0b5a56da98570dbd"
+        },
         "timezone": {
-          "current_time_local": "2025-06-25T09:42:42.966601",
-          "current_time_utc": "2025-06-25T00:42:42.966587+00:00",
-          "daylight_saving": false,
           "timezone_name": "JST",
-          "utc_offset_hours": 9.0,
-          "utc_offset_seconds": -32400
-        }
+          "utc_offset_hours": 9.0
+        },
+        "timestamp": 1750582016.0
       },
       "commit_hash": "e945508d6718b1edb2f579ce0b5a56da98570dbd",
       "timestamp": "2025-06-25T00:42:45",
@@ -745,59 +529,32 @@
         "cpu": {
           "cpu_count": 8,
           "cpu_count_physical": 8,
-          "cpu_freq": {
-            "current": 3504,
-            "max": 3504,
-            "min": 600
-          },
           "processor": "arm"
         },
-        "disk": {
-          "free": 611902582784,
-          "free_gb": 569.88,
-          "percent": 1.34,
-          "total": 994662584320,
-          "total_gb": 926.35,
-          "used": 13331030016
-        },
-        "git": {
-          "available": true,
-          "branch": "refactor-problemdata-unified-architecture",
-          "commit_hash": "e945508d6718b1edb2f579ce0b5a56da98570dbd",
-          "is_dirty": true
-        },
         "memory": {
-          "available": 10698833920,
-          "available_gb": 9.96,
-          "free": 684523520,
-          "percent": 58.5,
-          "total": 25769803776,
-          "total_gb": 24.0,
-          "used": 12369739776
+          "total_gb": 24.0
         },
         "os": {
           "architecture": "64bit",
           "machine": "arm64",
-          "platform": "macOS-14.5-arm64-arm-64bit",
-          "release": "23.5.0",
           "system": "Darwin",
-          "version": "Darwin Kernel Version 23.5.0: Wed May  1 20:19:05 PDT 2024; root:xnu-10063.121.3~5/RELEASE_ARM64_T8112"
+          "platform": "macOS-14.5-arm64-arm-64bit",
+          "release": "23.5.0"
         },
         "python": {
-          "executable": "/Users/naoki/PycharmProjects/optimization-solver-benchmark/venv/bin/python",
           "implementation": "CPython",
           "version": "3.12.2",
           "version_info": "3.12.2"
         },
-        "timestamp": 1750582016.0,
+        "git": {
+          "available": true,
+          "commit_hash": "e945508d6718b1edb2f579ce0b5a56da98570dbd"
+        },
         "timezone": {
-          "current_time_local": "2025-06-25T09:42:42.966601",
-          "current_time_utc": "2025-06-25T00:42:42.966587+00:00",
-          "daylight_saving": false,
           "timezone_name": "JST",
-          "utc_offset_hours": 9.0,
-          "utc_offset_seconds": -32400
-        }
+          "utc_offset_hours": 9.0
+        },
+        "timestamp": 1750582016.0
       },
       "commit_hash": "e945508d6718b1edb2f579ce0b5a56da98570dbd",
       "timestamp": "2025-06-25T00:42:54",
@@ -821,59 +578,32 @@
         "cpu": {
           "cpu_count": 8,
           "cpu_count_physical": 8,
-          "cpu_freq": {
-            "current": 3504,
-            "max": 3504,
-            "min": 600
-          },
           "processor": "arm"
         },
-        "disk": {
-          "free": 615791091712,
-          "free_gb": 573.5,
-          "percent": 1.34,
-          "total": 994662584320,
-          "total_gb": 926.35,
-          "used": 13331341312
-        },
-        "git": {
-          "available": true,
-          "branch": "update-documentation-main",
-          "commit_hash": "82612d7c8346e9f418e4c4fb79124a2f7c3a48d4",
-          "is_dirty": true
-        },
         "memory": {
-          "available": 10725998592,
-          "available_gb": 9.99,
-          "free": 138133504,
-          "percent": 58.4,
-          "total": 25769803776,
-          "total_gb": 24.0,
-          "used": 12792610816
+          "total_gb": 24.0
         },
         "os": {
           "architecture": "64bit",
           "machine": "arm64",
-          "platform": "macOS-14.5-arm64-arm-64bit",
-          "release": "23.5.0",
           "system": "Darwin",
-          "version": "Darwin Kernel Version 23.5.0: Wed May  1 20:19:05 PDT 2024; root:xnu-10063.121.3~5/RELEASE_ARM64_T8112"
+          "platform": "macOS-14.5-arm64-arm-64bit",
+          "release": "23.5.0"
         },
         "python": {
-          "executable": "/Users/naoki/PycharmProjects/optimization-solver-benchmark/venv/bin/python",
           "implementation": "CPython",
           "version": "3.12.2",
           "version_info": "3.12.2"
         },
-        "timestamp": 1750582016.0,
+        "git": {
+          "available": true,
+          "commit_hash": "82612d7c8346e9f418e4c4fb79124a2f7c3a48d4"
+        },
         "timezone": {
-          "current_time_local": "2025-06-24T22:11:59.086794",
-          "current_time_utc": "2025-06-24T13:11:59.086776+00:00",
-          "daylight_saving": false,
           "timezone_name": "JST",
-          "utc_offset_hours": 9.0,
-          "utc_offset_seconds": -32400
-        }
+          "utc_offset_hours": 9.0
+        },
+        "timestamp": 1750582016.0
       },
       "commit_hash": "82612d7c8346e9f418e4c4fb79124a2f7c3a48d4",
       "timestamp": "2025-06-24T13:12:07",
@@ -897,59 +627,32 @@
         "cpu": {
           "cpu_count": 8,
           "cpu_count_physical": 8,
-          "cpu_freq": {
-            "current": 3504,
-            "max": 3504,
-            "min": 600
-          },
           "processor": "arm"
         },
-        "disk": {
-          "free": 611902582784,
-          "free_gb": 569.88,
-          "percent": 1.34,
-          "total": 994662584320,
-          "total_gb": 926.35,
-          "used": 13331030016
-        },
-        "git": {
-          "available": true,
-          "branch": "refactor-problemdata-unified-architecture",
-          "commit_hash": "e945508d6718b1edb2f579ce0b5a56da98570dbd",
-          "is_dirty": true
-        },
         "memory": {
-          "available": 10698833920,
-          "available_gb": 9.96,
-          "free": 684523520,
-          "percent": 58.5,
-          "total": 25769803776,
-          "total_gb": 24.0,
-          "used": 12369739776
+          "total_gb": 24.0
         },
         "os": {
           "architecture": "64bit",
           "machine": "arm64",
-          "platform": "macOS-14.5-arm64-arm-64bit",
-          "release": "23.5.0",
           "system": "Darwin",
-          "version": "Darwin Kernel Version 23.5.0: Wed May  1 20:19:05 PDT 2024; root:xnu-10063.121.3~5/RELEASE_ARM64_T8112"
+          "platform": "macOS-14.5-arm64-arm-64bit",
+          "release": "23.5.0"
         },
         "python": {
-          "executable": "/Users/naoki/PycharmProjects/optimization-solver-benchmark/venv/bin/python",
           "implementation": "CPython",
           "version": "3.12.2",
           "version_info": "3.12.2"
         },
-        "timestamp": 1750582016.0,
+        "git": {
+          "available": true,
+          "commit_hash": "e945508d6718b1edb2f579ce0b5a56da98570dbd"
+        },
         "timezone": {
-          "current_time_local": "2025-06-25T09:42:42.966601",
-          "current_time_utc": "2025-06-25T00:42:42.966587+00:00",
-          "daylight_saving": false,
           "timezone_name": "JST",
-          "utc_offset_hours": 9.0,
-          "utc_offset_seconds": -32400
-        }
+          "utc_offset_hours": 9.0
+        },
+        "timestamp": 1750582016.0
       },
       "commit_hash": "e945508d6718b1edb2f579ce0b5a56da98570dbd",
       "timestamp": "2025-06-25T00:42:51",
@@ -973,59 +676,32 @@
         "cpu": {
           "cpu_count": 8,
           "cpu_count_physical": 8,
-          "cpu_freq": {
-            "current": 3504,
-            "max": 3504,
-            "min": 600
-          },
           "processor": "arm"
         },
-        "disk": {
-          "free": 615791091712,
-          "free_gb": 573.5,
-          "percent": 1.34,
-          "total": 994662584320,
-          "total_gb": 926.35,
-          "used": 13331341312
-        },
-        "git": {
-          "available": true,
-          "branch": "update-documentation-main",
-          "commit_hash": "82612d7c8346e9f418e4c4fb79124a2f7c3a48d4",
-          "is_dirty": true
-        },
         "memory": {
-          "available": 10725998592,
-          "available_gb": 9.99,
-          "free": 138133504,
-          "percent": 58.4,
-          "total": 25769803776,
-          "total_gb": 24.0,
-          "used": 12792610816
+          "total_gb": 24.0
         },
         "os": {
           "architecture": "64bit",
           "machine": "arm64",
-          "platform": "macOS-14.5-arm64-arm-64bit",
-          "release": "23.5.0",
           "system": "Darwin",
-          "version": "Darwin Kernel Version 23.5.0: Wed May  1 20:19:05 PDT 2024; root:xnu-10063.121.3~5/RELEASE_ARM64_T8112"
+          "platform": "macOS-14.5-arm64-arm-64bit",
+          "release": "23.5.0"
         },
         "python": {
-          "executable": "/Users/naoki/PycharmProjects/optimization-solver-benchmark/venv/bin/python",
           "implementation": "CPython",
           "version": "3.12.2",
           "version_info": "3.12.2"
         },
-        "timestamp": 1750582016.0,
+        "git": {
+          "available": true,
+          "commit_hash": "82612d7c8346e9f418e4c4fb79124a2f7c3a48d4"
+        },
         "timezone": {
-          "current_time_local": "2025-06-24T22:11:59.086794",
-          "current_time_utc": "2025-06-24T13:11:59.086776+00:00",
-          "daylight_saving": false,
           "timezone_name": "JST",
-          "utc_offset_hours": 9.0,
-          "utc_offset_seconds": -32400
-        }
+          "utc_offset_hours": 9.0
+        },
+        "timestamp": 1750582016.0
       },
       "commit_hash": "82612d7c8346e9f418e4c4fb79124a2f7c3a48d4",
       "timestamp": "2025-06-24T13:13:03",
@@ -1049,59 +725,32 @@
         "cpu": {
           "cpu_count": 8,
           "cpu_count_physical": 8,
-          "cpu_freq": {
-            "current": 3504,
-            "max": 3504,
-            "min": 600
-          },
           "processor": "arm"
         },
-        "disk": {
-          "free": 615791091712,
-          "free_gb": 573.5,
-          "percent": 1.34,
-          "total": 994662584320,
-          "total_gb": 926.35,
-          "used": 13331341312
-        },
-        "git": {
-          "available": true,
-          "branch": "update-documentation-main",
-          "commit_hash": "82612d7c8346e9f418e4c4fb79124a2f7c3a48d4",
-          "is_dirty": true
-        },
         "memory": {
-          "available": 10725998592,
-          "available_gb": 9.99,
-          "free": 138133504,
-          "percent": 58.4,
-          "total": 25769803776,
-          "total_gb": 24.0,
-          "used": 12792610816
+          "total_gb": 24.0
         },
         "os": {
           "architecture": "64bit",
           "machine": "arm64",
-          "platform": "macOS-14.5-arm64-arm-64bit",
-          "release": "23.5.0",
           "system": "Darwin",
-          "version": "Darwin Kernel Version 23.5.0: Wed May  1 20:19:05 PDT 2024; root:xnu-10063.121.3~5/RELEASE_ARM64_T8112"
+          "platform": "macOS-14.5-arm64-arm-64bit",
+          "release": "23.5.0"
         },
         "python": {
-          "executable": "/Users/naoki/PycharmProjects/optimization-solver-benchmark/venv/bin/python",
           "implementation": "CPython",
           "version": "3.12.2",
           "version_info": "3.12.2"
         },
-        "timestamp": 1750582016.0,
+        "git": {
+          "available": true,
+          "commit_hash": "82612d7c8346e9f418e4c4fb79124a2f7c3a48d4"
+        },
         "timezone": {
-          "current_time_local": "2025-06-24T22:11:59.086794",
-          "current_time_utc": "2025-06-24T13:11:59.086776+00:00",
-          "daylight_saving": false,
           "timezone_name": "JST",
-          "utc_offset_hours": 9.0,
-          "utc_offset_seconds": -32400
-        }
+          "utc_offset_hours": 9.0
+        },
+        "timestamp": 1750582016.0
       },
       "commit_hash": "82612d7c8346e9f418e4c4fb79124a2f7c3a48d4",
       "timestamp": "2025-06-24T13:12:07",
@@ -1125,59 +774,32 @@
         "cpu": {
           "cpu_count": 8,
           "cpu_count_physical": 8,
-          "cpu_freq": {
-            "current": 3504,
-            "max": 3504,
-            "min": 600
-          },
           "processor": "arm"
         },
-        "disk": {
-          "free": 615791091712,
-          "free_gb": 573.5,
-          "percent": 1.34,
-          "total": 994662584320,
-          "total_gb": 926.35,
-          "used": 13331341312
-        },
-        "git": {
-          "available": true,
-          "branch": "update-documentation-main",
-          "commit_hash": "82612d7c8346e9f418e4c4fb79124a2f7c3a48d4",
-          "is_dirty": true
-        },
         "memory": {
-          "available": 10725998592,
-          "available_gb": 9.99,
-          "free": 138133504,
-          "percent": 58.4,
-          "total": 25769803776,
-          "total_gb": 24.0,
-          "used": 12792610816
+          "total_gb": 24.0
         },
         "os": {
           "architecture": "64bit",
           "machine": "arm64",
-          "platform": "macOS-14.5-arm64-arm-64bit",
-          "release": "23.5.0",
           "system": "Darwin",
-          "version": "Darwin Kernel Version 23.5.0: Wed May  1 20:19:05 PDT 2024; root:xnu-10063.121.3~5/RELEASE_ARM64_T8112"
+          "platform": "macOS-14.5-arm64-arm-64bit",
+          "release": "23.5.0"
         },
         "python": {
-          "executable": "/Users/naoki/PycharmProjects/optimization-solver-benchmark/venv/bin/python",
           "implementation": "CPython",
           "version": "3.12.2",
           "version_info": "3.12.2"
         },
-        "timestamp": 1750582016.0,
+        "git": {
+          "available": true,
+          "commit_hash": "82612d7c8346e9f418e4c4fb79124a2f7c3a48d4"
+        },
         "timezone": {
-          "current_time_local": "2025-06-24T22:11:59.086794",
-          "current_time_utc": "2025-06-24T13:11:59.086776+00:00",
-          "daylight_saving": false,
           "timezone_name": "JST",
-          "utc_offset_hours": 9.0,
-          "utc_offset_seconds": -32400
-        }
+          "utc_offset_hours": 9.0
+        },
+        "timestamp": 1750582016.0
       },
       "commit_hash": "82612d7c8346e9f418e4c4fb79124a2f7c3a48d4",
       "timestamp": "2025-06-24T13:13:03",
@@ -1201,59 +823,32 @@
         "cpu": {
           "cpu_count": 8,
           "cpu_count_physical": 8,
-          "cpu_freq": {
-            "current": 3504,
-            "max": 3504,
-            "min": 600
-          },
           "processor": "arm"
         },
-        "disk": {
-          "free": 611902582784,
-          "free_gb": 569.88,
-          "percent": 1.34,
-          "total": 994662584320,
-          "total_gb": 926.35,
-          "used": 13331030016
-        },
-        "git": {
-          "available": true,
-          "branch": "refactor-problemdata-unified-architecture",
-          "commit_hash": "e945508d6718b1edb2f579ce0b5a56da98570dbd",
-          "is_dirty": true
-        },
         "memory": {
-          "available": 10698833920,
-          "available_gb": 9.96,
-          "free": 684523520,
-          "percent": 58.5,
-          "total": 25769803776,
-          "total_gb": 24.0,
-          "used": 12369739776
+          "total_gb": 24.0
         },
         "os": {
           "architecture": "64bit",
           "machine": "arm64",
-          "platform": "macOS-14.5-arm64-arm-64bit",
-          "release": "23.5.0",
           "system": "Darwin",
-          "version": "Darwin Kernel Version 23.5.0: Wed May  1 20:19:05 PDT 2024; root:xnu-10063.121.3~5/RELEASE_ARM64_T8112"
+          "platform": "macOS-14.5-arm64-arm-64bit",
+          "release": "23.5.0"
         },
         "python": {
-          "executable": "/Users/naoki/PycharmProjects/optimization-solver-benchmark/venv/bin/python",
           "implementation": "CPython",
           "version": "3.12.2",
           "version_info": "3.12.2"
         },
-        "timestamp": 1750582016.0,
+        "git": {
+          "available": true,
+          "commit_hash": "e945508d6718b1edb2f579ce0b5a56da98570dbd"
+        },
         "timezone": {
-          "current_time_local": "2025-06-25T09:42:42.966601",
-          "current_time_utc": "2025-06-25T00:42:42.966587+00:00",
-          "daylight_saving": false,
           "timezone_name": "JST",
-          "utc_offset_hours": 9.0,
-          "utc_offset_seconds": -32400
-        }
+          "utc_offset_hours": 9.0
+        },
+        "timestamp": 1750582016.0
       },
       "commit_hash": "e945508d6718b1edb2f579ce0b5a56da98570dbd",
       "timestamp": "2025-06-25T00:43:48",
@@ -1277,59 +872,32 @@
         "cpu": {
           "cpu_count": 8,
           "cpu_count_physical": 8,
-          "cpu_freq": {
-            "current": 3504,
-            "max": 3504,
-            "min": 600
-          },
           "processor": "arm"
         },
-        "disk": {
-          "free": 611902582784,
-          "free_gb": 569.88,
-          "percent": 1.34,
-          "total": 994662584320,
-          "total_gb": 926.35,
-          "used": 13331030016
-        },
-        "git": {
-          "available": true,
-          "branch": "refactor-problemdata-unified-architecture",
-          "commit_hash": "e945508d6718b1edb2f579ce0b5a56da98570dbd",
-          "is_dirty": true
-        },
         "memory": {
-          "available": 10698833920,
-          "available_gb": 9.96,
-          "free": 684523520,
-          "percent": 58.5,
-          "total": 25769803776,
-          "total_gb": 24.0,
-          "used": 12369739776
+          "total_gb": 24.0
         },
         "os": {
           "architecture": "64bit",
           "machine": "arm64",
-          "platform": "macOS-14.5-arm64-arm-64bit",
-          "release": "23.5.0",
           "system": "Darwin",
-          "version": "Darwin Kernel Version 23.5.0: Wed May  1 20:19:05 PDT 2024; root:xnu-10063.121.3~5/RELEASE_ARM64_T8112"
+          "platform": "macOS-14.5-arm64-arm-64bit",
+          "release": "23.5.0"
         },
         "python": {
-          "executable": "/Users/naoki/PycharmProjects/optimization-solver-benchmark/venv/bin/python",
           "implementation": "CPython",
           "version": "3.12.2",
           "version_info": "3.12.2"
         },
-        "timestamp": 1750582016.0,
+        "git": {
+          "available": true,
+          "commit_hash": "e945508d6718b1edb2f579ce0b5a56da98570dbd"
+        },
         "timezone": {
-          "current_time_local": "2025-06-25T09:42:42.966601",
-          "current_time_utc": "2025-06-25T00:42:42.966587+00:00",
-          "daylight_saving": false,
           "timezone_name": "JST",
-          "utc_offset_hours": 9.0,
-          "utc_offset_seconds": -32400
-        }
+          "utc_offset_hours": 9.0
+        },
+        "timestamp": 1750582016.0
       },
       "commit_hash": "e945508d6718b1edb2f579ce0b5a56da98570dbd",
       "timestamp": "2025-06-25T00:42:49",
@@ -1353,59 +921,32 @@
         "cpu": {
           "cpu_count": 8,
           "cpu_count_physical": 8,
-          "cpu_freq": {
-            "current": 3504,
-            "max": 3504,
-            "min": 600
-          },
           "processor": "arm"
         },
-        "disk": {
-          "free": 611909869568,
-          "free_gb": 569.89,
-          "percent": 1.34,
-          "total": 994662584320,
-          "total_gb": 926.35,
-          "used": 13331030016
-        },
-        "git": {
-          "available": true,
-          "branch": "refactor-problemdata-unified-architecture",
-          "commit_hash": "e945508d6718b1edb2f579ce0b5a56da98570dbd",
-          "is_dirty": true
-        },
         "memory": {
-          "available": 10555408384,
-          "available_gb": 9.83,
-          "free": 336379904,
-          "percent": 59.0,
-          "total": 25769803776,
-          "total_gb": 24.0,
-          "used": 12538511360
+          "total_gb": 24.0
         },
         "os": {
           "architecture": "64bit",
           "machine": "arm64",
-          "platform": "macOS-14.5-arm64-arm-64bit",
-          "release": "23.5.0",
           "system": "Darwin",
-          "version": "Darwin Kernel Version 23.5.0: Wed May  1 20:19:05 PDT 2024; root:xnu-10063.121.3~5/RELEASE_ARM64_T8112"
+          "platform": "macOS-14.5-arm64-arm-64bit",
+          "release": "23.5.0"
         },
         "python": {
-          "executable": "/Users/naoki/PycharmProjects/optimization-solver-benchmark/venv/bin/python",
           "implementation": "CPython",
           "version": "3.12.2",
           "version_info": "3.12.2"
         },
-        "timestamp": 1750582016.0,
+        "git": {
+          "available": true,
+          "commit_hash": "e945508d6718b1edb2f579ce0b5a56da98570dbd"
+        },
         "timezone": {
-          "current_time_local": "2025-06-25T09:47:52.786145",
-          "current_time_utc": "2025-06-25T00:47:52.786133+00:00",
-          "daylight_saving": false,
           "timezone_name": "JST",
-          "utc_offset_hours": 9.0,
-          "utc_offset_seconds": -32400
-        }
+          "utc_offset_hours": 9.0
+        },
+        "timestamp": 1750582016.0
       },
       "commit_hash": "e945508d6718b1edb2f579ce0b5a56da98570dbd",
       "timestamp": "2025-06-25T00:47:58",
@@ -1429,59 +970,32 @@
         "cpu": {
           "cpu_count": 8,
           "cpu_count_physical": 8,
-          "cpu_freq": {
-            "current": 3504,
-            "max": 3504,
-            "min": 600
-          },
           "processor": "arm"
         },
-        "disk": {
-          "free": 615791091712,
-          "free_gb": 573.5,
-          "percent": 1.34,
-          "total": 994662584320,
-          "total_gb": 926.35,
-          "used": 13331341312
-        },
-        "git": {
-          "available": true,
-          "branch": "update-documentation-main",
-          "commit_hash": "82612d7c8346e9f418e4c4fb79124a2f7c3a48d4",
-          "is_dirty": true
-        },
         "memory": {
-          "available": 10725998592,
-          "available_gb": 9.99,
-          "free": 138133504,
-          "percent": 58.4,
-          "total": 25769803776,
-          "total_gb": 24.0,
-          "used": 12792610816
+          "total_gb": 24.0
         },
         "os": {
           "architecture": "64bit",
           "machine": "arm64",
-          "platform": "macOS-14.5-arm64-arm-64bit",
-          "release": "23.5.0",
           "system": "Darwin",
-          "version": "Darwin Kernel Version 23.5.0: Wed May  1 20:19:05 PDT 2024; root:xnu-10063.121.3~5/RELEASE_ARM64_T8112"
+          "platform": "macOS-14.5-arm64-arm-64bit",
+          "release": "23.5.0"
         },
         "python": {
-          "executable": "/Users/naoki/PycharmProjects/optimization-solver-benchmark/venv/bin/python",
           "implementation": "CPython",
           "version": "3.12.2",
           "version_info": "3.12.2"
         },
-        "timestamp": 1750582016.0,
+        "git": {
+          "available": true,
+          "commit_hash": "82612d7c8346e9f418e4c4fb79124a2f7c3a48d4"
+        },
         "timezone": {
-          "current_time_local": "2025-06-24T22:11:59.086794",
-          "current_time_utc": "2025-06-24T13:11:59.086776+00:00",
-          "daylight_saving": false,
           "timezone_name": "JST",
-          "utc_offset_hours": 9.0,
-          "utc_offset_seconds": -32400
-        }
+          "utc_offset_hours": 9.0
+        },
+        "timestamp": 1750582016.0
       },
       "commit_hash": "82612d7c8346e9f418e4c4fb79124a2f7c3a48d4",
       "timestamp": "2025-06-24T13:11:59",
@@ -1505,59 +1019,32 @@
         "cpu": {
           "cpu_count": 8,
           "cpu_count_physical": 8,
-          "cpu_freq": {
-            "current": 3504,
-            "max": 3504,
-            "min": 600
-          },
           "processor": "arm"
         },
-        "disk": {
-          "free": 619116646400,
-          "free_gb": 576.6,
-          "percent": 1.34,
-          "total": 994662584320,
-          "total_gb": 926.35,
-          "used": 13331341312
-        },
-        "git": {
-          "available": true,
-          "branch": "update-documentation-main",
-          "commit_hash": "ce1969a22cbeb1ef396d49cbf1142984143d1297",
-          "is_dirty": true
-        },
         "memory": {
-          "available": 11585191936,
-          "available_gb": 10.79,
-          "free": 351895552,
-          "percent": 55.0,
-          "total": 25769803776,
-          "total_gb": 24.0,
-          "used": 13087555584
+          "total_gb": 24.0
         },
         "os": {
           "architecture": "64bit",
           "machine": "arm64",
-          "platform": "macOS-14.5-arm64-arm-64bit",
-          "release": "23.5.0",
           "system": "Darwin",
-          "version": "Darwin Kernel Version 23.5.0: Wed May  1 20:19:05 PDT 2024; root:xnu-10063.121.3~5/RELEASE_ARM64_T8112"
+          "platform": "macOS-14.5-arm64-arm-64bit",
+          "release": "23.5.0"
         },
         "python": {
-          "executable": "/Users/naoki/PycharmProjects/optimization-solver-benchmark/venv/bin/python",
           "implementation": "CPython",
           "version": "3.12.2",
           "version_info": "3.12.2"
         },
-        "timestamp": 1750582016.0,
+        "git": {
+          "available": true,
+          "commit_hash": "ce1969a22cbeb1ef396d49cbf1142984143d1297"
+        },
         "timezone": {
-          "current_time_local": "2025-06-22T18:46:38.189343",
-          "current_time_utc": "2025-06-22T09:46:38.189325+00:00",
-          "daylight_saving": false,
           "timezone_name": "JST",
-          "utc_offset_hours": 9.0,
-          "utc_offset_seconds": -32400
-        }
+          "utc_offset_hours": 9.0
+        },
+        "timestamp": 1750582016.0
       },
       "commit_hash": "ce1969a22cbeb1ef396d49cbf1142984143d1297",
       "timestamp": "2025-06-22T09:46:39",
@@ -1581,59 +1068,32 @@
         "cpu": {
           "cpu_count": 8,
           "cpu_count_physical": 8,
-          "cpu_freq": {
-            "current": 3504,
-            "max": 3504,
-            "min": 600
-          },
           "processor": "arm"
         },
-        "disk": {
-          "free": 619116646400,
-          "free_gb": 576.6,
-          "percent": 1.34,
-          "total": 994662584320,
-          "total_gb": 926.35,
-          "used": 13331341312
-        },
-        "git": {
-          "available": true,
-          "branch": "update-documentation-main",
-          "commit_hash": "ce1969a22cbeb1ef396d49cbf1142984143d1297",
-          "is_dirty": true
-        },
         "memory": {
-          "available": 11585191936,
-          "available_gb": 10.79,
-          "free": 351895552,
-          "percent": 55.0,
-          "total": 25769803776,
-          "total_gb": 24.0,
-          "used": 13087555584
+          "total_gb": 24.0
         },
         "os": {
           "architecture": "64bit",
           "machine": "arm64",
-          "platform": "macOS-14.5-arm64-arm-64bit",
-          "release": "23.5.0",
           "system": "Darwin",
-          "version": "Darwin Kernel Version 23.5.0: Wed May  1 20:19:05 PDT 2024; root:xnu-10063.121.3~5/RELEASE_ARM64_T8112"
+          "platform": "macOS-14.5-arm64-arm-64bit",
+          "release": "23.5.0"
         },
         "python": {
-          "executable": "/Users/naoki/PycharmProjects/optimization-solver-benchmark/venv/bin/python",
           "implementation": "CPython",
           "version": "3.12.2",
           "version_info": "3.12.2"
         },
-        "timestamp": 1750582016.0,
+        "git": {
+          "available": true,
+          "commit_hash": "ce1969a22cbeb1ef396d49cbf1142984143d1297"
+        },
         "timezone": {
-          "current_time_local": "2025-06-22T18:46:38.189343",
-          "current_time_utc": "2025-06-22T09:46:38.189325+00:00",
-          "daylight_saving": false,
           "timezone_name": "JST",
-          "utc_offset_hours": 9.0,
-          "utc_offset_seconds": -32400
-        }
+          "utc_offset_hours": 9.0
+        },
+        "timestamp": 1750582016.0
       },
       "commit_hash": "ce1969a22cbeb1ef396d49cbf1142984143d1297",
       "timestamp": "2025-06-22T09:46:51",
@@ -1657,59 +1117,32 @@
         "cpu": {
           "cpu_count": 8,
           "cpu_count_physical": 8,
-          "cpu_freq": {
-            "current": 3504,
-            "max": 3504,
-            "min": 600
-          },
           "processor": "arm"
         },
-        "disk": {
-          "free": 619116646400,
-          "free_gb": 576.6,
-          "percent": 1.34,
-          "total": 994662584320,
-          "total_gb": 926.35,
-          "used": 13331341312
-        },
-        "git": {
-          "available": true,
-          "branch": "update-documentation-main",
-          "commit_hash": "ce1969a22cbeb1ef396d49cbf1142984143d1297",
-          "is_dirty": true
-        },
         "memory": {
-          "available": 11585191936,
-          "available_gb": 10.79,
-          "free": 351895552,
-          "percent": 55.0,
-          "total": 25769803776,
-          "total_gb": 24.0,
-          "used": 13087555584
+          "total_gb": 24.0
         },
         "os": {
           "architecture": "64bit",
           "machine": "arm64",
-          "platform": "macOS-14.5-arm64-arm-64bit",
-          "release": "23.5.0",
           "system": "Darwin",
-          "version": "Darwin Kernel Version 23.5.0: Wed May  1 20:19:05 PDT 2024; root:xnu-10063.121.3~5/RELEASE_ARM64_T8112"
+          "platform": "macOS-14.5-arm64-arm-64bit",
+          "release": "23.5.0"
         },
         "python": {
-          "executable": "/Users/naoki/PycharmProjects/optimization-solver-benchmark/venv/bin/python",
           "implementation": "CPython",
           "version": "3.12.2",
           "version_info": "3.12.2"
         },
-        "timestamp": 1750582016.0,
+        "git": {
+          "available": true,
+          "commit_hash": "ce1969a22cbeb1ef396d49cbf1142984143d1297"
+        },
         "timezone": {
-          "current_time_local": "2025-06-22T18:46:38.189343",
-          "current_time_utc": "2025-06-22T09:46:38.189325+00:00",
-          "daylight_saving": false,
           "timezone_name": "JST",
-          "utc_offset_hours": 9.0,
-          "utc_offset_seconds": -32400
-        }
+          "utc_offset_hours": 9.0
+        },
+        "timestamp": 1750582016.0
       },
       "commit_hash": "ce1969a22cbeb1ef396d49cbf1142984143d1297",
       "timestamp": "2025-06-22T09:46:48",
@@ -1733,59 +1166,32 @@
         "cpu": {
           "cpu_count": 8,
           "cpu_count_physical": 8,
-          "cpu_freq": {
-            "current": 3504,
-            "max": 3504,
-            "min": 600
-          },
           "processor": "arm"
         },
-        "disk": {
-          "free": 619116646400,
-          "free_gb": 576.6,
-          "percent": 1.34,
-          "total": 994662584320,
-          "total_gb": 926.35,
-          "used": 13331341312
-        },
-        "git": {
-          "available": true,
-          "branch": "update-documentation-main",
-          "commit_hash": "ce1969a22cbeb1ef396d49cbf1142984143d1297",
-          "is_dirty": true
-        },
         "memory": {
-          "available": 11585191936,
-          "available_gb": 10.79,
-          "free": 351895552,
-          "percent": 55.0,
-          "total": 25769803776,
-          "total_gb": 24.0,
-          "used": 13087555584
+          "total_gb": 24.0
         },
         "os": {
           "architecture": "64bit",
           "machine": "arm64",
-          "platform": "macOS-14.5-arm64-arm-64bit",
-          "release": "23.5.0",
           "system": "Darwin",
-          "version": "Darwin Kernel Version 23.5.0: Wed May  1 20:19:05 PDT 2024; root:xnu-10063.121.3~5/RELEASE_ARM64_T8112"
+          "platform": "macOS-14.5-arm64-arm-64bit",
+          "release": "23.5.0"
         },
         "python": {
-          "executable": "/Users/naoki/PycharmProjects/optimization-solver-benchmark/venv/bin/python",
           "implementation": "CPython",
           "version": "3.12.2",
           "version_info": "3.12.2"
         },
-        "timestamp": 1750582016.0,
+        "git": {
+          "available": true,
+          "commit_hash": "ce1969a22cbeb1ef396d49cbf1142984143d1297"
+        },
         "timezone": {
-          "current_time_local": "2025-06-22T18:46:38.189343",
-          "current_time_utc": "2025-06-22T09:46:38.189325+00:00",
-          "daylight_saving": false,
           "timezone_name": "JST",
-          "utc_offset_hours": 9.0,
-          "utc_offset_seconds": -32400
-        }
+          "utc_offset_hours": 9.0
+        },
+        "timestamp": 1750582016.0
       },
       "commit_hash": "ce1969a22cbeb1ef396d49cbf1142984143d1297",
       "timestamp": "2025-06-22T09:46:48",
@@ -1809,59 +1215,32 @@
         "cpu": {
           "cpu_count": 8,
           "cpu_count_physical": 8,
-          "cpu_freq": {
-            "current": 3504,
-            "max": 3504,
-            "min": 600
-          },
           "processor": "arm"
         },
-        "disk": {
-          "free": 619116646400,
-          "free_gb": 576.6,
-          "percent": 1.34,
-          "total": 994662584320,
-          "total_gb": 926.35,
-          "used": 13331341312
-        },
-        "git": {
-          "available": true,
-          "branch": "update-documentation-main",
-          "commit_hash": "ce1969a22cbeb1ef396d49cbf1142984143d1297",
-          "is_dirty": true
-        },
         "memory": {
-          "available": 11585191936,
-          "available_gb": 10.79,
-          "free": 351895552,
-          "percent": 55.0,
-          "total": 25769803776,
-          "total_gb": 24.0,
-          "used": 13087555584
+          "total_gb": 24.0
         },
         "os": {
           "architecture": "64bit",
           "machine": "arm64",
-          "platform": "macOS-14.5-arm64-arm-64bit",
-          "release": "23.5.0",
           "system": "Darwin",
-          "version": "Darwin Kernel Version 23.5.0: Wed May  1 20:19:05 PDT 2024; root:xnu-10063.121.3~5/RELEASE_ARM64_T8112"
+          "platform": "macOS-14.5-arm64-arm-64bit",
+          "release": "23.5.0"
         },
         "python": {
-          "executable": "/Users/naoki/PycharmProjects/optimization-solver-benchmark/venv/bin/python",
           "implementation": "CPython",
           "version": "3.12.2",
           "version_info": "3.12.2"
         },
-        "timestamp": 1750582016.0,
+        "git": {
+          "available": true,
+          "commit_hash": "ce1969a22cbeb1ef396d49cbf1142984143d1297"
+        },
         "timezone": {
-          "current_time_local": "2025-06-22T18:46:38.189343",
-          "current_time_utc": "2025-06-22T09:46:38.189325+00:00",
-          "daylight_saving": false,
           "timezone_name": "JST",
-          "utc_offset_hours": 9.0,
-          "utc_offset_seconds": -32400
-        }
+          "utc_offset_hours": 9.0
+        },
+        "timestamp": 1750582016.0
       },
       "commit_hash": "ce1969a22cbeb1ef396d49cbf1142984143d1297",
       "timestamp": "2025-06-22T09:46:47",
@@ -1885,59 +1264,32 @@
         "cpu": {
           "cpu_count": 8,
           "cpu_count_physical": 8,
-          "cpu_freq": {
-            "current": 3504,
-            "max": 3504,
-            "min": 600
-          },
           "processor": "arm"
         },
-        "disk": {
-          "free": 611899604992,
-          "free_gb": 569.88,
-          "percent": 1.34,
-          "total": 994662584320,
-          "total_gb": 926.35,
-          "used": 13331030016
-        },
-        "git": {
-          "available": true,
-          "branch": "refactor-problemdata-unified-architecture",
-          "commit_hash": "e945508d6718b1edb2f579ce0b5a56da98570dbd",
-          "is_dirty": true
-        },
         "memory": {
-          "available": 10793271296,
-          "available_gb": 10.05,
-          "free": 857669632,
-          "percent": 58.1,
-          "total": 25769803776,
-          "total_gb": 24.0,
-          "used": 12263342080
+          "total_gb": 24.0
         },
         "os": {
           "architecture": "64bit",
           "machine": "arm64",
-          "platform": "macOS-14.5-arm64-arm-64bit",
-          "release": "23.5.0",
           "system": "Darwin",
-          "version": "Darwin Kernel Version 23.5.0: Wed May  1 20:19:05 PDT 2024; root:xnu-10063.121.3~5/RELEASE_ARM64_T8112"
+          "platform": "macOS-14.5-arm64-arm-64bit",
+          "release": "23.5.0"
         },
         "python": {
-          "executable": "/Users/naoki/PycharmProjects/optimization-solver-benchmark/venv/bin/python",
           "implementation": "CPython",
           "version": "3.12.2",
           "version_info": "3.12.2"
         },
-        "timestamp": 1750582016.0,
+        "git": {
+          "available": true,
+          "commit_hash": "e945508d6718b1edb2f579ce0b5a56da98570dbd"
+        },
         "timezone": {
-          "current_time_local": "2025-06-25T09:29:13.044363",
-          "current_time_utc": "2025-06-25T00:29:13.044350+00:00",
-          "daylight_saving": false,
           "timezone_name": "JST",
-          "utc_offset_hours": 9.0,
-          "utc_offset_seconds": -32400
-        }
+          "utc_offset_hours": 9.0
+        },
+        "timestamp": 1750582016.0
       },
       "commit_hash": "e945508d6718b1edb2f579ce0b5a56da98570dbd",
       "timestamp": "2025-06-25T00:29:24",
@@ -1961,59 +1313,32 @@
         "cpu": {
           "cpu_count": 8,
           "cpu_count_physical": 8,
-          "cpu_freq": {
-            "current": 3504,
-            "max": 3504,
-            "min": 600
-          },
           "processor": "arm"
         },
-        "disk": {
-          "free": 619116646400,
-          "free_gb": 576.6,
-          "percent": 1.34,
-          "total": 994662584320,
-          "total_gb": 926.35,
-          "used": 13331341312
-        },
-        "git": {
-          "available": true,
-          "branch": "update-documentation-main",
-          "commit_hash": "ce1969a22cbeb1ef396d49cbf1142984143d1297",
-          "is_dirty": true
-        },
         "memory": {
-          "available": 11585191936,
-          "available_gb": 10.79,
-          "free": 351895552,
-          "percent": 55.0,
-          "total": 25769803776,
-          "total_gb": 24.0,
-          "used": 13087555584
+          "total_gb": 24.0
         },
         "os": {
           "architecture": "64bit",
           "machine": "arm64",
-          "platform": "macOS-14.5-arm64-arm-64bit",
-          "release": "23.5.0",
           "system": "Darwin",
-          "version": "Darwin Kernel Version 23.5.0: Wed May  1 20:19:05 PDT 2024; root:xnu-10063.121.3~5/RELEASE_ARM64_T8112"
+          "platform": "macOS-14.5-arm64-arm-64bit",
+          "release": "23.5.0"
         },
         "python": {
-          "executable": "/Users/naoki/PycharmProjects/optimization-solver-benchmark/venv/bin/python",
           "implementation": "CPython",
           "version": "3.12.2",
           "version_info": "3.12.2"
         },
-        "timestamp": 1750582016.0,
+        "git": {
+          "available": true,
+          "commit_hash": "ce1969a22cbeb1ef396d49cbf1142984143d1297"
+        },
         "timezone": {
-          "current_time_local": "2025-06-22T18:46:38.189343",
-          "current_time_utc": "2025-06-22T09:46:38.189325+00:00",
-          "daylight_saving": false,
           "timezone_name": "JST",
-          "utc_offset_hours": 9.0,
-          "utc_offset_seconds": -32400
-        }
+          "utc_offset_hours": 9.0
+        },
+        "timestamp": 1750582016.0
       },
       "commit_hash": "ce1969a22cbeb1ef396d49cbf1142984143d1297",
       "timestamp": "2025-06-22T09:46:38",
@@ -2037,59 +1362,32 @@
         "cpu": {
           "cpu_count": 8,
           "cpu_count_physical": 8,
-          "cpu_freq": {
-            "current": 3504,
-            "max": 3504,
-            "min": 600
-          },
           "processor": "arm"
         },
-        "disk": {
-          "free": 618572591104,
-          "free_gb": 576.09,
-          "percent": 1.34,
-          "total": 994662584320,
-          "total_gb": 926.35,
-          "used": 13331341312
-        },
-        "git": {
-          "available": true,
-          "branch": "update-documentation-main",
-          "commit_hash": "ce1969a22cbeb1ef396d49cbf1142984143d1297",
-          "is_dirty": true
-        },
         "memory": {
-          "available": 11274469376,
-          "available_gb": 10.5,
-          "free": 148684800,
-          "percent": 56.2,
-          "total": 25769803776,
-          "total_gb": 24.0,
-          "used": 13165117440
+          "total_gb": 24.0
         },
         "os": {
           "architecture": "64bit",
           "machine": "arm64",
-          "platform": "macOS-14.5-arm64-arm-64bit",
-          "release": "23.5.0",
           "system": "Darwin",
-          "version": "Darwin Kernel Version 23.5.0: Wed May  1 20:19:05 PDT 2024; root:xnu-10063.121.3~5/RELEASE_ARM64_T8112"
+          "platform": "macOS-14.5-arm64-arm-64bit",
+          "release": "23.5.0"
         },
         "python": {
-          "executable": "/Users/naoki/PycharmProjects/optimization-solver-benchmark/venv/bin/python",
           "implementation": "CPython",
           "version": "3.12.2",
           "version_info": "3.12.2"
         },
-        "timestamp": 1750582016.0,
+        "git": {
+          "available": true,
+          "commit_hash": "ce1969a22cbeb1ef396d49cbf1142984143d1297"
+        },
         "timezone": {
-          "current_time_local": "2025-06-22T19:19:37.743760",
-          "current_time_utc": "2025-06-22T10:19:37.743751+00:00",
-          "daylight_saving": false,
           "timezone_name": "JST",
-          "utc_offset_hours": 9.0,
-          "utc_offset_seconds": -32400
-        }
+          "utc_offset_hours": 9.0
+        },
+        "timestamp": 1750582016.0
       },
       "commit_hash": "ce1969a22cbeb1ef396d49cbf1142984143d1297",
       "timestamp": "2025-06-22T10:19:40",
@@ -2113,59 +1411,32 @@
         "cpu": {
           "cpu_count": 8,
           "cpu_count_physical": 8,
-          "cpu_freq": {
-            "current": 3504,
-            "max": 3504,
-            "min": 600
-          },
           "processor": "arm"
         },
-        "disk": {
-          "free": 618572591104,
-          "free_gb": 576.09,
-          "percent": 1.34,
-          "total": 994662584320,
-          "total_gb": 926.35,
-          "used": 13331341312
-        },
-        "git": {
-          "available": true,
-          "branch": "update-documentation-main",
-          "commit_hash": "ce1969a22cbeb1ef396d49cbf1142984143d1297",
-          "is_dirty": true
-        },
         "memory": {
-          "available": 11274469376,
-          "available_gb": 10.5,
-          "free": 148684800,
-          "percent": 56.2,
-          "total": 25769803776,
-          "total_gb": 24.0,
-          "used": 13165117440
+          "total_gb": 24.0
         },
         "os": {
           "architecture": "64bit",
           "machine": "arm64",
-          "platform": "macOS-14.5-arm64-arm-64bit",
-          "release": "23.5.0",
           "system": "Darwin",
-          "version": "Darwin Kernel Version 23.5.0: Wed May  1 20:19:05 PDT 2024; root:xnu-10063.121.3~5/RELEASE_ARM64_T8112"
+          "platform": "macOS-14.5-arm64-arm-64bit",
+          "release": "23.5.0"
         },
         "python": {
-          "executable": "/Users/naoki/PycharmProjects/optimization-solver-benchmark/venv/bin/python",
           "implementation": "CPython",
           "version": "3.12.2",
           "version_info": "3.12.2"
         },
-        "timestamp": 1750582016.0,
+        "git": {
+          "available": true,
+          "commit_hash": "ce1969a22cbeb1ef396d49cbf1142984143d1297"
+        },
         "timezone": {
-          "current_time_local": "2025-06-22T19:19:37.743760",
-          "current_time_utc": "2025-06-22T10:19:37.743751+00:00",
-          "daylight_saving": false,
           "timezone_name": "JST",
-          "utc_offset_hours": 9.0,
-          "utc_offset_seconds": -32400
-        }
+          "utc_offset_hours": 9.0
+        },
+        "timestamp": 1750582016.0
       },
       "commit_hash": "ce1969a22cbeb1ef396d49cbf1142984143d1297",
       "timestamp": "2025-06-22T10:19:46",
@@ -2189,59 +1460,32 @@
         "cpu": {
           "cpu_count": 8,
           "cpu_count_physical": 8,
-          "cpu_freq": {
-            "current": 3504,
-            "max": 3504,
-            "min": 600
-          },
           "processor": "arm"
         },
-        "disk": {
-          "free": 618572591104,
-          "free_gb": 576.09,
-          "percent": 1.34,
-          "total": 994662584320,
-          "total_gb": 926.35,
-          "used": 13331341312
-        },
-        "git": {
-          "available": true,
-          "branch": "update-documentation-main",
-          "commit_hash": "ce1969a22cbeb1ef396d49cbf1142984143d1297",
-          "is_dirty": true
-        },
         "memory": {
-          "available": 11274469376,
-          "available_gb": 10.5,
-          "free": 148684800,
-          "percent": 56.2,
-          "total": 25769803776,
-          "total_gb": 24.0,
-          "used": 13165117440
+          "total_gb": 24.0
         },
         "os": {
           "architecture": "64bit",
           "machine": "arm64",
-          "platform": "macOS-14.5-arm64-arm-64bit",
-          "release": "23.5.0",
           "system": "Darwin",
-          "version": "Darwin Kernel Version 23.5.0: Wed May  1 20:19:05 PDT 2024; root:xnu-10063.121.3~5/RELEASE_ARM64_T8112"
+          "platform": "macOS-14.5-arm64-arm-64bit",
+          "release": "23.5.0"
         },
         "python": {
-          "executable": "/Users/naoki/PycharmProjects/optimization-solver-benchmark/venv/bin/python",
           "implementation": "CPython",
           "version": "3.12.2",
           "version_info": "3.12.2"
         },
-        "timestamp": 1750582016.0,
+        "git": {
+          "available": true,
+          "commit_hash": "ce1969a22cbeb1ef396d49cbf1142984143d1297"
+        },
         "timezone": {
-          "current_time_local": "2025-06-22T19:19:37.743760",
-          "current_time_utc": "2025-06-22T10:19:37.743751+00:00",
-          "daylight_saving": false,
           "timezone_name": "JST",
-          "utc_offset_hours": 9.0,
-          "utc_offset_seconds": -32400
-        }
+          "utc_offset_hours": 9.0
+        },
+        "timestamp": 1750582016.0
       },
       "commit_hash": "ce1969a22cbeb1ef396d49cbf1142984143d1297",
       "timestamp": "2025-06-22T10:19:43",
@@ -2265,59 +1509,32 @@
         "cpu": {
           "cpu_count": 8,
           "cpu_count_physical": 8,
-          "cpu_freq": {
-            "current": 3504,
-            "max": 3504,
-            "min": 600
-          },
           "processor": "arm"
         },
-        "disk": {
-          "free": 618572591104,
-          "free_gb": 576.09,
-          "percent": 1.34,
-          "total": 994662584320,
-          "total_gb": 926.35,
-          "used": 13331341312
-        },
-        "git": {
-          "available": true,
-          "branch": "update-documentation-main",
-          "commit_hash": "ce1969a22cbeb1ef396d49cbf1142984143d1297",
-          "is_dirty": true
-        },
         "memory": {
-          "available": 11274469376,
-          "available_gb": 10.5,
-          "free": 148684800,
-          "percent": 56.2,
-          "total": 25769803776,
-          "total_gb": 24.0,
-          "used": 13165117440
+          "total_gb": 24.0
         },
         "os": {
           "architecture": "64bit",
           "machine": "arm64",
-          "platform": "macOS-14.5-arm64-arm-64bit",
-          "release": "23.5.0",
           "system": "Darwin",
-          "version": "Darwin Kernel Version 23.5.0: Wed May  1 20:19:05 PDT 2024; root:xnu-10063.121.3~5/RELEASE_ARM64_T8112"
+          "platform": "macOS-14.5-arm64-arm-64bit",
+          "release": "23.5.0"
         },
         "python": {
-          "executable": "/Users/naoki/PycharmProjects/optimization-solver-benchmark/venv/bin/python",
           "implementation": "CPython",
           "version": "3.12.2",
           "version_info": "3.12.2"
         },
-        "timestamp": 1750582016.0,
+        "git": {
+          "available": true,
+          "commit_hash": "ce1969a22cbeb1ef396d49cbf1142984143d1297"
+        },
         "timezone": {
-          "current_time_local": "2025-06-22T19:19:37.743760",
-          "current_time_utc": "2025-06-22T10:19:37.743751+00:00",
-          "daylight_saving": false,
           "timezone_name": "JST",
-          "utc_offset_hours": 9.0,
-          "utc_offset_seconds": -32400
-        }
+          "utc_offset_hours": 9.0
+        },
+        "timestamp": 1750582016.0
       },
       "commit_hash": "ce1969a22cbeb1ef396d49cbf1142984143d1297",
       "timestamp": "2025-06-22T10:19:43",
@@ -2341,59 +1558,32 @@
         "cpu": {
           "cpu_count": 8,
           "cpu_count_physical": 8,
-          "cpu_freq": {
-            "current": 3504,
-            "max": 3504,
-            "min": 600
-          },
           "processor": "arm"
         },
-        "disk": {
-          "free": 618572591104,
-          "free_gb": 576.09,
-          "percent": 1.34,
-          "total": 994662584320,
-          "total_gb": 926.35,
-          "used": 13331341312
-        },
-        "git": {
-          "available": true,
-          "branch": "update-documentation-main",
-          "commit_hash": "ce1969a22cbeb1ef396d49cbf1142984143d1297",
-          "is_dirty": true
-        },
         "memory": {
-          "available": 11274469376,
-          "available_gb": 10.5,
-          "free": 148684800,
-          "percent": 56.2,
-          "total": 25769803776,
-          "total_gb": 24.0,
-          "used": 13165117440
+          "total_gb": 24.0
         },
         "os": {
           "architecture": "64bit",
           "machine": "arm64",
-          "platform": "macOS-14.5-arm64-arm-64bit",
-          "release": "23.5.0",
           "system": "Darwin",
-          "version": "Darwin Kernel Version 23.5.0: Wed May  1 20:19:05 PDT 2024; root:xnu-10063.121.3~5/RELEASE_ARM64_T8112"
+          "platform": "macOS-14.5-arm64-arm-64bit",
+          "release": "23.5.0"
         },
         "python": {
-          "executable": "/Users/naoki/PycharmProjects/optimization-solver-benchmark/venv/bin/python",
           "implementation": "CPython",
           "version": "3.12.2",
           "version_info": "3.12.2"
         },
-        "timestamp": 1750582016.0,
+        "git": {
+          "available": true,
+          "commit_hash": "ce1969a22cbeb1ef396d49cbf1142984143d1297"
+        },
         "timezone": {
-          "current_time_local": "2025-06-22T19:19:37.743760",
-          "current_time_utc": "2025-06-22T10:19:37.743751+00:00",
-          "daylight_saving": false,
           "timezone_name": "JST",
-          "utc_offset_hours": 9.0,
-          "utc_offset_seconds": -32400
-        }
+          "utc_offset_hours": 9.0
+        },
+        "timestamp": 1750582016.0
       },
       "commit_hash": "ce1969a22cbeb1ef396d49cbf1142984143d1297",
       "timestamp": "2025-06-22T10:19:41",
@@ -2417,59 +1607,32 @@
         "cpu": {
           "cpu_count": 8,
           "cpu_count_physical": 8,
-          "cpu_freq": {
-            "current": 3504,
-            "max": 3504,
-            "min": 600
-          },
           "processor": "arm"
         },
-        "disk": {
-          "free": 618572591104,
-          "free_gb": 576.09,
-          "percent": 1.34,
-          "total": 994662584320,
-          "total_gb": 926.35,
-          "used": 13331341312
-        },
-        "git": {
-          "available": true,
-          "branch": "update-documentation-main",
-          "commit_hash": "ce1969a22cbeb1ef396d49cbf1142984143d1297",
-          "is_dirty": true
-        },
         "memory": {
-          "available": 11274469376,
-          "available_gb": 10.5,
-          "free": 148684800,
-          "percent": 56.2,
-          "total": 25769803776,
-          "total_gb": 24.0,
-          "used": 13165117440
+          "total_gb": 24.0
         },
         "os": {
           "architecture": "64bit",
           "machine": "arm64",
-          "platform": "macOS-14.5-arm64-arm-64bit",
-          "release": "23.5.0",
           "system": "Darwin",
-          "version": "Darwin Kernel Version 23.5.0: Wed May  1 20:19:05 PDT 2024; root:xnu-10063.121.3~5/RELEASE_ARM64_T8112"
+          "platform": "macOS-14.5-arm64-arm-64bit",
+          "release": "23.5.0"
         },
         "python": {
-          "executable": "/Users/naoki/PycharmProjects/optimization-solver-benchmark/venv/bin/python",
           "implementation": "CPython",
           "version": "3.12.2",
           "version_info": "3.12.2"
         },
-        "timestamp": 1750582016.0,
+        "git": {
+          "available": true,
+          "commit_hash": "ce1969a22cbeb1ef396d49cbf1142984143d1297"
+        },
         "timezone": {
-          "current_time_local": "2025-06-22T19:19:37.743760",
-          "current_time_utc": "2025-06-22T10:19:37.743751+00:00",
-          "daylight_saving": false,
           "timezone_name": "JST",
-          "utc_offset_hours": 9.0,
-          "utc_offset_seconds": -32400
-        }
+          "utc_offset_hours": 9.0
+        },
+        "timestamp": 1750582016.0
       },
       "commit_hash": "ce1969a22cbeb1ef396d49cbf1142984143d1297",
       "timestamp": "2025-06-22T10:19:48",
@@ -2493,59 +1656,32 @@
         "cpu": {
           "cpu_count": 8,
           "cpu_count_physical": 8,
-          "cpu_freq": {
-            "current": 3504,
-            "max": 3504,
-            "min": 600
-          },
           "processor": "arm"
         },
-        "disk": {
-          "free": 618572591104,
-          "free_gb": 576.09,
-          "percent": 1.34,
-          "total": 994662584320,
-          "total_gb": 926.35,
-          "used": 13331341312
-        },
-        "git": {
-          "available": true,
-          "branch": "update-documentation-main",
-          "commit_hash": "ce1969a22cbeb1ef396d49cbf1142984143d1297",
-          "is_dirty": true
-        },
         "memory": {
-          "available": 11274469376,
-          "available_gb": 10.5,
-          "free": 148684800,
-          "percent": 56.2,
-          "total": 25769803776,
-          "total_gb": 24.0,
-          "used": 13165117440
+          "total_gb": 24.0
         },
         "os": {
           "architecture": "64bit",
           "machine": "arm64",
-          "platform": "macOS-14.5-arm64-arm-64bit",
-          "release": "23.5.0",
           "system": "Darwin",
-          "version": "Darwin Kernel Version 23.5.0: Wed May  1 20:19:05 PDT 2024; root:xnu-10063.121.3~5/RELEASE_ARM64_T8112"
+          "platform": "macOS-14.5-arm64-arm-64bit",
+          "release": "23.5.0"
         },
         "python": {
-          "executable": "/Users/naoki/PycharmProjects/optimization-solver-benchmark/venv/bin/python",
           "implementation": "CPython",
           "version": "3.12.2",
           "version_info": "3.12.2"
         },
-        "timestamp": 1750582016.0,
+        "git": {
+          "available": true,
+          "commit_hash": "ce1969a22cbeb1ef396d49cbf1142984143d1297"
+        },
         "timezone": {
-          "current_time_local": "2025-06-22T19:19:37.743760",
-          "current_time_utc": "2025-06-22T10:19:37.743751+00:00",
-          "daylight_saving": false,
           "timezone_name": "JST",
-          "utc_offset_hours": 9.0,
-          "utc_offset_seconds": -32400
-        }
+          "utc_offset_hours": 9.0
+        },
+        "timestamp": 1750582016.0
       },
       "commit_hash": "ce1969a22cbeb1ef396d49cbf1142984143d1297",
       "timestamp": "2025-06-22T10:19:37",
@@ -2569,59 +1705,32 @@
         "cpu": {
           "cpu_count": 8,
           "cpu_count_physical": 8,
-          "cpu_freq": {
-            "current": 3504,
-            "max": 3504,
-            "min": 600
-          },
           "processor": "arm"
         },
-        "disk": {
-          "free": 618501091328,
-          "free_gb": 576.02,
-          "percent": 1.34,
-          "total": 994662584320,
-          "total_gb": 926.35,
-          "used": 13331341312
-        },
-        "git": {
-          "available": true,
-          "branch": "update-documentation-main",
-          "commit_hash": "ce1969a22cbeb1ef396d49cbf1142984143d1297",
-          "is_dirty": true
-        },
         "memory": {
-          "available": 11157028864,
-          "available_gb": 10.39,
-          "free": 63111168,
-          "percent": 56.7,
-          "total": 25769803776,
-          "total_gb": 24.0,
-          "used": 13211516928
+          "total_gb": 24.0
         },
         "os": {
           "architecture": "64bit",
           "machine": "arm64",
-          "platform": "macOS-14.5-arm64-arm-64bit",
-          "release": "23.5.0",
           "system": "Darwin",
-          "version": "Darwin Kernel Version 23.5.0: Wed May  1 20:19:05 PDT 2024; root:xnu-10063.121.3~5/RELEASE_ARM64_T8112"
+          "platform": "macOS-14.5-arm64-arm-64bit",
+          "release": "23.5.0"
         },
         "python": {
-          "executable": "/Users/naoki/PycharmProjects/optimization-solver-benchmark/venv/bin/python",
           "implementation": "CPython",
           "version": "3.12.2",
           "version_info": "3.12.2"
         },
-        "timestamp": 1750582016.0,
+        "git": {
+          "available": true,
+          "commit_hash": "ce1969a22cbeb1ef396d49cbf1142984143d1297"
+        },
         "timezone": {
-          "current_time_local": "2025-06-22T19:28:07.021778",
-          "current_time_utc": "2025-06-22T10:28:07.021769+00:00",
-          "daylight_saving": false,
           "timezone_name": "JST",
-          "utc_offset_hours": 9.0,
-          "utc_offset_seconds": -32400
-        }
+          "utc_offset_hours": 9.0
+        },
+        "timestamp": 1750582016.0
       },
       "commit_hash": "ce1969a22cbeb1ef396d49cbf1142984143d1297",
       "timestamp": "2025-06-22T10:28:54",
@@ -2645,59 +1754,32 @@
         "cpu": {
           "cpu_count": 8,
           "cpu_count_physical": 8,
-          "cpu_freq": {
-            "current": 3504,
-            "max": 3504,
-            "min": 600
-          },
           "processor": "arm"
         },
-        "disk": {
-          "free": 618571415552,
-          "free_gb": 576.09,
-          "percent": 1.34,
-          "total": 994662584320,
-          "total_gb": 926.35,
-          "used": 13331341312
-        },
-        "git": {
-          "available": true,
-          "branch": "update-documentation-main",
-          "commit_hash": "ce1969a22cbeb1ef396d49cbf1142984143d1297",
-          "is_dirty": true
-        },
         "memory": {
-          "available": 11372331008,
-          "available_gb": 10.59,
-          "free": 312983552,
-          "percent": 55.9,
-          "total": 25769803776,
-          "total_gb": 24.0,
-          "used": 13071433728
+          "total_gb": 24.0
         },
         "os": {
           "architecture": "64bit",
           "machine": "arm64",
-          "platform": "macOS-14.5-arm64-arm-64bit",
-          "release": "23.5.0",
           "system": "Darwin",
-          "version": "Darwin Kernel Version 23.5.0: Wed May  1 20:19:05 PDT 2024; root:xnu-10063.121.3~5/RELEASE_ARM64_T8112"
+          "platform": "macOS-14.5-arm64-arm-64bit",
+          "release": "23.5.0"
         },
         "python": {
-          "executable": "/Users/naoki/PycharmProjects/optimization-solver-benchmark/venv/bin/python",
           "implementation": "CPython",
           "version": "3.12.2",
           "version_info": "3.12.2"
         },
-        "timestamp": 1750582016.0,
+        "git": {
+          "available": true,
+          "commit_hash": "ce1969a22cbeb1ef396d49cbf1142984143d1297"
+        },
         "timezone": {
-          "current_time_local": "2025-06-22T19:20:42.687504",
-          "current_time_utc": "2025-06-22T10:20:42.687496+00:00",
-          "daylight_saving": false,
           "timezone_name": "JST",
-          "utc_offset_hours": 9.0,
-          "utc_offset_seconds": -32400
-        }
+          "utc_offset_hours": 9.0
+        },
+        "timestamp": 1750582016.0
       },
       "commit_hash": "ce1969a22cbeb1ef396d49cbf1142984143d1297",
       "timestamp": "2025-06-22T10:20:47",
@@ -2721,59 +1803,32 @@
         "cpu": {
           "cpu_count": 8,
           "cpu_count_physical": 8,
-          "cpu_freq": {
-            "current": 3504,
-            "max": 3504,
-            "min": 600
-          },
           "processor": "arm"
         },
-        "disk": {
-          "free": 618571415552,
-          "free_gb": 576.09,
-          "percent": 1.34,
-          "total": 994662584320,
-          "total_gb": 926.35,
-          "used": 13331341312
-        },
-        "git": {
-          "available": true,
-          "branch": "update-documentation-main",
-          "commit_hash": "ce1969a22cbeb1ef396d49cbf1142984143d1297",
-          "is_dirty": true
-        },
         "memory": {
-          "available": 11372331008,
-          "available_gb": 10.59,
-          "free": 312983552,
-          "percent": 55.9,
-          "total": 25769803776,
-          "total_gb": 24.0,
-          "used": 13071433728
+          "total_gb": 24.0
         },
         "os": {
           "architecture": "64bit",
           "machine": "arm64",
-          "platform": "macOS-14.5-arm64-arm-64bit",
-          "release": "23.5.0",
           "system": "Darwin",
-          "version": "Darwin Kernel Version 23.5.0: Wed May  1 20:19:05 PDT 2024; root:xnu-10063.121.3~5/RELEASE_ARM64_T8112"
+          "platform": "macOS-14.5-arm64-arm-64bit",
+          "release": "23.5.0"
         },
         "python": {
-          "executable": "/Users/naoki/PycharmProjects/optimization-solver-benchmark/venv/bin/python",
           "implementation": "CPython",
           "version": "3.12.2",
           "version_info": "3.12.2"
         },
-        "timestamp": 1750582016.0,
+        "git": {
+          "available": true,
+          "commit_hash": "ce1969a22cbeb1ef396d49cbf1142984143d1297"
+        },
         "timezone": {
-          "current_time_local": "2025-06-22T19:20:42.687504",
-          "current_time_utc": "2025-06-22T10:20:42.687496+00:00",
-          "daylight_saving": false,
           "timezone_name": "JST",
-          "utc_offset_hours": 9.0,
-          "utc_offset_seconds": -32400
-        }
+          "utc_offset_hours": 9.0
+        },
+        "timestamp": 1750582016.0
       },
       "commit_hash": "ce1969a22cbeb1ef396d49cbf1142984143d1297",
       "timestamp": "2025-06-22T10:20:46",
@@ -2797,59 +1852,32 @@
         "cpu": {
           "cpu_count": 8,
           "cpu_count_physical": 8,
-          "cpu_freq": {
-            "current": 3504,
-            "max": 3504,
-            "min": 600
-          },
           "processor": "arm"
         },
-        "disk": {
-          "free": 618571415552,
-          "free_gb": 576.09,
-          "percent": 1.34,
-          "total": 994662584320,
-          "total_gb": 926.35,
-          "used": 13331341312
-        },
-        "git": {
-          "available": true,
-          "branch": "update-documentation-main",
-          "commit_hash": "ce1969a22cbeb1ef396d49cbf1142984143d1297",
-          "is_dirty": true
-        },
         "memory": {
-          "available": 11372331008,
-          "available_gb": 10.59,
-          "free": 312983552,
-          "percent": 55.9,
-          "total": 25769803776,
-          "total_gb": 24.0,
-          "used": 13071433728
+          "total_gb": 24.0
         },
         "os": {
           "architecture": "64bit",
           "machine": "arm64",
-          "platform": "macOS-14.5-arm64-arm-64bit",
-          "release": "23.5.0",
           "system": "Darwin",
-          "version": "Darwin Kernel Version 23.5.0: Wed May  1 20:19:05 PDT 2024; root:xnu-10063.121.3~5/RELEASE_ARM64_T8112"
+          "platform": "macOS-14.5-arm64-arm-64bit",
+          "release": "23.5.0"
         },
         "python": {
-          "executable": "/Users/naoki/PycharmProjects/optimization-solver-benchmark/venv/bin/python",
           "implementation": "CPython",
           "version": "3.12.2",
           "version_info": "3.12.2"
         },
-        "timestamp": 1750582016.0,
+        "git": {
+          "available": true,
+          "commit_hash": "ce1969a22cbeb1ef396d49cbf1142984143d1297"
+        },
         "timezone": {
-          "current_time_local": "2025-06-22T19:20:42.687504",
-          "current_time_utc": "2025-06-22T10:20:42.687496+00:00",
-          "daylight_saving": false,
           "timezone_name": "JST",
-          "utc_offset_hours": 9.0,
-          "utc_offset_seconds": -32400
-        }
+          "utc_offset_hours": 9.0
+        },
+        "timestamp": 1750582016.0
       },
       "commit_hash": "ce1969a22cbeb1ef396d49cbf1142984143d1297",
       "timestamp": "2025-06-22T10:20:46",
@@ -2873,59 +1901,32 @@
         "cpu": {
           "cpu_count": 8,
           "cpu_count_physical": 8,
-          "cpu_freq": {
-            "current": 3504,
-            "max": 3504,
-            "min": 600
-          },
           "processor": "arm"
         },
-        "disk": {
-          "free": 618571415552,
-          "free_gb": 576.09,
-          "percent": 1.34,
-          "total": 994662584320,
-          "total_gb": 926.35,
-          "used": 13331341312
-        },
-        "git": {
-          "available": true,
-          "branch": "update-documentation-main",
-          "commit_hash": "ce1969a22cbeb1ef396d49cbf1142984143d1297",
-          "is_dirty": true
-        },
         "memory": {
-          "available": 11372331008,
-          "available_gb": 10.59,
-          "free": 312983552,
-          "percent": 55.9,
-          "total": 25769803776,
-          "total_gb": 24.0,
-          "used": 13071433728
+          "total_gb": 24.0
         },
         "os": {
           "architecture": "64bit",
           "machine": "arm64",
-          "platform": "macOS-14.5-arm64-arm-64bit",
-          "release": "23.5.0",
           "system": "Darwin",
-          "version": "Darwin Kernel Version 23.5.0: Wed May  1 20:19:05 PDT 2024; root:xnu-10063.121.3~5/RELEASE_ARM64_T8112"
+          "platform": "macOS-14.5-arm64-arm-64bit",
+          "release": "23.5.0"
         },
         "python": {
-          "executable": "/Users/naoki/PycharmProjects/optimization-solver-benchmark/venv/bin/python",
           "implementation": "CPython",
           "version": "3.12.2",
           "version_info": "3.12.2"
         },
-        "timestamp": 1750582016.0,
+        "git": {
+          "available": true,
+          "commit_hash": "ce1969a22cbeb1ef396d49cbf1142984143d1297"
+        },
         "timezone": {
-          "current_time_local": "2025-06-22T19:20:42.687504",
-          "current_time_utc": "2025-06-22T10:20:42.687496+00:00",
-          "daylight_saving": false,
           "timezone_name": "JST",
-          "utc_offset_hours": 9.0,
-          "utc_offset_seconds": -32400
-        }
+          "utc_offset_hours": 9.0
+        },
+        "timestamp": 1750582016.0
       },
       "commit_hash": "ce1969a22cbeb1ef396d49cbf1142984143d1297",
       "timestamp": "2025-06-22T10:20:45",
@@ -2949,59 +1950,32 @@
         "cpu": {
           "cpu_count": 8,
           "cpu_count_physical": 8,
-          "cpu_freq": {
-            "current": 3504,
-            "max": 3504,
-            "min": 600
-          },
           "processor": "arm"
         },
-        "disk": {
-          "free": 618571415552,
-          "free_gb": 576.09,
-          "percent": 1.34,
-          "total": 994662584320,
-          "total_gb": 926.35,
-          "used": 13331341312
-        },
-        "git": {
-          "available": true,
-          "branch": "update-documentation-main",
-          "commit_hash": "ce1969a22cbeb1ef396d49cbf1142984143d1297",
-          "is_dirty": true
-        },
         "memory": {
-          "available": 11372331008,
-          "available_gb": 10.59,
-          "free": 312983552,
-          "percent": 55.9,
-          "total": 25769803776,
-          "total_gb": 24.0,
-          "used": 13071433728
+          "total_gb": 24.0
         },
         "os": {
           "architecture": "64bit",
           "machine": "arm64",
-          "platform": "macOS-14.5-arm64-arm-64bit",
-          "release": "23.5.0",
           "system": "Darwin",
-          "version": "Darwin Kernel Version 23.5.0: Wed May  1 20:19:05 PDT 2024; root:xnu-10063.121.3~5/RELEASE_ARM64_T8112"
+          "platform": "macOS-14.5-arm64-arm-64bit",
+          "release": "23.5.0"
         },
         "python": {
-          "executable": "/Users/naoki/PycharmProjects/optimization-solver-benchmark/venv/bin/python",
           "implementation": "CPython",
           "version": "3.12.2",
           "version_info": "3.12.2"
         },
-        "timestamp": 1750582016.0,
+        "git": {
+          "available": true,
+          "commit_hash": "ce1969a22cbeb1ef396d49cbf1142984143d1297"
+        },
         "timezone": {
-          "current_time_local": "2025-06-22T19:20:42.687504",
-          "current_time_utc": "2025-06-22T10:20:42.687496+00:00",
-          "daylight_saving": false,
           "timezone_name": "JST",
-          "utc_offset_hours": 9.0,
-          "utc_offset_seconds": -32400
-        }
+          "utc_offset_hours": 9.0
+        },
+        "timestamp": 1750582016.0
       },
       "commit_hash": "ce1969a22cbeb1ef396d49cbf1142984143d1297",
       "timestamp": "2025-06-22T10:20:49",
@@ -3025,59 +1999,32 @@
         "cpu": {
           "cpu_count": 8,
           "cpu_count_physical": 8,
-          "cpu_freq": {
-            "current": 3504,
-            "max": 3504,
-            "min": 600
-          },
           "processor": "arm"
         },
-        "disk": {
-          "free": 618571415552,
-          "free_gb": 576.09,
-          "percent": 1.34,
-          "total": 994662584320,
-          "total_gb": 926.35,
-          "used": 13331341312
-        },
-        "git": {
-          "available": true,
-          "branch": "update-documentation-main",
-          "commit_hash": "ce1969a22cbeb1ef396d49cbf1142984143d1297",
-          "is_dirty": true
-        },
         "memory": {
-          "available": 11372331008,
-          "available_gb": 10.59,
-          "free": 312983552,
-          "percent": 55.9,
-          "total": 25769803776,
-          "total_gb": 24.0,
-          "used": 13071433728
+          "total_gb": 24.0
         },
         "os": {
           "architecture": "64bit",
           "machine": "arm64",
-          "platform": "macOS-14.5-arm64-arm-64bit",
-          "release": "23.5.0",
           "system": "Darwin",
-          "version": "Darwin Kernel Version 23.5.0: Wed May  1 20:19:05 PDT 2024; root:xnu-10063.121.3~5/RELEASE_ARM64_T8112"
+          "platform": "macOS-14.5-arm64-arm-64bit",
+          "release": "23.5.0"
         },
         "python": {
-          "executable": "/Users/naoki/PycharmProjects/optimization-solver-benchmark/venv/bin/python",
           "implementation": "CPython",
           "version": "3.12.2",
           "version_info": "3.12.2"
         },
-        "timestamp": 1750582016.0,
+        "git": {
+          "available": true,
+          "commit_hash": "ce1969a22cbeb1ef396d49cbf1142984143d1297"
+        },
         "timezone": {
-          "current_time_local": "2025-06-22T19:20:42.687504",
-          "current_time_utc": "2025-06-22T10:20:42.687496+00:00",
-          "daylight_saving": false,
           "timezone_name": "JST",
-          "utc_offset_hours": 9.0,
-          "utc_offset_seconds": -32400
-        }
+          "utc_offset_hours": 9.0
+        },
+        "timestamp": 1750582016.0
       },
       "commit_hash": "ce1969a22cbeb1ef396d49cbf1142984143d1297",
       "timestamp": "2025-06-22T10:20:42",
@@ -3101,59 +2048,32 @@
         "cpu": {
           "cpu_count": 8,
           "cpu_count_physical": 8,
-          "cpu_freq": {
-            "current": 3504,
-            "max": 3504,
-            "min": 600
-          },
           "processor": "arm"
         },
-        "disk": {
-          "free": 614946893824,
-          "free_gb": 572.71,
-          "percent": 1.34,
-          "total": 994662584320,
-          "total_gb": 926.35,
-          "used": 13331030016
-        },
-        "git": {
-          "available": true,
-          "branch": "refactor-problemdata-unified-architecture",
-          "commit_hash": "cfc13857622458340de916f7b88e151405ec7ef9",
-          "is_dirty": true
-        },
         "memory": {
-          "available": 10338664448,
-          "available_gb": 9.63,
-          "free": 114573312,
-          "percent": 59.9,
-          "total": 25769803776,
-          "total_gb": 24.0,
-          "used": 12703367168
+          "total_gb": 24.0
         },
         "os": {
           "architecture": "64bit",
           "machine": "arm64",
-          "platform": "macOS-14.5-arm64-arm-64bit",
-          "release": "23.5.0",
           "system": "Darwin",
-          "version": "Darwin Kernel Version 23.5.0: Wed May  1 20:19:05 PDT 2024; root:xnu-10063.121.3~5/RELEASE_ARM64_T8112"
+          "platform": "macOS-14.5-arm64-arm-64bit",
+          "release": "23.5.0"
         },
         "python": {
-          "executable": "/Users/naoki/PycharmProjects/optimization-solver-benchmark/venv/bin/python",
           "implementation": "CPython",
           "version": "3.12.2",
           "version_info": "3.12.2"
         },
-        "timestamp": 1750582016.0,
+        "git": {
+          "available": true,
+          "commit_hash": "cfc13857622458340de916f7b88e151405ec7ef9"
+        },
         "timezone": {
-          "current_time_local": "2025-06-26T00:49:04.560205",
-          "current_time_utc": "2025-06-25T15:49:04.560187+00:00",
-          "daylight_saving": false,
           "timezone_name": "JST",
-          "utc_offset_hours": 9.0,
-          "utc_offset_seconds": -32400
-        }
+          "utc_offset_hours": 9.0
+        },
+        "timestamp": 1750582016.0
       },
       "commit_hash": "cfc13857622458340de916f7b88e151405ec7ef9",
       "timestamp": "2025-06-25T15:49:04",
@@ -3177,59 +2097,32 @@
         "cpu": {
           "cpu_count": 8,
           "cpu_count_physical": 8,
-          "cpu_freq": {
-            "current": 3504,
-            "max": 3504,
-            "min": 600
-          },
           "processor": "arm"
         },
-        "disk": {
-          "free": 614955708416,
-          "free_gb": 572.72,
-          "percent": 1.34,
-          "total": 994662584320,
-          "total_gb": 926.35,
-          "used": 13331030016
-        },
-        "git": {
-          "available": true,
-          "branch": "refactor-problemdata-unified-architecture",
-          "commit_hash": "cfc13857622458340de916f7b88e151405ec7ef9",
-          "is_dirty": true
-        },
         "memory": {
-          "available": 10432086016,
-          "available_gb": 9.72,
-          "free": 301907968,
-          "percent": 59.5,
-          "total": 25769803776,
-          "total_gb": 24.0,
-          "used": 12610011136
+          "total_gb": 24.0
         },
         "os": {
           "architecture": "64bit",
           "machine": "arm64",
-          "platform": "macOS-14.5-arm64-arm-64bit",
-          "release": "23.5.0",
           "system": "Darwin",
-          "version": "Darwin Kernel Version 23.5.0: Wed May  1 20:19:05 PDT 2024; root:xnu-10063.121.3~5/RELEASE_ARM64_T8112"
+          "platform": "macOS-14.5-arm64-arm-64bit",
+          "release": "23.5.0"
         },
         "python": {
-          "executable": "/Users/naoki/PycharmProjects/optimization-solver-benchmark/venv/bin/python",
           "implementation": "CPython",
           "version": "3.12.2",
           "version_info": "3.12.2"
         },
-        "timestamp": 1750582016.0,
+        "git": {
+          "available": true,
+          "commit_hash": "cfc13857622458340de916f7b88e151405ec7ef9"
+        },
         "timezone": {
-          "current_time_local": "2025-06-26T00:46:14.343188",
-          "current_time_utc": "2025-06-25T15:46:14.343175+00:00",
-          "daylight_saving": false,
           "timezone_name": "JST",
-          "utc_offset_hours": 9.0,
-          "utc_offset_seconds": -32400
-        }
+          "utc_offset_hours": 9.0
+        },
+        "timestamp": 1750582016.0
       },
       "commit_hash": "cfc13857622458340de916f7b88e151405ec7ef9",
       "timestamp": "2025-06-25T15:46:14",
@@ -3253,59 +2146,32 @@
         "cpu": {
           "cpu_count": 8,
           "cpu_count_physical": 8,
-          "cpu_freq": {
-            "current": 3504,
-            "max": 3504,
-            "min": 600
-          },
           "processor": "arm"
         },
-        "disk": {
-          "free": 612479127552,
-          "free_gb": 570.42,
-          "percent": 1.34,
-          "total": 994662584320,
-          "total_gb": 926.35,
-          "used": 13331341312
-        },
-        "git": {
-          "available": true,
-          "branch": "update-documentation-main",
-          "commit_hash": "3dc1728a0d0428c00c35221f7a17fc1dd250035f",
-          "is_dirty": true
-        },
         "memory": {
-          "available": 11203903488,
-          "available_gb": 10.43,
-          "free": 212271104,
-          "percent": 56.5,
-          "total": 25769803776,
-          "total_gb": 24.0,
-          "used": 13108084736
+          "total_gb": 24.0
         },
         "os": {
           "architecture": "64bit",
           "machine": "arm64",
-          "platform": "macOS-14.5-arm64-arm-64bit",
-          "release": "23.5.0",
           "system": "Darwin",
-          "version": "Darwin Kernel Version 23.5.0: Wed May  1 20:19:05 PDT 2024; root:xnu-10063.121.3~5/RELEASE_ARM64_T8112"
+          "platform": "macOS-14.5-arm64-arm-64bit",
+          "release": "23.5.0"
         },
         "python": {
-          "executable": "/Users/naoki/PycharmProjects/optimization-solver-benchmark/venv/bin/python",
           "implementation": "CPython",
           "version": "3.12.2",
           "version_info": "3.12.2"
         },
-        "timestamp": 1750582016.0,
+        "git": {
+          "available": true,
+          "commit_hash": "3dc1728a0d0428c00c35221f7a17fc1dd250035f"
+        },
         "timezone": {
-          "current_time_local": "2025-06-23T00:20:41.135615",
-          "current_time_utc": "2025-06-22T15:20:41.135602+00:00",
-          "daylight_saving": false,
           "timezone_name": "JST",
-          "utc_offset_hours": 9.0,
-          "utc_offset_seconds": -32400
-        }
+          "utc_offset_hours": 9.0
+        },
+        "timestamp": 1750582016.0
       },
       "commit_hash": "3dc1728a0d0428c00c35221f7a17fc1dd250035f",
       "timestamp": "2025-06-22T15:20:41",
@@ -3329,59 +2195,32 @@
         "cpu": {
           "cpu_count": 8,
           "cpu_count_physical": 8,
-          "cpu_freq": {
-            "current": 3504,
-            "max": 3504,
-            "min": 600
-          },
           "processor": "arm"
         },
-        "disk": {
-          "free": 612479131648,
-          "free_gb": 570.42,
-          "percent": 1.34,
-          "total": 994662584320,
-          "total_gb": 926.35,
-          "used": 13331341312
-        },
-        "git": {
-          "available": true,
-          "branch": "update-documentation-main",
-          "commit_hash": "3dc1728a0d0428c00c35221f7a17fc1dd250035f",
-          "is_dirty": true
-        },
         "memory": {
-          "available": 11293261824,
-          "available_gb": 10.52,
-          "free": 312590336,
-          "percent": 56.2,
-          "total": 25769803776,
-          "total_gb": 24.0,
-          "used": 13019758592
+          "total_gb": 24.0
         },
         "os": {
           "architecture": "64bit",
           "machine": "arm64",
-          "platform": "macOS-14.5-arm64-arm-64bit",
-          "release": "23.5.0",
           "system": "Darwin",
-          "version": "Darwin Kernel Version 23.5.0: Wed May  1 20:19:05 PDT 2024; root:xnu-10063.121.3~5/RELEASE_ARM64_T8112"
+          "platform": "macOS-14.5-arm64-arm-64bit",
+          "release": "23.5.0"
         },
         "python": {
-          "executable": "/Users/naoki/PycharmProjects/optimization-solver-benchmark/venv/bin/python",
           "implementation": "CPython",
           "version": "3.12.2",
           "version_info": "3.12.2"
         },
-        "timestamp": 1750582016.0,
+        "git": {
+          "available": true,
+          "commit_hash": "3dc1728a0d0428c00c35221f7a17fc1dd250035f"
+        },
         "timezone": {
-          "current_time_local": "2025-06-23T00:20:31.817705",
-          "current_time_utc": "2025-06-22T15:20:31.817692+00:00",
-          "daylight_saving": false,
           "timezone_name": "JST",
-          "utc_offset_hours": 9.0,
-          "utc_offset_seconds": -32400
-        }
+          "utc_offset_hours": 9.0
+        },
+        "timestamp": 1750582016.0
       },
       "commit_hash": "3dc1728a0d0428c00c35221f7a17fc1dd250035f",
       "timestamp": "2025-06-22T15:20:32",
