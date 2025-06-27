@@ -36,7 +36,7 @@ python main.py --validate
 # Check problem registry includes external problems
 python -c "
 import yaml
-with open('problems/problem_registry.yaml') as f:
+with open('config/problem_registry.yaml') as f:
     registry = yaml.safe_load(f)
     print(f'DIMACS problems: {len(registry.get(\"external_libraries\", {}).get(\"DIMACS\", {}).get(\"problems\", []))}')
     print(f'SDPLIB problems: {len(registry.get(\"external_libraries\", {}).get(\"SDPLIB\", {}).get(\"problems\", []))}')
@@ -105,7 +105,7 @@ External problems are significantly more challenging than synthetic test cases:
 
 ### Problem Registry Structure
 
-External libraries are configured in `problems/problem_registry.yaml`:
+External libraries are configured in `config/problem_registry.yaml`:
 
 ```yaml
 external_libraries:
