@@ -1,41 +1,34 @@
-# Export Functionality Guide
+# Data Access Guide
 
-The optimization solver benchmark system provides basic data export capabilities for research and analysis.
+The optimization solver benchmark system generates JSON and CSV data files as part of its HTML reporting process. This guide explains how to access and use this data.
 
 ## Overview
 
-Currently available export functionality:
-- **JSON exports** for programmatic access (via reporting system)
-- **CSV exports** for spreadsheet analysis (generated reports)
-- **HTML reports** for interactive viewing
+Data is automatically exported when generating reports:
+- **JSON files** - Complete benchmark results in machine-readable format
+- **CSV files** - Results in spreadsheet-compatible format  
+- **HTML reports** - Interactive web reports with embedded data
 
-**Note**: This system focuses on static HTML reports with embedded JSON/CSV data rather than standalone export utilities.
+**Note**: This system generates static data files alongside HTML reports, not a standalone export utility.
 
 ## Quick Start
 
-### Generate Reports with Data Export
+### Generate Reports with Data
 ```bash
-# Generate complete reports (includes embedded JSON/CSV data)
+# Generate complete benchmark reports (includes data files)
 python main.py --all
-
-# Reports are generated in docs/ directory
-# JSON data available at: docs/pages/data/benchmark_results.json
-# CSV data available at: docs/pages/data/benchmark_results.csv
 ```
 
-### Accessing Exported Data
+### Locate Generated Data
 ```bash
-# View generated data files
+# Data files are generated in docs/pages/data/
 ls docs/pages/data/
 # benchmark_results.json  - Complete benchmark results
 # benchmark_results.csv   - Results in CSV format  
 # summary.json           - Summary statistics
-
-# Open HTML reports (contain interactive data access)
-open docs/pages/index.html
 ```
 
-### Using Data Programmatically
+### Access Data Files
 ```python
 import json
 import pandas as pd
@@ -44,367 +37,269 @@ import pandas as pd
 with open('docs/pages/data/benchmark_results.json', 'r') as f:
     results = json.load(f)
 
-# Load CSV data
+# Load CSV data  
 df = pd.read_csv('docs/pages/data/benchmark_results.csv')
 
-# Access summary statistics
+# Load summary statistics
 with open('docs/pages/data/summary.json', 'r') as f:
     summary = json.load(f)
 ```
 
-## Export Formats
+## Available Data Files
 
-### CSV Exports
-
-#### Solver Comparison CSV
-Contains solver performance statistics:
-- `solver_name`: Name of the solver
-- `total_problems`: Number of problems attempted
-- `problems_solved`: Number successfully solved
-- `success_rate`: Success rate (0.0 to 1.0)
-- `avg_solve_time`: Average solving time in seconds
-- `min_solve_time`: Fastest solve time
-- `max_solve_time`: Slowest solve time
-
-```python
-# Export solver comparison
-csv_path = exporter.export_solver_comparison_csv("my_solver_comparison.csv")
-```
-
-#### Problem Results CSV
-Contains detailed results for each solver-problem combination:
-- `benchmark_id`: Unique benchmark run identifier
-- `solver_name`: Name of the solver
-- `problem_name`: Name of the problem
-- `problem_type`: Type (LP, QP, SOCP, SDP)
-- `status`: Solution status (optimal, error, timeout, etc.)
-- `solve_time`: Time taken to solve
-- `objective_value`: Optimal objective value
-- `iterations`: Number of solver iterations
-
-```python
-# Export all results
-csv_path = exporter.export_problem_results_csv("my_results.csv")
-
-# Export filtered results
-csv_path = exporter.export_problem_results_csv(
-    "scipy_results.csv",
-    solver_filter="SciPy"
-)
-```
-
-### JSON Exports
-
-#### Structured JSON Data
-Comprehensive data in machine-readable format:
+### benchmark_results.json
+Complete benchmark results in JSON format:
 ```json
 {
-  "metadata": {
-    "generated_at": "2025-06-11T20:00:00",
-    "total_results": 100,
-    "total_solvers": 8,
-    "total_problems": 10
-  },
-  "solver_comparison": [
+  "results": [
     {
-      "solver_name": "SciPy",
-      "success_rate": 0.95,
-      "avg_solve_time": 0.0025,
-      "problems_solved": 19
+      "solver_name": "SciPy linprog",
+      "problem_name": "control1", 
+      "problem_type": "SDP",
+      "status": "optimal",
+      "solve_time": 0.045,
+      "objective_value": -1.234,
+      "library_source": "control family"
     }
   ],
-  "problem_statistics": [...],
-  "environment_info": {...}
+  "metadata": {
+    "generated_at": "2025-06-27T01:00:00",
+    "git_commit": "d12a85a...", 
+    "total_problems": 142,
+    "total_solvers": 9
+  }
 }
 ```
 
-```python
-# Export comprehensive JSON
-json_path = exporter.export_json_data("benchmark_data.json")
+### benchmark_results.csv  
+Tabular format suitable for spreadsheet analysis:
+- `solver_name` - Name of the solver
+- `problem_name` - Name of the problem
+- `problem_type` - Type (LP, QP, SOCP, SDP)
+- `status` - Solution status (optimal, infeasible, error, timeout)
+- `solve_time` - Time taken to solve (seconds)
+- `objective_value` - Optimal objective value (if available)
+- `library_source` - Problem origin (e.g., "control family", "DIMACS")
 
-# Include raw results
-json_path = exporter.export_json_data(
-    "full_data.json", 
-    include_raw_results=True
-)
+### summary.json
+Aggregated statistics and solver comparison:
+```json
+{
+  "solver_performance": {
+    "SciPy linprog": {
+      "total_problems": 12,
+      "success_rate": 1.0,
+      "avg_solve_time": 0.003
+    }
+  },
+  "problem_type_breakdown": {
+    "LP": 12, 
+    "QP": 6,
+    "SOCP": 31,
+    "SDP": 93
+  }
+}
 ```
 
-### PDF Reports
+## Data Analysis Examples
 
-#### Summary Report
-Basic PDF report with:
-- Benchmark overview statistics
-- Top-performing solvers table
-- System information
-- Generation metadata
-
-```python
-# Generate PDF report
-pdf_path = exporter.generate_summary_report_pdf("summary.pdf")
-```
-
-**Note**: PDF generation requires `reportlab`. If not available, a text-based report is generated as fallback.
-
-## RESTful API
-
-### Endpoints
-
-#### Health Check
-```bash
-GET /api/health
-```
-Returns API status and database information.
-
-#### Solvers
-```bash
-GET /api/solvers
-```
-List all solvers with basic statistics.
-
-#### Problems
-```bash
-GET /api/problems
-```
-List all problems with solver performance data.
-
-#### Results
-```bash
-GET /api/results?solver=SciPy&limit=50&offset=0
-```
-Get benchmark results with filtering and pagination.
-
-**Query Parameters:**
-- `solver`: Filter by solver name
-- `problem`: Filter by problem name
-- `type`: Filter by problem type (LP, QP, etc.)
-- `status`: Filter by result status
-- `limit`: Results per page (max 1000)
-- `offset`: Page offset
-
-#### Summary
-```bash
-GET /api/summary
-```
-Get overall benchmark statistics.
-
-#### Solver Details
-```bash
-GET /api/solver/<solver_name>
-```
-Detailed information about specific solver.
-
-#### Problem Details
-```bash
-GET /api/problem/<problem_name>
-```
-Detailed information about specific problem.
-
-### Example API Usage
-```python
-import requests
-
-# Get solver list
-response = requests.get("http://localhost:5000/api/solvers")
-solvers = response.json()
-
-# Get recent results
-response = requests.get("http://localhost:5000/api/results?limit=10")
-results = response.json()
-
-# Get solver details
-response = requests.get("http://localhost:5000/api/solver/SciPy")
-scipy_info = response.json()
-```
-
-## Data Validation
-
-### Automatic Validation
-```python
-from scripts.reporting.data_validator import DataValidator
-
-validator = DataValidator()
-
-# Validate CSV export
-result = validator.validate_csv_export("solver_comparison.csv")
-print(f"Valid: {result.valid}")
-print(f"Errors: {result.errors}")
-
-# Validate JSON export
-result = validator.validate_json_export("benchmark_data.json")
-
-# Check cross-format consistency
-result = validator.validate_cross_format_consistency(
-    csv_files=["results.csv"],
-    json_path="data.json"
-)
-```
-
-### Command Line Validation
-```bash
-# Validate exported files
-python scripts/reporting/data_validator.py exports/*.csv exports/*.json
-
-# Check consistency
-python scripts/reporting/data_validator.py --check-consistency exports/*
-
-# Verbose output
-python scripts/reporting/data_validator.py --verbose exports/benchmark_data.json
-```
-
-## Configuration
-
-### Export Configuration
-```python
-from scripts.reporting.export import ExportConfig
-
-config = ExportConfig(
-    output_directory="my_exports",
-    include_metadata=True,
-    format_numbers=True,
-    decimal_places=4,
-    validate_data=True
-)
-
-exporter = DataExporter(config=config)
-```
-
-### API Configuration
-```python
-from scripts.api.simple_api import BenchmarkAPI
-
-api = BenchmarkAPI(
-    database_path="my_database.db",
-    debug=True
-)
-
-api.run(host="0.0.0.0", port=8080)
-```
-
-## Integration Examples
-
-### Spreadsheet Analysis
+### Basic Statistics
 ```python
 import pandas as pd
 
-# Load CSV data
-df = pd.read_csv("solver_comparison.csv")
+# Load results
+df = pd.read_csv('docs/pages/data/benchmark_results.csv')
 
-# Analyze performance
-top_solvers = df.nlargest(5, 'success_rate')
-print(top_solvers[['solver_name', 'success_rate', 'avg_solve_time']])
+# Success rate by solver
+success_rates = df.groupby('solver_name')['status'].apply(
+    lambda x: (x == 'optimal').mean()
+)
+print("Success Rates:")
+print(success_rates.sort_values(ascending=False))
 
-# Create visualizations
+# Average solve time by problem type
+avg_times = df[df['status'] == 'optimal'].groupby('problem_type')['solve_time'].mean()
+print("\nAverage Solve Times by Problem Type:")
+print(avg_times)
+```
+
+### Solver Comparison
+```python
+import json
+import pandas as pd
+
+# Load summary data
+with open('docs/pages/data/summary.json', 'r') as f:
+    summary = json.load(f)
+
+# Convert solver performance to DataFrame
+solver_df = pd.DataFrame(summary['solver_performance']).T
+solver_df = solver_df.sort_values('success_rate', ascending=False)
+
+print("Top Performing Solvers:")
+print(solver_df[['success_rate', 'avg_solve_time']].head())
+```
+
+### Problem Analysis
+```python
+# Load full results
+df = pd.read_csv('docs/pages/data/benchmark_results.csv')
+
+# Analyze by library source
+library_stats = df.groupby('library_source').agg({
+    'problem_name': 'count',
+    'status': lambda x: (x == 'optimal').mean(),
+    'solve_time': 'mean'
+}).round(3)
+library_stats.columns = ['total_problems', 'success_rate', 'avg_solve_time']
+
+print("Performance by Problem Library:")
+print(library_stats)
+```
+
+## Visualization Examples
+
+### Create Charts
+```python
 import matplotlib.pyplot as plt
-df.plot(x='solver_name', y='success_rate', kind='bar')
+import pandas as pd
+
+df = pd.read_csv('docs/pages/data/benchmark_results.csv')
+
+# Success rate by solver
+success_rates = df.groupby('solver_name')['status'].apply(
+    lambda x: (x == 'optimal').mean()
+)
+
+plt.figure(figsize=(10, 6))
+success_rates.plot(kind='bar')
+plt.title('Solver Success Rates')
+plt.ylabel('Success Rate')
+plt.xticks(rotation=45)
+plt.tight_layout()
+plt.savefig('solver_success_rates.png')
 plt.show()
 ```
 
-### Research Workflow
+### Performance Comparison
 ```python
-# Export for analysis
-exporter = DataExporter()
-results = exporter.export_all_formats("research_data")
+# Solve time distribution for successful solves
+successful_results = df[df['status'] == 'optimal']
 
-# Validate exports
-validator = DataValidator()
-for format_name, path in results.items():
-    if path.suffix == '.csv':
-        validation = validator.validate_csv_export(path)
-        print(f"{format_name}: {'✅' if validation.valid else '❌'}")
+plt.figure(figsize=(12, 6))
+for solver in successful_results['solver_name'].unique():
+    solver_times = successful_results[successful_results['solver_name'] == solver]['solve_time']
+    plt.hist(solver_times, alpha=0.6, label=solver, bins=20)
 
-# Use data in research scripts
-import json
-with open(results['json_data'], 'r') as f:
-    benchmark_data = json.load(f)
-
-solver_stats = benchmark_data['solver_comparison']
+plt.xlabel('Solve Time (seconds)')
+plt.ylabel('Frequency')
+plt.title('Solve Time Distribution by Solver')
+plt.legend()
+plt.yscale('log')
+plt.tight_layout()
+plt.savefig('solve_time_distribution.png')
+plt.show()
 ```
 
-### Automated Reporting
+## Integration with Research Workflows
+
+### Export for External Analysis
+```bash
+# Generate fresh benchmark data
+python main.py --all
+
+# Copy data files to analysis directory
+cp docs/pages/data/*.json analysis/
+cp docs/pages/data/*.csv analysis/
+
+# Process with your analysis tools
+cd analysis/
+python my_analysis_script.py
+```
+
+### Automated Data Collection
 ```bash
 #!/bin/bash
-# automated_export.sh
+# collect_benchmark_data.sh
 
-# Export latest data
-python scripts/reporting/export.py --format all --prefix "daily_$(date +%Y%m%d)"
+# Generate reports
+python main.py --all --library_names DIMACS,SDPLIB
 
-# Validate exports
-python scripts/reporting/data_validator.py exports/daily_*.* --check-consistency
+# Archive results with timestamp  
+timestamp=$(date +%Y%m%d_%H%M%S)
+mkdir -p "archives/$timestamp"
+cp docs/pages/data/* "archives/$timestamp/"
 
-# Upload to research repository
-# rsync exports/ user@research-server:/data/benchmarks/
+echo "Benchmark data archived to archives/$timestamp/"
 ```
 
-## Best Practices
+## Data Format Notes
 
-### File Organization
-```
-exports/
-├── daily/          # Daily automated exports
-├── research/       # Research-specific exports
-├── archives/       # Historical data
-└── validation/     # Validation reports
-```
+### JSON Structure
+- **results**: Array of individual benchmark results
+- **metadata**: Information about the benchmark run
+- **All times in seconds**: Solve times are floating-point seconds
+- **Status values**: "optimal", "infeasible", "unbounded", "error", "timeout"
 
-### Performance Tips
-- Use filtering to reduce export size for large datasets
-- Enable data validation for critical exports
-- Use JSON format for programmatic access
-- Use CSV format for spreadsheet analysis
-- Cache API responses for frequently accessed data
-
-### Quality Assurance
-1. **Always validate exports** before using in research
-2. **Check cross-format consistency** when using multiple formats
-3. **Verify against source database** for critical data
-4. **Monitor export file sizes** for unexpected changes
-5. **Test API endpoints** before production use
+### CSV Compatibility
+- **Standard CSV format**: Compatible with Excel, R, Python pandas
+- **UTF-8 encoding**: Handles special characters in problem names
+- **Missing values**: Empty cells for unavailable data (e.g., objective_value for failed solves)
 
 ## Troubleshooting
 
 ### Common Issues
 
-#### Empty CSV Files
-```
-Problem: CSV files have headers but no data rows
-Solution: Check if database contains benchmark results
-```
-
-#### JSON Validation Errors
-```
-Problem: JSON structure validation fails
-Solution: Ensure all required sections are present
+**No data files found**
+```bash
+# Ensure reports were generated
+python main.py --all
+ls docs/pages/data/
 ```
 
-#### PDF Generation Fails
-```
-Problem: PDF generation not available
-Solution: Install reportlab: pip install reportlab
-```
-
-#### API Server Won't Start
-```
-Problem: Flask/CORS import errors
-Solution: Install dependencies: pip install flask flask-cors
+**Empty or incomplete data**
+```bash
+# Check if benchmarks ran successfully
+python main.py --validate
+python main.py --benchmark --verbose
 ```
 
-### Debug Mode
+**Data doesn't match HTML reports**
+```bash
+# Regenerate both together
+python main.py --all
+```
+
+### Data Quality Checks
 ```python
-# Enable debug logging
-import logging
-logging.getLogger("data_exporter").setLevel(logging.DEBUG)
-logging.getLogger("benchmark_api").setLevel(logging.DEBUG)
+import pandas as pd
 
-# Use debug mode for API
-api = BenchmarkAPI(debug=True)
+df = pd.read_csv('docs/pages/data/benchmark_results.csv')
+
+# Check for missing data
+print("Missing data summary:")
+print(df.isnull().sum())
+
+# Verify solve times are positive
+negative_times = df[df['solve_time'] < 0]
+if len(negative_times) > 0:
+    print("Warning: Found negative solve times")
+    print(negative_times)
+
+# Check status values
+valid_statuses = ['optimal', 'infeasible', 'unbounded', 'error', 'timeout']
+invalid_statuses = df[~df['status'].isin(valid_statuses)]
+if len(invalid_statuses) > 0:
+    print("Warning: Found invalid status values")
+    print(invalid_statuses['status'].unique())
 ```
 
-### Support
-For issues with export functionality:
-1. Check logs for detailed error messages
-2. Validate database schema and content
-3. Ensure all dependencies are installed
-4. Test with sample data first
-5. Use validation tools to identify problems
+## Best Practices
 
-This export system provides comprehensive data access for research, analysis, and integration with external tools while maintaining data quality and consistency.
+1. **Regenerate data before analysis** - Always run `python main.py --all` for fresh data
+2. **Check timestamps** - Verify metadata timestamps match your expectations
+3. **Handle missing values** - Some solvers may not provide objective values or iteration counts
+4. **Filter by status** - Focus on 'optimal' results for performance analysis
+5. **Archive results** - Keep historical data for trend analysis
+
+This data access system provides the benchmark results in standard formats suitable for research analysis, statistical evaluation, and integration with external tools.

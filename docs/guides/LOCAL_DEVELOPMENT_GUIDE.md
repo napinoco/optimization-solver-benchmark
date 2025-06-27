@@ -80,7 +80,7 @@ Expected output:
 ✅ Environment validation passed
 ✅ Configuration loaded successfully
 ✅ 5 solvers available
-✅ 8 problems loaded from light_set
+✅ 142 problems loaded (DIMACS + SDPLIB)
 ```
 
 ---
@@ -121,9 +121,9 @@ python main.py --all --verbose
 python main.py --all --solvers scipy_linprog,cvxpy_clarabel
 ```
 
-**Custom Configuration**
+**Verbose Output**
 ```bash
-python main.py --all --config config/custom_config.yaml
+python main.py --all --verbose
 ```
 
 **Quiet Mode**
@@ -142,7 +142,7 @@ python main.py --all --quiet
 | `--verbose` | Enable detailed logging |
 | `--quiet` | Suppress non-error output |
 | `--solvers` | Specify comma-separated solver list |
-| `--config` | Use custom configuration file |
+| `--dry-run` | Run benchmarks without storing results |
 
 ---
 
@@ -230,7 +230,7 @@ class NewSolver(SolverInterface):
         pass
 ```
 
-2. **Add Configuration** in `config/solvers.yaml`
+2. **Add Configuration** in `config/solver_registry.yaml`
 ```yaml
 new_solver:
   name: "New Solver"
@@ -252,20 +252,22 @@ python main.py --benchmark --solvers new_solver
 
 ### Adding New Problems
 
-1. **Add Problem Files** to appropriate problem library directory
-2. **Update Registry** in `problems/problem_registry.yaml`
+The current system uses external problem libraries (DIMACS, SDPLIB). To add new problems:
+
+1. **Add to existing library structure** following DIMACS/SDPLIB format
+2. **Update Registry** in `config/problem_registry.yaml`
 ```yaml
-problems:
-  light_set:
-    LP:
-      - name: "new_problem"
-        file_path: "problems/light_set/lp/new_problem.mps"
-        problem_class: "LP"
+problem_libraries:
+  new_problem_name:
+    library_name: "DIMACS"  # or appropriate library
+    file_path: "problems/DIMACS/data/new_file.mat.gz"
+    file_type: "mat"  # or "dat-s" for SDPLIB
+    problem_type: "SDP"
 ```
 
 3. **Test Loading**
 ```bash
-python -c "from scripts.data_loaders.problem_loader import load_problem; print(load_problem('new_problem', 'light_set'))"
+python -c "from scripts.data_loaders.problem_loader import load_problem; print(load_problem('new_problem_name'))"
 ```
 
 ---
@@ -338,16 +340,17 @@ chmod 644 database/results.db
 **"No problems found in registry"**
 ```bash
 # Verify problem files exist
-ls problems/light_set/lp/
-cat problems/problem_registry.yaml
+ls problems/DIMACS/data/
+ls problems/SDPLIB/data/
+cat config/problem_registry.yaml
 ```
 
 ### Performance Issues
 
 **Slow Benchmark Execution**
 - Check system resources (CPU, memory)
-- Reduce timeout in `config/benchmark_config.yaml`
-- Test with fewer solvers: `--solvers scipy`
+- Use fewer problems: `python main.py --all --library_names DIMACS` (instead of both DIMACS,SDPLIB)
+- Test with fewer solvers: `--solvers scipy_linprog`
 
 **Large Database Size**
 ```bash
@@ -384,22 +387,21 @@ python main.py --all --verbose
 
 ### Configuration Debugging
 
-**Check Configuration Loading**
+**Check Available Solvers**
 ```bash
 python -c "
-from scripts.utils.config_loader import ConfigLoader
-config = ConfigLoader('config/benchmark_config.yaml')
-print(config.data)
+from scripts.benchmark.runner import BenchmarkRunner
+runner = BenchmarkRunner()
+print('Available solvers:', runner.get_available_solvers())
 "
 ```
 
-**Verify Solver Configuration**
+**Verify Problem Registry**
 ```bash
 python -c "
-from scripts.utils.config_loader import ConfigLoader
-config = ConfigLoader('config/solvers.yaml')
-for name, solver in config.data['solvers'].items():
-    print(f'{name}: enabled={solver.get(\"enabled\", True)}')
+from scripts.data_loaders.problem_loader import load_problem_registry
+registry = load_problem_registry()
+print(f'Total problems: {len(registry[\"problem_libraries\"])}')
 "
 ```
 

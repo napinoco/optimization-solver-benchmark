@@ -43,7 +43,7 @@ The PR preview system automatically generates temporary preview URLs for every p
 The preview uses a lightweight configuration for fast deployment:
 
 - **Solvers**: `scipy,cvxpy` (core solvers only)
-- **Problem Set**: `light_set` (small problems for speed)
+- **Problem Set**: Limited external problems for speed
 - **Timeout**: 300 seconds
 - **Platform**: Ubuntu 22.04 only
 
@@ -171,7 +171,7 @@ The preview system can be customized by editing `.github/workflows/pr-preview.ym
 **Change Benchmark Configuration:**
 ```yaml
 # Modify the benchmark execution step
-python main.py --benchmark --solvers "scipy,cvxpy,clarabel" --problem-set "medium_set"
+python main.py --benchmark --solvers "scipy_linprog,cvxpy_clarabel" --library_names "DIMACS,SDPLIB"
 ```
 
 **Modify Preview Banner:**
