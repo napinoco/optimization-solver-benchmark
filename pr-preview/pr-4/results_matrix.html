@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Optimization Solver Benchmark - Results Matrix</title>
+    <style>
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f8f9fa;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+            color: white;
+            text-align: center;
+            padding: 2rem 1rem;
+            margin-bottom: 2rem;
+        }
+        
+        header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+        
+        nav {
+            background: white;
+            padding: 1rem;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+        
+        nav a {
+            color: #2c3e50;
+            text-decoration: none;
+            margin: 0 1rem;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            transition: background-color 0.2s;
+        }
+        
+        nav a:hover {
+            background-color: #ecf0f1;
+        }
+        
+        nav a.active {
+            background-color: #3498db;
+            color: white;
+        }
+        
+        main {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 1rem;
+        }
+        
+        .section {
+            background: white;
+            margin: 2rem 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .section h2 {
+            background: linear-gradient(135deg, #34495e 0%, #2c3e50 100%);
+            color: white;
+            padding: 1rem 1.5rem;
+            margin: 0;
+            border-radius: 8px 8px 0 0;
+            font-size: 1.5rem;
+        }
+        
+        .section-content {
+            padding: 1.5rem;
+        }
+        
+        .matrix-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+            font-size: 0.9em;
+        }
+        
+        .matrix-table th, .matrix-table td {
+            padding: 10px 8px;
+            text-align: center;
+            border: 1px solid #ecf0f1;
+        }
+        
+        .matrix-table th {
+            background-color: #f8f9fa;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        
+        .matrix-table .problem-name {
+            text-align: left;
+            font-weight: bold;
+            background-color: #f8f9fa;
+            color: #2c3e50;
+        }
+        
+        .status-optimal {
+            background-color: #d4edda;
+            color: #155724;
+            font-weight: bold;
+        }
+        
+        .status-error {
+            background-color: #f8d7da;
+            color: #721c24;
+            font-weight: bold;
+        }
+        
+        .status-infeasible {
+            background-color: #fff3cd;
+            color: #856404;
+            font-weight: bold;
+        }
+        
+        .status-unknown {
+            background-color: #e2e3e5;
+            color: #6c757d;
+        }
+        
+        .solve-time {
+            font-size: 0.8em;
+            color: #7f8c8d;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .objective-value {
+            font-size: 0.8em;
+            color: #2980b9;
+            font-family: 'Courier New', monospace;
+            font-weight: 500;
+        }
+        
+        .matrix-note {
+            margin: 2rem 0;
+            padding: 1.5rem;
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 6px;
+            border-left: 4px solid #f39c12;
+        }
+        
+        .matrix-note-content {
+            color: #856404;
+            line-height: 1.6;
+            white-space: pre-line;
+        }
+        
+        .matrix-note-content strong {
+            color: #6c5119;
+        }
+        
+        .legend {
+            margin: 2rem 0;
+            padding: 1.5rem;
+            background: #ecf0f1;
+            border-radius: 6px;
+        }
+        
+        .legend h3 {
+            color: #2c3e50;
+            margin-bottom: 1rem;
+        }
+        
+        .legend p {
+            margin: 0.5rem 0;
+            color: #34495e;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 2rem;
+            color: #7f8c8d;
+            border-top: 1px solid #ecf0f1;
+            margin-top: 3rem;
+        }
+        
+        footer a {
+            color: #3498db;
+            text-decoration: none;
+            margin: 0 1rem;
+        }
+        
+        footer a:hover {
+            text-decoration: underline;
+        }
+        
+    </style>
+</head>
+<body>
+    <header>
+    <div style="background: #fff3cd; border: 1px solid #ffeaa7; padding: 10px; margin: 10px 0; border-radius: 5px; text-align: center;">
+        <strong>🚧 Preview Environment</strong> - This is a preview of PR #4. 
+        <a href="https://github.com/napinoco/optimization-solver-benchmark/pull/4">View Pull Request →</a>
+    </div>
+        <h1>🔬 Optimization Solver Benchmark</h1>
+        <p>Results Matrix - Problems × Solvers</p>
+        <p><small>Generated: 2025-06-27 16:56:07</small></p>
+    </header>
+    
+    <nav>
+        <a href="index.html">Overview</a>
+        <a href="results_matrix.html" class="active">Results Matrix</a>
+        <a href="raw_data.html">Raw Data</a>
+        <a href="data/">Data Exports</a>
+    </nav>
+    
+    <main>
+
+        <div class="section">
+            <h2>📊 Results Matrix</h2>
+            <div class="section-content">
+                <table class="matrix-table">
+                    <thead>
+                        <tr>
+                            <th>Problem</th>
+                            <th>Type</th>
+                            <th>Library</th>
+                            <th>Known Objective</th><th>cvxpy_clarabel</th><th>cvxpy_cvxopt</th><th>cvxpy_ecos</th><th>cvxpy_highs</th><th>cvxpy_osqp</th><th>cvxpy_scip</th><th>cvxpy_scs</th><th>cvxpy_sdpa</th><th>scipy_linprog</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            <tr>
+                <td class="problem-name">nb</td>
+                <td>SOCP</td>
+                <td>DIMACS</td>
+                <td>-0.050703</td><td class="status-optimal">OPTIMAL<br><span class="solve-time">2.371s</span><br><span class="objective-value">-0.050703</span></td><td class="status-optimal">OPTIMAL<br><span class="solve-time">2.514s</span><br><span class="objective-value">-0.050703</span></td><td class="status-optimal">OPTIMAL<br><span class="solve-time">2.074s</span><br><span class="objective-value">-0.050703</span></td><td class="status-error">ERROR<br><span class="solve-time">0.000s</span></td><td class="status-error">ERROR<br><span class="solve-time">0.000s</span></td><td class="status-optimal">OPTIMAL<br><span class="solve-time">48.258s</span><br><span class="objective-value">-0.050703</span></td><td class="status-optimal">OPTIMAL<br><span class="solve-time">4.158s</span><br><span class="objective-value">-0.050701</span></td><td class="status-optimal">OPTIMAL<br><span class="solve-time">5.959s</span><br><span class="objective-value">-1.877217</span></td><td class="status-error">ERROR<br><span class="solve-time">0.000s</span></td></tr>
+            <tr>
+                <td class="problem-name">bm1</td>
+                <td>UNKNOWN</td>
+                <td>DIMACS</td>
+                <td>23.443400</td><td class="status-error">ERROR<br><span class="solve-time">48.140s</span></td><td class="status-optimal">OPTIMAL<br><span class="solve-time">880.079s</span><br><span class="objective-value">23.439801</span></td><td class="status-error">ERROR<br><span class="solve-time">0.000s</span></td><td class="status-unknown">—</td><td class="status-error">ERROR<br><span class="solve-time">0.000s</span></td><td class="status-unknown">—</td><td class="status-optimal">OPTIMAL<br><span class="solve-time">36704.034s</span><br><span class="objective-value">23.592063</span></td><td class="status-optimal">OPTIMAL<br><span class="solve-time">79.027s</span><br><span class="objective-value">23.439818</span></td><td class="status-error">ERROR<br><span class="solve-time">0.000s</span></td></tr>
+            <tr>
+                <td class="problem-name">nb_L1</td>
+                <td>UNKNOWN</td>
+                <td>DIMACS</td>
+                <td>-13.012337</td><td class="status-optimal">OPTIMAL<br><span class="solve-time">1.533s</span><br><span class="objective-value">-13.012271</span></td><td class="status-optimal">OPTIMAL<br><span class="solve-time">3.080s</span><br><span class="objective-value">-13.012270</span></td><td class="status-optimal">OPTIMAL<br><span class="solve-time">1.462s</span><br><span class="objective-value">-13.012271</span></td><td class="status-unknown">—</td><td class="status-error">ERROR<br><span class="solve-time">0.000s</span></td><td class="status-unknown">—</td><td class="status-optimal">OPTIMAL<br><span class="solve-time">7.499s</span><br><span class="objective-value">-13.012200</span></td><td class="status-optimal">OPTIMAL<br><span class="solve-time">11.671s</span><br><span class="objective-value">-13.012153</span></td><td class="status-error">ERROR<br><span class="solve-time">0.000s</span></td></tr>
+            <tr>
+                <td class="problem-name">nb_L2</td>
+                <td>UNKNOWN</td>
+                <td>DIMACS</td>
+                <td>-1.628972</td><td class="status-optimal">OPTIMAL<br><span class="solve-time">2.241s</span><br><span class="objective-value">-1.628972</span></td><td class="status-optimal">OPTIMAL<br><span class="solve-time">2.346s</span><br><span class="objective-value">-1.628972</span></td><td class="status-optimal">OPTIMAL<br><span class="solve-time">1.735s</span><br><span class="objective-value">-1.628972</span></td><td class="status-unknown">—</td><td class="status-error">ERROR<br><span class="solve-time">0.000s</span></td><td class="status-unknown">—</td><td class="status-optimal">OPTIMAL<br><span class="solve-time">1.861s</span><br><span class="objective-value">-1.628982</span></td><td class="status-optimal">OPTIMAL<br><span class="solve-time">2.305s</span><br><span class="objective-value">-1.628972</span></td><td class="status-error">ERROR<br><span class="solve-time">0.000s</span></td></tr>
+            <tr>
+                <td class="problem-name">nb_L2_bessel</td>
+                <td>UNKNOWN</td>
+                <td>DIMACS</td>
+                <td>-0.102570</td><td class="status-optimal">OPTIMAL<br><span class="solve-time">46.943s</span><br><span class="objective-value">-0.102570</span></td><td class="status-optimal">OPTIMAL<br><span class="solve-time">1.318s</span><br><span class="objective-value">-0.102570</span></td><td class="status-optimal">OPTIMAL<br><span class="solve-time">1.159s</span><br><span class="objective-value">-0.102570</span></td><td class="status-unknown">—</td><td class="status-error">ERROR<br><span class="solve-time">0.000s</span></td><td class="status-unknown">—</td><td class="status-optimal">OPTIMAL<br><span class="solve-time">1.149s</span><br><span class="objective-value">-0.102571</span></td><td class="status-optimal">OPTIMAL<br><span class="solve-time">1.306s</span><br><span class="objective-value">-0.102570</span></td><td class="status-error">ERROR<br><span class="solve-time">0.000s</span></td></tr>
+            <tr>
+                <td class="problem-name">qap5</td>
+                <td>SDP</td>
+                <td>SDPLIB</td>
+                <td>-436.000000</td><td class="status-unknown">—</td><td class="status-optimal">OPTIMAL<br><span class="solve-time">0.095s</span><br><span class="objective-value">-583.999993</span></td><td class="status-unknown">—</td><td class="status-unknown">—</td><td class="status-unknown">—</td><td class="status-unknown">—</td><td class="status-unknown">—</td><td class="status-optimal">OPTIMAL<br><span class="solve-time">0.058s</span><br><span class="objective-value">-584.000759</span></td><td class="status-unknown">—</td></tr>
+            <tr>
+                <td class="problem-name">simple_lp_test</td>
+                <td>UNKNOWN</td>
+                <td>internal</td>
+                <td>—</td><td class="status-unknown">—</td><td class="status-unknown">—</td><td class="status-unknown">—</td><td class="status-optimal">OPTIMAL<br><span class="solve-time">0.004s</span><br><span class="objective-value">0.000000</span></td><td class="status-unknown">—</td><td class="status-optimal">OPTIMAL<br><span class="solve-time">0.005s</span><br><span class="objective-value">0.000000</span></td><td class="status-unknown">—</td><td class="status-unknown">—</td><td class="status-unknown">—</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        
+        <div class="matrix-note">
+            <div class="matrix-note-content">⚠️ **Important Note**: The bm1 problem shows CLARABEL with an ERROR status and extended solve time (48.140s). This occurred because CLARABEL consumed excessive memory and was terminated by the system with SIGKILL (signal 9) before completing the optimization process.</div>
+        </div>
+        
+
+        <div class="legend">
+            <h3>📋 Status Legend</h3>
+            <p><span class="status-optimal" style="padding: 5px 10px; border-radius: 3px;">OPTIMAL</span> - Successfully solved to optimality</p>
+            <p><span class="status-error" style="padding: 5px 10px; border-radius: 3px;">ERROR</span> - Solver encountered an error</p>
+            <p><span class="status-infeasible" style="padding: 5px 10px; border-radius: 3px;">INFEASIBLE/UNBOUNDED</span> - Problem has no feasible solution</p>
+            <p><span class="status-unknown" style="padding: 5px 10px; border-radius: 3px;">—</span> - No result available</p>
+        </div>
+    </main>
+
+    <footer>
+        <p>
+            <a href="index.html">Overview</a> |
+            <a href="raw_data.html">Raw Data</a> |
+            <a href="data/">Data Exports</a>
+        </p>
+        <p><small>Generated by Optimization Solver Benchmark System</small></p>
+    </footer>
+</body>
+</html>
