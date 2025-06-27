@@ -187,7 +187,7 @@ class DataExporter:
                 "solver_performance": solver_comparison,
                 "environment": {
                     "commit_hash": results[0].commit_hash if results else "unknown",
-                    "platform": results[0].environment_info.get('platform', 'Unknown') if results and results[0].environment_info else "Unknown"
+                    "platform": results[0].environment_info.get('os', {}).get('platform', 'Unknown') if results and results[0].environment_info else "Unknown"
                 }
             }
             
