@@ -64,7 +64,7 @@ class BenchmarkResult:
             'problem_library': self.problem_library,
             'problem_name': self.problem_name,
             'problem_type': self.problem_type,
-            'environment_info': self.environment_info,
+            'environment_info': self._sanitize_environment_info(self.environment_info),
             'commit_hash': self.commit_hash,
             'timestamp': self.timestamp.isoformat() if self.timestamp else None,
             'solve_time': self.solve_time,
@@ -76,6 +76,73 @@ class BenchmarkResult:
             'dual_infeasibility': self.dual_infeasibility,
             'iterations': self.iterations
         }
+    
+    def _sanitize_environment_info(self, env_info: Dict[str, Any]) -> Dict[str, Any]:
+        """Sanitize environment info to remove sensitive information"""
+        if not env_info:
+            return {}
+        
+        # Create sanitized copy
+        sanitized = {}
+        
+        # CPU info - safe to keep
+        if 'cpu' in env_info:
+            cpu = env_info['cpu']
+            sanitized['cpu'] = {
+                'cpu_count': cpu.get('cpu_count'),
+                'cpu_count_physical': cpu.get('cpu_count_physical'),
+                'processor': cpu.get('processor')
+            }
+        
+        # Memory info - keep totals only
+        if 'memory' in env_info:
+            memory = env_info['memory']
+            sanitized['memory'] = {
+                'total_gb': memory.get('total_gb')
+            }
+        
+        # OS info - keep basic system info only
+        if 'os' in env_info:
+            os_info = env_info['os']
+            sanitized['os'] = {
+                'architecture': os_info.get('architecture'),
+                'machine': os_info.get('machine'),
+                'system': os_info.get('system'),
+                'platform': os_info.get('platform'),
+                'release': os_info.get('release')
+            }
+        
+        # Python info - remove executable path
+        if 'python' in env_info:
+            python = env_info['python']
+            sanitized['python'] = {
+                'implementation': python.get('implementation'),
+                'version': python.get('version'),
+                'version_info': python.get('version_info')
+            }
+        
+        # Git info - filter sensitive parts
+        if 'git' in env_info:
+            git = env_info['git']
+            sanitized['git'] = {
+                'available': git.get('available'),
+                'commit_hash': git.get('commit_hash')
+                # Note: Removing branch name and is_dirty status
+            }
+        
+        # Timezone info - keep basic info only
+        if 'timezone' in env_info:
+            tz = env_info['timezone']
+            sanitized['timezone'] = {
+                'timezone_name': tz.get('timezone_name'),
+                'utc_offset_hours': tz.get('utc_offset_hours')
+            }
+        
+        # Timestamp - safe to keep
+        if 'timestamp' in env_info:
+            sanitized['timestamp'] = env_info['timestamp']
+        
+        return sanitized
     
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> 'BenchmarkResult':
