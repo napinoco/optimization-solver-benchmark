@@ -151,6 +151,25 @@
             font-weight: 500;
         }
         
+        .matrix-note {
+            margin: 2rem 0;
+            padding: 1.5rem;
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 6px;
+            border-left: 4px solid #f39c12;
+        }
+        
+        .matrix-note-content {
+            color: #856404;
+            line-height: 1.6;
+            white-space: pre-line;
+        }
+        
+        .matrix-note-content strong {
+            color: #6c5119;
+        }
+        
         .legend {
             margin: 2rem 0;
             padding: 1.5rem;
@@ -192,7 +211,7 @@
     <header>
         <h1>🔬 Optimization Solver Benchmark</h1>
         <p>Results Matrix - Problems × Solvers</p>
-        <p><small>Generated: 2025-06-25 09:48:05</small></p>
+        <p><small>Generated: 2025-06-27 11:49:45</small></p>
     </header>
     
     <nav>
@@ -243,6 +262,11 @@
                 <td>DIMACS</td>
                 <td>-0.102570</td><td class="status-optimal">OPTIMAL<br><span class="solve-time">46.943s</span><br><span class="objective-value">-0.102570</span></td><td class="status-optimal">OPTIMAL<br><span class="solve-time">1.318s</span><br><span class="objective-value">-0.102570</span></td><td class="status-optimal">OPTIMAL<br><span class="solve-time">1.159s</span><br><span class="objective-value">-0.102570</span></td><td class="status-unknown">—</td><td class="status-error">ERROR<br><span class="solve-time">0.000s</span></td><td class="status-unknown">—</td><td class="status-optimal">OPTIMAL<br><span class="solve-time">1.149s</span><br><span class="objective-value">-0.102571</span></td><td class="status-optimal">OPTIMAL<br><span class="solve-time">1.306s</span><br><span class="objective-value">-0.102570</span></td><td class="status-error">ERROR<br><span class="solve-time">0.000s</span></td></tr>
             <tr>
+                <td class="problem-name">qap5</td>
+                <td>SDP</td>
+                <td>SDPLIB</td>
+                <td>-436.000000</td><td class="status-unknown">—</td><td class="status-optimal">OPTIMAL<br><span class="solve-time">0.095s</span><br><span class="objective-value">-583.999993</span></td><td class="status-unknown">—</td><td class="status-unknown">—</td><td class="status-unknown">—</td><td class="status-unknown">—</td><td class="status-unknown">—</td><td class="status-optimal">OPTIMAL<br><span class="solve-time">0.058s</span><br><span class="objective-value">-584.000759</span></td><td class="status-unknown">—</td></tr>
+            <tr>
                 <td class="problem-name">simple_lp_test</td>
                 <td>UNKNOWN</td>
                 <td>internal</td>
@@ -251,6 +275,12 @@
                 </table>
             </div>
         </div>
+
+        
+        <div class="matrix-note">
+            <div class="matrix-note-content">⚠️ **Important Note**: The bm1 problem shows CLARABEL with an ERROR status and extended solve time (48.140s). This occurred because CLARABEL consumed excessive memory and was terminated by the system with SIGKILL (signal 9) before completing the optimization process.</div>
+        </div>
+        
 
         <div class="legend">
             <h3>📋 Status Legend</h3>

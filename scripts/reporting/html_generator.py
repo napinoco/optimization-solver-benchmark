@@ -13,6 +13,7 @@ Simple HTML structure without complex Bootstrap dashboards.
 from pathlib import Path
 from typing import List, Dict, Any
 import sys
+import yaml
 from datetime import datetime
 
 # Add project root to path for imports
@@ -38,6 +39,124 @@ class HTMLGenerator:
         
         self.result_processor = ResultProcessor()
         self.logger = get_logger("html_generator")
+        
+        # Load site configuration
+        self.site_config = self._load_site_config()
+    
+    def _load_site_config(self) -> Dict[str, Any]:
+        """Load site configuration from config/site_config.yaml"""
+        try:
+            config_path = project_root / "config" / "site_config.yaml"
+            with open(config_path, 'r', encoding='utf-8') as f:
+                return yaml.safe_load(f)
+        except Exception as e:
+            self.logger.warning(f"Failed to load site config: {e}")
+            return {}
+    
+    def _get_overview_section(self) -> str:
+        """Generate overview section HTML from site config"""
+        if not self.site_config or 'site' not in self.site_config:
+            return ""
+        
+        site_info = self.site_config.get('site', {})
+        overview = site_info.get('overview', '').strip()
+        
+        if not overview:
+            return ""
+        
+        return f"""
+        <div class="overview-section">
+            <h2>📋 Project Overview</h2>
+            <div class="overview-content">{overview}</div>
+        </div>
+        """
+    
+    def _get_results_matrix_note(self) -> str:
+        """Generate results matrix note HTML from site config"""
+        if not self.site_config or 'site' not in self.site_config:
+            return ""
+        
+        site_info = self.site_config.get('site', {})
+        note = site_info.get('results_matrix_note', '').strip()
+        
+        if not note:
+            return ""
+        
+        return f"""
+        <div class="matrix-note">
+            <div class="matrix-note-content">{note}</div>
+        </div>
+        """
+    
+    def _analyze_multiple_environments(self, results: List[BenchmarkResult]) -> Dict[str, Any]:
+        """Analyze commit hashes and environments from all results"""
+        commit_hashes = set()
+        environments = set()
+        
+        for result in results:
+            # Collect commit hashes
+            if hasattr(result, 'commit_hash') and result.commit_hash:
+                commit_hashes.add(result.commit_hash)
+            
+            # Collect environment platforms
+            env_info = getattr(result, 'environment_info', {})
+            platform = self._get_platform_info(env_info)
+            if platform != 'Unknown':
+                environments.add(platform)
+        
+        return {
+            'commit_hashes': sorted(list(commit_hashes)),
+            'environments': sorted(list(environments)) if environments else ['Unknown']
+        }
+    
+    def _generate_environment_section(self, env_analysis: Dict[str, Any], env_info: Dict[str, Any]) -> str:
+        """Generate environment information section HTML"""
+        commit_hashes = env_analysis['commit_hashes']
+        environments = env_analysis['environments']
+        
+        # Generate commit hash display
+        if len(commit_hashes) == 1:
+            commit_display = f"<p><strong>Commit Hash:</strong> {commit_hashes[0][:8]}</p>"
+        elif len(commit_hashes) > 1:
+            commit_list = ', '.join([ch[:8] for ch in commit_hashes])
+            commit_display = f"<p><strong>Commit Hashes:</strong> {commit_list}</p>"
+            commit_display += f"<p><em>⚠️ Multiple environments detected: Results from {len(commit_hashes)} different Git commits</em></p>"
+        else:
+            commit_display = "<p><strong>Commit Hash:</strong> Unknown</p>"
+        
+        # Generate environment display
+        if len(environments) == 1:
+            env_display = f"<p><strong>Platform:</strong> {environments[0]}</p>"
+        elif len(environments) > 1:
+            env_list = ', '.join(environments)
+            env_display = f"<p><strong>Platforms:</strong> {env_list}</p>"
+            env_display += f"<p><em>⚠️ Multiple platforms detected: Results from {len(environments)} different environments</em></p>"
+        else:
+            env_display = "<p><strong>Platform:</strong> Unknown</p>"
+        
+        # Python version (from latest result)
+        python_version = env_info.get('python', {}).get('version', 'Unknown')
+        python_display = f"<p><strong>Python Version:</strong> {python_version}</p>"
+        
+        return commit_display + env_display + python_display
+    
+    def _get_platform_info(self, environment_info: Dict[str, Any]) -> str:
+        """Extract platform information including CPU and memory details"""
+        if not isinstance(environment_info, dict):
+            return 'Unknown'
+            
+        os_info = environment_info.get('os', {})
+        cpu_info = environment_info.get('cpu', {})
+        memory_info = environment_info.get('memory', {})
+        
+        platform_base = os_info.get('platform', 'Unknown')
+        cpu_count = cpu_info.get('cpu_count', 'Unknown')
+        memory_gb = memory_info.get('total_gb', 'Unknown')
+        
+        if platform_base != 'Unknown' and cpu_count != 'Unknown' and memory_gb != 'Unknown':
+            return f"{platform_base} ({cpu_count}CPU, {memory_gb:.0f}GB)"
+        else:
+            return platform_base
     
     def _get_common_css(self) -> str:
         """Get common CSS styles for all reports"""
@@ -203,18 +322,21 @@ class HTMLGenerator:
         solver_comparison = self.result_processor.get_solver_comparison(results)
         solver_comparison_by_type = self.result_processor.get_solver_comparison_by_problem_type(results)
         
-        # Generate environment info from latest result
+        # Analyze multiple environments and commit hashes
+        env_analysis = self._analyze_multiple_environments(results)
+        
+        # Generate environment info from latest result for fallback
         if results:
             # Handle both dict and object result formats
             if isinstance(results[0], dict):
                 env_info = results[0].get('environment_info', {})
-                commit_hash = results[0].get('commit_hash', 'unknown')
+                latest_commit_hash = results[0].get('commit_hash', 'unknown')
             else:
                 env_info = getattr(results[0], 'environment_info', {})
-                commit_hash = getattr(results[0], 'commit_hash', 'unknown')
+                latest_commit_hash = getattr(results[0], 'commit_hash', 'unknown')
         else:
             env_info = {}
-            commit_hash = "unknown"
+            latest_commit_hash = "unknown"
         
         html_content = f"""<!DOCTYPE html>
 <html lang="en">
@@ -405,6 +527,30 @@ class HTMLGenerator:
         footer a:hover {{
             text-decoration: underline;
         }}
+        
+        .overview-section {{
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }}
+        
+        .overview-section h2 {{
+            color: #2c3e50;
+            margin-bottom: 1rem;
+            font-size: 1.5rem;
+        }}
+        
+        .overview-content {{
+            color: #34495e;
+            line-height: 1.8;
+            white-space: pre-line;
+        }}
+        
+        .overview-content strong {{
+            color: #2c3e50;
+        }}
     </style>
 </head>
 <body>
@@ -422,6 +568,9 @@ class HTMLGenerator:
     </nav>
     
     <main>
+        
+        <!-- Project Overview Section -->
+        {self._get_overview_section()}
 
         <div class="stats-grid">
             <div class="stat-card">
@@ -540,9 +689,7 @@ class HTMLGenerator:
 
         <div class="metadata">
             <h3>🔧 Environment Information</h3>
-            <p><strong>Commit Hash:</strong> {commit_hash}</p>
-            <p><strong>Platform:</strong> {env_info.get('os', {}).get('platform', 'Unknown')}</p>
-            <p><strong>Python Version:</strong> {env_info.get('python', {}).get('version', 'Unknown')}</p>
+            {self._generate_environment_section(env_analysis, env_info)}
         </div>
     </main>
 
@@ -724,6 +871,25 @@ class HTMLGenerator:
             font-weight: 500;
         }
         
+        .matrix-note {
+            margin: 2rem 0;
+            padding: 1.5rem;
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 6px;
+            border-left: 4px solid #f39c12;
+        }
+        
+        .matrix-note-content {
+            color: #856404;
+            line-height: 1.6;
+            white-space: pre-line;
+        }
+        
+        .matrix-note-content strong {
+            color: #6c5119;
+        }
+        
         .legend {
             margin: 2rem 0;
             padding: 1.5rem;
@@ -861,6 +1027,8 @@ class HTMLGenerator:
             </div>
         </div>
 
+        {self._get_results_matrix_note()}
+
         <div class="legend">
             <h3>📋 Status Legend</h3>
             <p><span class="status-optimal" style="padding: 5px 10px; border-radius: 3px;">OPTIMAL</span> - Successfully solved to optimality</p>
@@ -979,10 +1147,17 @@ class HTMLGenerator:
             padding: 1.5rem;
         }
         
+        .table-container {
+            overflow-x: auto;
+            margin: 1rem 0;
+            border: 1px solid #ecf0f1;
+            border-radius: 6px;
+        }
+        
         .data-table {
             width: 100%;
+            min-width: 1400px;
             border-collapse: collapse;
-            margin: 1rem 0;
             font-size: 0.9em;
         }
         
@@ -1056,6 +1231,21 @@ class HTMLGenerator:
             font-family: 'Courier New', monospace;
         }
         
+        .commit-hash {
+            font-size: 0.8em;
+            color: #6c757d;
+            font-family: 'Courier New', monospace;
+            word-break: break-all;
+        }
+        
+        .platform {
+            font-size: 0.8em;
+            color: #495057;
+            font-weight: 500;
+            max-width: 200px;
+            word-wrap: break-word;
+        }
+        
         footer {
             text-align: center;
             padding: 2rem;
@@ -1103,23 +1293,26 @@ class HTMLGenerator:
         <div class="section">
             <h2>📋 Detailed Results</h2>
             <div class="section-content">
-                <table class="data-table">
-                    <thead>
-                        <tr>
-                            <th>Solver</th>
-                            <th>Version</th>
-                            <th>Problem</th>
-                            <th>Type</th>
-                            <th>Library</th>
-                            <th>Status</th>
-                            <th>Solve Time (s)</th>
-                            <th>Objective Value</th>
-                            <th>Iterations</th>
-                            <th>Duality Gap</th>
-                            <th>Timestamp</th>
-                        </tr>
-                    </thead>
-                    <tbody>"""
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Solver</th>
+                                <th>Version</th>
+                                <th>Problem</th>
+                                <th>Type</th>
+                                <th>Library</th>
+                                <th>Status</th>
+                                <th>Solve Time (s)</th>
+                                <th>Objective Value</th>
+                                <th>Iterations</th>
+                                <th>Duality Gap</th>
+                                <th>Commit Hash</th>
+                                <th>Platform</th>
+                                <th>Timestamp</th>
+                            </tr>
+                        </thead>
+                        <tbody>"""
         
         # Sort results by library_name, problem_type, problem_name
         sorted_results = sorted(
@@ -1138,6 +1331,16 @@ class HTMLGenerator:
             iterations = str(result.iterations) if result.iterations is not None else "—"
             duality_gap = f"{result.duality_gap:.6e}" if result.duality_gap is not None else "—"
             timestamp = result.timestamp.strftime('%Y-%m-%d %H:%M:%S') if result.timestamp else "—"
+            
+            # Format commit hash and environment
+            commit_hash = getattr(result, 'commit_hash', None) or "—"
+            if commit_hash != "—" and len(commit_hash) > 8:
+                commit_hash_short = commit_hash[:8]
+            else:
+                commit_hash_short = commit_hash
+                
+            environment_info = getattr(result, 'environment_info', {})
+            platform = self._get_platform_info(environment_info)
             
             # Status styling
             status = result.status or "unknown"
@@ -1163,12 +1366,15 @@ class HTMLGenerator:
                 <td class="number">{objective}</td>
                 <td class="number">{iterations}</td>
                 <td class="number">{duality_gap}</td>
+                <td><span class="commit-hash" title="{commit_hash}">{commit_hash_short}</span></td>
+                <td><span class="platform">{platform}</span></td>
                 <td class="timestamp">{timestamp}</td>
             </tr>"""
         
         html_content += f"""
                     </tbody>
                 </table>
+                </div>
             </div>
         </div>
     </main>
