@@ -1,0 +1,914 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Optimization Solver Benchmark - Raw Data</title>
+    <style>
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f8f9fa;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+            color: white;
+            text-align: center;
+            padding: 2rem 1rem;
+            margin-bottom: 2rem;
+        }
+        
+        header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+        
+        nav {
+            background: white;
+            padding: 1rem;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+        
+        nav a {
+            color: #2c3e50;
+            text-decoration: none;
+            margin: 0 1rem;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            transition: background-color 0.2s;
+        }
+        
+        nav a:hover {
+            background-color: #ecf0f1;
+        }
+        
+        nav a.active {
+            background-color: #3498db;
+            color: white;
+        }
+        
+        main {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 1rem;
+        }
+        
+        .section {
+            background: white;
+            margin: 2rem 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .section h2 {
+            background: linear-gradient(135deg, #34495e 0%, #2c3e50 100%);
+            color: white;
+            padding: 1rem 1.5rem;
+            margin: 0;
+            border-radius: 8px 8px 0 0;
+            font-size: 1.5rem;
+        }
+        
+        .section-content {
+            padding: 1.5rem;
+        }
+        
+        .table-container {
+            overflow-x: auto;
+            margin: 1rem 0;
+            border: 1px solid #ecf0f1;
+            border-radius: 6px;
+        }
+        
+        .data-table {
+            width: 100%;
+            min-width: 1400px;
+            border-collapse: collapse;
+            font-size: 0.9em;
+        }
+        
+        .data-table th, .data-table td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #ecf0f1;
+        }
+        
+        .data-table th {
+            background-color: #f8f9fa;
+            font-weight: 600;
+            color: #2c3e50;
+            position: sticky;
+            top: 0;
+            border-bottom: 2px solid #dee2e6;
+        }
+        
+        .data-table tr:hover {
+            background-color: #f8f9fa;
+        }
+        
+        .status-optimal {
+            background-color: #d4edda;
+            color: #155724;
+            font-weight: bold;
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
+        
+        .status-error {
+            background-color: #f8d7da;
+            color: #721c24;
+            font-weight: bold;
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
+        
+        .status-infeasible {
+            background-color: #fff3cd;
+            color: #856404;
+            font-weight: bold;
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
+        
+        .solver-name {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        
+        .problem-type {
+            font-weight: 500;
+            color: #3498db;
+        }
+        
+        .library-name {
+            font-style: italic;
+            color: #7f8c8d;
+        }
+        
+        .number {
+            text-align: right;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+        }
+        
+        .timestamp {
+            font-size: 0.85em;
+            color: #7f8c8d;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .commit-hash {
+            font-size: 0.8em;
+            color: #6c757d;
+            font-family: 'Courier New', monospace;
+            word-break: break-all;
+        }
+        
+        .platform {
+            font-size: 0.8em;
+            color: #495057;
+            font-weight: 500;
+            max-width: 200px;
+            word-wrap: break-word;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 2rem;
+            color: #7f8c8d;
+            border-top: 1px solid #ecf0f1;
+            margin-top: 3rem;
+        }
+        
+        footer a {
+            color: #3498db;
+            text-decoration: none;
+            margin: 0 1rem;
+        }
+        
+        footer a:hover {
+            text-decoration: underline;
+        }
+        
+    </style>
+</head>
+<body>
+    <header>
+    <div style="background: #fff3cd; border: 1px solid #ffeaa7; padding: 10px; margin: 10px 0; border-radius: 5px; text-align: center;">
+        <strong>🚧 Preview Environment</strong> - This is a preview of PR #5. 
+        <a href="https://github.com/napinoco/optimization-solver-benchmark/pull/5">View Pull Request →</a>
+    </div>
+        <h1>🔬 Optimization Solver Benchmark</h1>
+        <p>Raw Data - Detailed Results Table</p>
+        <p><small>Generated: 2025-06-27 16:56:07 | Total Results: 43</small></p>
+    </header>
+    
+    <nav>
+        <a href="index.html">Overview</a>
+        <a href="results_matrix.html">Results Matrix</a>
+        <a href="raw_data.html" class="active">Raw Data</a>
+        <a href="data/">Data Exports</a>
+    </nav>
+    
+    <main>
+        <div class="section">
+            <h2>📋 Detailed Results</h2>
+            <div class="section-content">
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Solver</th>
+                                <th>Version</th>
+                                <th>Problem</th>
+                                <th>Type</th>
+                                <th>Library</th>
+                                <th>Status</th>
+                                <th>Solve Time (s)</th>
+                                <th>Objective Value</th>
+                                <th>Iterations</th>
+                                <th>Duality Gap</th>
+                                <th>Commit Hash</th>
+                                <th>Platform</th>
+                                <th>Timestamp</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            <tr>
+                <td><span class="solver-name">cvxpy_clarabel</span></td>
+                <td><span class="solver-version">cvxpy-1.6.5-CLARABEL-0.11.0</span></td>
+                <td>nb</td>
+                <td><span class="problem-type">SOCP</span></td>
+                <td><span class="library-name">DIMACS</span></td>
+                <td><span class="status-optimal">OPTIMAL</span></td>
+                <td class="number">2.3709</td>
+                <td class="number">-5.070309e-02</td>
+                <td class="number">21</td>
+                <td class="number">—</td>
+                <td><span class="commit-hash" title="e945508d6718b1edb2f579ce0b5a56da98570dbd">e945508d</span></td>
+                <td><span class="platform">macOS-14.5-arm64-arm-64bit (8CPU, 24GB)</span></td>
+                <td class="timestamp">2025-06-25 00:42:45</td>
+            </tr>
+            <tr>
+                <td><span class="solver-name">cvxpy_cvxopt</span></td>
+                <td><span class="solver-version">cvxpy-1.6.5-CVXOPT-1.3.2</span></td>
+                <td>nb</td>
+                <td><span class="problem-type">SOCP</span></td>
+                <td><span class="library-name">DIMACS</span></td>
+                <td><span class="status-optimal">OPTIMAL</span></td>
+                <td class="number">2.5139</td>
+                <td class="number">-5.070309e-02</td>
+                <td class="number">—</td>
+                <td class="number">—</td>
+                <td><span class="commit-hash" title="e945508d6718b1edb2f579ce0b5a56da98570dbd">e945508d</span></td>
+                <td><span class="platform">macOS-14.5-arm64-arm-64bit (8CPU, 24GB)</span></td>
+                <td class="timestamp">2025-06-25 00:42:54</td>
+            </tr>
+            <tr>
+                <td><span class="solver-name">cvxpy_ecos</span></td>
+                <td><span class="solver-version">cvxpy-1.6.5-ECOS-2.0.14</span></td>
+                <td>nb</td>
+                <td><span class="problem-type">SOCP</span></td>
+                <td><span class="library-name">DIMACS</span></td>
+                <td><span class="status-optimal">OPTIMAL</span></td>
+                <td class="number">2.0738</td>
+                <td class="number">-5.070309e-02</td>
+                <td class="number">20</td>
+                <td class="number">—</td>
+                <td><span class="commit-hash" title="e945508d6718b1edb2f579ce0b5a56da98570dbd">e945508d</span></td>
+                <td><span class="platform">macOS-14.5-arm64-arm-64bit (8CPU, 24GB)</span></td>
+                <td class="timestamp">2025-06-25 00:42:51</td>
+            </tr>
+            <tr>
+                <td><span class="solver-name">cvxpy_scip</span></td>
+                <td><span class="solver-version">cvxpy-1.6.5-SCIP-5.5.0</span></td>
+                <td>nb</td>
+                <td><span class="problem-type">SOCP</span></td>
+                <td><span class="library-name">DIMACS</span></td>
+                <td><span class="status-optimal">OPTIMAL</span></td>
+                <td class="number">48.2575</td>
+                <td class="number">-5.070300e-02</td>
+                <td class="number">—</td>
+                <td class="number">—</td>
+                <td><span class="commit-hash" title="e945508d6718b1edb2f579ce0b5a56da98570dbd">e945508d</span></td>
+                <td><span class="platform">macOS-14.5-arm64-arm-64bit (8CPU, 24GB)</span></td>
+                <td class="timestamp">2025-06-25 00:43:48</td>
+            </tr>
+            <tr>
+                <td><span class="solver-name">cvxpy_scs</span></td>
+                <td><span class="solver-version">cvxpy-1.6.5-SCS-3.2.7.post2</span></td>
+                <td>nb</td>
+                <td><span class="problem-type">SOCP</span></td>
+                <td><span class="library-name">DIMACS</span></td>
+                <td><span class="status-optimal">OPTIMAL</span></td>
+                <td class="number">4.1585</td>
+                <td class="number">-5.070062e-02</td>
+                <td class="number">5425</td>
+                <td class="number">—</td>
+                <td><span class="commit-hash" title="e945508d6718b1edb2f579ce0b5a56da98570dbd">e945508d</span></td>
+                <td><span class="platform">macOS-14.5-arm64-arm-64bit (8CPU, 24GB)</span></td>
+                <td class="timestamp">2025-06-25 00:42:49</td>
+            </tr>
+            <tr>
+                <td><span class="solver-name">cvxpy_sdpa</span></td>
+                <td><span class="solver-version">cvxpy-1.6.5-SDPA-0.2.2</span></td>
+                <td>nb</td>
+                <td><span class="problem-type">SOCP</span></td>
+                <td><span class="library-name">DIMACS</span></td>
+                <td><span class="status-optimal">OPTIMAL</span></td>
+                <td class="number">5.9593</td>
+                <td class="number">-1.877217e+00</td>
+                <td class="number">—</td>
+                <td class="number">—</td>
+                <td><span class="commit-hash" title="e945508d6718b1edb2f579ce0b5a56da98570dbd">e945508d</span></td>
+                <td><span class="platform">macOS-14.5-arm64-arm-64bit (8CPU, 24GB)</span></td>
+                <td class="timestamp">2025-06-25 00:47:58</td>
+            </tr>
+            <tr>
+                <td><span class="solver-name">cvxpy_sdpa</span></td>
+                <td><span class="solver-version">cvxpy-1.6.5-SDPA-unknown</span></td>
+                <td>nb_L1</td>
+                <td><span class="problem-type">SOCP</span></td>
+                <td><span class="library-name">DIMACS</span></td>
+                <td><span class="status-optimal">OPTIMAL</span></td>
+                <td class="number">11.6706</td>
+                <td class="number">-1.301215e+01</td>
+                <td class="number">—</td>
+                <td class="number">—</td>
+                <td><span class="commit-hash" title="e945508d6718b1edb2f579ce0b5a56da98570dbd">e945508d</span></td>
+                <td><span class="platform">macOS-14.5-arm64-arm-64bit (8CPU, 24GB)</span></td>
+                <td class="timestamp">2025-06-25 00:29:24</td>
+            </tr>
+            <tr>
+                <td><span class="solver-name">cvxpy_clarabel</span></td>
+                <td><span class="solver-version">cvxpy-1.6.5-CLARABEL</span></td>
+                <td>bm1</td>
+                <td><span class="problem-type">UNKNOWN</span></td>
+                <td><span class="library-name">DIMACS</span></td>
+                <td><span class="status-error">ERROR</span></td>
+                <td class="number">48.1399</td>
+                <td class="number">—</td>
+                <td class="number">—</td>
+                <td class="number">—</td>
+                <td><span class="commit-hash" title="ce1969a22cbeb1ef396d49cbf1142984143d1297">ce1969a2</span></td>
+                <td><span class="platform">macOS-14.5-arm64-arm-64bit (8CPU, 24GB)</span></td>
+                <td class="timestamp">2025-06-22 10:30:18</td>
+            </tr>
+            <tr>
+                <td><span class="solver-name">cvxpy_cvxopt</span></td>
+                <td><span class="solver-version">cvxpy-1.6.5-CVXOPT</span></td>
+                <td>bm1</td>
+                <td><span class="problem-type">UNKNOWN</span></td>
+                <td><span class="library-name">DIMACS</span></td>
+                <td><span class="status-optimal">OPTIMAL</span></td>
+                <td class="number">880.0795</td>
+                <td class="number">2.343980e+01</td>
+                <td class="number">—</td>
+                <td class="number">—</td>
+                <td><span class="commit-hash" title="ce1969a22cbeb1ef396d49cbf1142984143d1297">ce1969a2</span></td>
+                <td><span class="platform">macOS-14.5-arm64-arm-64bit (8CPU, 24GB)</span></td>
+                <td class="timestamp">2025-06-22 23:39:01</td>
+            </tr>
+            <tr>
+                <td><span class="solver-name">cvxpy_ecos</span></td>
+                <td><span class="solver-version">cvxpy-1.6.5-ECOS</span></td>
+                <td>bm1</td>
+                <td><span class="problem-type">UNKNOWN</span></td>
+                <td><span class="library-name">DIMACS</span></td>
+                <td><span class="status-error">ERROR</span></td>
+                <td class="number">0.0000</td>
+                <td class="number">—</td>
+                <td class="number">—</td>
+                <td class="number">—</td>
+                <td><span class="commit-hash" title="ce1969a22cbeb1ef396d49cbf1142984143d1297">ce1969a2</span></td>
+                <td><span class="platform">macOS-14.5-arm64-arm-64bit (8CPU, 24GB)</span></td>
+                <td class="timestamp">2025-06-22 23:24:20</td>
+            </tr>
+            <tr>
+                <td><span class="solver-name">cvxpy_osqp</span></td>
+                <td><span class="solver-version">cvxpy-1.6.5-OSQP</span></td>
+                <td>bm1</td>
+                <td><span class="problem-type">UNKNOWN</span></td>
+                <td><span class="library-name">DIMACS</span></td>
+                <td><span class="status-error">ERROR</span></td>
+                <td class="number">0.0000</td>
+                <td class="number">—</td>
+                <td class="number">—</td>
+                <td class="number">—</td>
+                <td><span class="commit-hash" title="ce1969a22cbeb1ef396d49cbf1142984143d1297">ce1969a2</span></td>
+                <td><span class="platform">macOS-14.5-arm64-arm-64bit (8CPU, 24GB)</span></td>
+                <td class="timestamp">2025-06-22 23:24:20</td>
+            </tr>
+            <tr>
+                <td><span class="solver-name">cvxpy_scs</span></td>
+                <td><span class="solver-version">cvxpy-1.6.5-SCS</span></td>
+                <td>bm1</td>
+                <td><span class="problem-type">UNKNOWN</span></td>
+                <td><span class="library-name">DIMACS</span></td>
+                <td><span class="status-optimal">OPTIMAL</span></td>
+                <td class="number">36704.0342</td>
+                <td class="number">2.359206e+01</td>
+                <td class="number">100000</td>
+                <td class="number">—</td>
+                <td><span class="commit-hash" title="ce1969a22cbeb1ef396d49cbf1142984143d1297">ce1969a2</span></td>
+                <td><span class="platform">macOS-14.5-arm64-arm-64bit (8CPU, 24GB)</span></td>
+                <td class="timestamp">2025-06-22 23:24:20</td>
+            </tr>
+            <tr>
+                <td><span class="solver-name">cvxpy_sdpa</span></td>
+                <td><span class="solver-version">cvxpy-1.6.5-SDPA</span></td>
+                <td>bm1</td>
+                <td><span class="problem-type">UNKNOWN</span></td>
+                <td><span class="library-name">DIMACS</span></td>
+                <td><span class="status-optimal">OPTIMAL</span></td>
+                <td class="number">79.0268</td>
+                <td class="number">2.343982e+01</td>
+                <td class="number">—</td>
+                <td class="number">—</td>
+                <td><span class="commit-hash" title="ce1969a22cbeb1ef396d49cbf1142984143d1297">ce1969a2</span></td>
+                <td><span class="platform">macOS-14.5-arm64-arm-64bit (8CPU, 24GB)</span></td>
+                <td class="timestamp">2025-06-22 13:09:05</td>
+            </tr>
+            <tr>
+                <td><span class="solver-name">scipy_linprog</span></td>
+                <td><span class="solver-version">scipy-1.15.3</span></td>
+                <td>bm1</td>
+                <td><span class="problem-type">UNKNOWN</span></td>
+                <td><span class="library-name">DIMACS</span></td>
+                <td><span class="status-error">ERROR</span></td>
+                <td class="number">0.0000</td>
+                <td class="number">—</td>
+                <td class="number">—</td>
+                <td class="number">—</td>
+                <td><span class="commit-hash" title="ce1969a22cbeb1ef396d49cbf1142984143d1297">ce1969a2</span></td>
+                <td><span class="platform">macOS-14.5-arm64-arm-64bit (8CPU, 24GB)</span></td>
+                <td class="timestamp">2025-06-22 13:10:16</td>
+            </tr>
+            <tr>
+                <td><span class="solver-name">cvxpy_ecos</span></td>
+                <td><span class="solver-version">cvxpy-1.6.5-ECOS</span></td>
+                <td>nb</td>
+                <td><span class="problem-type">UNKNOWN</span></td>
+                <td><span class="library-name">DIMACS</span></td>
+                <td><span class="status-optimal">OPTIMAL</span></td>
+                <td class="number">1.9609</td>
+                <td class="number">-5.070309e-02</td>
+                <td class="number">20</td>
+                <td class="number">—</td>
+                <td><span class="commit-hash" title="82612d7c8346e9f418e4c4fb79124a2f7c3a48d4">82612d7c</span></td>
+                <td><span class="platform">macOS-14.5-arm64-arm-64bit (8CPU, 24GB)</span></td>
+                <td class="timestamp">2025-06-24 13:12:07</td>
+            </tr>
+            <tr>
+                <td><span class="solver-name">cvxpy_highs</span></td>
+                <td><span class="solver-version">cvxpy-1.6.5-HIGHS</span></td>
+                <td>nb</td>
+                <td><span class="problem-type">UNKNOWN</span></td>
+                <td><span class="library-name">DIMACS</span></td>
+                <td><span class="status-error">ERROR</span></td>
+                <td class="number">0.0001</td>
+                <td class="number">—</td>
+                <td class="number">—</td>
+                <td class="number">—</td>
+                <td><span class="commit-hash" title="82612d7c8346e9f418e4c4fb79124a2f7c3a48d4">82612d7c</span></td>
+                <td><span class="platform">macOS-14.5-arm64-arm-64bit (8CPU, 24GB)</span></td>
+                <td class="timestamp">2025-06-24 13:13:03</td>
+            </tr>
+            <tr>
+                <td><span class="solver-name">cvxpy_osqp</span></td>
+                <td><span class="solver-version">cvxpy-1.6.5-OSQP</span></td>
+                <td>nb</td>
+                <td><span class="problem-type">UNKNOWN</span></td>
+                <td><span class="library-name">DIMACS</span></td>
+                <td><span class="status-error">ERROR</span></td>
+                <td class="number">0.0001</td>
+                <td class="number">—</td>
+                <td class="number">—</td>
+                <td class="number">—</td>
+                <td><span class="commit-hash" title="82612d7c8346e9f418e4c4fb79124a2f7c3a48d4">82612d7c</span></td>
+                <td><span class="platform">macOS-14.5-arm64-arm-64bit (8CPU, 24GB)</span></td>
+                <td class="timestamp">2025-06-24 13:12:07</td>
+            </tr>
+            <tr>
+                <td><span class="solver-name">cvxpy_scip</span></td>
+                <td><span class="solver-version">cvxpy-1.6.5-SCIP</span></td>
+                <td>nb</td>
+                <td><span class="problem-type">UNKNOWN</span></td>
+                <td><span class="library-name">DIMACS</span></td>
+                <td><span class="status-optimal">OPTIMAL</span></td>
+                <td class="number">48.3824</td>
+                <td class="number">-5.070300e-02</td>
+                <td class="number">—</td>
+                <td class="number">—</td>
+                <td><span class="commit-hash" title="82612d7c8346e9f418e4c4fb79124a2f7c3a48d4">82612d7c</span></td>
+                <td><span class="platform">macOS-14.5-arm64-arm-64bit (8CPU, 24GB)</span></td>
+                <td class="timestamp">2025-06-24 13:13:03</td>
+            </tr>
+            <tr>
+                <td><span class="solver-name">scipy_linprog</span></td>
+                <td><span class="solver-version">scipy-1.15.3</span></td>
+                <td>nb</td>
+                <td><span class="problem-type">UNKNOWN</span></td>
+                <td><span class="library-name">DIMACS</span></td>
+                <td><span class="status-error">ERROR</span></td>
+                <td class="number">0.0001</td>
+                <td class="number">—</td>
+                <td class="number">—</td>
+                <td class="number">—</td>
+                <td><span class="commit-hash" title="82612d7c8346e9f418e4c4fb79124a2f7c3a48d4">82612d7c</span></td>
+                <td><span class="platform">macOS-14.5-arm64-arm-64bit (8CPU, 24GB)</span></td>
+                <td class="timestamp">2025-06-24 13:11:59</td>
+            </tr>
+            <tr>
+                <td><span class="solver-name">cvxpy_clarabel</span></td>
+                <td><span class="solver-version">cvxpy-1.6.5-CLARABEL</span></td>
+                <td>nb_L1</td>
+                <td><span class="problem-type">UNKNOWN</span></td>
+                <td><span class="library-name">DIMACS</span></td>
+                <td><span class="status-optimal">OPTIMAL</span></td>
+                <td class="number">1.5330</td>
+                <td class="number">-1.301227e+01</td>
+                <td class="number">17</td>
+                <td class="number">—</td>
+                <td><span class="commit-hash" title="ce1969a22cbeb1ef396d49cbf1142984143d1297">ce1969a2</span></td>
+                <td><span class="platform">macOS-14.5-arm64-arm-64bit (8CPU, 24GB)</span></td>
+                <td class="timestamp">2025-06-22 09:46:39</td>
+            </tr>
+            <tr>
+                <td><span class="solver-name">cvxpy_cvxopt</span></td>
+                <td><span class="solver-version">cvxpy-1.6.5-CVXOPT</span></td>
+                <td>nb_L1</td>
+                <td><span class="problem-type">UNKNOWN</span></td>
+                <td><span class="library-name">DIMACS</span></td>
+                <td><span class="status-optimal">OPTIMAL</span></td>
+                <td class="number">3.0802</td>
+                <td class="number">-1.301227e+01</td>
+                <td class="number">—</td>
+                <td class="number">—</td>
+                <td><span class="commit-hash" title="ce1969a22cbeb1ef396d49cbf1142984143d1297">ce1969a2</span></td>
+                <td><span class="platform">macOS-14.5-arm64-arm-64bit (8CPU, 24GB)</span></td>
+                <td class="timestamp">2025-06-22 09:46:51</td>
+            </tr>
+            <tr>
+                <td><span class="solver-name">cvxpy_ecos</span></td>
+                <td><span class="solver-version">cvxpy-1.6.5-ECOS</span></td>
+                <td>nb_L1</td>
+                <td><span class="problem-type">UNKNOWN</span></td>
+                <td><span class="library-name">DIMACS</span></td>
+                <td><span class="status-optimal">OPTIMAL</span></td>
+                <td class="number">1.4624</td>
+                <td class="number">-1.301227e+01</td>
+                <td class="number">19</td>
+                <td class="number">—</td>
+                <td><span class="commit-hash" title="ce1969a22cbeb1ef396d49cbf1142984143d1297">ce1969a2</span></td>
+                <td><span class="platform">macOS-14.5-arm64-arm-64bit (8CPU, 24GB)</span></td>
+                <td class="timestamp">2025-06-22 09:46:48</td>
+            </tr>
+            <tr>
+                <td><span class="solver-name">cvxpy_osqp</span></td>
+                <td><span class="solver-version">cvxpy-1.6.5-OSQP</span></td>
+                <td>nb_L1</td>
+                <td><span class="problem-type">UNKNOWN</span></td>
+                <td><span class="library-name">DIMACS</span></td>
+                <td><span class="status-error">ERROR</span></td>
+                <td class="number">0.0000</td>
+                <td class="number">—</td>
+                <td class="number">—</td>
+                <td class="number">—</td>
+                <td><span class="commit-hash" title="ce1969a22cbeb1ef396d49cbf1142984143d1297">ce1969a2</span></td>
+                <td><span class="platform">macOS-14.5-arm64-arm-64bit (8CPU, 24GB)</span></td>
+                <td class="timestamp">2025-06-22 09:46:48</td>
+            </tr>
+            <tr>
+                <td><span class="solver-name">cvxpy_scs</span></td>
+                <td><span class="solver-version">cvxpy-1.6.5-SCS</span></td>
+                <td>nb_L1</td>
+                <td><span class="problem-type">UNKNOWN</span></td>
+                <td><span class="library-name">DIMACS</span></td>
+                <td><span class="status-optimal">OPTIMAL</span></td>
+                <td class="number">7.4992</td>
+                <td class="number">-1.301220e+01</td>
+                <td class="number">20575</td>
+                <td class="number">—</td>
+                <td><span class="commit-hash" title="ce1969a22cbeb1ef396d49cbf1142984143d1297">ce1969a2</span></td>
+                <td><span class="platform">macOS-14.5-arm64-arm-64bit (8CPU, 24GB)</span></td>
+                <td class="timestamp">2025-06-22 09:46:47</td>
+            </tr>
+            <tr>
+                <td><span class="solver-name">scipy_linprog</span></td>
+                <td><span class="solver-version">scipy-1.15.3</span></td>
+                <td>nb_L1</td>
+                <td><span class="problem-type">UNKNOWN</span></td>
+                <td><span class="library-name">DIMACS</span></td>
+                <td><span class="status-error">ERROR</span></td>
+                <td class="number">0.0000</td>
+                <td class="number">—</td>
+                <td class="number">—</td>
+                <td class="number">—</td>
+                <td><span class="commit-hash" title="ce1969a22cbeb1ef396d49cbf1142984143d1297">ce1969a2</span></td>
+                <td><span class="platform">macOS-14.5-arm64-arm-64bit (8CPU, 24GB)</span></td>
+                <td class="timestamp">2025-06-22 09:46:38</td>
+            </tr>
+            <tr>
+                <td><span class="solver-name">cvxpy_clarabel</span></td>
+                <td><span class="solver-version">cvxpy-1.6.5-CLARABEL</span></td>
+                <td>nb_L2</td>
+                <td><span class="problem-type">UNKNOWN</span></td>
+                <td><span class="library-name">DIMACS</span></td>
+                <td><span class="status-optimal">OPTIMAL</span></td>
+                <td class="number">2.2410</td>
+                <td class="number">-1.628972e+00</td>
+                <td class="number">12</td>
+                <td class="number">—</td>
+                <td><span class="commit-hash" title="ce1969a22cbeb1ef396d49cbf1142984143d1297">ce1969a2</span></td>
+                <td><span class="platform">macOS-14.5-arm64-arm-64bit (8CPU, 24GB)</span></td>
+                <td class="timestamp">2025-06-22 10:19:40</td>
+            </tr>
+            <tr>
+                <td><span class="solver-name">cvxpy_cvxopt</span></td>
+                <td><span class="solver-version">cvxpy-1.6.5-CVXOPT</span></td>
+                <td>nb_L2</td>
+                <td><span class="problem-type">UNKNOWN</span></td>
+                <td><span class="library-name">DIMACS</span></td>
+                <td><span class="status-optimal">OPTIMAL</span></td>
+                <td class="number">2.3464</td>
+                <td class="number">-1.628972e+00</td>
+                <td class="number">—</td>
+                <td class="number">—</td>
+                <td><span class="commit-hash" title="ce1969a22cbeb1ef396d49cbf1142984143d1297">ce1969a2</span></td>
+                <td><span class="platform">macOS-14.5-arm64-arm-64bit (8CPU, 24GB)</span></td>
+                <td class="timestamp">2025-06-22 10:19:46</td>
+            </tr>
+            <tr>
+                <td><span class="solver-name">cvxpy_ecos</span></td>
+                <td><span class="solver-version">cvxpy-1.6.5-ECOS</span></td>
+                <td>nb_L2</td>
+                <td><span class="problem-type">UNKNOWN</span></td>
+                <td><span class="library-name">DIMACS</span></td>
+                <td><span class="status-optimal">OPTIMAL</span></td>
+                <td class="number">1.7351</td>
+                <td class="number">-1.628972e+00</td>
+                <td class="number">11</td>
+                <td class="number">—</td>
+                <td><span class="commit-hash" title="ce1969a22cbeb1ef396d49cbf1142984143d1297">ce1969a2</span></td>
+                <td><span class="platform">macOS-14.5-arm64-arm-64bit (8CPU, 24GB)</span></td>
+                <td class="timestamp">2025-06-22 10:19:43</td>
+            </tr>
+            <tr>
+                <td><span class="solver-name">cvxpy_osqp</span></td>
+                <td><span class="solver-version">cvxpy-1.6.5-OSQP</span></td>
+                <td>nb_L2</td>
+                <td><span class="problem-type">UNKNOWN</span></td>
+                <td><span class="library-name">DIMACS</span></td>
+                <td><span class="status-error">ERROR</span></td>
+                <td class="number">0.0000</td>
+                <td class="number">—</td>
+                <td class="number">—</td>
+                <td class="number">—</td>
+                <td><span class="commit-hash" title="ce1969a22cbeb1ef396d49cbf1142984143d1297">ce1969a2</span></td>
+                <td><span class="platform">macOS-14.5-arm64-arm-64bit (8CPU, 24GB)</span></td>
+                <td class="timestamp">2025-06-22 10:19:43</td>
+            </tr>
+            <tr>
+                <td><span class="solver-name">cvxpy_scs</span></td>
+                <td><span class="solver-version">cvxpy-1.6.5-SCS</span></td>
+                <td>nb_L2</td>
+                <td><span class="problem-type">UNKNOWN</span></td>
+                <td><span class="library-name">DIMACS</span></td>
+                <td><span class="status-optimal">OPTIMAL</span></td>
+                <td class="number">1.8608</td>
+                <td class="number">-1.628982e+00</td>
+                <td class="number">775</td>
+                <td class="number">—</td>
+                <td><span class="commit-hash" title="ce1969a22cbeb1ef396d49cbf1142984143d1297">ce1969a2</span></td>
+                <td><span class="platform">macOS-14.5-arm64-arm-64bit (8CPU, 24GB)</span></td>
+                <td class="timestamp">2025-06-22 10:19:41</td>
+            </tr>
+            <tr>
+                <td><span class="solver-name">cvxpy_sdpa</span></td>
+                <td><span class="solver-version">cvxpy-1.6.5-CLARABEL</span></td>
+                <td>nb_L2</td>
+                <td><span class="problem-type">UNKNOWN</span></td>
+                <td><span class="library-name">DIMACS</span></td>
+                <td><span class="status-optimal">OPTIMAL</span></td>
+                <td class="number">2.3051</td>
+                <td class="number">-1.628972e+00</td>
+                <td class="number">12</td>
+                <td class="number">—</td>
+                <td><span class="commit-hash" title="ce1969a22cbeb1ef396d49cbf1142984143d1297">ce1969a2</span></td>
+                <td><span class="platform">macOS-14.5-arm64-arm-64bit (8CPU, 24GB)</span></td>
+                <td class="timestamp">2025-06-22 10:19:48</td>
+            </tr>
+            <tr>
+                <td><span class="solver-name">scipy_linprog</span></td>
+                <td><span class="solver-version">scipy-1.15.3</span></td>
+                <td>nb_L2</td>
+                <td><span class="problem-type">UNKNOWN</span></td>
+                <td><span class="library-name">DIMACS</span></td>
+                <td><span class="status-error">ERROR</span></td>
+                <td class="number">0.0000</td>
+                <td class="number">—</td>
+                <td class="number">—</td>
+                <td class="number">—</td>
+                <td><span class="commit-hash" title="ce1969a22cbeb1ef396d49cbf1142984143d1297">ce1969a2</span></td>
+                <td><span class="platform">macOS-14.5-arm64-arm-64bit (8CPU, 24GB)</span></td>
+                <td class="timestamp">2025-06-22 10:19:37</td>
+            </tr>
+            <tr>
+                <td><span class="solver-name">cvxpy_clarabel</span></td>
+                <td><span class="solver-version">cvxpy-1.6.5-CLARABEL</span></td>
+                <td>nb_L2_bessel</td>
+                <td><span class="problem-type">UNKNOWN</span></td>
+                <td><span class="library-name">DIMACS</span></td>
+                <td><span class="status-optimal">OPTIMAL</span></td>
+                <td class="number">46.9429</td>
+                <td class="number">-1.025695e-01</td>
+                <td class="number">14</td>
+                <td class="number">—</td>
+                <td><span class="commit-hash" title="ce1969a22cbeb1ef396d49cbf1142984143d1297">ce1969a2</span></td>
+                <td><span class="platform">macOS-14.5-arm64-arm-64bit (8CPU, 24GB)</span></td>
+                <td class="timestamp">2025-06-22 10:28:54</td>
+            </tr>
+            <tr>
+                <td><span class="solver-name">cvxpy_cvxopt</span></td>
+                <td><span class="solver-version">cvxpy-1.6.5-CVXOPT</span></td>
+                <td>nb_L2_bessel</td>
+                <td><span class="problem-type">UNKNOWN</span></td>
+                <td><span class="library-name">DIMACS</span></td>
+                <td><span class="status-optimal">OPTIMAL</span></td>
+                <td class="number">1.3184</td>
+                <td class="number">-1.025695e-01</td>
+                <td class="number">—</td>
+                <td class="number">—</td>
+                <td><span class="commit-hash" title="ce1969a22cbeb1ef396d49cbf1142984143d1297">ce1969a2</span></td>
+                <td><span class="platform">macOS-14.5-arm64-arm-64bit (8CPU, 24GB)</span></td>
+                <td class="timestamp">2025-06-22 10:20:47</td>
+            </tr>
+            <tr>
+                <td><span class="solver-name">cvxpy_ecos</span></td>
+                <td><span class="solver-version">cvxpy-1.6.5-ECOS</span></td>
+                <td>nb_L2_bessel</td>
+                <td><span class="problem-type">UNKNOWN</span></td>
+                <td><span class="library-name">DIMACS</span></td>
+                <td><span class="status-optimal">OPTIMAL</span></td>
+                <td class="number">1.1593</td>
+                <td class="number">-1.025695e-01</td>
+                <td class="number">13</td>
+                <td class="number">—</td>
+                <td><span class="commit-hash" title="ce1969a22cbeb1ef396d49cbf1142984143d1297">ce1969a2</span></td>
+                <td><span class="platform">macOS-14.5-arm64-arm-64bit (8CPU, 24GB)</span></td>
+                <td class="timestamp">2025-06-22 10:20:46</td>
+            </tr>
+            <tr>
+                <td><span class="solver-name">cvxpy_osqp</span></td>
+                <td><span class="solver-version">cvxpy-1.6.5-OSQP</span></td>
+                <td>nb_L2_bessel</td>
+                <td><span class="problem-type">UNKNOWN</span></td>
+                <td><span class="library-name">DIMACS</span></td>
+                <td><span class="status-error">ERROR</span></td>
+                <td class="number">0.0000</td>
+                <td class="number">—</td>
+                <td class="number">—</td>
+                <td class="number">—</td>
+                <td><span class="commit-hash" title="ce1969a22cbeb1ef396d49cbf1142984143d1297">ce1969a2</span></td>
+                <td><span class="platform">macOS-14.5-arm64-arm-64bit (8CPU, 24GB)</span></td>
+                <td class="timestamp">2025-06-22 10:20:46</td>
+            </tr>
+            <tr>
+                <td><span class="solver-name">cvxpy_scs</span></td>
+                <td><span class="solver-version">cvxpy-1.6.5-SCS</span></td>
+                <td>nb_L2_bessel</td>
+                <td><span class="problem-type">UNKNOWN</span></td>
+                <td><span class="library-name">DIMACS</span></td>
+                <td><span class="status-optimal">OPTIMAL</span></td>
+                <td class="number">1.1491</td>
+                <td class="number">-1.025710e-01</td>
+                <td class="number">950</td>
+                <td class="number">—</td>
+                <td><span class="commit-hash" title="ce1969a22cbeb1ef396d49cbf1142984143d1297">ce1969a2</span></td>
+                <td><span class="platform">macOS-14.5-arm64-arm-64bit (8CPU, 24GB)</span></td>
+                <td class="timestamp">2025-06-22 10:20:45</td>
+            </tr>
+            <tr>
+                <td><span class="solver-name">cvxpy_sdpa</span></td>
+                <td><span class="solver-version">cvxpy-1.6.5-CLARABEL</span></td>
+                <td>nb_L2_bessel</td>
+                <td><span class="problem-type">UNKNOWN</span></td>
+                <td><span class="library-name">DIMACS</span></td>
+                <td><span class="status-optimal">OPTIMAL</span></td>
+                <td class="number">1.3062</td>
+                <td class="number">-1.025695e-01</td>
+                <td class="number">14</td>
+                <td class="number">—</td>
+                <td><span class="commit-hash" title="ce1969a22cbeb1ef396d49cbf1142984143d1297">ce1969a2</span></td>
+                <td><span class="platform">macOS-14.5-arm64-arm-64bit (8CPU, 24GB)</span></td>
+                <td class="timestamp">2025-06-22 10:20:49</td>
+            </tr>
+            <tr>
+                <td><span class="solver-name">scipy_linprog</span></td>
+                <td><span class="solver-version">scipy-1.15.3</span></td>
+                <td>nb_L2_bessel</td>
+                <td><span class="problem-type">UNKNOWN</span></td>
+                <td><span class="library-name">DIMACS</span></td>
+                <td><span class="status-error">ERROR</span></td>
+                <td class="number">0.0000</td>
+                <td class="number">—</td>
+                <td class="number">—</td>
+                <td class="number">—</td>
+                <td><span class="commit-hash" title="ce1969a22cbeb1ef396d49cbf1142984143d1297">ce1969a2</span></td>
+                <td><span class="platform">macOS-14.5-arm64-arm-64bit (8CPU, 24GB)</span></td>
+                <td class="timestamp">2025-06-22 10:20:42</td>
+            </tr>
+            <tr>
+                <td><span class="solver-name">cvxpy_cvxopt</span></td>
+                <td><span class="solver-version">cvxpy-1.6.5-CVXOPT-1.3.2</span></td>
+                <td>qap5</td>
+                <td><span class="problem-type">SDP</span></td>
+                <td><span class="library-name">SDPLIB</span></td>
+                <td><span class="status-optimal">OPTIMAL</span></td>
+                <td class="number">0.0946</td>
+                <td class="number">-5.840000e+02</td>
+                <td class="number">—</td>
+                <td class="number">—</td>
+                <td><span class="commit-hash" title="cfc13857622458340de916f7b88e151405ec7ef9">cfc13857</span></td>
+                <td><span class="platform">macOS-14.5-arm64-arm-64bit (8CPU, 24GB)</span></td>
+                <td class="timestamp">2025-06-25 15:49:04</td>
+            </tr>
+            <tr>
+                <td><span class="solver-name">cvxpy_sdpa</span></td>
+                <td><span class="solver-version">cvxpy-1.6.5-SDPA-0.2.2</span></td>
+                <td>qap5</td>
+                <td><span class="problem-type">SDP</span></td>
+                <td><span class="library-name">SDPLIB</span></td>
+                <td><span class="status-optimal">OPTIMAL</span></td>
+                <td class="number">0.0575</td>
+                <td class="number">-5.840008e+02</td>
+                <td class="number">—</td>
+                <td class="number">—</td>
+                <td><span class="commit-hash" title="cfc13857622458340de916f7b88e151405ec7ef9">cfc13857</span></td>
+                <td><span class="platform">macOS-14.5-arm64-arm-64bit (8CPU, 24GB)</span></td>
+                <td class="timestamp">2025-06-25 15:46:14</td>
+            </tr>
+            <tr>
+                <td><span class="solver-name">cvxpy_highs</span></td>
+                <td><span class="solver-version">cvxpy-1.6.5-HIGHS</span></td>
+                <td>simple_lp_test</td>
+                <td><span class="problem-type">UNKNOWN</span></td>
+                <td><span class="library-name">internal</span></td>
+                <td><span class="status-optimal">OPTIMAL</span></td>
+                <td class="number">0.0039</td>
+                <td class="number">0.000000e+00</td>
+                <td class="number">0</td>
+                <td class="number">—</td>
+                <td><span class="commit-hash" title="3dc1728a0d0428c00c35221f7a17fc1dd250035f">3dc1728a</span></td>
+                <td><span class="platform">macOS-14.5-arm64-arm-64bit (8CPU, 24GB)</span></td>
+                <td class="timestamp">2025-06-22 15:20:41</td>
+            </tr>
+            <tr>
+                <td><span class="solver-name">cvxpy_scip</span></td>
+                <td><span class="solver-version">cvxpy-1.6.5-SCIP</span></td>
+                <td>simple_lp_test</td>
+                <td><span class="problem-type">UNKNOWN</span></td>
+                <td><span class="library-name">internal</span></td>
+                <td><span class="status-optimal">OPTIMAL</span></td>
+                <td class="number">0.0051</td>
+                <td class="number">0.000000e+00</td>
+                <td class="number">—</td>
+                <td class="number">—</td>
+                <td><span class="commit-hash" title="3dc1728a0d0428c00c35221f7a17fc1dd250035f">3dc1728a</span></td>
+                <td><span class="platform">macOS-14.5-arm64-arm-64bit (8CPU, 24GB)</span></td>
+                <td class="timestamp">2025-06-22 15:20:32</td>
+            </tr>
+                    </tbody>
+                </table>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <p>
+            <a href="index.html">Overview</a> |
+            <a href="results_matrix.html">Results Matrix</a> |
+            <a href="data/">Data Exports</a>
+        </p>
+        <p><small>Generated by Optimization Solver Benchmark System</small></p>
+    </footer>
+</body>
+</html>
