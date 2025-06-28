@@ -39,12 +39,11 @@ Both libraries are included as fixed snapshots (committed on June 25, 2025) for 
 
 ### Installation
 ```bash
-git clone https://github.com/napinoco/optimization-solver-benchmark.git
+git clone --recursive https://github.com/napinoco/optimization-solver-benchmark.git
 cd optimization-solver-benchmark
 python -m venv venv
 source venv/bin/activate  # On Windows: venv\Scripts\activate
-pip install -r requirements/base.txt
-pip install -r requirements/python.txt
+pip install -r requirements.txt
 ```
 
 ### Run Benchmarks

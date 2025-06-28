@@ -78,14 +78,8 @@ def test_github_actions_simulation():
         return False
     
     if not run_command(
-        f"{activate_cmd} && pip install -r requirements/base.txt", 
-        "Install base dependencies"
-    ):
-        return False
-    
-    if not run_command(
-        f"{activate_cmd} && pip install -r requirements/python.txt", 
-        "Install Python solver dependencies"
+        f"{activate_cmd} && pip install -r requirements.txt", 
+        "Install dependencies"
     ):
         return False
     

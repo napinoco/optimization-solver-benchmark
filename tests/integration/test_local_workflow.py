@@ -151,7 +151,7 @@ def test_main_deployment_workflow():
     
     # 2. Run full benchmark (same as main deployment)
     if not run_command(
-        'python main.py --benchmark --solvers "scipy,clarabel_cvxpy,scs_cvxpy,ecos_cvxpy,osqp_cvxpy" --problem-set "standard_set"',
+        'python main.py --benchmark --solvers "scipy_linprog,cvxpy_clarabel,cvxpy_scs,cvxpy_ecos,cvxpy_osqp" --library_names "dimacs,sdplib"',
         "Run Main Deployment Benchmark"
     ):
         print("⚠️  Benchmark failed, but continuing to test report generation...")
@@ -179,7 +179,7 @@ def main():
         print("Choose which workflow to test:")
         print()
         print("1. PR Preview Workflow (lightweight: cvxpy_clarabel,cvxpy_scs + dimacs)")
-        print("2. Main Deployment Workflow (full: scipy,clarabel_cvxpy,scs_cvxpy,ecos_cvxpy,osqp_cvxpy + standard_set)")
+        print("2. Main Deployment Workflow (full: scipy_linprog,cvxpy_clarabel,cvxpy_scs,cvxpy_ecos,cvxpy_osqp + dimacs,sdplib)")
         print("3. Both workflows")
         print()
         
