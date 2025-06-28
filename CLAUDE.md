@@ -63,8 +63,7 @@ This is an automated benchmark system for optimization solvers (LP, QP, SOCP, SD
 │   └── reporting/   # HTML generation and data publishing
 ├── problems/        # Benchmark problem files
 │   ├── DIMACS/     # External DIMACS library (47 problems)
-│   ├── SDPLIB/     # External SDPLIB library (92 problems)
-│   └── light_set/  # Internal synthetic problems
+│   └── SDPLIB/     # External SDPLIB library (92 problems)
 ├── docs/           # Generated reports (GitHub Pages)
 └── requirements.txt # Python dependencies (single file)
 ```
@@ -83,8 +82,7 @@ SDP          | 38 results   | ~29%        | CLARABEL + SCS
 Library  | Problems | Format        | Source
 DIMACS   | 47       | SeDuMi .mat   | Optimization challenges
 SDPLIB   | 92       | SDPA .dat-s   | Semidefinite programming
-Internal | 6        | Python        | Synthetic test cases
-Total    | 145      | Mixed         | Complete coverage
+Total    | 139      | Mixed         | Complete coverage
 ```
 
 ---
@@ -193,7 +191,7 @@ pip install -r requirements.txt
 4. Test with validation framework
 
 ### Adding New Problems
-1. **Internal Problems**: Place in `problems/light_set/type/` directory
+1. **Problem Extension**: Extend existing DIMACS/SDPLIB collections or add new external libraries
 2. **External Libraries**: Add git submodule or extend existing DIMACS/SDPLIB
 3. Update `problems/problem_registry.yaml` with problem metadata
 4. Implement loader in `scripts/external/` if new format required

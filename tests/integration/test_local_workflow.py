@@ -58,7 +58,7 @@ def test_pr_preview_workflow():
     
     # 2. Run lightweight benchmark (same as PR preview)
     if not run_command(
-        'python main.py --benchmark --solvers "scipy,clarabel_cvxpy,scs_cvxpy" --problem-set "light_set"',
+        'python main.py --benchmark --solvers "cvxpy_clarabel,cvxpy_scs" --library_names "dimacs"',
         "Run PR Preview Benchmark"
     ):
         print("⚠️  Benchmark failed, but continuing to test report generation...")
@@ -178,7 +178,7 @@ def main():
     else:
         print("Choose which workflow to test:")
         print()
-        print("1. PR Preview Workflow (lightweight: scipy,clarabel_cvxpy,scs_cvxpy + light_set)")
+        print("1. PR Preview Workflow (lightweight: cvxpy_clarabel,cvxpy_scs + dimacs)")
         print("2. Main Deployment Workflow (full: scipy,clarabel_cvxpy,scs_cvxpy,ecos_cvxpy,osqp_cvxpy + standard_set)")
         print("3. Both workflows")
         print()

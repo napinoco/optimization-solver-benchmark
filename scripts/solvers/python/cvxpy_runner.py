@@ -12,6 +12,7 @@ import numpy as np
 import cvxpy as cp
 from pathlib import Path
 from typing import Optional, Dict, List
+from datetime import datetime
 
 # Add project root to path for imports
 project_root = Path(__file__).parent.parent.parent.parent
@@ -28,7 +29,7 @@ class CvxpySolver(SolverInterface):
     """CVXPY-based solver for LP, QP, SOCP, and SDP problems."""
     
     def __init__(self, backend: str = "CLARABEL", verbose: bool = False,
-                 solver_options: Optional[Dict] = None, **kwargs):
+                 solver_options: Optional[Dict] = None, save_solutions: bool = False, **kwargs):
         """
         Initialize CVXPY solver with specific backend.
         
@@ -36,6 +37,7 @@ class CvxpySolver(SolverInterface):
             backend: CVXPY backend solver (CLARABEL, OSQP, SCS, etc.)
             verbose: Whether to enable verbose solver output
             solver_options: Backend-specific solver options
+            save_solutions: Whether to save optimal solutions to disk
             **kwargs: Additional configuration parameters
         """
         # Auto-generate name with proper format
@@ -46,6 +48,12 @@ class CvxpySolver(SolverInterface):
         self.backend = backend
         self.verbose = verbose
         self.solver_options = solver_options or {}
+        self.save_solutions = save_solutions
+        
+        # Setup solution storage directory
+        if self.save_solutions:
+            self.solutions_dir = Path(__file__).parent.parent.parent.parent / "problems" / "solutions"
+            self.solutions_dir.mkdir(parents=True, exist_ok=True)
         
         # Verify solver availability - no fallbacks for pure benchmarking
         available_solvers = cp.installed_solvers()
@@ -211,7 +219,7 @@ class CvxpySolver(SolverInterface):
                 **solver_options
             )
             
-            return self._create_result_from_cvxpy(cvx_problem, start_time)
+            return self._create_result_from_cvxpy(cvx_problem, start_time, problem_data)
                 
         except Exception as e:
             solve_time = time.time() - start_time
@@ -301,8 +309,8 @@ class CvxpySolver(SolverInterface):
         
         return cvx_problem
 
-    def _create_result_from_cvxpy(self, cvx_problem: cp.Problem, start_time: float) -> SolverResult:
-        """Create standardized result from CVXPY problem."""
+    def _create_result_from_cvxpy(self, cvx_problem: cp.Problem, start_time: float, problem_data: ProblemData) -> SolverResult:
+        """Create standardized result from CVXPY problem with manual duality calculations."""
         
         solve_time = time.time() - start_time
         
@@ -311,23 +319,110 @@ class CvxpySolver(SolverInterface):
             cp.OPTIMAL: 'OPTIMAL',
             cp.INFEASIBLE: 'INFEASIBLE',
             cp.UNBOUNDED: 'UNBOUNDED',
-            cp.INFEASIBLE_INACCURATE: 'INFEASIBLE',
-            cp.UNBOUNDED_INACCURATE: 'UNBOUNDED',
-            cp.OPTIMAL_INACCURATE: 'OPTIMAL'
+            cp.INFEASIBLE_INACCURATE: 'INFEASIBLE (INACCURATE)',
+            cp.UNBOUNDED_INACCURATE: 'UNBOUNDED (INACCURATE)',
+            cp.OPTIMAL_INACCURATE: 'OPTIMAL (INACCURATE)',
         }
         
         status = status_mapping.get(cvx_problem.status, 'UNKNOWN')
-        primal_objective_value = cvx_problem.value if cvx_problem.value is not None else None
-        
-        # Calculate dual objective if available
+
+        # Manual duality calculations for unified comparison
+        primal_objective_value = None
+        primal_infeasibility = None
         dual_objective_value = None
-        if hasattr(cvx_problem, 'dual_value') and cvx_problem.dual_value is not None:
-            dual_objective_value = float(cvx_problem.dual_value)
-        
-        # Calculate duality gap if both values available
+        dual_infeasibility = None
         duality_gap = None
-        if primal_objective_value is not None and dual_objective_value is not None:
-            duality_gap = abs(primal_objective_value - dual_objective_value)
+
+        try:
+            A_eq = problem_data.A_eq
+            b_eq = problem_data.b_eq
+            c = problem_data.c
+            cone_structure = problem_data.cone_structure
+
+            # Get primal solution of SeDuMi format (=dual solution of CVXPY)
+            x_list = []
+            for constraint in cvx_problem.constraints:
+                if not hasattr(constraint, 'dual_value') or constraint.dual_value is None:
+                    x_list = []
+                    break
+                if isinstance(constraint, cp.SOC):
+                    x_list.append(constraint.dual_value[0].reshape(-1, 1))
+                    x_list.append(constraint.dual_value[1].reshape(-1, 1))
+                else:
+                    x_list.append(constraint.dual_value.reshape(-1, 1))
+
+            if x_list:
+                x = np.vstack(x_list)
+                primal_objective_value = float(c.T @ x)
+                # Primal infeasibility: ||A_eq @ x - b_eq|| / (1 + ||b_eq||)
+                primal_residual = A_eq @ x - b_eq
+                primal_infeasibility = float(np.linalg.norm(primal_residual) / (1 + np.linalg.norm(b_eq)))
+            else:
+                x = None
+
+            # Get dual solution of SeDuMi format (=primal solution of CVXPY)
+            y = cvx_problem.variables()[0].value.reshape(-1, 1)
+            dual_objective_value = float(b_eq.T @ y)  # equals to cvx_problem.value
+
+            # Dual infeasibility: ||z - (c - A_eq.T @ y)|| / (1 + ||c||)
+            nvar_cnt = 0
+            cmAty = c - A_eq.T @ y
+            dinf2 = 0  # similar to np.sum(constraint.violation() ** 2 for constraint in cvx_problem.constraints)
+            if 'free_vars' in cone_structure:
+                free_vars = cone_structure['free_vars']
+                if free_vars:
+                    begin = nvar_cnt
+                    end = nvar_cnt + free_vars
+                    dinf2 += np.linalg.norm(cmAty[begin:end], ord=2) ** 2
+                    nvar_cnt = end
+            if 'nonneg_vars' in cone_structure:
+                nonneg_vars = cone_structure['nonneg_vars']
+                if nonneg_vars:
+                    begin = nvar_cnt
+                    end = nvar_cnt + nonneg_vars
+                    dinf2 += np.linalg.norm(np.minimum(cmAty[begin:end], 0), ord=2) ** 2
+                    nvar_cnt = end
+            if 'soc_cones' in cone_structure:
+                def proj_onto_soc(z):
+                    z0 = z[0]
+                    znorm = np.linalg.norm(z[1:], ord=2)
+                    if znorm <= z0:
+                        return z
+                    elif znorm <= -z0:
+                        return np.zeros_like(z)
+                    else:
+                        scale = (z0 + znorm) / 2
+                        return np.concatenate(([1], z[1:] / znorm)) * scale
+                soc_cones = cone_structure['soc_cones']
+                for ndim in soc_cones:
+                    if ndim <= 0:
+                        continue
+                    begin = nvar_cnt
+                    end = nvar_cnt + ndim
+                    dinf2 += np.linalg.norm(cmAty[begin:end] - proj_onto_soc(cmAty[begin:end]), ord=2) ** 2
+                    nvar_cnt = end
+            if 'sdp_cones' in cone_structure:
+                sdp_cones = cone_structure['sdp_cones']
+                for ndim in sdp_cones:
+                    if ndim <= 0:
+                        continue
+                    begin = nvar_cnt
+                    end = nvar_cnt + ndim * ndim
+                    eigvals = np.linalg.eigvalsh(cmAty[begin:end].reshape(ndim, ndim))
+                    neg_eigvals = np.minimum(eigvals, 0)
+                    dinf2 += np.sum(neg_eigvals ** 2)
+                    nvar_cnt = end
+            dual_infeasibility = float(np.sqrt(dinf2) / (1 + np.sum(c ** 2)))
+
+            if primal_objective_value is not None and dual_objective_value is not None:
+                duality_gap = primal_objective_value - dual_objective_value
+
+            # Save solution if requested
+            if self.save_solutions:
+                self._save_solution(problem_data, x, y)
+
+        except Exception as e:
+            self.logger.debug(f"Manual duality calculation failed: {e}")
         
         # Get iterations if available
         iterations = None
@@ -339,7 +434,8 @@ class CvxpySolver(SolverInterface):
             "cvxpy_status": cvx_problem.status,
             "backend_solver": self.backend,
             "solver_stats": cvx_problem.solver_stats.__dict__ if cvx_problem.solver_stats else None,
-            "cvxpy_version": cp.__version__
+            "cvxpy_version": cp.__version__,
+            "manual_duality_used": True
         }
         
         # Add solution information if available
@@ -352,7 +448,8 @@ class CvxpySolver(SolverInterface):
             pass
         
         self.logger.debug(f"Solve completed: status={status}, "
-                         f"objective={primal_objective_value}, time={solve_time:.3f}s")
+                         f"objective={primal_objective_value}, time={solve_time:.3f}s, "
+                         f"dual_gap={duality_gap}")
         
         return SolverResult(
             solve_time=solve_time,
@@ -360,8 +457,8 @@ class CvxpySolver(SolverInterface):
             primal_objective_value=primal_objective_value,
             dual_objective_value=dual_objective_value,
             duality_gap=duality_gap,
-            primal_infeasibility=None,  # CVXPY doesn't provide this easily
-            dual_infeasibility=None,
+            primal_infeasibility=primal_infeasibility,
+            dual_infeasibility=dual_infeasibility,
             iterations=iterations,
             solver_name=self.solver_name,
             solver_version=self.get_version(),
@@ -393,6 +490,30 @@ class CvxpySolver(SolverInterface):
         except Exception as e:
             self.logger.debug(f"Failed to get backend version for {self.backend}: {e}")
             return "unknown"
+    
+    def _save_solution(self, problem_data: ProblemData, primal_solution: np.ndarray, dual_solution: np.ndarray) -> None:
+        """Save optimal solution to disk for verification and analysis."""
+        try:
+            # Create library-specific directory
+            out_dir = self.solutions_dir
+            out_dir.mkdir(parents=True, exist_ok=True)
+            
+            # Generate filename: problemname_solvername.npz
+            problem_name = problem_data.name.replace('/', '_').replace('\\', '_')
+            filename = f"{problem_name}_{self.solver_name}.npz"
+            filepath = out_dir / filename
+            
+            # Save solution data
+            np.savez_compressed(
+                filepath,
+                primal_solution=primal_solution,
+                dual_solution=dual_solution
+            )
+            
+            self.logger.debug(f"Saved solution to {filepath}")
+            
+        except Exception as e:
+            self.logger.warning(f"Failed to save solution for {problem_data.name}: {e}")
     
     def _get_package_version(self, package_name: str) -> str:
         """Get version of a specific Python package."""

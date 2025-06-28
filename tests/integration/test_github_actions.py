@@ -103,10 +103,10 @@ def test_github_actions_simulation():
     ):
         return False
     
-    # Test 6: Run quick benchmark (light_set only)
+    # Test 6: Run quick benchmark (dimacs only)
     if not run_command(
-        f"{activate_cmd} && python main.py --benchmark --solvers scipy --problem-set light_set", 
-        "Run quick benchmark with SciPy solver"
+        f"{activate_cmd} && python main.py --benchmark --solvers cvxpy_clarabel --library_names dimacs", 
+        "Run quick benchmark with CLARABEL solver"
     ):
         return False
     
@@ -158,7 +158,7 @@ def test_github_actions_simulation():
     
     for solvers in solver_combinations:
         if not run_command(
-            f"{activate_cmd} && python main.py --benchmark --solvers {solvers} --problem-set light_set", 
+            f"{activate_cmd} && python main.py --benchmark --solvers {solvers} --library_names dimacs", 
             f"Test solver combination: {solvers}"
         ):
             print(f"Warning: Failed to run with solvers: {solvers}")

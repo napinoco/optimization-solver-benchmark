@@ -52,7 +52,8 @@ class BenchmarkRunner:
     
     def __init__(self, database_manager: Optional[DatabaseManager] = None, 
                  registries: Optional[Dict[str, Any]] = None,
-                 dry_run: bool = False):
+                 dry_run: bool = False,
+                 save_solutions: bool = False):
         """
         Initialize simplified benchmark runner.
         
@@ -60,9 +61,11 @@ class BenchmarkRunner:
             database_manager: Optional database manager (creates default if None)
             registries: Pre-loaded registries to avoid redundant loading
             dry_run: If True, skip database operations (for testing)
+            save_solutions: If True, save optimal solutions to disk
         """
         self.db = database_manager or DatabaseManager()
         self.dry_run = dry_run
+        self.save_solutions = save_solutions
         
         # Collect environment info and git hash once (now cached)
         self.environment_info = collect_environment_info()
@@ -121,23 +124,23 @@ class BenchmarkRunner:
         
         # Direct if-elif logic as specified in re-architecture
         if solver_name == "scipy_linprog":
-            return ScipySolver()
+            return ScipySolver(save_solutions=self.save_solutions)
         elif solver_name == "cvxpy_clarabel":
-            return CvxpySolver(backend="CLARABEL")
+            return CvxpySolver(backend="CLARABEL", save_solutions=self.save_solutions)
         elif solver_name == "cvxpy_scs":
-            return CvxpySolver(backend="SCS")
+            return CvxpySolver(backend="SCS", save_solutions=self.save_solutions)
         elif solver_name == "cvxpy_ecos":
-            return CvxpySolver(backend="ECOS")
+            return CvxpySolver(backend="ECOS", save_solutions=self.save_solutions)
         elif solver_name == "cvxpy_osqp":
-            return CvxpySolver(backend="OSQP")
+            return CvxpySolver(backend="OSQP", save_solutions=self.save_solutions)
         elif solver_name == "cvxpy_cvxopt":
-            return CvxpySolver(backend="CVXOPT")
+            return CvxpySolver(backend="CVXOPT", save_solutions=self.save_solutions)
         elif solver_name == "cvxpy_sdpa":
-            return CvxpySolver(backend="SDPA")
+            return CvxpySolver(backend="SDPA", save_solutions=self.save_solutions)
         elif solver_name == "cvxpy_scip":
-            return CvxpySolver(backend="SCIP")
+            return CvxpySolver(backend="SCIP", save_solutions=self.save_solutions)
         elif solver_name == "cvxpy_highs":
-            return CvxpySolver(backend="HIGHS")  # Actual HiGHS solver
+            return CvxpySolver(backend="HIGHS", save_solutions=self.save_solutions)  # Actual HiGHS solver
         else:
             raise ValueError(f"Unknown solver: {solver_name}")
     

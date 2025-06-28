@@ -157,7 +157,8 @@ def validate_environment() -> bool:
 def run_benchmark(library_names: Optional[List[str]] = None,
                  problems: Optional[List[str]] = None,
                  solvers: Optional[List[str]] = None,
-                 dry_run: bool = False) -> bool:
+                 dry_run: bool = False,
+                 save_solutions: bool = False) -> bool:
     """Run the benchmark suite with simplified registry-based approach.
     
     Args:
@@ -165,6 +166,7 @@ def run_benchmark(library_names: Optional[List[str]] = None,
         problems: List of specific problem names to run
         solvers: List of solver names to run
         dry_run: If True, skip database operations (for testing)
+        save_solutions: If True, save optimal solutions to disk
     """
     
     logger = get_logger("benchmark")
@@ -183,7 +185,7 @@ def run_benchmark(library_names: Optional[List[str]] = None,
         
         # Create benchmark runner with pre-loaded registries
         db_manager = DatabaseManager()
-        runner = BenchmarkRunner(db_manager, registries=registries, dry_run=dry_run)
+        runner = BenchmarkRunner(db_manager, registries=registries, dry_run=dry_run, save_solutions=save_solutions)
         
         # Filter problems based on library_names and problems arguments
         selected_problems = {}
@@ -385,6 +387,12 @@ Examples:
         help='Run benchmarks without storing results in database (for testing)'
     )
     
+    parser.add_argument(
+        '--save-solutions',
+        action='store_true',
+        help='Save optimal solutions to disk for verification and analysis'
+    )
+    
     # Logging options
     parser.add_argument(
         '--verbose', '-v',
@@ -437,7 +445,8 @@ Examples:
                 library_names=library_names,
                 problems=problems,
                 solvers=solvers,
-                dry_run=args.dry_run
+                dry_run=args.dry_run,
+                save_solutions=args.save_solutions
             )
             
         elif args.report:
@@ -449,7 +458,8 @@ Examples:
                 library_names=library_names,
                 problems=problems,
                 solvers=solvers,
-                dry_run=args.dry_run
+                dry_run=args.dry_run,
+                save_solutions=args.save_solutions
             )
             
             if benchmark_success:

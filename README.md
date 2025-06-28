@@ -140,14 +140,11 @@ optimization-solver-benchmark/
 │   ├── problems/
 │   │   ├── DIMACS/                 # External DIMACS library (47 problems)
 │   │   ├── SDPLIB/                 # External SDPLIB library (92+ problems)
-│   │   └── light_set/              # Internal synthetic problems
 │   ├── database/                   # SQLite results with version tracking
 │   └── docs/                       # Generated reports and data exports
 │
 ├── 🔧 Dependencies
-│   └── requirements/
-│       ├── base.txt                # Core dependencies
-│       └── python.txt              # Python solver dependencies
+│   └── requirements.txt
 │
 └── 🚀 CI/CD
     └── .github/
@@ -182,7 +179,7 @@ Total    | 139+     | Mixed         | ~37%         | System average
 
 ### Manual Trigger Options
 Access via GitHub Actions tab → "Run workflow":
-- **Problem Set**: Choose from external, dimacs, sdplib, or light_set
+- **Problem Set**: Choose from external, dimacs, or sdplib
 - **Solvers**: Select specific solvers to benchmark
 - **Library Names**: Filter by library (DIMACS, SDPLIB)
 - **Dry Run**: Test without database updates
