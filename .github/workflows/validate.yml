@@ -30,6 +30,8 @@ jobs:
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
+      with:
+        submodules: 'recursive'
       
     - name: Set up Python ${{ env.PYTHON_VERSION }}
       uses: actions/setup-python@v5

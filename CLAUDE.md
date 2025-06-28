@@ -3,6 +3,9 @@
 > **⚠️ CRITICAL INSTRUCTION FOR LLM AGENTS:**  
 > **You MUST read the linked documentation below BEFORE starting any development work.**  
 > This file serves as a dispatching hub - the actual implementation details, coding standards, and development context are in the linked documents.
+>
+> **⚠️ AFTER AUTO-COMPACT OPERATIONS:**
+> **You MUST re-read CLAUDE.md and all related documentation carefully after any auto-compact operation to ensure you maintain proper context and understanding of the project requirements and constraints.**
 
 ---
 
@@ -89,6 +92,9 @@ Total    | 145      | Mixed         | Complete coverage
 ## 🚀 Quick Development Commands
 
 ```bash
+# Clone with submodules (required for external libraries)
+git clone --recursive <repository-url>
+
 # Validate environment and external libraries
 python main.py --validate
 

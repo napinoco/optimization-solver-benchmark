@@ -1,0 +1,6 @@
+[submodule "problems/DIMACS"]
+	path = problems/DIMACS
+	url = https://github.com/vsdp/DIMACS.git
+[submodule "problems/SDPLIB"]
+	path = problems/SDPLIB
+	url = https://github.com/vsdp/SDPLIB.git

@@ -31,7 +31,7 @@ sys.path.insert(0, str(project_root))
 
 # Core imports
 from scripts.database.database_manager import DatabaseManager
-from scripts.benchmark.environment_info import collect_environment_info
+from scripts.utils.environment_info import collect_environment_info
 from scripts.utils.git_utils import get_git_commit_hash
 from scripts.utils.logger import get_logger
 
