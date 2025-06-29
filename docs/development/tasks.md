@@ -1,171 +1,984 @@
-# Development Tasks - ProblemData Architecture Analysis
+# Development Tasks - Phase 6: MATLAB/Octave Solver Integration
 
-**Phase**: Architecture Analysis & Planning  
-**Priority**: High - User-requested ProblemData unification analysis  
-**Context**: Investigate feasibility of SeDuMi-like ProblemData unification
+**Phase**: MATLAB/Octave Solver Integration  
+**Priority**: High - User-requested solver ecosystem expansion  
+**Target**: Add SeDuMi and SDPT3 solvers to expand solver coverage and validate system extensibility
 
-The user has requested analysis of a major ProblemData refactoring to unify all optimization problems under a SeDuMi-like format. This requires careful analysis before implementation to ensure compatibility with current production system.
+---
+
+## Phase Overview
+
+This phase implements MATLAB/Octave optimization solver integration (SeDuMi and SDPT3) using a loose-coupling architecture. The integration maintains the core principles of fair benchmarking while extending solver coverage to include the MATLAB ecosystem.
+
+**Architecture**: Python → MATLAB → Python with JSON data exchange  
+**Scope**: Production-ready integration with comprehensive testing  
+**Impact**: Expand from 9 to 11 solvers, add MATLAB ecosystem validation
 
 ---
 
 ## Current System Status ✅
 
-**Production-Ready Status**:
+**Pre-Integration Capabilities**:
 - ✅ 139+ external problems (DIMACS + SDPLIB) working correctly
-- ✅ 9 solvers with comprehensive backend support  
-- ✅ Stable MAT/DAT loader architecture
-- ✅ Working CVXPY integration for all problem types
-- ✅ Complete testing infrastructure with --dry-run mode
+- ✅ 9 Python solvers with comprehensive backend support
+- ✅ Stable MAT/DAT loader architecture (Python-based)
+- ✅ Production-ready reporting and database systems
+- ✅ Comprehensive testing infrastructure with --dry-run mode
 
-**Architecture Health**: Strong - Recent simplification completed successfully
+**Architecture Readiness**: Phase 5 analysis confirmed compatibility for MATLAB integration
 
 ---
 
-## Active Task Queue (Execute Sequentially per conventions.md)
+## Sprint Schedule (Execute Sequentially per conventions.md)
 
-### **Task 1: Analyze Current ProblemData Usage** ⭐ HIGH PRIORITY
-**Objective**: Comprehensively analyze current ProblemData field usage across codebase  
-**Context**: User requests SeDuMi unification but must understand impact on existing system
+### **Sprint 1: MATLAB Environment and Data Loading** 🚀 **WEEKS 1-2**
+**Objective**: Establish MATLAB execution environment and implement data loaders  
+**Deliverable**: Working MATLAB data loaders with Python integration
+
+### **Sprint 2: MATLAB Solver Implementation** ⚡ **WEEKS 3-4**  
+**Objective**: Implement SeDuMi and SDPT3 solver runners with standardized output  
+**Deliverable**: MATLAB solver functions producing JSON results
+
+### **Sprint 3: Integration Orchestration** 🔧 **WEEKS 5-6**
+**Objective**: Implement MATLAB-Python bridge and unified orchestration  
+**Deliverable**: Complete integration allowing Python to execute MATLAB solvers
+
+### **Sprint 4: Python Interface Integration** 🐍 **WEEKS 7-8**
+**Objective**: Integrate MATLAB solvers into existing Python benchmark system  
+**Deliverable**: MATLAB solvers available through standard BenchmarkRunner interface
+
+### **Sprint 5: Testing and Production Deployment** ✅ **WEEKS 9-10**
+**Objective**: Comprehensive testing and production-ready deployment  
+**Deliverable**: Production system with 11 solvers including MATLAB integration
+
+---
+
+## Detailed Task Breakdown
+
+### **Sprint 1: MATLAB Environment and Data Loading (Tasks 1-5)**
+
+#### **Task 1: MATLAB Environment Setup and Validation** 🔧 HIGH PRIORITY
+**Objective**: Establish and validate MATLAB/Octave execution environment  
+**Context**: Foundation for all MATLAB integration work
 
 **Steps**:
-1. Document all current ProblemData field usage in loaders (MAT, DAT)
-2. Document all ProblemData field usage in solvers (SciPy, CVXPY) 
-3. Analyze which fields are essential vs optional for each problem type
-4. Identify potential breaking changes from removing A_ub, b_ub, bounds
-5. Document current CVXPY field usage (cvxpy_problem, variables, objective, constraints)
+1. Verify MATLAB/Octave installation and accessibility
+2. Test command-line execution (`matlab -batch` and `octave --eval`)
+3. Verify SeDuMi and SDPT3 solver availability in MATLAB path
+4. Test basic solver functionality (simple optimization problem)
+5. Document environment requirements and setup procedures
+
+**Success Criteria**:
+- [ ] MATLAB executable responds to command-line calls
+- [ ] SeDuMi executes successfully on simple test problem
+- [ ] SDPT3 executes successfully on simple test problem
+- [ ] Environment detection script created and tested
+- [ ] Setup documentation written with troubleshooting guide
 
 **Test Criteria**:
-- [ ] Complete mapping of field usage across MAT/DAT loaders
-- [ ] Complete mapping of field usage across SciPy/CVXPY solvers
-- [ ] Impact assessment for A_ub/b_ub/bounds removal
-- [ ] Impact assessment for CVXPY field removal
-- [ ] Compatibility analysis with external libraries (DIMACS/SDPLIB)
+- Basic MATLAB execution: `matlab -batch "disp('Hello World')"`
+- SeDuMi test: Solve simple LP problem and verify solution
+- SDPT3 test: Solve simple SDP problem and verify solution
+- Error handling: Test behavior with invalid MATLAB path
 
-**Definition of Done**: Comprehensive analysis document showing current usage and refactoring impact
+**Files Modified**: 
+- `docs/guides/MATLAB_SETUP.md` (new)
+- `scripts/utils/matlab_detection.py` (new)
 
-### **Task 2: Validate SeDuMi Compatibility** 🔍 HIGH PRIORITY  
-**Objective**: Verify that SeDuMi format can represent all current problem types
-**Context**: Must ensure no loss of functionality with format change
+**Estimated Time**: 8-12 hours  
+**Dependencies**: None
+
+---
+
+#### **Task 2: MATLAB SeDuMi Data Loader Implementation** 📁 HIGH PRIORITY
+**Objective**: Implement MATLAB function to load SeDuMi .mat files  
+**Context**: Core data loading capability for DIMACS problems
 
 **Steps**:
-1. Test current DIMACS problems: verify they have cone_structure in metadata
-2. Test current SDPLIB problems: verify they have cone_structure in metadata  
-3. Analyze if SeDuMi format can represent current LP/QP constraint patterns
-4. Verify that A_eq-only representation works for all current problems
-5. Test conversion of A_ub constraints to A_eq format with slack variables
+1. Create `scripts/data_loaders/matlab_octave/mat_loader.m`
+2. Implement .mat file loading with error handling
+3. Support compressed .mat.gz files (automatic decompression)
+4. Extract A, b, c, K matrices in SeDuMi format
+5. Validate output format and handle edge cases
+
+**Success Criteria**:
+- [ ] Function loads standard .mat files correctly
+- [ ] Function handles compressed .mat.gz files
+- [ ] Proper error handling for corrupted/missing files
+- [ ] Validates required fields (A, b, c) exist
+- [ ] Constructs default cone structure K when missing
+- [ ] Unit tests pass for sample DIMACS problems
 
 **Test Criteria**:
-- [ ] All DIMACS problems have usable cone_structure data
-- [ ] All SDPLIB problems have usable cone_structure data
-- [ ] A_ub to A_eq conversion preserves problem semantics
-- [ ] No loss of problem representation capability
+- Load nb.mat (small DIMACS problem) and verify A,b,c,K extraction
+- Test with compressed and uncompressed files
+- Error handling: Test with invalid/corrupted .mat files
+- Edge cases: Test with missing K field, empty matrices
 
-**Definition of Done**: Verification that all current problems are compatible with SeDuMi format
+**Files Modified**:
+- `scripts/data_loaders/matlab_octave/mat_loader.m` (new)
+- `tests/unit/test_matlab_mat_loader.m` (new)
 
-### **Task 3: Design Migration Strategy** 📋 MEDIUM PRIORITY
-**Objective**: Create step-by-step migration plan with backward compatibility
-**Context**: Large refactoring requires careful planning to avoid system breakage
+**Estimated Time**: 6-8 hours  
+**Dependencies**: Task 1 (MATLAB environment)
+
+---
+
+#### **Task 3: MATLAB SDPLIB Data Loader Implementation** 📁 HIGH PRIORITY
+**Objective**: Implement MATLAB function to load SDPLIB .dat-s files  
+**Context**: Core data loading capability for SDPLIB problems
 
 **Steps**:
-1. Design backward-compatible ProblemData interface
-2. Plan gradual migration of loaders (MAT first, then DAT)
-3. Plan gradual migration of solvers (test compatibility)
-4. Design validation tests for each migration step
-5. Create rollback plan if migration fails
+1. Create `scripts/data_loaders/matlab_octave/dat_loader.m`
+2. Implement SDPA sparse format parser
+3. Convert SDPA format to SeDuMi format (A, b, c, K)
+4. Handle multiple SDP blocks and cone structures
+5. Robust error handling for malformed files
+
+**Success Criteria**:
+- [ ] Function parses SDPA sparse format correctly
+- [ ] Converts to valid SeDuMi format (A, b, c, K)
+- [ ] Handles multiple SDP blocks properly
+- [ ] Constructs appropriate cone structure for SDP problems
+- [ ] Error handling for malformed/incomplete files
+- [ ] Unit tests pass for sample SDPLIB problems
 
 **Test Criteria**:
-- [ ] Migration plan maintains system functionality at each step
-- [ ] Backward compatibility preserved during transition
-- [ ] Clear rollback procedure defined
-- [ ] All current tests continue to pass
+- Load arch0.dat-s (small SDPLIB problem) and verify conversion
+- Test with multi-block SDP problems
+- Verify cone structure K correctly represents SDP blocks
+- Error handling: Test with malformed SDPA files
 
-**Definition of Done**: Detailed migration plan with risk mitigation
+**Files Modified**:
+- `scripts/data_loaders/matlab_octave/dat_loader.m` (new)
+- `tests/unit/test_matlab_dat_loader.m` (new)
 
-### **Task 4: Create Proof of Concept** 🔬 MEDIUM PRIORITY
-**Objective**: Implement small-scale proof of concept for SeDuMi format
-**Context**: Validate approach before full implementation
+**Estimated Time**: 8-10 hours  
+**Dependencies**: Task 1 (MATLAB environment)
+
+---
+
+#### **Task 4: YAML Configuration Reader for MATLAB** ⚙️ MEDIUM PRIORITY
+**Objective**: Implement MATLAB function to read problem_registry.yaml  
+**Context**: Enable MATLAB to resolve problem names to file paths
 
 **Steps**:
-1. Create experimental ProblemData class with SeDuMi format
-2. Implement converter from current format to SeDuMi format
-3. Test with one DIMACS problem (nb) and one SDPLIB problem (arch0)
-4. Verify CVXPY solver can handle converted problems
-5. Compare results between old and new format
+1. Create `scripts/utils/matlab_yaml_reader.m`
+2. Implement basic YAML parsing for problem_registry structure
+3. Support problem name to file path resolution
+4. Handle missing problems and configuration errors
+5. Test with current problem_registry.yaml structure
+
+**Success Criteria**:
+- [ ] Function reads problem_registry.yaml successfully
+- [ ] Resolves problem names to file paths correctly
+- [ ] Handles missing problems gracefully
+- [ ] Supports both DIMACS and SDPLIB problem entries
+- [ ] Error handling for malformed YAML files
+- [ ] Compatible with existing problem_registry.yaml format
 
 **Test Criteria**:
-- [ ] Experimental class successfully created
-- [ ] Conversion preserves problem semantics
-- [ ] Solver produces identical results with both formats
-- [ ] No performance regression observed
+- Load current problem_registry.yaml and verify parsing
+- Resolve known problem names (nb, arch0) to correct file paths
+- Error handling: Test with missing YAML file, invalid syntax
+- Validate problem metadata extraction (file_type, library_name)
 
-**Definition of Done**: Working proof of concept with verified results
+**Files Modified**:
+- `scripts/utils/matlab_yaml_reader.m` (new)
+- `tests/unit/test_matlab_yaml_reader.m` (new)
 
----
-
-## Analysis Requirements (Per conventions.md)
-
-### **Sequential Execution Protocol**
-1. **Complete Task 1 first** - Full analysis before any implementation
-2. **Stop for user approval** after each task completion
-3. **No implementation** until analysis is complete and approved
-4. **Risk assessment** at each step to protect production system
-
-### **Success Criteria for Analysis Phase**
-- **Impact Assessment**: Clear understanding of refactoring scope and risks
-- **Compatibility Verification**: Proof that SeDuMi format works with all current problems
-- **Migration Plan**: Step-by-step approach with risk mitigation
-- **Proof of Concept**: Small-scale validation of approach
-
-### **Risk Mitigation**
-- **Preserve Current System**: All analysis done without breaking existing functionality
-- **Gradual Approach**: No big-bang refactoring, incremental changes only
-- **Validation at Each Step**: Comprehensive testing before proceeding
-- **Rollback Capability**: Ability to revert if issues discovered
+**Estimated Time**: 6-8 hours  
+**Dependencies**: Task 1 (MATLAB environment)
 
 ---
 
-## Dependencies & Prerequisites
+#### **Task 5: Data Loader Integration Testing** ✅ MEDIUM PRIORITY
+**Objective**: Comprehensive testing of MATLAB data loading pipeline  
+**Context**: Validate data loaders work correctly with real problems
 
-**Current System Requirements**:
-- Production-ready system with 139+ working problems
-- Stable MAT/DAT loader architecture
-- Working CVXPY integration with 9 solvers
-- Complete testing infrastructure
+**Steps**:
+1. Test mat_loader.m with multiple DIMACS problems
+2. Test dat_loader.m with multiple SDPLIB problems
+3. Verify data consistency between MATLAB and Python loaders
+4. Performance testing with larger problems
+5. Create integration test suite
 
-**Analysis Requirements**:
-- Deep understanding of current ProblemData usage patterns
-- Knowledge of SeDuMi format requirements
-- Compatibility verification with external libraries
-- Performance impact assessment
+**Success Criteria**:
+- [ ] All DIMACS test problems load correctly via mat_loader
+- [ ] All SDPLIB test problems load correctly via dat_loader
+- [ ] Data consistency verified between MATLAB and Python loaders
+- [ ] Performance acceptable for production use
+- [ ] Comprehensive test suite covering edge cases
+- [ ] Error scenarios handled gracefully
 
----
+**Test Criteria**:
+- Compare MATLAB loader output with Python MAT/DAT loaders
+- Test with 5+ problems from each library (DIMACS, SDPLIB)
+- Performance: Measure loading time for representative problems
+- Memory usage: Verify no memory leaks in MATLAB
 
-## Success Criteria
+**Files Modified**:
+- `tests/integration/test_matlab_data_loaders.m` (new)
+- `tests/performance/benchmark_matlab_loaders.m` (new)
 
-**Analysis Completion**:
-- Complete understanding of current system dependencies
-- Verified compatibility of SeDuMi format with all problem types
-- Detailed migration plan with risk assessment
-- Proof of concept demonstrating feasibility
-
-**Decision Point**:
-- Clear recommendation on whether to proceed with refactoring
-- If proceeding: detailed implementation plan with milestones
-- If not proceeding: alternative approaches or modifications to original request
-
----
-
-## Important Notes
-
-**Per conventions.md Requirements**:
-- **One task at a time**: Complete Task 1 before proceeding to Task 2
-- **User approval required**: Stop after each task for approval before continuing
-- **Production system protection**: No changes that risk current functionality
-- **Comprehensive testing**: Validate all assumptions before implementation
-
-**This analysis phase ensures that the user's requested ProblemData unification is technically sound and implementable without risking the current production-ready system.**
+**Estimated Time**: 4-6 hours  
+**Dependencies**: Tasks 2, 3, 4 (All data loaders)
 
 ---
 
-*Task Status: Ready for Task 1 - Analysis Phase*  
-*Next Action: Begin comprehensive ProblemData usage analysis*
+### **Sprint 2: MATLAB Solver Implementation (Tasks 6-10)**
+
+#### **Task 6: SeDuMi Solver Runner Implementation** 🔧 HIGH PRIORITY
+**Objective**: Implement MATLAB function to execute SeDuMi with standardized output  
+**Context**: Core solver execution for SeDuMi integration
+
+**Steps**:
+1. Create `scripts/solvers/matlab_octave/sedumi_runner.m`
+2. Implement SeDuMi solver execution with minimal configuration
+3. Extract standardized solver metrics (time, status, objectives, etc.)
+4. Map SeDuMi status codes to standard format
+5. Handle solver errors and edge cases gracefully
+
+**Success Criteria**:
+- [ ] Function executes SeDuMi solver correctly
+- [ ] Uses minimal configuration for fair benchmarking
+- [ ] Extracts all required standardized metrics
+- [ ] Maps SeDuMi status to standard format (optimal, infeasible, etc.)
+- [ ] Handles solver errors without crashing
+- [ ] Returns consistent result structure
+
+**Test Criteria**:
+- Solve simple LP problem and verify optimal solution
+- Solve infeasible problem and verify correct status
+- Test error handling with invalid input
+- Measure performance overhead of metric extraction
+
+**Files Modified**:
+- `scripts/solvers/matlab_octave/sedumi_runner.m` (new)
+- `tests/unit/test_sedumi_runner.m` (new)
+
+**Estimated Time**: 6-8 hours  
+**Dependencies**: Sprint 1 (Data loaders)
+
+---
+
+#### **Task 7: SDPT3 Solver Runner Implementation** 🔧 HIGH PRIORITY
+**Objective**: Implement MATLAB function to execute SDPT3 with standardized output  
+**Context**: Core solver execution for SDPT3 integration
+
+**Steps**:
+1. Create `scripts/solvers/matlab_octave/sdpt3_runner.m`
+2. Implement SDPT3 solver execution with minimal configuration
+3. Extract standardized solver metrics from SDPT3 output
+4. Map SDPT3 status codes to standard format
+5. Handle SDPT3-specific data conversion requirements
+
+**Success Criteria**:
+- [ ] Function executes SDPT3 solver correctly
+- [ ] Handles SeDuMi to SDPT3 data format conversion
+- [ ] Extracts all required standardized metrics
+- [ ] Maps SDPT3 status to standard format
+- [ ] Handles solver errors gracefully
+- [ ] Returns consistent result structure
+
+**Test Criteria**:
+- Solve simple SDP problem and verify optimal solution
+- Test with LP/QP problems (SDPT3 multi-format support)
+- Verify data conversion from SeDuMi to SDPT3 format
+- Test error handling with solver failures
+
+**Files Modified**:
+- `scripts/solvers/matlab_octave/sdpt3_runner.m` (new)
+- `tests/unit/test_sdpt3_runner.m` (new)
+
+**Estimated Time**: 8-10 hours  
+**Dependencies**: Sprint 1 (Data loaders), Task 6 (SeDuMi as reference)
+
+---
+
+#### **Task 8: Solver Version Detection and Metadata** 📊 MEDIUM PRIORITY
+**Objective**: Implement version detection and metadata collection for MATLAB solvers  
+**Context**: Required for standardized result reporting and reproducibility
+
+**Steps**:
+1. Implement SeDuMi version detection function
+2. Implement SDPT3 version detection function
+3. Collect MATLAB version information
+4. Create unified metadata collection function
+5. Handle cases where version detection fails
+
+**Success Criteria**:
+- [ ] SeDuMi version detected and reported correctly
+- [ ] SDPT3 version detected and reported correctly
+- [ ] MATLAB version information collected
+- [ ] Metadata included in solver results
+- [ ] Graceful fallback when version detection fails
+- [ ] Version information formatted consistently
+
+**Test Criteria**:
+- Verify version detection returns valid version strings
+- Test with different MATLAB versions if available
+- Handle missing solvers gracefully
+- Validate version string format consistency
+
+**Files Modified**:
+- `scripts/utils/matlab_version_detection.m` (new)
+- Updated: `sedumi_runner.m`, `sdpt3_runner.m`
+
+**Estimated Time**: 4-6 hours  
+**Dependencies**: Tasks 6, 7 (Solver runners)
+
+---
+
+#### **Task 9: JSON Result Format Implementation** 📝 MEDIUM PRIORITY
+**Objective**: Implement standardized JSON output format for MATLAB solver results  
+**Context**: Enable structured data exchange between MATLAB and Python
+
+**Steps**:
+1. Define JSON schema for solver results
+2. Implement JSON encoding function in MATLAB
+3. Handle null/empty values appropriately
+4. Ensure compatibility with Python JSON parsing
+5. Add result validation and error detection
+
+**Success Criteria**:
+- [ ] JSON schema matches SolverResult requirements
+- [ ] MATLAB jsonencode produces valid JSON
+- [ ] Null/empty values handled correctly
+- [ ] JSON compatible with Python json.load()
+- [ ] Result validation detects invalid data
+- [ ] Error results formatted consistently
+
+**Test Criteria**:
+- Generate JSON for optimal solution and verify Python parsing
+- Generate JSON for infeasible result and verify format
+- Test edge cases: empty values, large numbers, special characters
+- Validate JSON schema compliance
+
+**Files Modified**:
+- `scripts/utils/matlab_json_formatter.m` (new)
+- Updated: `sedumi_runner.m`, `sdpt3_runner.m`
+
+**Estimated Time**: 4-6 hours  
+**Dependencies**: Tasks 6, 7, 8 (Solver runners and metadata)
+
+---
+
+#### **Task 10: Solver Runner Integration Testing** ✅ MEDIUM PRIORITY
+**Objective**: Comprehensive testing of MATLAB solver execution pipeline  
+**Context**: Validate solver runners work correctly with real problems
+
+**Steps**:
+1. Test SeDuMi with representative problems from each type (LP, QP, SOCP, SDP)
+2. Test SDPT3 with representative problems from each type
+3. Compare results with Python solvers for validation
+4. Performance benchmarking and optimization
+5. Error scenario testing and validation
+
+**Success Criteria**:
+- [ ] SeDuMi solves all supported problem types correctly
+- [ ] SDPT3 solves all supported problem types correctly
+- [ ] Results consistent with Python solver results (where applicable)
+- [ ] Performance meets production requirements
+- [ ] Error scenarios handled gracefully
+- [ ] JSON output validates correctly
+
+**Test Criteria**:
+- Solve nb (DIMACS) with both solvers, compare results
+- Solve arch0 (SDPLIB) with both solvers, compare results
+- Performance: Measure solve time vs Python solvers
+- Stress test: Run with larger problems, monitor memory usage
+
+**Files Modified**:
+- `tests/integration/test_matlab_solvers.m` (new)
+- `tests/performance/benchmark_matlab_solvers.m` (new)
+
+**Estimated Time**: 6-8 hours  
+**Dependencies**: Tasks 6, 7, 8, 9 (Complete solver implementation)
+
+---
+
+### **Sprint 3: Integration Orchestration (Tasks 11-15)**
+
+#### **Task 11: MATLAB Integration Orchestrator** 🎯 HIGH PRIORITY
+**Objective**: Implement main MATLAB orchestrator that coordinates problem loading and solving  
+**Context**: Central MATLAB function that Python will execute
+
+**Steps**:
+1. Create `scripts/solvers/matlab_octave/matlab_runner.m`
+2. Implement command-line argument parsing
+3. Integrate problem loading, solver execution, and result output
+4. Add comprehensive error handling and logging
+5. Ensure clean exit codes for Python process management
+
+**Success Criteria**:
+- [ ] Function accepts problem name, solver name, and output file as arguments
+- [ ] Resolves problem name to file path using YAML configuration
+- [ ] Loads problem using appropriate data loader
+- [ ] Executes specified solver and collects results
+- [ ] Saves results to JSON file with proper formatting
+- [ ] Returns appropriate exit codes for success/failure
+
+**Test Criteria**:
+- Execute: `matlab_runner('nb', 'sedumi', 'result.json')` and verify JSON output
+- Execute: `matlab_runner('arch0', 'sdpt3', 'result.json')` and verify JSON output
+- Error handling: Test with invalid problem name, solver name
+- Exit codes: Verify success (0) and error (1) exit codes
+
+**Files Modified**:
+- `scripts/solvers/matlab_octave/matlab_runner.m` (new)
+- `tests/integration/test_matlab_runner.m` (new)
+
+**Estimated Time**: 8-10 hours  
+**Dependencies**: Sprint 1 (Data loaders), Sprint 2 (Solver runners)
+
+---
+
+#### **Task 12: Temporary File Management System** 📁 MEDIUM PRIORITY
+**Objective**: Implement robust temporary file management for Python-MATLAB data exchange  
+**Context**: Ensure reliable file-based communication without conflicts
+
+**Steps**:
+1. Design temporary file naming strategy (unique IDs)
+2. Implement file creation and cleanup in MATLAB
+3. Add timeout-based cleanup for orphaned files
+4. Handle concurrent execution scenarios
+5. Test file system error scenarios
+
+**Success Criteria**:
+- [ ] Unique temporary file names prevent conflicts
+- [ ] Automatic cleanup of temporary files after use
+- [ ] Timeout-based cleanup for orphaned files
+- [ ] Concurrent execution doesn't cause file conflicts
+- [ ] File system errors handled gracefully
+- [ ] No temporary file leaks in normal operation
+
+**Test Criteria**:
+- Parallel execution: Run multiple MATLAB processes simultaneously
+- Cleanup verification: Confirm files removed after successful execution
+- Error scenarios: Test cleanup when MATLAB crashes or times out
+- File permissions: Verify appropriate file access controls
+
+**Files Modified**:
+- `scripts/utils/matlab_temp_manager.m` (new)
+- Updated: `matlab_runner.m`
+
+**Estimated Time**: 4-6 hours  
+**Dependencies**: Task 11 (MATLAB orchestrator)
+
+---
+
+#### **Task 13: Command-Line Interface Validation** 🖥️ MEDIUM PRIORITY
+**Objective**: Validate MATLAB command-line execution from Python environment  
+**Context**: Ensure reliable Python to MATLAB process execution
+
+**Steps**:
+1. Test `matlab -batch` command execution
+2. Test `octave --eval` alternative execution
+3. Validate argument passing and escaping
+4. Test timeout and process termination
+5. Handle MATLAB startup and initialization delays
+
+**Success Criteria**:
+- [ ] `matlab -batch` executes MATLAB functions correctly
+- [ ] `octave --eval` provides compatible alternative
+- [ ] Arguments passed safely without injection risks
+- [ ] Process timeout and termination work correctly
+- [ ] MATLAB startup delays handled appropriately
+- [ ] Error messages captured and parsed correctly
+
+**Test Criteria**:
+- Basic execution: `matlab -batch "disp('test')"` returns expected output
+- Argument passing: Execute with complex arguments and verify parsing
+- Timeout test: Execute long-running operation and verify termination
+- Error capture: Execute invalid command and verify error handling
+
+**Files Modified**:
+- `scripts/utils/matlab_execution_test.py` (new)
+- `tests/integration/test_matlab_cli.py` (new)
+
+**Estimated Time**: 4-6 hours  
+**Dependencies**: Task 11 (MATLAB orchestrator)
+
+---
+
+#### **Task 14: Error Handling and Logging Framework** 📋 MEDIUM PRIORITY
+**Objective**: Implement comprehensive error handling and logging for MATLAB integration  
+**Context**: Ensure reliable error detection and debugging capabilities
+
+**Steps**:
+1. Design error handling strategy for MATLAB components
+2. Implement structured logging in MATLAB functions
+3. Create error classification and recovery procedures
+4. Add performance monitoring and metrics collection
+5. Test error scenarios and recovery mechanisms
+
+**Success Criteria**:
+- [ ] Structured error handling across all MATLAB components
+- [ ] Consistent logging format compatible with Python system
+- [ ] Error classification enables appropriate recovery actions
+- [ ] Performance metrics collected for monitoring
+- [ ] Error scenarios tested and documented
+- [ ] Debugging information available for troubleshooting
+
+**Test Criteria**:
+- Error propagation: Verify errors bubble up correctly to Python
+- Logging format: Ensure MATLAB logs integrate with Python logging
+- Recovery testing: Verify system continues after MATLAB errors
+- Performance impact: Measure overhead of logging and error handling
+
+**Files Modified**:
+- `scripts/utils/matlab_logger.m` (new)
+- `scripts/utils/matlab_error_handler.m` (new)
+- Updated: All MATLAB functions
+
+**Estimated Time**: 6-8 hours  
+**Dependencies**: Tasks 11, 12, 13 (Core integration components)
+
+---
+
+#### **Task 15: Integration Orchestration Testing** ✅ HIGH PRIORITY
+**Objective**: End-to-end testing of complete MATLAB integration pipeline  
+**Context**: Validate full integration works correctly before Python interface
+
+**Steps**:
+1. Test complete pipeline: problem loading → solving → result output
+2. Test with multiple problem types and solvers
+3. Validate JSON output format and content
+4. Performance testing and optimization
+5. Error scenario testing and recovery
+
+**Success Criteria**:
+- [ ] Complete pipeline executes successfully for all test problems
+- [ ] JSON output format validated against Python requirements
+- [ ] Performance meets production benchmarks
+- [ ] Error scenarios handled gracefully with proper logging
+- [ ] Memory usage and cleanup verified
+- [ ] Integration ready for Python interface development
+
+**Test Criteria**:
+- Run complete pipeline on 5+ problems with both solvers
+- Validate JSON output can be parsed by Python
+- Performance: Compare execution time with Python solvers
+- Error recovery: Test with corrupted files, invalid arguments
+
+**Files Modified**:
+- `tests/integration/test_complete_matlab_pipeline.m` (new)
+- `tests/performance/benchmark_matlab_pipeline.m` (new)
+
+**Estimated Time**: 6-8 hours  
+**Dependencies**: Tasks 11-14 (Complete integration orchestration)
+
+---
+
+### **Sprint 4: Python Interface Integration (Tasks 16-20)**
+
+#### **Task 16: Python MatlabSolver Class Implementation** 🐍 HIGH PRIORITY
+**Objective**: Implement Python SolverInterface subclass for MATLAB solvers  
+**Context**: Bridge between Python benchmark system and MATLAB solvers
+
+**Steps**:
+1. Create `scripts/solvers/matlab_octave/matlab_solver.py`
+2. Implement SolverInterface methods (solve, get_version, etc.)
+3. Add command-line execution and JSON parsing
+4. Implement timeout and error handling
+5. Add temporary file management and cleanup
+
+**Success Criteria**:
+- [ ] MatlabSolver inherits from SolverInterface correctly
+- [ ] solve() method executes MATLAB and returns SolverResult
+- [ ] get_version() returns appropriate version information
+- [ ] Timeout handling prevents hanging processes
+- [ ] Error handling converts MATLAB errors to SolverResult errors
+- [ ] Temporary file cleanup works in all scenarios
+
+**Test Criteria**:
+- Create MatlabSolver('sedumi') and verify initialization
+- Call solve() with test problem and verify SolverResult format
+- Test timeout with long-running problem
+- Error handling: Test with invalid MATLAB installation
+
+**Files Modified**:
+- `scripts/solvers/matlab_octave/matlab_solver.py` (new)
+- `tests/unit/test_matlab_solver.py` (new)
+
+**Estimated Time**: 8-10 hours  
+**Dependencies**: Sprint 3 (Complete MATLAB integration)
+
+---
+
+#### **Task 17: Convenience Solver Classes** 🔧 MEDIUM PRIORITY
+**Objective**: Create SeDuMiSolver and SDPT3Solver convenience classes  
+**Context**: Provide easy instantiation of specific MATLAB solvers
+
+**Steps**:
+1. Implement SeDuMiSolver class extending MatlabSolver
+2. Implement SDPT3Solver class extending MatlabSolver
+3. Add solver-specific configuration options
+4. Implement solver capability detection
+5. Add documentation and usage examples
+
+**Success Criteria**:
+- [ ] SeDuMiSolver creates correctly configured MatlabSolver
+- [ ] SDPT3Solver creates correctly configured MatlabSolver  
+- [ ] Solver-specific options handled appropriately
+- [ ] Capability detection works for problem type compatibility
+- [ ] Documentation provides clear usage examples
+- [ ] Classes integrate seamlessly with existing system
+
+**Test Criteria**:
+- Instantiate SeDuMiSolver() and verify correct configuration
+- Instantiate SDPT3Solver() and verify correct configuration
+- Test solver capability detection with different problem types
+- Verify integration with BenchmarkRunner
+
+**Files Modified**:
+- Updated: `scripts/solvers/matlab_octave/matlab_solver.py`
+- `tests/unit/test_convenience_solvers.py` (new)
+
+**Estimated Time**: 4-6 hours  
+**Dependencies**: Task 16 (MatlabSolver implementation)
+
+---
+
+#### **Task 18: BenchmarkRunner Integration** 🔗 HIGH PRIORITY
+**Objective**: Integrate MATLAB solvers into existing BenchmarkRunner system  
+**Context**: Enable MATLAB solvers through standard benchmark execution interface
+
+**Steps**:
+1. Update BenchmarkRunner.create_solver() method
+2. Add MATLAB solver creation logic
+3. Update solver registry configuration loading
+4. Test integration with existing benchmark workflows
+5. Verify compatibility with --dry-run mode
+
+**Success Criteria**:
+- [ ] create_solver() handles 'matlab_sedumi' and 'matlab_sdpt3'
+- [ ] MATLAB solvers integrate with existing benchmark workflows
+- [ ] --dry-run mode works correctly with MATLAB solvers
+- [ ] Error handling maintains system stability
+- [ ] Performance impact minimal on Python-only workflows
+- [ ] All existing functionality preserved
+
+**Test Criteria**:
+- Run benchmark with MATLAB solver: verify execution and database storage
+- Test --dry-run mode with MATLAB solvers
+- Verify existing Python solvers unaffected by integration
+- Error resilience: Ensure MATLAB failures don't crash system
+
+**Files Modified**:
+- `scripts/benchmark/runner.py`
+- `tests/integration/test_benchmark_runner_matlab.py` (new)
+
+**Estimated Time**: 6-8 hours  
+**Dependencies**: Tasks 16, 17 (Complete Python interface)
+
+---
+
+#### **Task 19: Configuration Integration** ⚙️ MEDIUM PRIORITY
+**Objective**: Update configuration files to include MATLAB solvers  
+**Context**: Enable MATLAB solvers through standard configuration system
+
+**Steps**:
+1. Update `config/solver_registry.yaml` with MATLAB solvers
+2. Verify MATLAB solver display names and metadata
+3. Test configuration loading with new solvers
+4. Update validation to check MATLAB availability
+5. Document configuration options for MATLAB solvers
+
+**Success Criteria**:
+- [ ] solver_registry.yaml includes matlab_sedumi and matlab_sdpt3
+- [ ] Display names consistent with existing pattern
+- [ ] Configuration loading handles MATLAB solvers correctly
+- [ ] Validation checks MATLAB availability when needed
+- [ ] Documentation explains MATLAB solver configuration
+- [ ] Backward compatibility maintained for existing configurations
+
+**Test Criteria**:
+- Load configuration and verify MATLAB solvers present
+- Test main.py --validate with MATLAB solvers
+- Verify solver filtering works with MATLAB solvers
+- Test graceful degradation when MATLAB unavailable
+
+**Files Modified**:
+- `config/solver_registry.yaml`
+- `docs/guides/CONFIGURATION.md`
+- `tests/unit/test_config_matlab_integration.py` (new)
+
+**Estimated Time**: 3-4 hours  
+**Dependencies**: Task 18 (BenchmarkRunner integration)
+
+---
+
+#### **Task 20: Python Integration Testing** ✅ HIGH PRIORITY
+**Objective**: Comprehensive testing of complete Python-MATLAB integration  
+**Context**: Validate end-to-end integration works correctly in production scenario
+
+**Steps**:
+1. Test complete benchmark execution with MATLAB solvers
+2. Verify database storage and result format
+3. Test report generation with MATLAB solver results
+4. Performance testing and comparison with Python solvers
+5. Error scenario testing and system resilience
+
+**Success Criteria**:
+- [ ] Complete benchmark workflow works with MATLAB solvers
+- [ ] Database storage correctly handles MATLAB solver results
+- [ ] HTML reports display MATLAB solver results correctly
+- [ ] Performance acceptable for production use
+- [ ] System resilient to MATLAB solver failures
+- [ ] Integration ready for production deployment
+
+**Test Criteria**:
+- Run `python main.py --benchmark --problems nb,arch0 --solvers matlab_sedumi,matlab_sdpt3`
+- Verify database contains correctly formatted results
+- Generate HTML reports and verify MATLAB solver display
+- Compare performance with equivalent Python solvers
+
+**Files Modified**:
+- `tests/integration/test_end_to_end_matlab.py` (new)
+- `tests/performance/benchmark_matlab_vs_python.py` (new)
+
+**Estimated Time**: 8-10 hours  
+**Dependencies**: Tasks 16-19 (Complete Python integration)
+
+---
+
+### **Sprint 5: Testing and Production Deployment (Tasks 21-25)**
+
+#### **Task 21: Comprehensive Unit Test Suite** ✅ MEDIUM PRIORITY
+**Objective**: Create comprehensive unit tests for all MATLAB integration components  
+**Context**: Ensure code quality and regression prevention
+
+**Steps**:
+1. Complete unit test coverage for all MATLAB functions
+2. Complete unit test coverage for Python integration classes
+3. Add edge case testing and error scenario coverage
+4. Implement test data generation and validation
+5. Set up automated test execution
+
+**Success Criteria**:
+- [ ] >90% code coverage for MATLAB functions
+- [ ] >90% code coverage for Python integration classes
+- [ ] Edge cases and error scenarios covered
+- [ ] Test data covers representative problem types
+- [ ] Automated test execution integrated with development workflow
+- [ ] Tests run successfully in CI environment (where applicable)
+
+**Test Criteria**:
+- Run complete test suite and verify all tests pass
+- Coverage report shows >90% coverage
+- Tests execute in reasonable time (<5 minutes)
+- Tests provide clear failure messages for debugging
+
+**Files Modified**:
+- Complete all unit test files created in previous tasks
+- `tests/run_matlab_tests.py` (new)
+
+**Estimated Time**: 6-8 hours  
+**Dependencies**: All previous tasks (Complete implementation)
+
+---
+
+#### **Task 22: Production Problem Testing** 🏭 HIGH PRIORITY
+**Objective**: Test MATLAB solvers with full production problem set  
+**Context**: Validate MATLAB solvers work correctly with all 139+ problems
+
+**Steps**:
+1. Run MATLAB solvers on representative sample of DIMACS problems
+2. Run MATLAB solvers on representative sample of SDPLIB problems
+3. Compare results with existing Python solver results
+4. Identify and resolve any compatibility issues
+5. Document problem-specific behavior and limitations
+
+**Success Criteria**:
+- [ ] MATLAB solvers execute successfully on 90%+ of test problems
+- [ ] Results consistent with Python solvers where comparable
+- [ ] Problem compatibility issues identified and documented
+- [ ] Performance acceptable across problem range
+- [ ] System stability maintained during extended execution
+- [ ] Clear documentation of solver capabilities and limitations
+
+**Test Criteria**:
+- Run MATLAB solvers on 20+ representative problems from each library
+- Compare solution quality with Python solvers on same problems
+- Measure execution time distribution across problem sizes
+- Test system stability with continuous execution
+
+**Files Modified**:
+- `tests/production/test_matlab_production_problems.py` (new)
+- `docs/MATLAB_SOLVER_CAPABILITIES.md` (new)
+
+**Estimated Time**: 10-12 hours  
+**Dependencies**: All previous tasks (Complete system)
+
+---
+
+#### **Task 23: Performance Optimization and Tuning** ⚡ MEDIUM PRIORITY
+**Objective**: Optimize MATLAB integration performance for production use  
+**Context**: Ensure MATLAB integration doesn't significantly impact system performance
+
+**Steps**:
+1. Profile MATLAB solver execution overhead
+2. Optimize temporary file handling and cleanup
+3. Optimize JSON serialization and parsing
+4. Implement MATLAB process reuse where beneficial
+5. Document performance characteristics and tuning options
+
+**Success Criteria**:
+- [ ] MATLAB solver overhead minimized (<20% vs native execution)
+- [ ] Temporary file operations optimized
+- [ ] JSON processing optimized for large results
+- [ ] Process reuse implemented where beneficial
+- [ ] Performance characteristics documented
+- [ ] Tuning options provided for different scenarios
+
+**Test Criteria**:
+- Measure execution overhead vs native MATLAB execution
+- Profile memory usage during extended operation
+- Benchmark JSON processing with large result sets
+- Test process reuse benefits with multiple problems
+
+**Files Modified**:
+- Performance optimizations in existing MATLAB and Python files
+- `docs/MATLAB_PERFORMANCE_TUNING.md` (new)
+
+**Estimated Time**: 8-10 hours  
+**Dependencies**: Task 22 (Production testing)
+
+---
+
+#### **Task 24: Documentation and User Guide** 📚 MEDIUM PRIORITY
+**Objective**: Create comprehensive documentation for MATLAB solver integration  
+**Context**: Enable users to understand and utilize MATLAB solver capabilities
+
+**Steps**:
+1. Create MATLAB solver installation and setup guide
+2. Document MATLAB solver capabilities and limitations
+3. Create troubleshooting guide for common issues
+4. Update main documentation to include MATLAB integration
+5. Create examples and usage patterns
+
+**Success Criteria**:
+- [ ] Complete installation guide for MATLAB/Octave and solvers
+- [ ] Clear documentation of solver capabilities by problem type
+- [ ] Comprehensive troubleshooting guide with solutions
+- [ ] Updated main documentation includes MATLAB integration
+- [ ] Examples provided for common usage patterns
+- [ ] Documentation tested by following setup procedures
+
+**Test Criteria**:
+- Follow installation guide and verify successful setup
+- Verify troubleshooting guide addresses common issues
+- Test examples and usage patterns work as documented
+- Review documentation for clarity and completeness
+
+**Files Modified**:
+- `docs/guides/MATLAB_SETUP.md`
+- `docs/guides/MATLAB_TROUBLESHOOTING.md`
+- `docs/guides/MATLAB_USAGE_EXAMPLES.md`
+- Updated: `README.md`, `docs/development/detail_design.md`
+
+**Estimated Time**: 6-8 hours  
+**Dependencies**: Task 22 (Production testing), Task 23 (Performance optimization)
+
+---
+
+#### **Task 25: Production Deployment and Validation** 🚀 HIGH PRIORITY
+**Objective**: Deploy MATLAB integration to production and validate complete system  
+**Context**: Finalize MATLAB integration and prepare for production use
+
+**Steps**:
+1. Deploy complete system with MATLAB integration
+2. Run full production benchmark with all 11 solvers
+3. Generate and validate HTML reports with MATLAB results
+4. Perform system stability and reliability testing
+5. Create final validation report and sign-off
+
+**Success Criteria**:
+- [ ] Production system includes working MATLAB solvers
+- [ ] Full benchmark executes successfully with all solvers
+- [ ] HTML reports correctly display MATLAB solver results
+- [ ] System stability validated under production load
+- [ ] Performance meets production requirements
+- [ ] Complete validation documentation prepared
+
+**Test Criteria**:
+- Execute: `python main.py --all` and verify all 11 solvers complete
+- Verify HTML reports show matlab_sedumi and matlab_sdpt3 results
+- Run extended stability test (multiple benchmark cycles)
+- Validate final solver count: 11 total (9 Python + 2 MATLAB)
+
+**Files Modified**:
+- Production deployment configurations
+- `VALIDATION_REPORT_PHASE6.md` (new)
+
+**Estimated Time**: 6-8 hours  
+**Dependencies**: Tasks 21-24 (Complete testing and documentation)
+
+---
+
+## Success Criteria for Phase 6
+
+### **Technical Achievements**
+- ✅ **Solver Coverage Expansion**: From 9 to 11 solvers (SeDuMi + SDPT3)
+- ✅ **MATLAB Ecosystem Integration**: Production-ready MATLAB solver support
+- ✅ **Architecture Validation**: Successful loose-coupling implementation
+- ✅ **Fair Benchmarking**: MATLAB solvers use default configuration
+- ✅ **System Stability**: No impact on existing 139+ working problems
+
+### **Production Readiness**
+- ✅ **Performance**: MATLAB integration overhead <20%
+- ✅ **Reliability**: MATLAB solver failures don't crash system
+- ✅ **Documentation**: Complete setup and troubleshooting guides
+- ✅ **Testing**: Comprehensive unit and integration test coverage
+- ✅ **Compatibility**: Works with existing benchmark and reporting systems
+
+### **Validation Targets**
+- **Problem Coverage**: MATLAB solvers work on 90%+ of test problems
+- **Result Quality**: Solutions consistent with Python solvers where comparable
+- **System Integration**: HTML reports correctly display MATLAB solver results
+- **User Experience**: Clear installation guide and troubleshooting documentation
+
+---
+
+## Risk Mitigation
+
+### **Technical Risks**
+- **MATLAB Availability**: Graceful degradation when MATLAB not available
+- **Solver Installation**: Clear documentation and validation procedures
+- **Process Management**: Robust timeout and cleanup mechanisms
+- **Performance Impact**: Monitoring and optimization throughout development
+
+### **Integration Risks**
+- **System Stability**: Comprehensive testing with existing workflows
+- **Backward Compatibility**: Extensive testing of existing functionality
+- **Error Propagation**: Isolated error handling prevents cascade failures
+- **Resource Management**: Proper cleanup prevents resource leaks
+
+---
+
+## Dependencies and Prerequisites
+
+### **External Dependencies**
+- MATLAB R2020a+ or Octave 6.0+ installation
+- SeDuMi solver properly installed and configured
+- SDPT3 solver properly installed and configured
+- Command-line access to MATLAB/Octave
+
+### **Internal Dependencies**
+- Current production system with 139+ working problems
+- Existing Python solver architecture and interfaces
+- Database schema and reporting system
+- Testing infrastructure and validation framework
+
+---
+
+*This task list provides a comprehensive roadmap for MATLAB/Octave solver integration while maintaining the system's production readiness and core principles of fair benchmarking and reliability.*
+
+*Next Action: Begin Sprint 1, Task 1 - MATLAB Environment Setup and Validation*  
+*Phase Target: Complete MATLAB integration within 10 weeks*
+
+---
+
+*Last Updated: December 2025*
