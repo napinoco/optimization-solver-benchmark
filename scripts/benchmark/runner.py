@@ -202,6 +202,12 @@ class BenchmarkRunner:
                 logger.info(f"[DRY-RUN] Would store result: {solver_name} on {problem_name} ({result.status})")
                 return
             
+            # Convert additional_info to JSON string for memo field
+            memo = None
+            if result.additional_info:
+                import json
+                memo = json.dumps(result.additional_info, indent=2, default=str)
+            
             # Store in database using the simplified schema
             self.db.store_result(
                 solver_name=solver_name,
@@ -218,7 +224,8 @@ class BenchmarkRunner:
                 duality_gap=result.duality_gap,
                 primal_infeasibility=result.primal_infeasibility,
                 dual_infeasibility=result.dual_infeasibility,
-                iterations=result.iterations
+                iterations=result.iterations,
+                memo=memo
             )
             
             logger.debug(f"Stored result: {solver_name} on {problem_name}")

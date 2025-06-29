@@ -198,7 +198,7 @@ class CvxpySolver(SolverInterface):
         self.logger.debug(f"Solving {problem_data.problem_class} problem '{problem_data.name}'")
         
         start_time = time.time()
-        
+
         try:
             # Check if backend supports this problem type
             if problem_data.problem_class not in self.backend_capabilities["supported_problem_types"]:
@@ -214,12 +214,14 @@ class CvxpySolver(SolverInterface):
             solver_options = self._get_solver_options(timeout)
             
             # Solve the problem
+            start_time = time.time()
             cvx_problem.solve(
                 solver=getattr(cp, self.backend),
                 **solver_options
             )
+            solve_time = time.time() - start_time
             
-            return self._create_result_from_cvxpy(cvx_problem, start_time, problem_data)
+            return self._create_result_from_cvxpy(cvx_problem, solve_time, problem_data)
                 
         except Exception as e:
             solve_time = time.time() - start_time
@@ -310,10 +312,8 @@ class CvxpySolver(SolverInterface):
         
         return cvx_problem
 
-    def _create_result_from_cvxpy(self, cvx_problem: cp.Problem, start_time: float, problem_data: ProblemData) -> SolverResult:
+    def _create_result_from_cvxpy(self, cvx_problem: cp.Problem, solve_time: float, problem_data: ProblemData) -> SolverResult:
         """Create standardized result from CVXPY problem with manual duality calculations."""
-        
-        solve_time = time.time() - start_time
         
         # Map CVXPY status to standard status
         status_mapping = {
@@ -425,20 +425,10 @@ class CvxpySolver(SolverInterface):
         except Exception as e:
             self.logger.debug(f"Manual duality calculation failed: {e}")
         
-        # Get iterations and solver time if available
+        # Get iterations if available
         iterations = None
-        solver_time = None
-        if cvx_problem.solver_stats:
-            if hasattr(cvx_problem.solver_stats, 'num_iters'):
-                iterations = cvx_problem.solver_stats.num_iters
-            
-            # Get solver time if available
-            if hasattr(cvx_problem.solver_stats, 'solve_time'):
-                solver_time = cvx_problem.solver_stats.solve_time
-                self.logger.debug(f"Extracted solver time: {solver_time:.6f}s vs wall clock: {solve_time:.6f}s")
-        
-        # Use solver time if available, otherwise fall back to wall clock time
-        reported_solve_time = solver_time if solver_time is not None else solve_time
+        if cvx_problem.solver_stats and hasattr(cvx_problem.solver_stats, 'num_iters'):
+            iterations = cvx_problem.solver_stats.num_iters
         
         # Extract solver-specific information
         additional_info = {
@@ -448,6 +438,20 @@ class CvxpySolver(SolverInterface):
             "cvxpy_version": cp.__version__,
             "manual_duality_used": True
         }
+        
+        # Add solver timing information to additional_info for memo
+        if cvx_problem.solver_stats:
+            if hasattr(cvx_problem.solver_stats, 'solve_time'):
+                additional_info["solver_solve_time"] = cvx_problem.solver_stats.solve_time
+            if hasattr(cvx_problem.solver_stats, 'setup_time'):
+                additional_info["solver_setup_time"] = cvx_problem.solver_stats.setup_time
+        
+        # Add timing breakdown for analysis
+        additional_info["wall_clock_solve_time"] = solve_time
+        if cvx_problem.solver_stats and hasattr(cvx_problem.solver_stats, 'solve_time'):
+            solver_internal_time = cvx_problem.solver_stats.solve_time
+            additional_info["cvxpy_overhead"] = solve_time - solver_internal_time
+            additional_info["overhead_percentage"] = ((solve_time - solver_internal_time) / solve_time * 100) if solve_time > 0 else 0
         
         # Add solution information if available
         try:
@@ -463,7 +467,7 @@ class CvxpySolver(SolverInterface):
                          f"dual_gap={duality_gap}")
         
         return SolverResult(
-            solve_time=reported_solve_time,
+            solve_time=solve_time,
             status=status,
             primal_objective_value=primal_objective_value,
             dual_objective_value=dual_objective_value,
