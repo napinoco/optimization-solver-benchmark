@@ -425,10 +425,20 @@ class CvxpySolver(SolverInterface):
         except Exception as e:
             self.logger.debug(f"Manual duality calculation failed: {e}")
         
-        # Get iterations if available
+        # Get iterations and solver time if available
         iterations = None
-        if cvx_problem.solver_stats and hasattr(cvx_problem.solver_stats, 'num_iters'):
-            iterations = cvx_problem.solver_stats.num_iters
+        solver_time = None
+        if cvx_problem.solver_stats:
+            if hasattr(cvx_problem.solver_stats, 'num_iters'):
+                iterations = cvx_problem.solver_stats.num_iters
+            
+            # Get solver time if available
+            if hasattr(cvx_problem.solver_stats, 'solve_time'):
+                solver_time = cvx_problem.solver_stats.solve_time
+                self.logger.debug(f"Extracted solver time: {solver_time:.6f}s vs wall clock: {solve_time:.6f}s")
+        
+        # Use solver time if available, otherwise fall back to wall clock time
+        reported_solve_time = solver_time if solver_time is not None else solve_time
         
         # Extract solver-specific information
         additional_info = {
@@ -453,7 +463,7 @@ class CvxpySolver(SolverInterface):
                          f"dual_gap={duality_gap}")
         
         return SolverResult(
-            solve_time=solve_time,
+            solve_time=reported_solve_time,
             status=status,
             primal_objective_value=primal_objective_value,
             dual_objective_value=dual_objective_value,
