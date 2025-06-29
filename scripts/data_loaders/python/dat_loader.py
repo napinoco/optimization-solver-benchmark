@@ -24,7 +24,7 @@ Where matno=0 is F0, matno=1,2,... are F1,F2,...
 
 import numpy as np
 from pathlib import Path
-from typing import Dict, List, Optional, Any
+from typing import Dict, Any
 import sys
 
 # Add project root to path for imports
@@ -155,25 +155,6 @@ class DATLoader:
             logger.error(f"Failed to parse {file_path}: {e}")
             raise
     
-    def analyze_block_structure(self, block_sizes: List[int]) -> Dict[str, Any]:
-        """
-        Analyze block structure to determine cone types.
-        Uses SeDuMi standard field names for consistency.
-        
-        Args:
-            block_sizes: List of block sizes
-            
-        Returns:
-            Dictionary with cone structure information in SeDuMi format
-        """
-        cone_info = {
-            'free_vars': 0,
-            'nonneg_vars': 0,
-            'soc_cones': [],
-            'sdp_cones': block_sizes
-        }
-
-        return cone_info
     
     def convert_to_problem_data(self, parsed_data: Dict[str, Any], 
                               problem_name: str) -> ProblemData:
@@ -263,21 +244,6 @@ class DATLoader:
         )
 
 
-# Convenience function for backward compatibility
-def load_dat_problem(file_path: str, 
-                    problem_name: Optional[str] = None) -> ProblemData:
-    """
-    Convenience function to load a DAT problem.
-    
-    Args:
-        file_path: Path to the .dat-s file
-        problem_name: Optional name for the problem
-        
-    Returns:
-        ProblemData object
-    """
-    loader = DATLoader()
-    return loader.load(file_path, problem_name)
 
 
 if __name__ == "__main__":
@@ -291,7 +257,8 @@ if __name__ == "__main__":
     file_path = sys.argv[1]
     
     try:
-        problem = load_dat_problem(file_path)
+        loader = DATLoader()
+        problem = loader.load(file_path)
         print(f"Loaded problem: {problem}")
         
         # The problem is now loaded and ready for use

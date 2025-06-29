@@ -242,17 +242,10 @@ class ScipySolver(SolverInterface):
         if hasattr(result, 'con') and result.con is not None and len(result.con) > 0:
             primal_infeasibility = float(np.max(np.abs(result.con)))
         
-        # Extract solver-specific information
+        # Extract minimal solver timing information for memo
         additional_info = {
-            "scipy_status": result.status,
-            "scipy_message": result.message,
-            "scipy_success": result.success,
-            "scipy_nit": getattr(result, 'nit', None),
-            "method": self.method
+            "solver_solve_time": solve_time
         }
-        
-        if hasattr(result, 'x') and result.x is not None:
-            additional_info["solution_norm"] = float(np.linalg.norm(result.x))
         
         self.logger.debug(f"LP solve completed: status={status}, "
                          f"objective={primal_objective_value}, time={solve_time:.3f}s")
@@ -373,18 +366,10 @@ class ScipySolver(SolverInterface):
         if hasattr(result, 'constr_violation') and result.constr_violation is not None:
             primal_infeasibility = float(result.constr_violation)
         
-        # Extract solver-specific information
+        # Extract minimal solver timing information for memo
         additional_info = {
-            "scipy_success": result.success,
-            "scipy_message": result.message,
-            "scipy_nfev": getattr(result, 'nfev', None),
-            "scipy_njev": getattr(result, 'njev', None),
-            "scipy_nhev": getattr(result, 'nhev', None),
-            "method": "trust-constr"
+            "solver_solve_time": solve_time
         }
-        
-        if hasattr(result, 'x') and result.x is not None:
-            additional_info["solution_norm"] = float(np.linalg.norm(result.x))
         
         self.logger.debug(f"QP solve completed: status={status}, "
                          f"objective={primal_objective_value}, time={solve_time:.3f}s")

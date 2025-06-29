@@ -106,48 +106,6 @@ def load_problem_registry() -> Dict:
     with open(registry_path, 'r') as f:
         return yaml.safe_load(f)
 
-def load_python_problem(file_path: str, problem_class: str) -> ProblemData:
-    """Load a problem from a Python module (for SOCP, SDP, etc.)."""
-    logger.info(f"Loading Python problem: {file_path}")
-    
-    try:
-        import importlib.util
-        import sys
-        
-        # Load the module
-        spec = importlib.util.spec_from_file_location("problem_module", file_path)
-        module = importlib.util.module_from_spec(spec)
-        sys.modules["problem_module"] = module
-        spec.loader.exec_module(module)
-        
-        # Look for the main generation function based on problem class
-        if problem_class == "SOCP":
-            if hasattr(module, 'generate_portfolio_optimization_socp'):
-                problem_dict, problem_data = module.generate_portfolio_optimization_socp()
-            elif hasattr(module, 'generate_robust_optimization_socp'):
-                problem_dict, problem_data = module.generate_robust_optimization_socp()
-            elif hasattr(module, 'generate_facility_location_socp'):
-                problem_dict, problem_data = module.generate_facility_location_socp()
-            else:
-                raise ValueError(f"No suitable SOCP generation function found in {file_path}")
-        elif problem_class == "SDP":
-            if hasattr(module, 'generate_matrix_completion_sdp'):
-                problem_dict, problem_data = module.generate_matrix_completion_sdp()
-            elif hasattr(module, 'generate_control_lmi_sdp'):
-                problem_dict, problem_data = module.generate_control_lmi_sdp()
-            elif hasattr(module, 'generate_max_cut_sdp'):
-                problem_dict, problem_data = module.generate_max_cut_sdp()
-            else:
-                raise ValueError(f"No suitable SDP generation function found in {file_path}")
-        else:
-            raise ValueError(f"Unsupported Python problem class: {problem_class}")
-        
-        logger.info(f"Successfully loaded Python problem: {problem_data.name} ({problem_class})")
-        return problem_data
-        
-    except Exception as e:
-        logger.error(f"Failed to load Python problem {file_path}: {e}")
-        raise
 
 def load_problem(problem_name: str, problem_set: str = None) -> ProblemData:
     """Load a specific problem by name from the registry."""
@@ -184,10 +142,7 @@ def load_problem(problem_name: str, problem_set: str = None) -> ProblemData:
         from scripts.data_loaders.python.dat_loader import DATLoader
         loader = DATLoader()
         return loader.load(str(file_path), problem_name)
-    # MPS and QPS loaders removed - no problems in registry use these formats
-    elif file_type == "python":
-        # Use Python loader for SOCP/SDP
-        return load_python_problem(str(file_path), problem_info["problem_type"])
+    # MPS, QPS, and Python loaders removed - no problems in registry use these formats
     else:
         raise ValueError(f"Unsupported file type: {file_type}")
 

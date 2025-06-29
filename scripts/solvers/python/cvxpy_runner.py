@@ -430,37 +430,12 @@ class CvxpySolver(SolverInterface):
         if cvx_problem.solver_stats and hasattr(cvx_problem.solver_stats, 'num_iters'):
             iterations = cvx_problem.solver_stats.num_iters
         
-        # Extract solver-specific information
-        additional_info = {
-            "cvxpy_status": cvx_problem.status,
-            "backend_solver": self.backend,
-            "solver_stats": cvx_problem.solver_stats.__dict__ if cvx_problem.solver_stats else None,
-            "cvxpy_version": cp.__version__,
-            "manual_duality_used": True
-        }
+        # Extract minimal solver timing information for memo
+        additional_info = {}
         
-        # Add solver timing information to additional_info for memo
-        if cvx_problem.solver_stats:
-            if hasattr(cvx_problem.solver_stats, 'solve_time'):
-                additional_info["solver_solve_time"] = cvx_problem.solver_stats.solve_time
-            if hasattr(cvx_problem.solver_stats, 'setup_time'):
-                additional_info["solver_setup_time"] = cvx_problem.solver_stats.setup_time
-        
-        # Add timing breakdown for analysis
-        additional_info["wall_clock_solve_time"] = solve_time
+        # Only add solver internal timing for memo
         if cvx_problem.solver_stats and hasattr(cvx_problem.solver_stats, 'solve_time'):
-            solver_internal_time = cvx_problem.solver_stats.solve_time
-            additional_info["cvxpy_overhead"] = solve_time - solver_internal_time
-            additional_info["overhead_percentage"] = ((solve_time - solver_internal_time) / solve_time * 100) if solve_time > 0 else 0
-        
-        # Add solution information if available
-        try:
-            if cvx_problem.variables:
-                variables_list = list(cvx_problem.variables)
-                if variables_list and variables_list[0].value is not None:
-                    additional_info["solution_norm"] = float(np.linalg.norm(variables_list[0].value))
-        except Exception:
-            pass
+            additional_info["solver_solve_time"] = cvx_problem.solver_stats.solve_time
         
         self.logger.debug(f"Solve completed: status={status}, "
                          f"objective={primal_objective_value}, time={solve_time:.3f}s, "
