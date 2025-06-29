@@ -78,67 +78,68 @@ class BenchmarkResult:
         }
     
     def _sanitize_environment_info(self, env_info: Dict[str, Any]) -> Dict[str, Any]:
-        """Sanitize environment info to remove sensitive information"""
+        """Sanitize environment info to remove sensitive information - matches database sanitization"""
         if not env_info:
             return {}
         
-        # Create sanitized copy
+        # Create sanitized copy with minimal information for privacy protection
         sanitized = {}
         
-        # CPU info - safe to keep
+        # CPU info - keep essential performance info only
         if 'cpu' in env_info:
             cpu = env_info['cpu']
             sanitized['cpu'] = {
                 'cpu_count': cpu.get('cpu_count'),
                 'cpu_count_physical': cpu.get('cpu_count_physical'),
-                'processor': cpu.get('processor')
+                'processor': cpu.get('processor'),
+                'architecture': cpu.get('architecture') or env_info.get('os', {}).get('architecture')
             }
         
-        # Memory info - keep totals only
+        # Memory info - keep total only (performance relevant)
         if 'memory' in env_info:
             memory = env_info['memory']
             sanitized['memory'] = {
                 'total_gb': memory.get('total_gb')
             }
         
-        # OS info - keep basic system info only
+        # OS info - keep basic system info only (no version details that could identify specific systems)
         if 'os' in env_info:
             os_info = env_info['os']
             sanitized['os'] = {
-                'architecture': os_info.get('architecture'),
-                'machine': os_info.get('machine'),
-                'system': os_info.get('system'),
-                'platform': os_info.get('platform'),
-                'release': os_info.get('release')
+                'system': os_info.get('system'),      # Darwin, Linux, Windows
+                'machine': os_info.get('machine'),    # arm64, x86_64
+                'release': os_info.get('release')     # Keep for compatibility testing
             }
+            # Remove: architecture (duplicated), platform (too detailed), version (too specific)
         
-        # Python info - remove executable path
+        # Python info - keep version only (remove all paths)
         if 'python' in env_info:
             python = env_info['python']
             sanitized['python'] = {
-                'implementation': python.get('implementation'),
-                'version': python.get('version'),
-                'version_info': python.get('version_info')
+                'implementation': python.get('implementation'),  # CPython, PyPy
+                'version': python.get('version'),                # 3.12.2
+                'version_info': python.get('version_info')       # 3.12.2
             }
+            # Remove: executable (contains user paths)
         
-        # Git info - filter sensitive parts
+        # Git info - keep commit hash only (remove branch and dirty status)
         if 'git' in env_info:
             git = env_info['git']
-            sanitized['git'] = {
-                'available': git.get('available'),
-                'commit_hash': git.get('commit_hash')
-                # Note: Removing branch name and is_dirty status
-            }
+            if git.get('available') and git.get('commit_hash'):
+                sanitized['git'] = {
+                    'commit_hash': git.get('commit_hash')
+                }
+            # Remove: available, branch, is_dirty (privacy/security sensitive)
         
-        # Timezone info - keep basic info only
-        if 'timezone' in env_info:
-            tz = env_info['timezone']
-            sanitized['timezone'] = {
-                'timezone_name': tz.get('timezone_name'),
-                'utc_offset_hours': tz.get('utc_offset_hours')
-            }
+        # Timezone - UTC ONLY (remove all location-specific timezone info)
+        # Replace all timezone info with UTC standard to prevent location identification
+        sanitized['timezone'] = {
+            'timezone_name': 'UTC',
+            'utc_offset_hours': 0.0
+        }
+        # Remove all original timezone data to prevent location identification
         
-        # Timestamp - safe to keep
+        # Timestamp - keep original timestamp (should be in UTC for consistency)
         if 'timestamp' in env_info:
             sanitized['timestamp'] = env_info['timestamp']
         
