@@ -258,28 +258,29 @@ class CvxpySolver(SolverInterface):
         b_eq = problem_data.b_eq
         c = problem_data.c
         (m, n) = A_eq.shape
-        y = cp.Variable(m, name="y")
+        y = cp.Variable((m, 1) , name="y")
 
         P = problem_data.P if hasattr(problem_data, 'P') else None
         obj_func = b_eq.T @ y - (cp.quad_form(y, P) / 2 if P is not None else 0)
 
         nvar_cnt = 0
         constraints = []
+        cmAty = c - (y.T @ A_eq).T
         if 'free_vars' in cone_structure:
             free_vars = cone_structure['free_vars']
             if free_vars:
                 begin = nvar_cnt
                 end = nvar_cnt + free_vars
-                z = c[begin:end] - sum(A_eq[i, begin:end] * y[i] for i in range(m))
-                constraints.append(z == 0)
+                z = cmAty[begin:end]
+                constraints.append(z[:, 0] == 0)
                 nvar_cnt = end
         if 'nonneg_vars' in cone_structure:
             nonneg_vars = cone_structure['nonneg_vars']
             if nonneg_vars:
                 begin = nvar_cnt
                 end = nvar_cnt + nonneg_vars
-                z = c[begin:end] - sum(A_eq[i, begin:end] * y[i] for i in range(m))
-                constraints.append(z >= 0)
+                z = cmAty[begin:end]
+                constraints.append(z[:, 0] >= 0)
                 nvar_cnt = end
         if 'soc_cones' in cone_structure:
             soc_cones = cone_structure['soc_cones']
@@ -288,8 +289,8 @@ class CvxpySolver(SolverInterface):
                     continue
                 begin = nvar_cnt
                 end = nvar_cnt + ndim
-                z = c[begin:end] - (y.T @ A_eq[:, begin:end]).T
-                constraints.append(cp.SOC(z[0], z[1:]))
+                z = cmAty[begin:end]
+                constraints.append(cp.SOC(z[0, 0], z[1:, 0]))
                 nvar_cnt = end
         if 'sdp_cones' in cone_structure:
             sdp_cones = cone_structure['sdp_cones']
@@ -298,7 +299,7 @@ class CvxpySolver(SolverInterface):
                     continue
                 begin = nvar_cnt
                 end = nvar_cnt + ndim * ndim
-                z = c[begin:end].reshape(ndim, ndim) - cp.reshape(y.T @ A_eq[:, begin:end], (ndim, ndim), order='C')
+                z = cp.reshape(cmAty[begin:end], (ndim, ndim), order='C')
                 constraints.append(z >> 0)
                 nvar_cnt = end
 
@@ -399,7 +400,7 @@ class CvxpySolver(SolverInterface):
                         continue
                     begin = nvar_cnt
                     end = nvar_cnt + ndim
-                    dinf2 += np.linalg.norm(cmAty[begin:end] - proj_onto_soc(cmAty[begin:end]), ord=2) ** 2
+                    dinf2 += np.linalg.norm(proj_onto_soc(-cmAty[begin:end]), ord=2) ** 2  # Pi_{K*}(-z) = z - Pi_K(z)
                     nvar_cnt = end
             if 'sdp_cones' in cone_structure:
                 sdp_cones = cone_structure['sdp_cones']

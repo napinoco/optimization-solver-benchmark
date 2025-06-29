@@ -199,15 +199,15 @@ class MATLoader:
         # Handle sparse matrices for b and c
         b = mat_data['b']
         if hasattr(b, 'toarray'):
-            b = b.toarray().flatten()
+            b = b.toarray().reshape(-1, 1)
         else:
-            b = b.flatten()
-            
+            b = b.reshape(-1, 1)
+
         c = mat_data['c']
         if hasattr(c, 'toarray'):
-            c = c.toarray().flatten()
+            c = c.toarray().reshape(-1, 1)
         else:
-            c = c.flatten()
+            c = c.reshape(-1, 1)
         
         # Handle cone structure
         cone_info = {}
