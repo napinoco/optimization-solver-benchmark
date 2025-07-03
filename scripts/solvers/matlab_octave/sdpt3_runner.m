@@ -1,28 +1,28 @@
 function [x, y, result] = sdpt3_runner(A, b, c, K, options)
-% Execute SDPT3 solver and return solutions with result structure
-%
-% This function runs the SDPT3 optimization solver with minimal configuration
-% for fair benchmarking. It converts SeDuMi format to SDPT3 format internally
-% and returns the solutions with a standardized result structure.
-%
-% Input:
-%   A: Constraint matrix (sparse, m x n) in SeDuMi format
-%   b: Right-hand side vector (m x 1) in SeDuMi format
-%   c: Objective vector (n x 1) in SeDuMi format
-%   K: Cone structure (struct with fields K.f, K.l, K.q, K.s) in SeDuMi format
-%   options: (optional) Solver options struct
-%
-% Output:
-%   x: Primal solution vector (in SeDuMi format)
-%   y: Dual solution vector
-%   result: Standardized result structure
+    % Execute SDPT3 solver and return solutions with result structure
+    %
+    % This function runs the SDPT3 optimization solver with minimal configuration
+    % for fair benchmarking. It converts SeDuMi format to SDPT3 format internally
+    % and returns the solutions with a standardized result structure.
+    %
+    % Input:
+    %   A: Constraint matrix (sparse, m x n) in SeDuMi format
+    %   b: Right-hand side vector (m x 1) in SeDuMi format
+    %   c: Objective vector (n x 1) in SeDuMi format
+    %   K: Cone structure (struct with fields K.f, K.l, K.q, K.s) in SeDuMi format
+    %   options: (optional) Solver options struct
+    %
+    % Output:
+    %   x: Primal solution vector (in SeDuMi format)
+    %   y: Dual solution vector
+    %   result: Standardized result structure
 
-% Initialize empty outputs
-x = [];
-y = [];
-result = struct();
+    % Initialize empty outputs
+    x = [];
+    y = [];
+    result = struct();
 
-try
+    try
     % Validate inputs
     if nargin < 4
         error('sdpt3_runner:InvalidInput', 'Insufficient input arguments. Need A, b, c, K');
@@ -63,29 +63,29 @@ try
     % Convert SDPT3 solution back to SeDuMi format
     if ~isempty(X) && iscell(X)
         try
-            % Use SDPT3's built-in conversion function
-            [x, ~, ~] = SDPT3soln_SEDUMIsoln(blk, X, y, Z, perm);
-        catch
-            x = [];
-        end
+        % Use SDPT3's built-in conversion function
+        [x, ~, ~] = SDPT3soln_SEDUMIsoln(blk, X, y, Z, perm);
+    catch
+        x = [];
     end
+end
     
-    fprintf('SDPT3: Completed in %.3f seconds\n', solve_time);
+fprintf('SDPT3: Completed in %.3f seconds\n', solve_time);
     
-    % Create result structure from SDPT3 info
-    result = create_sdpt3_result(info);
-    result.solve_time = solve_time;
+% Create result structure from SDPT3 info
+result = create_sdpt3_result(info);
+result.solve_time = solve_time;
     
 catch ME
-    % Handle errors - return empty solutions
-    x = [];
-    y = [];
-    info = struct();
-    info.error_message = ME.message;
-    result = create_sdpt3_result(info);
-    result.solve_time = 0;  % Error case: no solve time
+% Handle errors - return empty solutions
+x = [];
+y = [];
+info = struct();
+info.error_message = ME.message;
+result = create_sdpt3_result(info);
+result.solve_time = 0;  % Error case: no solve time
     
-    fprintf('SDPT3 Runner: Error: %s\n', ME.message);
+fprintf('SDPT3 Runner: Error: %s\n', ME.message);
 end
 
 end
@@ -95,10 +95,10 @@ function merged = merge_options(defaults, user_options)
 
 merged = defaults;
 if ~isempty(user_options) && isstruct(user_options)
-    fields = fieldnames(user_options);
-    for i = 1:length(fields)
-        merged.(fields{i}) = user_options.(fields{i});
-    end
+fields = fieldnames(user_options);
+for i = 1:length(fields)
+    merged.(fields{i}) = user_options.(fields{i});
+end
 end
 
 end
@@ -107,57 +107,57 @@ function version = get_sdpt3_version()
 % Get exact SDPT3 version dynamically from git submodule
 
 try
-    if exist('sqlp', 'file') ~= 2
-        version = 'SDPT3-Unknown';
+if exist('sqlp', 'file') ~= 2
+version = 'SDPT3-Unknown';
+return;
+end
+    
+% Get SDPT3 directory path
+sdpt3_path = which('sqlp');
+if ~isempty(sdpt3_path)
+[sdpt3_dir, ~, ~] = fileparts(sdpt3_path);
+        
+% Try to get git tag/commit info from submodule
+try
+% Save current directory
+current_dir = pwd;
+            
+% Change to SDPT3 directory and get git info
+cd(sdpt3_dir);
+[status, git_info] = system('git describe --tags --always 2>/dev/null');
+            
+% Restore directory
+cd(current_dir);
+            
+if status == 0 && ~isempty(strtrim(git_info))
+    git_info = strtrim(git_info);
+    version = sprintf('SDPT3-%s', git_info);
+    return;
+end
+catch ME
+% Git command failed, continue to README fallback
+fprintf('SDPT3 git version detection failed: %s\n', ME.message);
+end
+        
+% Fallback: Try to read version from README
+readme_file = fullfile(sdpt3_dir, 'README');
+if exist(readme_file, 'file')
+fid = fopen(readme_file, 'r');
+if fid ~= -1
+    line = fgetl(fid);
+    fclose(fid);
+    if ischar(line) && contains(line, 'SDPT3 4.0')
+        version = 'SDPT3-4.0';
         return;
     end
+end
+end
+end
     
-    % Get SDPT3 directory path
-    sdpt3_path = which('sqlp');
-    if ~isempty(sdpt3_path)
-        [sdpt3_dir, ~, ~] = fileparts(sdpt3_path);
-        
-        % Try to get git tag/commit info from submodule
-        try
-            % Save current directory
-            current_dir = pwd;
-            
-            % Change to SDPT3 directory and get git info
-            cd(sdpt3_dir);
-            [status, git_info] = system('git describe --tags --always 2>/dev/null');
-            
-            % Restore directory
-            cd(current_dir);
-            
-            if status == 0 && ~isempty(strtrim(git_info))
-                git_info = strtrim(git_info);
-                version = sprintf('SDPT3-%s', git_info);
-                return;
-            end
-        catch ME
-            % Git command failed, continue to README fallback
-            fprintf('SDPT3 git version detection failed: %s\n', ME.message);
-        end
-        
-        % Fallback: Try to read version from README
-        readme_file = fullfile(sdpt3_dir, 'README');
-        if exist(readme_file, 'file')
-            fid = fopen(readme_file, 'r');
-            if fid ~= -1
-                line = fgetl(fid);
-                fclose(fid);
-                if ischar(line) && contains(line, 'SDPT3 4.0')
-                    version = 'SDPT3-4.0';
-                    return;
-                end
-            end
-        end
-    end
-    
-    version = 'SDPT3-Unknown';
+version = 'SDPT3-Unknown';
 catch ME
-    fprintf('SDPT3 version detection failed: %s\n', ME.message);
-    version = 'SDPT3-Unknown';
+fprintf('SDPT3 version detection failed: %s\n', ME.message);
+version = 'SDPT3-Unknown';
 end
 
 end
@@ -170,43 +170,43 @@ result.solver_version = get_sdpt3_version();
 
 % Map SDPT3 status codes to standard format
 if isfield(info, 'error_message')
-    result.status = 'error';
-    result.termination_reason = 'Solver error';
-    result.error_message = info.error_message;
+result.status = 'error';
+result.termination_reason = 'Solver error';
+result.error_message = info.error_message;
 elseif isfield(info, 'termcode')
-    switch info.termcode
-        case 0
-            result.status = 'optimal';
-            result.termination_reason = 'Optimal solution found';
-        case 1
-            result.status = 'infeasible';
-            result.termination_reason = 'Primal infeasible';
-        case 2
-            result.status = 'unbounded';
-            result.termination_reason = 'Dual infeasible (primal unbounded)';
-        case -1
-            result.status = 'max_iter';
-            result.termination_reason = 'Maximum iterations reached';
-        case -2
-            result.status = 'num_error';
-            result.termination_reason = 'Numerical difficulties';
-        case -3
-            result.status = 'num_error';
-            result.termination_reason = 'No progress in iterations';
-        otherwise
-            result.status = 'unknown';
-            result.termination_reason = sprintf('Unknown termination code: %d', info.termcode);
-    end
+switch info.termcode
+case 0
+result.status = 'optimal';
+result.termination_reason = 'Optimal solution found';
+case 1
+result.status = 'infeasible';
+result.termination_reason = 'Primal infeasible';
+case 2
+result.status = 'unbounded';
+result.termination_reason = 'Dual infeasible (primal unbounded)';
+case -1
+result.status = 'max_iter';
+result.termination_reason = 'Maximum iterations reached';
+case -2
+result.status = 'num_error';
+result.termination_reason = 'Numerical difficulties';
+case -3
+result.status = 'num_error';
+result.termination_reason = 'No progress in iterations';
+otherwise
+result.status = 'unknown';
+result.termination_reason = sprintf('Unknown termination code: %d', info.termcode);
+end
 else
-    result.status = 'unknown';
-    result.termination_reason = 'No termination code available';
+result.status = 'unknown';
+result.termination_reason = 'No termination code available';
 end
 
 % Extract iteration count
 if isfield(info, 'iter')
-    result.iterations = info.iter;
+result.iterations = info.iter;
 else
-    result.iterations = NaN;
+result.iterations = NaN;
 end
 
 % Initialize other fields

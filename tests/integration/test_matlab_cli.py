@@ -17,7 +17,7 @@ from pathlib import Path
 project_root = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(project_root))
 
-from scripts.utils.matlab_execution_test import MatlabExecutionTester
+from tests.test_utils.matlab_execution_tester import MatlabExecutionTester
 from scripts.utils.logger import get_logger
 
 logger = get_logger("test_matlab_cli")

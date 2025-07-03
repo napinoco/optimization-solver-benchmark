@@ -27,3 +27,9 @@ solvers:
     
   cvxpy_highs:
     display_name: "HiGHS (via CVXPY)"
+    
+  matlab_sedumi:
+    display_name: "SeDuMi (via MATLAB)"
+  
+  matlab_sdpt3:
+    display_name: "SDPT3 (via MATLAB)"

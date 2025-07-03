@@ -154,6 +154,72 @@ def validate_environment() -> bool:
     return True
 
 
+def validate_solver_setup(verbose: bool = False) -> bool:
+    """Validate solver setup and availability."""
+    
+    logger = get_logger("solver_validation")
+    
+    try:
+        # Initialize benchmark runner to test solver availability
+        runner = BenchmarkRunner()
+        
+        # Run comprehensive validation
+        print("Running comprehensive solver validation...")
+        validation_report = runner.validate_setup()
+        
+        working_solvers = validation_report['summary']['working_solvers']
+        total_solvers = validation_report['summary']['total_solvers']
+        working_problems = validation_report['summary']['working_problems']
+        total_problems = validation_report['summary']['total_problems']
+        
+        print(f"\nSolver Validation Results:")
+        print(f"  Working Solvers: {working_solvers}/{total_solvers}")
+        print(f"  Working Problems: {working_problems}/{total_problems}")
+        
+        # Show solver details
+        if verbose:
+            print(f"\nDetailed Solver Status:")
+            for solver_name, info in validation_report['solvers'].items():
+                status = "✓" if info['status'] == 'working' else "✗"
+                if info['status'] == 'working':
+                    print(f"  {status} {solver_name}: {info['version']}")
+                else:
+                    print(f"  {status} {solver_name}: {info['error']}")
+        
+        # Check MATLAB solver availability
+        matlab_solvers = {name: info for name, info in validation_report['solvers'].items() 
+                         if name.startswith('matlab_')}
+        
+        if matlab_solvers:
+            matlab_working = sum(1 for info in matlab_solvers.values() if info['status'] == 'working')
+            print(f"\nMATLAB Solver Status: {matlab_working}/{len(matlab_solvers)} working")
+            
+            if verbose:
+                for solver_name, info in matlab_solvers.items():
+                    status = "✓" if info['status'] == 'working' else "✗"
+                    if info['status'] == 'working':
+                        print(f"  {status} {solver_name}: {info['version']}")
+                    else:
+                        print(f"  {status} {solver_name}: {info['error']}")
+        
+        # Validation passes if we have at least some working solvers
+        if working_solvers == 0:
+            logger.error("No working solvers found")
+            return False
+        
+        # Show warnings for missing solvers
+        missing_solvers = total_solvers - working_solvers
+        if missing_solvers > 0:
+            logger.warning(f"{missing_solvers} solvers are not available")
+        
+        logger.info(f"Solver validation completed: {working_solvers}/{total_solvers} solvers working")
+        return True
+        
+    except Exception as e:
+        logger.error(f"Solver validation failed: {e}")
+        return False
+
+
 def run_benchmark(library_names: Optional[List[str]] = None,
                  problems: Optional[List[str]] = None,
                  solvers: Optional[List[str]] = None,
@@ -359,7 +425,12 @@ Examples:
     operation_group.add_argument(
         '--validate',
         action='store_true',
-        help='Validate environment setup only'
+        help='Validate environment and solver setup'
+    )
+    operation_group.add_argument(
+        '--validate-verbose',
+        action='store_true',
+        help='Validate environment and solver setup with detailed output'
     )
     
     # Options
@@ -436,9 +507,14 @@ Examples:
         # Execute requested operation
         success = False
         
-        if args.validate:
-            print("Environment validation completed successfully")
-            success = True
+        if args.validate or args.validate_verbose:
+            # Run enhanced validation including solver testing
+            solver_validation_success = validate_solver_setup(verbose=args.validate_verbose)
+            if solver_validation_success:
+                print("Validation completed successfully")
+            else:
+                print("Validation completed with issues")
+            success = solver_validation_success
             
         elif args.benchmark:
             success = run_benchmark(

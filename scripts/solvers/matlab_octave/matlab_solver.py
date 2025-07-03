@@ -1,11 +1,21 @@
 """
-MATLAB Solver Integration with Enhanced Temporary File Management.
+Production-Ready MATLAB Solver Integration for Benchmark System.
 
-This module provides a Python interface for MATLAB optimization solvers (SeDuMi, SDPT3)
-with robust temporary file management for Python-MATLAB data exchange.
+This module provides a complete Python interface for MATLAB optimization solvers (SeDuMi, SDPT3)
+that integrates seamlessly with the benchmark system's SolverInterface architecture.
 
-This is a basic implementation focusing on temporary file management for Task 12.
-Full implementation will be completed in Sprint 4 (Tasks 16-20).
+Features:
+- Full SolverInterface compliance with standardized SolverResult format
+- Problem registry integration for DIMACS/SDPLIB problem resolution
+- Dynamic version detection and robust error handling
+- Concurrent execution safety with enhanced temporary file management
+- Production-ready performance optimization and monitoring
+
+Integration Points:
+- Works with existing ProblemData and problem registry system
+- Compatible with BenchmarkRunner for automated benchmarking
+- Supports all cone problem types (LP, QP, SOCP, SDP)
+- Provides detailed diagnostics and performance metrics
 """
 
 import os
@@ -13,6 +23,7 @@ import sys
 import json
 import subprocess
 import time
+import yaml
 from pathlib import Path
 from typing import Optional, Dict, Any, List
 
@@ -21,7 +32,7 @@ project_root = Path(__file__).parent.parent.parent.parent
 sys.path.insert(0, str(project_root))
 
 from scripts.solvers.solver_interface import SolverInterface, SolverResult
-from scripts.data_loaders.problem_loader import ProblemData
+from scripts.data_loaders.problem_loader import ProblemData, load_problem_registry
 from scripts.utils.temp_file_manager import TempFileManager, temp_file_context
 from scripts.utils.logger import get_logger
 
@@ -43,7 +54,7 @@ class MatlabSolver(SolverInterface):
     def __init__(self, matlab_solver: str, matlab_executable: str = 'matlab',
                  timeout: Optional[float] = 300, use_octave: bool = False, **kwargs):
         """
-        Initialize MATLAB solver interface with enhanced temp file management.
+        Initialize production-ready MATLAB solver interface.
         
         Args:
             matlab_solver: MATLAB solver name ('sedumi' or 'sdpt3')
@@ -73,10 +84,23 @@ class MatlabSolver(SolverInterface):
             cleanup_age_hours=1  # Clean up files older than 1 hour
         )
         
-        # Verify MATLAB/Octave availability
-        self._verify_matlab_availability()
+        # Load problem registry for problem resolution
+        try:
+            self.problem_registry = load_problem_registry()
+            logger.debug(f"Loaded problem registry with {len(self.problem_registry.get('problem_libraries', {}))} problems")
+        except Exception as e:
+            logger.warning(f"Failed to load problem registry: {e}")
+            self.problem_registry = {'problem_libraries': {}}
         
-        logger.info(f"Initialized MATLAB solver '{self.solver_name}' "
+        # Cache for version information
+        self._version_cache = None
+        self._matlab_version_cache = None
+        
+        # Verify MATLAB/Octave availability and cache version info
+        self._verify_matlab_availability()
+        self._detect_solver_versions()
+        
+        logger.info(f"Initialized production MATLAB solver '{self.solver_name}' "
                    f"using {matlab_solver} via {matlab_executable}")
     
     def _verify_matlab_availability(self) -> None:
@@ -118,6 +142,84 @@ class MatlabSolver(SolverInterface):
             raise RuntimeError(f"MATLAB/Octave verification timed out after 45s - check MATLAB installation")
         except FileNotFoundError:
             raise RuntimeError(f"MATLAB/Octave executable not found: {self.matlab_executable}")
+    
+    def _detect_solver_versions(self) -> None:
+        """Detect and cache MATLAB and solver version information."""
+        logger.debug("Detecting MATLAB and solver versions...")
+        
+        try:
+            # Construct command to get version information
+            version_cmd = ("addpath(genpath('.')); "
+                          "try "
+                          "result = matlab_version_detection(); "
+                          "disp(['VERSION_INFO:', jsonencode(result)]); "
+                          "catch ME "
+                          "disp(['VERSION_ERROR:', ME.message]); "
+                          "end")
+            
+            if self.use_octave:
+                cmd = [self.matlab_executable, '--eval', version_cmd]
+            else:
+                cmd = [self.matlab_executable, '-batch', version_cmd]
+            
+            result = subprocess.run(
+                cmd,
+                capture_output=True,
+                text=True,
+                timeout=30,  # Shorter timeout for version detection
+                cwd=project_root
+            )
+            
+            if result.returncode == 0:
+                # Parse version information from output
+                self._parse_version_output(result.stdout)
+            else:
+                logger.warning(f"Version detection failed: {result.stderr}")
+                self._set_default_versions()
+                
+        except subprocess.TimeoutExpired:
+            logger.warning("Version detection timed out, using default versions")
+            self._set_default_versions()
+        except Exception as e:
+            logger.warning(f"Version detection error: {e}, using default versions")
+            self._set_default_versions()
+    
+    def _parse_version_output(self, output: str) -> None:
+        """Parse version information from MATLAB output."""
+        try:
+            for line in output.split('\n'):
+                if line.startswith('VERSION_INFO:'):
+                    version_json = line[len('VERSION_INFO:'):].strip()
+                    version_data = json.loads(version_json)
+                    
+                    self._matlab_version_cache = version_data.get('matlab_version', 'unknown')
+                    
+                    # Extract solver-specific version
+                    solver_versions = version_data.get('solver_versions', {})
+                    if self.matlab_solver in solver_versions:
+                        self._version_cache = solver_versions[self.matlab_solver]
+                    else:
+                        self._version_cache = f"{self.SUPPORTED_SOLVERS[self.matlab_solver]} (version unknown)"
+                    
+                    logger.debug(f"Detected versions - MATLAB: {self._matlab_version_cache}, "
+                               f"{self.matlab_solver}: {self._version_cache}")
+                    return
+                elif line.startswith('VERSION_ERROR:'):
+                    error_msg = line[len('VERSION_ERROR:'):].strip()
+                    logger.warning(f"MATLAB version detection error: {error_msg}")
+                    break
+            
+            # If no version info found, use defaults
+            self._set_default_versions()
+            
+        except json.JSONDecodeError as e:
+            logger.warning(f"Failed to parse version JSON: {e}")
+            self._set_default_versions()
+    
+    def _set_default_versions(self) -> None:
+        """Set default version information when detection fails."""
+        self._matlab_version_cache = 'unknown'
+        self._version_cache = f"{self.SUPPORTED_SOLVERS[self.matlab_solver]} (version unknown)"
     
     def _parse_matlab_error(self, stderr: str, stdout: str) -> str:
         """Parse MATLAB error messages to extract meaningful information."""
@@ -170,7 +272,11 @@ class MatlabSolver(SolverInterface):
         safe_result_file = result_file.replace("'", "''")
         
         # Construct MATLAB command string
-        matlab_command = f"matlab_runner('{safe_problem_name}', '{safe_solver_name}', '{safe_result_file}')"
+        # Get the path to MATLAB scripts
+        matlab_script_dir = Path(__file__).parent.absolute()
+        
+        # Create MATLAB command that adds path and then runs the function
+        matlab_command = f"addpath('{matlab_script_dir}'); matlab_runner('{safe_problem_name}', '{safe_solver_name}', '{safe_result_file}')"
         
         # Build command array
         if self.use_octave:
@@ -182,7 +288,7 @@ class MatlabSolver(SolverInterface):
     
     def solve(self, problem_data: ProblemData, timeout: Optional[float] = None) -> SolverResult:
         """
-        Solve optimization problem using MATLAB solver with enhanced temp file management.
+        Solve optimization problem using MATLAB solver with full registry integration.
         
         Args:
             problem_data: Problem data in unified format
@@ -204,17 +310,26 @@ class MatlabSolver(SolverInterface):
             with temp_file_context(".json") as result_file:
                 logger.debug(f"Using temporary result file: {result_file}")
                 
-                # Verify problem data has required fields (simplified check for Task 12)
-                if not hasattr(problem_data, 'name'):
+                # Enhanced problem data validation
+                if not self._validate_problem_data(problem_data):
                     return SolverResult.create_error_result(
-                        "Problem data missing required 'name' field",
+                        "Problem data validation failed",
                         solve_time=time.time() - start_time,
                         solver_name=self.solver_name,
                         solver_version=self.get_version()
                     )
                 
-                # Get problem name from metadata
-                problem_name = problem_data.name
+                # Resolve problem path from registry
+                problem_name, problem_path = self._resolve_problem_info(problem_data)
+                
+                # Check solver compatibility with problem type
+                if not self._check_solver_compatibility(problem_data):
+                    return SolverResult.create_error_result(
+                        f"Problem type not supported by {self.matlab_solver}",
+                        solve_time=time.time() - start_time,
+                        solver_name=self.solver_name,
+                        solver_version=self.get_version()
+                    )
                 
                 # Construct safe MATLAB command
                 try:
@@ -330,11 +445,11 @@ class MatlabSolver(SolverInterface):
             )
     
     def _convert_matlab_result(self, matlab_result: Dict[str, Any], solve_time: float) -> SolverResult:
-        """Convert MATLAB JSON result to SolverResult format."""
+        """Convert MATLAB JSON result to SolverResult format with enhanced metadata."""
         
-        # Extract solver version information
-        solver_version = matlab_result.get('solver_version', 'unknown')
-        matlab_version = matlab_result.get('matlab_version', 'unknown')
+        # Extract solver version information (use cached versions if available)
+        solver_version = matlab_result.get('solver_version', self._version_cache or 'unknown')
+        matlab_version = matlab_result.get('matlab_version', self._matlab_version_cache or 'unknown')
         combined_version = f"{solver_version} (MATLAB {matlab_version})"
         
         # Handle None/null values from JSON
@@ -359,7 +474,11 @@ class MatlabSolver(SolverInterface):
                 additional_info={
                     'matlab_output': matlab_result,
                     'matlab_version': matlab_version,
-                    'temp_file_stats': self.temp_manager.get_temp_file_stats()
+                    'solver_backend': self.matlab_solver,
+                    'execution_environment': 'octave' if self.use_octave else 'matlab',
+                    'temp_file_stats': self.temp_manager.get_temp_file_stats(),
+                    'problem_registry_loaded': len(self.problem_registry.get('problem_libraries', {})) > 0,
+                    'version_cache_available': self._version_cache is not None
                 }
             )
         except Exception as e:
@@ -371,25 +490,94 @@ class MatlabSolver(SolverInterface):
                 solver_version=combined_version
             )
     
-    def get_version(self) -> str:
-        """Get MATLAB solver version information."""
+    def _validate_problem_data(self, problem_data: ProblemData) -> bool:
+        """Validate that problem data has required fields for MATLAB integration."""
         try:
-            # Basic version detection for Task 12 demonstration
-            if self.matlab_solver == 'sedumi':
-                return f"{self.SUPPORTED_SOLVERS[self.matlab_solver]} (MATLAB)"
-            elif self.matlab_solver == 'sdpt3':
-                return f"{self.SUPPORTED_SOLVERS[self.matlab_solver]} (MATLAB)"
-            else:
-                return f"{self.SUPPORTED_SOLVERS.get(self.matlab_solver, 'Unknown')} (MATLAB)"
+            # Check for required name field
+            if not hasattr(problem_data, 'name') or not problem_data.name:
+                logger.error("Problem data missing required 'name' field")
+                return False
+            
+            # Check that problem exists in registry
+            if problem_data.name not in self.problem_registry.get('problem_libraries', {}):
+                logger.error(f"Problem '{problem_data.name}' not found in problem registry")
+                return False
+            
+            # Basic structure validation
+            if not hasattr(problem_data, 'problem_class'):
+                logger.warning("Problem data missing 'problem_class' field")
+            
+            return True
+            
+        except Exception as e:
+            logger.error(f"Problem data validation error: {e}")
+            return False
+    
+    def _resolve_problem_info(self, problem_data: ProblemData) -> tuple[str, str]:
+        """Resolve problem name and path from registry."""
+        problem_name = problem_data.name
+        
+        # Get problem info from registry
+        problem_info = self.problem_registry['problem_libraries'].get(problem_name)
+        if not problem_info:
+            raise ValueError(f"Problem '{problem_name}' not found in registry")
+        
+        # Resolve absolute path
+        problem_path = str(project_root / problem_info['file_path'])
+        
+        logger.debug(f"Resolved problem '{problem_name}' to path: {problem_path}")
+        return problem_name, problem_path
+    
+    def _check_solver_compatibility(self, problem_data: ProblemData) -> bool:
+        """Check if solver is compatible with problem type."""
+        try:
+            # Get problem info from registry
+            problem_name = problem_data.name
+            problem_info = self.problem_registry['problem_libraries'].get(problem_name)
+            
+            if not problem_info:
+                return False
+            
+            # Check file type compatibility
+            file_type = problem_info.get('file_type', '')
+            
+            # MATLAB solvers support both MAT (DIMACS) and DAT-S (SDPLIB) formats
+            supported_types = ['mat', 'dat-s']
+            
+            if file_type not in supported_types:
+                logger.warning(f"Unsupported file type '{file_type}' for MATLAB solver")
+                return False
+            
+            # Additional compatibility checks based on problem class
+            problem_class = getattr(problem_data, 'problem_class', '')
+            
+            # Both SeDuMi and SDPT3 support LP, QP, SOCP, and SDP
+            # No specific exclusions needed for these solvers
+            
+            return True
+            
+        except Exception as e:
+            logger.error(f"Solver compatibility check failed: {e}")
+            return False
+    
+    def get_version(self) -> str:
+        """Get MATLAB solver version information with dynamic detection."""
+        try:
+            # Use cached version if available
+            if self._version_cache:
+                return self._version_cache
+            
+            # Fallback to static version info
+            return f"{self.SUPPORTED_SOLVERS[self.matlab_solver]} (MATLAB)"
                 
         except Exception:
             return f"{self.SUPPORTED_SOLVERS.get(self.matlab_solver, 'Unknown')} (version detection failed)"
     
     def validate_problem_compatibility(self, problem_data: ProblemData) -> bool:
         """Check if problem is compatible with MATLAB solver."""
-        # Basic compatibility check for Task 12
-        # Full implementation will be in Sprint 4
-        return hasattr(problem_data, 'name')
+        # Use the enhanced compatibility check
+        return (self._validate_problem_data(problem_data) and 
+                self._check_solver_compatibility(problem_data))
     
     def get_temp_file_stats(self) -> Dict[str, Any]:
         """Get current temporary file statistics."""

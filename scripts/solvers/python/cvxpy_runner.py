@@ -533,24 +533,3 @@ class CvxpySolver(SolverInterface):
     def validate_problem_compatibility(self, problem_data: ProblemData) -> bool:
         """Check if the solver can handle the given problem type."""
         return problem_data.problem_class in self.backend_capabilities["supported_problem_types"]
-
-
-# Convenience function to create solvers with different backends
-def create_cvxpy_solvers(verbose: bool = False) -> List[CvxpySolver]:
-    """Create CVXPY solver instances for different available backends."""
-    available_backends = cp.installed_solvers()
-    solver_instances = []
-    
-    # Define open-source backends in order of preference
-    open_source_backends = ["CLARABEL", "SCS", "ECOS", "OSQP"]
-    
-    for backend_name in open_source_backends:
-        if backend_name in available_backends:
-            try:
-                solver_instance = CvxpySolver(backend=backend_name, verbose=verbose)
-                solver_instances.append(solver_instance)
-            except Exception as e:
-                logger.warning(f"Failed to create solver for backend {backend_name}: {e}")
-    
-    return solver_instances
-

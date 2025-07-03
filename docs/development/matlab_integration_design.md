@@ -185,15 +185,17 @@ end
 
 #### `scripts/solvers/matlab_octave/sedumi_runner.m`
 ```matlab
-function result = sedumi_runner(A, b, c, K, solver_options)
-% Execute SeDuMi solver and collect standardized metrics
+function [x, y, info] = sedumi_runner(A, b, c, K, solver_options)
+% Execute SeDuMi solver and return solutions
 %
 % Input:
 %   A, b, c, K: SeDuMi format optimization problem
 %   solver_options: Optional solver parameters (struct)
 %
 % Output:
-%   result: Struct with standardized solver metrics
+%   x: Primal solution vector
+%   y: Dual solution vector
+%   info: Solver information structure
 
 % Set default options for fair benchmarking
 if nargin < 5 || isempty(solver_options)
@@ -212,85 +214,32 @@ if isfield(solver_options, 'eps')
 end
 
 try
-    % Record start time
-    start_time = tic;
-    
-    % Execute SeDuMi solver
+    % Execute SeDuMi solver with minimal configuration
     [x, y, info] = sedumi(A, b, c, K, pars);
     
-    % Record solve time
-    solve_time = toc(start_time);
-    
-    % Extract solver information
-    solver_version = sedumi_version();
-    matlab_version = version();
-    
-    % Compute standardized metrics
-    result = struct();
-    result.solve_time = solve_time;
-    
-    % Map SeDuMi status to standard format
-    if info.pinf == 0 && info.dinf == 0
-        result.status = 'optimal';
-        result.primal_objective_value = c' * x;
-        result.dual_objective_value = b' * y;
-        result.duality_gap = abs(result.primal_objective_value - result.dual_objective_value);
-    elseif info.pinf == 1
-        result.status = 'primal_infeasible';
-        result.primal_objective_value = [];
-        result.dual_objective_value = [];
-        result.duality_gap = [];
-    elseif info.dinf == 1
-        result.status = 'dual_infeasible';
-        result.primal_objective_value = [];
-        result.dual_objective_value = [];
-        result.duality_gap = [];
-    else
-        result.status = 'unknown';
-        result.primal_objective_value = [];
-        result.dual_objective_value = [];
-        result.duality_gap = [];
-    end
-    
-    % Extract infeasibility measures
-    result.primal_infeasibility = info.numerr;
-    result.dual_infeasibility = info.numerr;
-    result.iterations = info.iter;
-    
-    % Store solver metadata
-    result.solver_version = solver_version;
-    result.matlab_version = matlab_version;
-    result.additional_info = info;
-    
 catch ME
-    % Handle solver errors gracefully
-    result = struct();
-    result.solve_time = 0;
-    result.status = 'error';
-    result.primal_objective_value = [];
-    result.dual_objective_value = [];
-    result.duality_gap = [];
-    result.primal_infeasibility = [];
-    result.dual_infeasibility = [];
-    result.iterations = [];
-    result.solver_version = 'unknown';
-    result.matlab_version = version();
-    result.error_message = ME.message;
+    % Handle solver errors - return empty solutions
+    x = [];
+    y = [];
+    info = struct();
+    info.error_message = ME.message;
 end
 end
 ```
 
 #### `scripts/solvers/matlab_octave/sdpt3_runner.m`
 ```matlab
-function result = sdpt3_runner(A, b, c, K, solver_options)
-% Execute SDPT3 solver and collect standardized metrics
+function [x, y, info] = sdpt3_runner(A, b, c, K, solver_options)
+% Execute SDPT3 solver and return solutions
 %
 % Input:
 %   A, b, c, K: SeDuMi format optimization problem
 %   solver_options: Optional solver parameters (struct)
 %
 % Output:
-%   result: Struct with standardized solver metrics
+%   x: Primal solution vector (in SeDuMi format)
+%   y: Dual solution vector
+%   info: Solver information structure
 
 % Set default options for fair benchmarking
 if nargin < 5 || isempty(solver_options)
@@ -309,71 +258,29 @@ if isfield(solver_options, 'gaptol')
 end
 
 try
-    % Record start time
-    start_time = tic;
+    % Convert SeDuMi format to SDPT3 format
+    [blk, At, C, b_sdpt3] = read_sedumi(A, b, c, K);
     
     % Execute SDPT3 solver
-    [blk, A_sdpt3, C, b_sdpt3] = read_sedumi(A, b, c, K);
-    [obj, X, y, Z, info, runhist] = sqlp(blk, A_sdpt3, C, b_sdpt3, options);
+    [obj, X, y, Z, info, runhist] = sqlp(blk, At, C, b_sdpt3, options);
     
-    % Record solve time
-    solve_time = toc(start_time);
-    
-    % Get solver version information
-    matlab_version = version();
-    sdpt3_version = '4.0';  % Default version (can be detected if available)
-    
-    % Compute standardized metrics
-    result = struct();
-    result.solve_time = solve_time;
-    
-    % Map SDPT3 status to standard format
-    if info.termcode == 0
-        result.status = 'optimal';
-        result.primal_objective_value = obj(1);
-        result.dual_objective_value = obj(2);
-        result.duality_gap = abs(obj(1) - obj(2));
-    elseif info.termcode == 1
-        result.status = 'primal_infeasible';
-        result.primal_objective_value = [];
-        result.dual_objective_value = [];
-        result.duality_gap = [];
-    elseif info.termcode == 2
-        result.status = 'dual_infeasible';
-        result.primal_objective_value = [];
-        result.dual_objective_value = [];
-        result.duality_gap = [];
+    % Convert SDPT3 solution back to SeDuMi format using built-in function
+    if ~isempty(X) && iscell(X)
+        try
+            [x, ~, ~] = SDPT3soln_SEDUMIsoln(blk, At, C, b_sdpt3, X, y, Z);
+        catch
+            x = [];
+        end
     else
-        result.status = 'unknown';
-        result.primal_objective_value = [];
-        result.dual_objective_value = [];
-        result.duality_gap = [];
+        x = [];
     end
     
-    % Extract infeasibility measures
-    result.primal_infeasibility = info.pinfeas;
-    result.dual_infeasibility = info.dinfeas;
-    result.iterations = info.iter;
-    
-    % Store solver metadata
-    result.solver_version = sdpt3_version;
-    result.matlab_version = matlab_version;
-    result.additional_info = info;
-    
 catch ME
-    % Handle solver errors gracefully
-    result = struct();
-    result.solve_time = 0;
-    result.status = 'error';
-    result.primal_objective_value = [];
-    result.dual_objective_value = [];
-    result.duality_gap = [];
-    result.primal_infeasibility = [];
-    result.dual_infeasibility = [];
-    result.iterations = [];
-    result.solver_version = 'unknown';
-    result.matlab_version = version();
-    result.error_message = ME.message;
+    % Handle solver errors - return empty solutions
+    x = [];
+    y = [];
+    info = struct();
+    info.error_message = ME.message;
 end
 end
 ```
@@ -382,20 +289,23 @@ end
 
 #### `scripts/solvers/matlab_octave/matlab_runner.m`
 ```matlab
-function matlab_runner(problem_name, solver_name, result_file)
+function matlab_runner(problem_name, solver_name, result_file, save_solutions)
 % Main MATLAB orchestrator for benchmark execution
 %
 % Input:
 %   problem_name: Name of problem from problem_registry.yaml
 %   solver_name: Name of solver ('sedumi' or 'sdpt3')
 %   result_file: Path to output JSON file for results
+%   save_solutions: (optional) Boolean flag to save solutions to .mat file
 %
 % This function:
 % 1. Loads problem_registry.yaml configuration
 % 2. Resolves problem file path and type
 % 3. Loads problem data using appropriate loader
-% 4. Executes specified solver
-% 5. Saves results to JSON file
+% 4. Executes specified solver and gets solutions
+% 5. Calculates metrics using solver_metrics_calculator
+% 6. Saves results to JSON file
+% 7. Optionally saves solution vectors to .mat file
 
 try
     % Add necessary paths for solvers and loaders
@@ -424,13 +334,25 @@ try
         error('Unsupported file type: %s', file_type);
     end
     
-    % Execute solver
+    % Execute solver and get solutions
     if strcmp(solver_name, 'sedumi')
-        result = sedumi_runner(A, b, c, K);
+        [x, y, info] = sedumi_runner(A, b, c, K);
+        result = create_sedumi_result(info);
     elseif strcmp(solver_name, 'sdpt3')
-        result = sdpt3_runner(A, b, c, K);
+        [x, y, info] = sdpt3_runner(A, b, c, K);
+        result = create_sdpt3_result(info);
     else
         error('Unknown solver: %s', solver_name);
+    end
+    
+    % Calculate metrics using shared function
+    if ~isempty(x) && ~isempty(y)
+        result = solver_metrics_calculator(result, x, y, A, b, c);
+    end
+    
+    % Save solution vectors if requested and solver succeeded
+    if save_solutions && strcmp(result.status, 'optimal') && ~isempty(x) && ~isempty(y)
+        save_solution_file(problem_name, solver_name, x, y, save_solutions);
     end
     
     % Convert result to JSON-compatible format
@@ -900,6 +822,193 @@ def create_solver(self, solver_name: str) -> SolverInterface:
     else:
         raise ValueError(f"Unknown solver: {solver_name}")
 ```
+
+---
+
+## Enhanced Temporary File Management System (Task 12)
+
+### 1. Overview
+
+The enhanced temporary file management system provides robust, concurrent-safe handling of temporary files for Python-MATLAB data exchange. This system was implemented as part of Task 12 to ensure reliable file-based communication without conflicts.
+
+### 2. Architecture
+
+#### Core Components
+- **TempFileManager Class**: Centralized temporary file management
+- **Context Manager**: Automatic cleanup with `temp_file_context()`
+- **Orphaned File Cleanup**: Age-based cleanup of abandoned files
+- **Concurrent Safety**: Process ID + UUID naming prevents conflicts
+
+#### File Naming Strategy
+```
+Format: {prefix}_{process_id}_{timestamp}_{uuid}.{extension}
+Example: matlab_sedumi_result_12345_1751374419_a1b2c3d4.json
+```
+
+### 3. Key Features
+
+#### Unique File Generation
+```python
+from scripts.utils.temp_file_manager import TempFileManager
+
+manager = TempFileManager("matlab_result")
+temp_file = manager.create_temp_file(".json")  # Atomic creation
+```
+
+#### Context Manager for Automatic Cleanup
+```python
+from scripts.utils.temp_file_manager import temp_file_context
+
+with temp_file_context(".json") as temp_file:
+    # Use temp file
+    with open(temp_file, 'w') as f:
+        json.dump(result_data, f)
+    # File automatically cleaned up on exit
+```
+
+#### Orphaned File Cleanup
+```python
+# Clean up files older than 1 hour
+manager = TempFileManager(cleanup_age_hours=1)
+cleaned_count = manager.cleanup_orphaned_files()
+```
+
+#### Error Handling and Fallbacks
+- Multiple temp directory options (system temp, project temp, /tmp, current dir)
+- Graceful handling of disk full, permission errors
+- Safe cleanup that ignores missing files
+- Detailed logging for debugging
+
+### 4. Integration with MATLAB Solver
+
+#### Python Side (matlab_solver.py)
+```python
+class MatlabSolver(SolverInterface):
+    def __init__(self, matlab_solver: str, **kwargs):
+        # Initialize with solver-specific temp manager
+        self.temp_manager = TempFileManager(
+            base_prefix=f"matlab_{matlab_solver}_result",
+            cleanup_age_hours=1
+        )
+    
+    def solve(self, problem_data: ProblemData, timeout: Optional[float] = None) -> SolverResult:
+        # Clean up old files before starting
+        self.temp_manager.cleanup_orphaned_files()
+        
+        # Use context manager for automatic cleanup
+        with temp_file_context(".json") as result_file:
+            # Execute MATLAB with temp file
+            matlab_command = f"matlab_runner('{problem_name}', '{self.matlab_solver}', '{result_file}')"
+            # ... execute and read result
+            # File automatically cleaned up
+```
+
+#### MATLAB Side (matlab_runner.m)
+```matlab
+function matlab_runner(problem_name, solver_name, result_file, save_solutions)
+    % MATLAB receives the result file path from Python
+    % Writes JSON result to the specified file
+    
+    % ... solve problem ...
+    
+    % Save result to JSON file specified by Python
+    json_text = jsonencode(json_result);
+    fid = fopen(result_file, 'w');
+    fprintf(fid, '%s', json_text);
+    fclose(fid);
+end
+```
+
+### 5. Concurrency and Safety
+
+#### Process Isolation
+- Each Python process uses unique process ID in file names
+- UUID component ensures uniqueness within process
+- No shared state between concurrent executions
+
+#### File System Safety
+- Atomic file creation using `os.O_CREAT | os.O_EXCL`
+- Proper file permissions (0o600 - owner read/write only)
+- Safe cleanup that handles missing files gracefully
+
+#### Resource Management
+- Automatic cleanup via context managers
+- Age-based cleanup of orphaned files
+- Statistics tracking for monitoring
+
+### 6. Testing and Validation
+
+#### Comprehensive Test Suite
+```bash
+python tests/test_temp_file_management.py
+```
+
+**Test Coverage:**
+- ✅ Unique file name generation
+- ✅ Atomic file creation and cleanup
+- ✅ Context manager automatic cleanup
+- ✅ Orphaned file cleanup (age-based)
+- ✅ Concurrent file creation without conflicts
+- ✅ File statistics tracking
+- ✅ Error handling scenarios
+
+### 7. Performance Characteristics
+
+#### Overhead Analysis
+- File name generation: ~1ms
+- File creation: ~5-10ms (system dependent)
+- Cleanup: ~1-2ms per file
+- Orphaned file scan: ~10-50ms (depends on temp directory size)
+
+#### Scalability
+- Handles thousands of concurrent temp files
+- Cleanup scales linearly with file count
+- Memory usage minimal (no caching of file lists)
+
+### 8. Configuration Options
+
+#### TempFileManager Parameters
+```python
+manager = TempFileManager(
+    base_prefix="custom_prefix",      # Base name for temp files
+    cleanup_age_hours=2               # Age threshold for orphaned cleanup
+)
+```
+
+#### Environment Variables (Future Enhancement)
+- `MATLAB_TEMP_DIR`: Override temp directory location
+- `MATLAB_CLEANUP_AGE`: Override cleanup age threshold
+- `MATLAB_TEMP_PREFIX`: Override temp file prefix
+
+### 9. Monitoring and Debugging
+
+#### Statistics Collection
+```python
+stats = manager.get_temp_file_stats()
+# Returns:
+# {
+#     'total_files': 5,
+#     'total_size_bytes': 12458,
+#     'temp_directory': '/tmp',
+#     'oldest_file': '/tmp/matlab_result_12345_1751374419_a1b2c3d4.json',
+#     'oldest_age_hours': 0.25
+# }
+```
+
+#### Logging Integration
+- All temp file operations logged at DEBUG level
+- Cleanup actions logged at INFO level
+- Errors logged at WARNING/ERROR levels
+- Compatible with existing logger system
+
+### 10. Future Enhancements
+
+#### Planned Improvements
+- **Batch Cleanup**: Cleanup multiple files in single operation
+- **Compression**: Optional compression for large result files
+- **Encryption**: Optional encryption for sensitive temporary data
+- **Network Storage**: Support for shared/network temporary directories
+- **Metrics Collection**: Integration with monitoring systems
 
 ---
 

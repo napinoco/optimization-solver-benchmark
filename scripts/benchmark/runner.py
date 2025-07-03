@@ -46,6 +46,18 @@ from scripts.data_loaders.python.dat_loader import DATLoader
 
 logger = get_logger("benchmark_runner")
 
+# MATLAB solver imports (with graceful degradation if not available)
+try:
+    from scripts.solvers.matlab_octave.matlab_solver import SeDuMiSolver, SDPT3Solver
+    MATLAB_SOLVERS_AVAILABLE = True
+    logger.debug("MATLAB solvers available for integration")
+except ImportError as e:
+    MATLAB_SOLVERS_AVAILABLE = False
+    logger.warning(f"MATLAB solvers not available: {e}")
+    # Define dummy classes to prevent runtime errors
+    SeDuMiSolver = None
+    SDPT3Solver = None
+
 
 class BenchmarkRunner:
     """Main benchmark execution engine with direct database storage"""
@@ -141,8 +153,54 @@ class BenchmarkRunner:
             return CvxpySolver(backend="SCIP", save_solutions=self.save_solutions)
         elif solver_name == "cvxpy_highs":
             return CvxpySolver(backend="HIGHS", save_solutions=self.save_solutions)  # Actual HiGHS solver
+        
+        # MATLAB solver integration
+        elif solver_name == "matlab_sedumi":
+            if not MATLAB_SOLVERS_AVAILABLE:
+                raise ValueError(f"MATLAB solvers not available. Please check MATLAB installation and ensure SeDuMi is accessible.")
+            return SeDuMiSolver(save_solutions=self.save_solutions)
+        elif solver_name == "matlab_sdpt3":
+            if not MATLAB_SOLVERS_AVAILABLE:
+                raise ValueError(f"MATLAB solvers not available. Please check MATLAB installation and ensure SDPT3 is accessible.")
+            return SDPT3Solver(save_solutions=self.save_solutions)
+        
         else:
             raise ValueError(f"Unknown solver: {solver_name}")
+    
+    def get_available_solvers(self) -> List[str]:
+        """
+        Get list of currently available solvers.
+        
+        Returns:
+            List of solver names that can be created
+        """
+        # Python solvers (always available)
+        available_solvers = [
+            "scipy_linprog",
+            "cvxpy_clarabel", 
+            "cvxpy_scs",
+            "cvxpy_ecos",
+            "cvxpy_osqp",
+            "cvxpy_cvxopt",
+            "cvxpy_sdpa",
+            "cvxpy_scip",
+            "cvxpy_highs"
+        ]
+        
+        # Add MATLAB solvers if available (check by trying to import)
+        try:
+            from scripts.solvers.matlab_octave.matlab_solver import SeDuMiSolver, SDPT3Solver
+            available_solvers.extend([
+                "matlab_sedumi",
+                "matlab_sdpt3"
+            ])
+            logger.debug("MATLAB solvers added to available solvers list")
+        except ImportError as e:
+            logger.debug(f"MATLAB solvers not available for inclusion in available solvers: {e}")
+        except Exception as e:
+            logger.warning(f"Unexpected error checking MATLAB solver availability: {e}")
+        
+        return available_solvers
     
     def load_problem(self, problem_name: str, problem_config: Dict[str, Any]) -> Any:
         """
@@ -359,14 +417,6 @@ class BenchmarkRunner:
         
         return problems
     
-    def get_available_solvers(self) -> List[str]:
-        """
-        Get list of available solvers from registry.
-        
-        Returns:
-            List of solver names
-        """
-        return list(self.solver_registry['solvers'].keys())
     
     def validate_setup(self) -> Dict[str, Any]:
         """

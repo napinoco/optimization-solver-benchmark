@@ -20,7 +20,7 @@ sys.path.insert(0, str(project_root))
 
 from scripts.utils.logger import get_logger
 
-logger = get_logger("matlab_execution_test")
+logger = get_logger("matlab_execution_tester")
 
 
 class MatlabExecutionTester:
