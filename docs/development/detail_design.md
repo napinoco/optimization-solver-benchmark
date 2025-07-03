@@ -597,7 +597,29 @@ def load_problem(self, problem_name: str, problem_library: str) -> ProblemData:
     return loader.load(file_path)
 ```
 
-### 3. Solver Architecture with Standardized Output
+### 3. Solver Architecture with Interface Symmetry
+
+#### Design Philosophy: Symmetrical Interface Pattern
+
+The solver architecture follows a **symmetrical interface pattern** where each solver ecosystem has its own dedicated interface module that manages the complexities of that ecosystem, while maintaining a unified interface to the benchmark runner.
+
+```
+scripts/solvers/
+├── python/
+│   ├── cvxpy_runner.py      # Individual CVXPY solver implementations  
+│   ├── scipy_runner.py      # Individual SciPy solver implementations
+│   └── python_interface.py  # Python ecosystem management interface
+└── matlab_octave/
+    ├── matlab_interface.py   # MATLAB ecosystem management interface
+    └── ...individual solver files
+```
+
+#### Benefits of Symmetrical Design
+- **Architectural Consistency**: Both Python and MATLAB ecosystems have dedicated interface modules
+- **Separation of Concerns**: Each interface handles its ecosystem's specific complexities
+- **Maintainability**: Changes to solver ecosystems are isolated within their interface modules
+- **Extensibility**: Easy to add new solver ecosystems (e.g., Julia, R) following the same pattern
+- **Testability**: Each interface can be tested independently from the orchestration layer
 
 #### Solver Interface
 ```python
@@ -622,7 +644,46 @@ class SolverResult:
         self.solver_info: dict               # Additional solver-specific information
 ```
 
-#### CVXPY and SciPy Solver Implementation
+#### Python Interface Module
+```python
+class PythonInterface:
+    """Interface for managing Python solver ecosystem"""
+    
+    def __init__(self, save_solutions: bool = False):
+        self.save_solutions = save_solutions
+        self.available_solvers = self._detect_available_solvers()
+    
+    def create_solver(self, solver_name: str) -> SolverInterface:
+        """Create Python solver instance based on solver name"""
+        # Handle Python-specific solver creation logic
+        # CVXPY backend management
+        # SciPy solver configuration
+        
+    def get_available_solvers(self) -> List[str]:
+        """Get list of available Python solvers"""
+        # Dynamic detection of available Python backends
+        
+    def validate_solver_compatibility(self, solver_name: str, problem_data: ProblemData) -> bool:
+        """Check if Python solver can handle problem type"""
+```
+
+#### MATLAB Interface Module (Already Implemented)
+```python
+class MatlabInterface:
+    """Interface for managing MATLAB solver ecosystem"""
+    
+    def create_solver(self, solver_name: str) -> SolverInterface:
+        """Create MATLAB solver instance (SeDuMi, SDPT3)"""
+        # Handle MATLAB-specific initialization
+        # Problem registry integration
+        # Version detection and validation
+        
+    def get_available_solvers(self) -> List[str]:
+        """Get list of available MATLAB solvers"""
+        # Check MATLAB installation and solver availability
+```
+
+#### Individual Solver Implementations
 ```python
 class CVXPYSolver(SolverInterface):
     """CVXPY solver with multiple backend support"""
@@ -634,7 +695,7 @@ class CVXPYSolver(SolverInterface):
     def solve(self, problem: ProblemData) -> SolverResult:
         """Solve using CVXPY with specified backend"""
         # Convert to CVXPY format
-        # Solve with specified backend
+        # Solve with specified backend  
         # Extract standardized results
         
     def detect_version(self) -> str:
@@ -646,6 +707,15 @@ class SciPySolver(SolverInterface):
     
     def solve(self, problem: ProblemData) -> SolverResult:
         """Solve using appropriate SciPy method based on problem type"""
+
+class MatlabSolver(SolverInterface):
+    """Base class for MATLAB solvers (SeDuMi, SDPT3)"""
+    
+    def solve(self, problem: ProblemData) -> SolverResult:
+        """Interface between Python and MATLAB solver systems"""
+        # Problem registry resolution
+        # MATLAB environment management
+        # Result conversion back to Python
 ```
 
 ### 4. Benchmark Execution and Database Storage

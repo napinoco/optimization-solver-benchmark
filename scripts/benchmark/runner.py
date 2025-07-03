@@ -35,10 +35,9 @@ from scripts.utils.environment_info import collect_environment_info
 from scripts.utils.git_utils import get_git_commit_hash
 from scripts.utils.logger import get_logger
 
-# Solver imports
-from scripts.solvers.python.scipy_runner import ScipySolver
-from scripts.solvers.python.cvxpy_runner import CvxpySolver
+# Solver interface imports
 from scripts.solvers.solver_interface import SolverInterface, SolverResult
+from scripts.solvers.python.python_interface import PythonInterface
 
 # Data loader imports
 from scripts.data_loaders.python.mat_loader import MATLoader
@@ -60,14 +59,14 @@ except ImportError as e:
 
 
 class BenchmarkRunner:
-    """Main benchmark execution engine with direct database storage"""
+    """Main benchmark execution engine with symmetrical solver interfaces"""
     
     def __init__(self, database_manager: Optional[DatabaseManager] = None, 
                  registries: Optional[Dict[str, Any]] = None,
                  dry_run: bool = False,
                  save_solutions: bool = False):
         """
-        Initialize simplified benchmark runner.
+        Initialize benchmark runner with symmetrical solver interfaces.
         
         Args:
             database_manager: Optional database manager (creates default if None)
@@ -78,6 +77,9 @@ class BenchmarkRunner:
         self.db = database_manager or DatabaseManager()
         self.dry_run = dry_run
         self.save_solutions = save_solutions
+        
+        # Initialize solver interfaces (symmetrical design)
+        self.python_interface = PythonInterface(save_solutions=save_solutions)
         
         # Collect environment info and git hash once (now cached)
         self.environment_info = collect_environment_info()
@@ -93,10 +95,13 @@ class BenchmarkRunner:
             self.solver_registry = self.load_solver_registry()
             self.problem_registry = self.load_problem_registry()
         
-        
-        logger.info("Benchmark runner initialized")
+        logger.info("Benchmark runner initialized with symmetrical solver interfaces")
         logger.info(f"Git commit: {self.commit_hash}")
         logger.info(f"Environment: {self.environment_info['os']['system']} {self.environment_info['python']['version']}")
+        
+        # Log interface statistics
+        python_stats = self.python_interface.get_solver_statistics()
+        logger.info(f"Python interface: {python_stats['total_available']}/{python_stats['total_configured']} solvers available")
     
     def load_solver_registry(self) -> Dict[str, Any]:
         """Load solver registry from config/solver_registry.yaml"""
@@ -121,7 +126,7 @@ class BenchmarkRunner:
     
     def create_solver(self, solver_name: str) -> SolverInterface:
         """
-        Create solver instance based on solver name using direct logic.
+        Create solver instance using symmetrical interface pattern.
         
         Args:
             solver_name: Name of solver to create
@@ -132,29 +137,13 @@ class BenchmarkRunner:
         Raises:
             ValueError: If solver name is unknown
         """
-        logger.debug(f"Creating solver: {solver_name}")
+        logger.debug(f"Creating solver via interface: {solver_name}")
         
-        # Direct if-elif logic as specified in re-architecture
-        if solver_name == "scipy_linprog":
-            return ScipySolver(save_solutions=self.save_solutions)
-        elif solver_name == "cvxpy_clarabel":
-            return CvxpySolver(backend="CLARABEL", save_solutions=self.save_solutions)
-        elif solver_name == "cvxpy_scs":
-            return CvxpySolver(backend="SCS", save_solutions=self.save_solutions)
-        elif solver_name == "cvxpy_ecos":
-            return CvxpySolver(backend="ECOS", save_solutions=self.save_solutions)
-        elif solver_name == "cvxpy_osqp":
-            return CvxpySolver(backend="OSQP", save_solutions=self.save_solutions)
-        elif solver_name == "cvxpy_cvxopt":
-            return CvxpySolver(backend="CVXOPT", save_solutions=self.save_solutions)
-        elif solver_name == "cvxpy_sdpa":
-            return CvxpySolver(backend="SDPA", save_solutions=self.save_solutions)
-        elif solver_name == "cvxpy_scip":
-            return CvxpySolver(backend="SCIP", save_solutions=self.save_solutions)
-        elif solver_name == "cvxpy_highs":
-            return CvxpySolver(backend="HIGHS", save_solutions=self.save_solutions)  # Actual HiGHS solver
+        # Try Python interface first
+        if solver_name in self.python_interface.get_available_solvers():
+            return self.python_interface.create_solver(solver_name)
         
-        # MATLAB solver integration
+        # MATLAB solver integration (legacy direct creation for now)
         elif solver_name == "matlab_sedumi":
             if not MATLAB_SOLVERS_AVAILABLE:
                 raise ValueError(f"MATLAB solvers not available. Please check MATLAB installation and ensure SeDuMi is accessible.")
@@ -165,27 +154,19 @@ class BenchmarkRunner:
             return SDPT3Solver(save_solutions=self.save_solutions)
         
         else:
-            raise ValueError(f"Unknown solver: {solver_name}")
+            # Provide helpful error message with available solvers
+            available_solvers = self.get_available_solvers()
+            raise ValueError(f"Unknown solver: {solver_name}. Available solvers: {available_solvers}")
     
     def get_available_solvers(self) -> List[str]:
         """
-        Get list of currently available solvers.
+        Get list of currently available solvers using symmetrical interfaces.
         
         Returns:
             List of solver names that can be created
         """
-        # Python solvers (always available)
-        available_solvers = [
-            "scipy_linprog",
-            "cvxpy_clarabel", 
-            "cvxpy_scs",
-            "cvxpy_ecos",
-            "cvxpy_osqp",
-            "cvxpy_cvxopt",
-            "cvxpy_sdpa",
-            "cvxpy_scip",
-            "cvxpy_highs"
-        ]
+        # Get Python solvers from interface
+        available_solvers = self.python_interface.get_available_solvers()
         
         # Add MATLAB solvers if available (check by trying to import)
         try:
