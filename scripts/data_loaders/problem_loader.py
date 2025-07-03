@@ -107,69 +107,69 @@ def load_problem_registry() -> Dict:
         return yaml.safe_load(f)
 
 
-def load_problem(problem_name: str, problem_set: str = None) -> ProblemData:
-    """Load a specific problem by name from the registry."""
-    
-    # Load from registry (new flat structure)
-    registry = load_problem_registry()
-    
-    # Find the problem in the flat registry
-    problem_info = None
-    if problem_name in registry["problem_libraries"]:
-        problem_info = registry["problem_libraries"][problem_name]
-    
-    if not problem_info:
-        raise ValueError(f"Problem '{problem_name}' not found in registry")
-    
-    # Filter by problem_set/library if specified
-    if problem_set and problem_info.get("library_name") != problem_set:
-        raise ValueError(f"Problem '{problem_name}' is not from library '{problem_set}'")
-    
-    # Get absolute path to problem file
-    project_root = Path(__file__).parent.parent.parent
-    file_path = project_root / problem_info["file_path"]
-    
-    # Load based on file type
-    file_type = problem_info["file_type"]
-    
-    if file_type == "mat":
-        # Use MAT loader for .mat.gz files (DIMACS)
-        from scripts.data_loaders.python.mat_loader import MATLoader
-        loader = MATLoader()
-        return loader.load(str(file_path), problem_name)
-    elif file_type == "dat-s":
-        # Use DAT loader for .dat-s files (SDPLIB)
-        from scripts.data_loaders.python.dat_loader import DATLoader
-        loader = DATLoader()
-        return loader.load(str(file_path), problem_name)
-    # MPS, QPS, and Python loaders removed - no problems in registry use these formats
-    else:
-        raise ValueError(f"Unsupported file type: {file_type}")
-
-
-if __name__ == "__main__":
-    # Test script to load and validate problems
-    try:
-        # Test loading registry
-        registry = load_problem_registry()
-        print("Registry loaded successfully:")
-        print(f"Problem sets: {list(registry['problems'].keys())}")
-        
-        # Test loading each problem
-        for problem_set in registry["problems"]:
-            for problem_class in registry["problems"][problem_set]:
-                for problem_info in registry["problems"][problem_set][problem_class]:
-                    problem_name = problem_info["name"]
-                    print(f"\nTesting problem: {problem_name}")
-                    
-                    problem = load_problem(problem_name, problem_set)
-                    print(f"  Loaded: {problem}")
-                    print(f"  Variables: {len(problem.c) if problem.c is not None else 0}")
-                    if problem.A_ub is not None:
-                        print(f"  Constraints: {problem.A_ub.shape[0]}")
-                    if problem.P is not None:
-                        print(f"  Quadratic matrix shape: {problem.P.shape}")
-                        
-    except Exception as e:
-        logger.error(f"Test failed: {e}")
-        raise
+# def load_problem(problem_name: str, problem_set: str = None) -> ProblemData:
+#     """Load a specific problem by name from the registry."""
+#
+#     # Load from registry (new flat structure)
+#     registry = load_problem_registry()
+#
+#     # Find the problem in the flat registry
+#     problem_info = None
+#     if problem_name in registry["problem_libraries"]:
+#         problem_info = registry["problem_libraries"][problem_name]
+#
+#     if not problem_info:
+#         raise ValueError(f"Problem '{problem_name}' not found in registry")
+#
+#     # Filter by problem_set/library if specified
+#     if problem_set and problem_info.get("library_name") != problem_set:
+#         raise ValueError(f"Problem '{problem_name}' is not from library '{problem_set}'")
+#
+#     # Get absolute path to problem file
+#     project_root = Path(__file__).parent.parent.parent
+#     file_path = project_root / problem_info["file_path"]
+#
+#     # Load based on file type
+#     file_type = problem_info["file_type"]
+#
+#     if file_type == "mat":
+#         # Use MAT loader for .mat.gz files (DIMACS)
+#         from scripts.data_loaders.python.mat_loader import MATLoader
+#         loader = MATLoader()
+#         return loader.load(str(file_path), problem_name)
+#     elif file_type == "dat-s":
+#         # Use DAT loader for .dat-s files (SDPLIB)
+#         from scripts.data_loaders.python.dat_loader import DATLoader
+#         loader = DATLoader()
+#         return loader.load(str(file_path), problem_name)
+#     # MPS, QPS, and Python loaders removed - no problems in registry use these formats
+#     else:
+#         raise ValueError(f"Unsupported file type: {file_type}")
+#
+#
+# if __name__ == "__main__":
+#     # Test script to load and validate problems
+#     try:
+#         # Test loading registry
+#         registry = load_problem_registry()
+#         print("Registry loaded successfully:")
+#         print(f"Problem sets: {list(registry['problems'].keys())}")
+#
+#         # Test loading each problem
+#         for problem_set in registry["problems"]:
+#             for problem_class in registry["problems"][problem_set]:
+#                 for problem_info in registry["problems"][problem_set][problem_class]:
+#                     problem_name = problem_info["name"]
+#                     print(f"\nTesting problem: {problem_name}")
+#
+#                     problem = load_problem(problem_name, problem_set)
+#                     print(f"  Loaded: {problem}")
+#                     print(f"  Variables: {len(problem.c) if problem.c is not None else 0}")
+#                     if problem.A_ub is not None:
+#                         print(f"  Constraints: {problem.A_ub.shape[0]}")
+#                     if problem.P is not None:
+#                         print(f"  Quadratic matrix shape: {problem.P.shape}")
+#
+#     except Exception as e:
+#         logger.error(f"Test failed: {e}")
+#         raise

@@ -261,7 +261,7 @@ import logging
 logging.basicConfig(level=logging.DEBUG)
 
 # Test MATLAB solver
-from scripts.solvers.matlab_octave.matlab_solver import SeDuMiSolver
+from scripts.solvers.matlab_octave.matlab_interface import SeDuMiSolver
 solver = SeDuMiSolver()
 print(f"Solver initialized: {solver.solver_name}")
 ```

@@ -36,7 +36,7 @@ from scripts.data_loaders.problem_loader import ProblemData, load_problem_regist
 from scripts.utils.temp_file_manager import TempFileManager, temp_file_context
 from scripts.utils.logger import get_logger
 
-logger = get_logger("matlab_solver")
+logger = get_logger("matlab_interface")
 
 
 class MatlabSolver(SolverInterface):

@@ -83,8 +83,8 @@ class TestMATLABConfigIntegration(unittest.TestCase):
                 with patch.object(BenchmarkRunner, 'load_problem_registry',
                                 return_value=self.test_problem_registry):
                     # Mock MATLAB availability
-                    with patch('scripts.solvers.matlab_octave.matlab_solver.SeDuMiSolver') as mock_sedumi:
-                        with patch('scripts.solvers.matlab_octave.matlab_solver.SDPT3Solver') as mock_sdpt3:
+                    with patch('scripts.solvers.matlab_octave.matlab_interface.SeDuMiSolver') as mock_sedumi:
+                        with patch('scripts.solvers.matlab_octave.matlab_interface.SDPT3Solver') as mock_sdpt3:
                             runner = BenchmarkRunner()
                             available = runner.get_available_solvers()
                             
@@ -107,7 +107,7 @@ class TestMATLABConfigIntegration(unittest.TestCase):
                                 return_value=self.test_problem_registry):
                     # Mock MATLAB import failure
                     with patch('scripts.benchmark.runner.logger'):
-                        with patch('scripts.solvers.matlab_octave.matlab_solver.SeDuMiSolver',
+                        with patch('scripts.solvers.matlab_octave.matlab_interface.SeDuMiSolver',
                                  side_effect=ImportError("MATLAB not available")):
                             runner = BenchmarkRunner()
                             available = runner.get_available_solvers()
@@ -132,7 +132,7 @@ class TestMATLABConfigIntegration(unittest.TestCase):
                     mock_sedumi = Mock()
                     mock_sedumi.solver_name = 'matlab_sedumi'
                     
-                    with patch('scripts.solvers.matlab_octave.matlab_solver.SeDuMiSolver',
+                    with patch('scripts.solvers.matlab_octave.matlab_interface.SeDuMiSolver',
                              return_value=mock_sedumi):
                         runner = BenchmarkRunner()
                         solver = runner.create_solver('matlab_sedumi')

@@ -48,7 +48,7 @@ scripts/
 │
 ├── solvers/
 │   └── matlab_octave/          # MATLAB solver implementations
-│       ├── matlab_solver.py    # Python interface class
+│       ├── matlab_interface.py    # Python interface class
 │       ├── sedumi_runner.m     # SeDuMi solver execution
 │       ├── sdpt3_runner.m      # SDPT3 solver execution
 │       └── matlab_runner.m     # Main MATLAB orchestrator
@@ -465,7 +465,7 @@ end
 
 ### 4. Python Integration Interface
 
-#### `scripts/solvers/matlab_octave/matlab_solver.py`
+#### `scripts/solvers/matlab_octave/matlab_interface.py`
 ```python
 """
 MATLAB Solver Integration for Optimization Benchmark System.
@@ -493,7 +493,7 @@ from scripts.solvers.solver_interface import SolverInterface, SolverResult
 from scripts.data_loaders.problem_loader import ProblemData
 from scripts.utils.logger import get_logger
 
-logger = get_logger("matlab_solver")
+logger = get_logger("matlab_interface")
 
 
 class MatlabSolver(SolverInterface):
@@ -806,7 +806,7 @@ solvers:
 Extend `scripts/benchmark/runner.py`:
 ```python
 # Add import
-from scripts.solvers.matlab_octave.matlab_solver import SeDuMiSolver, SDPT3Solver
+from scripts.solvers.matlab_octave.matlab_interface import SeDuMiSolver, SDPT3Solver
 
 # Update create_solver method
 def create_solver(self, solver_name: str) -> SolverInterface:
@@ -881,7 +881,7 @@ cleaned_count = manager.cleanup_orphaned_files()
 
 ### 4. Integration with MATLAB Solver
 
-#### Python Side (matlab_solver.py)
+#### Python Side (matlab_interface.py)
 ```python
 class MatlabSolver(SolverInterface):
     def __init__(self, matlab_solver: str, **kwargs):

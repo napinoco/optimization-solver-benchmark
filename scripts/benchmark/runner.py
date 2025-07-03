@@ -48,7 +48,7 @@ logger = get_logger("benchmark_runner")
 
 # MATLAB solver imports (with graceful degradation if not available)
 try:
-    from scripts.solvers.matlab_octave.matlab_solver import SeDuMiSolver, SDPT3Solver
+    from scripts.solvers.matlab_octave.matlab_interface import SeDuMiSolver, SDPT3Solver
     MATLAB_SOLVERS_AVAILABLE = True
     logger.debug("MATLAB solvers available for integration")
 except ImportError as e:
@@ -189,7 +189,7 @@ class BenchmarkRunner:
         
         # Add MATLAB solvers if available (check by trying to import)
         try:
-            from scripts.solvers.matlab_octave.matlab_solver import SeDuMiSolver, SDPT3Solver
+            from scripts.solvers.matlab_octave.matlab_interface import SeDuMiSolver, SDPT3Solver
             available_solvers.extend([
                 "matlab_sedumi",
                 "matlab_sdpt3"
