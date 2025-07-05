@@ -35,13 +35,10 @@ from scripts.utils.environment_info import collect_environment_info
 from scripts.utils.git_utils import get_git_commit_hash
 from scripts.utils.logger import get_logger
 
-# Solver interface imports
+# Interface imports (symmetrical design)
 from scripts.solvers.solver_interface import SolverInterface, SolverResult
 from scripts.solvers.python.python_interface import PythonInterface
-
-# Data loader imports
-from scripts.data_loaders.python.mat_loader import MATLoader
-from scripts.data_loaders.python.dat_loader import DATLoader
+from scripts.data_loaders.python.problem_interface import ProblemInterface
 
 logger = get_logger("benchmark_runner")
 
@@ -78,30 +75,32 @@ class BenchmarkRunner:
         self.dry_run = dry_run
         self.save_solutions = save_solutions
         
-        # Initialize solver interfaces (symmetrical design)
+        # Initialize interfaces (symmetrical design)
         self.python_interface = PythonInterface(save_solutions=save_solutions)
+        self.problem_interface = ProblemInterface()
         
         # Collect environment info and git hash once (now cached)
         self.environment_info = collect_environment_info()
         self.commit_hash = get_git_commit_hash()
         
-        # Use pre-loaded registries or load them
+        # Use pre-loaded registries for backward compatibility
         if registries:
-            self.solver_registry = registries['solver_registry']
-            self.problem_registry = registries['problem_registry']
-            logger.debug("Using pre-loaded registries")
+            self.solver_registry = registries.get('solver_registry', {})
+            # Problem registry now managed by problem interface
+            logger.debug("Using pre-loaded solver registry")
         else:
-            # Fallback to loading configurations
+            # Fallback to loading solver configuration
             self.solver_registry = self.load_solver_registry()
-            self.problem_registry = self.load_problem_registry()
         
-        logger.info("Benchmark runner initialized with symmetrical solver interfaces")
+        logger.info("Benchmark runner initialized with symmetrical interfaces")
         logger.info(f"Git commit: {self.commit_hash}")
         logger.info(f"Environment: {self.environment_info['os']['system']} {self.environment_info['python']['version']}")
         
         # Log interface statistics
         python_stats = self.python_interface.get_solver_statistics()
+        problem_stats = self.problem_interface.get_problem_statistics()
         logger.info(f"Python interface: {python_stats['total_available']}/{python_stats['total_configured']} solvers available")
+        logger.info(f"Problem interface: {problem_stats['total_problems']} problems from {len(problem_stats['libraries'])} libraries")
     
     def load_solver_registry(self) -> Dict[str, Any]:
         """Load solver registry from config/solver_registry.yaml"""
@@ -114,15 +113,11 @@ class BenchmarkRunner:
             # Return empty registry to force configuration fix
             return {'solvers': {}}
     
+    # Problem registry loading now handled by problem interface
+    # Keeping method for backward compatibility but delegating to interface
     def load_problem_registry(self) -> Dict[str, Any]:
-        """Load problem registry from config/problem_registry.yaml"""
-        try:
-            config_path = project_root / "config" / "problem_registry.yaml"
-            with open(config_path, 'r') as f:
-                return yaml.safe_load(f)
-        except Exception as e:
-            logger.warning(f"Failed to load problem registry: {e}")
-            return {'problem_libraries': {}}
+        """Load problem registry (delegated to problem interface)"""
+        return self.problem_interface.problem_registry
     
     def create_solver(self, solver_name: str) -> SolverInterface:
         """
@@ -183,31 +178,18 @@ class BenchmarkRunner:
         
         return available_solvers
     
-    def load_problem(self, problem_name: str, problem_config: Dict[str, Any]) -> Any:
+    def load_problem(self, problem_name: str, problem_config: Optional[Dict[str, Any]] = None) -> Any:
         """
-        Load problem using appropriate loader based on file type.
+        Load problem using problem interface (symmetrical design).
         
         Args:
             problem_name: Name of the problem
-            problem_config: Problem configuration from registry
+            problem_config: Optional problem configuration (delegated to interface)
             
         Returns:
             Loaded problem data
         """
-        file_type = problem_config['file_type']
-        file_path = project_root / problem_config['file_path']
-        
-        logger.debug(f"Loading problem {problem_name} from {file_path} (type: {file_type})")
-        
-        # Select appropriate loader based on file type
-        if file_type == 'mat':
-            loader = MATLoader()
-        elif file_type == 'dat-s':
-            loader = DATLoader()
-        else:
-            raise ValueError(f"Unsupported file type: {file_type}")
-        
-        return loader.load(str(file_path))
+        return self.problem_interface.load_problem(problem_name, problem_config)
     
     def store_result(self, solver_name: str, problem_name: str, 
                     result: SolverResult, problem_config: Dict[str, Any], 
@@ -380,7 +362,7 @@ class BenchmarkRunner:
     
     def get_available_problems(self, for_test_only: bool = False) -> List[str]:
         """
-        Get list of available problems from registry.
+        Get list of available problems using problem interface.
         
         Args:
             for_test_only: If True, only return problems marked for testing
@@ -388,15 +370,7 @@ class BenchmarkRunner:
         Returns:
             List of problem names
         """
-        problems = []
-        for problem_name, config in self.problem_registry['problem_libraries'].items():
-            if for_test_only:
-                if config.get('for_test_flag', False):
-                    problems.append(problem_name)
-            else:
-                problems.append(problem_name)
-        
-        return problems
+        return self.problem_interface.get_available_problems(test_only=for_test_only)
     
     
     def validate_setup(self) -> Dict[str, Any]:
@@ -433,12 +407,12 @@ class BenchmarkRunner:
                     'error': str(e)
                 }
         
-        # Test problem loading
+        # Test problem loading using problem interface
         for problem_name in self.get_available_problems():
             report['summary']['total_problems'] += 1
             try:
-                problem_config = self.problem_registry['problem_libraries'][problem_name]
-                problem_data = self.load_problem(problem_name, problem_config)
+                problem_config = self.problem_interface.get_problem_config(problem_name)
+                problem_data = self.load_problem(problem_name)
                 report['problems'][problem_name] = {
                     'status': 'working',
                     'type': problem_config.get('problem_type', 'unknown'),

@@ -32,7 +32,8 @@ project_root = Path(__file__).parent.parent.parent.parent
 sys.path.insert(0, str(project_root))
 
 from scripts.solvers.solver_interface import SolverInterface, SolverResult
-from scripts.data_loaders.problem_loader import ProblemData, load_problem_registry
+from scripts.data_loaders.problem_loader import ProblemData
+from scripts.data_loaders.python.problem_interface import ProblemInterface
 from scripts.utils.temp_file_manager import TempFileManager, temp_file_context
 from scripts.utils.logger import get_logger
 
@@ -84,13 +85,14 @@ class MatlabSolver(SolverInterface):
             cleanup_age_hours=1  # Clean up files older than 1 hour
         )
         
-        # Load problem registry for problem resolution
+        # Initialize problem interface for problem resolution
         try:
-            self.problem_registry = load_problem_registry()
-            logger.debug(f"Loaded problem registry with {len(self.problem_registry.get('problem_libraries', {}))} problems")
+            self.problem_interface = ProblemInterface()
+            problem_stats = self.problem_interface.get_problem_statistics()
+            logger.debug(f"Loaded problem interface with {problem_stats['total_problems']} problems")
         except Exception as e:
-            logger.warning(f"Failed to load problem registry: {e}")
-            self.problem_registry = {'problem_libraries': {}}
+            logger.warning(f"Failed to initialize problem interface: {e}")
+            self.problem_interface = None
         
         # Cache for version information
         self._version_cache = None
@@ -477,7 +479,7 @@ class MatlabSolver(SolverInterface):
                     'solver_backend': self.matlab_solver,
                     'execution_environment': 'octave' if self.use_octave else 'matlab',
                     'temp_file_stats': self.temp_manager.get_temp_file_stats(),
-                    'problem_registry_loaded': len(self.problem_registry.get('problem_libraries', {})) > 0,
+                    'problem_interface_available': self.problem_interface is not None,
                     'version_cache_available': self._version_cache is not None
                 }
             )
@@ -498,10 +500,15 @@ class MatlabSolver(SolverInterface):
                 logger.error("Problem data missing required 'name' field")
                 return False
             
-            # Check that problem exists in registry
-            if problem_data.name not in self.problem_registry.get('problem_libraries', {}):
-                logger.error(f"Problem '{problem_data.name}' not found in problem registry")
-                return False
+            # Check that problem exists in registry using problem interface
+            if self.problem_interface:
+                try:
+                    self.problem_interface.get_problem_config(problem_data.name)
+                except ValueError:
+                    logger.error(f"Problem '{problem_data.name}' not found in problem registry")
+                    return False
+            else:
+                logger.warning("Problem interface not available for validation")
             
             # Basic structure validation
             if not hasattr(problem_data, 'problem_class'):
@@ -514,13 +521,17 @@ class MatlabSolver(SolverInterface):
             return False
     
     def _resolve_problem_info(self, problem_data: ProblemData) -> tuple[str, str]:
-        """Resolve problem name and path from registry."""
+        """Resolve problem name and path using problem interface."""
         problem_name = problem_data.name
         
-        # Get problem info from registry
-        problem_info = self.problem_registry['problem_libraries'].get(problem_name)
-        if not problem_info:
-            raise ValueError(f"Problem '{problem_name}' not found in registry")
+        # Get problem info from problem interface
+        if not self.problem_interface:
+            raise ValueError("Problem interface not available")
+        
+        try:
+            problem_info = self.problem_interface.get_problem_config(problem_name)
+        except ValueError as e:
+            raise ValueError(f"Problem '{problem_name}' not found in registry: {e}")
         
         # Resolve absolute path
         problem_path = str(project_root / problem_info['file_path'])
@@ -529,13 +540,18 @@ class MatlabSolver(SolverInterface):
         return problem_name, problem_path
     
     def _check_solver_compatibility(self, problem_data: ProblemData) -> bool:
-        """Check if solver is compatible with problem type."""
+        """Check if solver is compatible with problem type using problem interface."""
         try:
-            # Get problem info from registry
-            problem_name = problem_data.name
-            problem_info = self.problem_registry['problem_libraries'].get(problem_name)
+            # Get problem info from problem interface
+            if not self.problem_interface:
+                logger.warning("Problem interface not available for compatibility check")
+                return False
             
-            if not problem_info:
+            problem_name = problem_data.name
+            try:
+                problem_info = self.problem_interface.get_problem_config(problem_name)
+            except ValueError:
+                logger.error(f"Problem '{problem_name}' not found for compatibility check")
                 return False
             
             # Check file type compatibility
