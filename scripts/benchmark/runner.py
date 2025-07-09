@@ -38,21 +38,12 @@ from scripts.utils.logger import get_logger
 # Interface imports (symmetrical design)
 from scripts.solvers.solver_interface import SolverInterface, SolverResult
 from scripts.solvers.python.python_interface import PythonInterface
+from scripts.solvers.matlab_octave.matlab_interface import MatlabInterface
 from scripts.data_loaders.python.problem_interface import ProblemInterface
 
 logger = get_logger("benchmark_runner")
 
-# MATLAB solver imports (with graceful degradation if not available)
-try:
-    from scripts.solvers.matlab_octave.matlab_interface import SeDuMiSolver, SDPT3Solver
-    MATLAB_SOLVERS_AVAILABLE = True
-    logger.debug("MATLAB solvers available for integration")
-except ImportError as e:
-    MATLAB_SOLVERS_AVAILABLE = False
-    logger.warning(f"MATLAB solvers not available: {e}")
-    # Define dummy classes to prevent runtime errors
-    SeDuMiSolver = None
-    SDPT3Solver = None
+# MATLAB availability will be checked lazily when needed (true EAFP approach)
 
 
 class BenchmarkRunner:
@@ -75,43 +66,89 @@ class BenchmarkRunner:
         self.dry_run = dry_run
         self.save_solutions = save_solutions
         
-        # Initialize interfaces (symmetrical design)
-        self.python_interface = PythonInterface(save_solutions=save_solutions)
+        # Initialize problem interface only (essential for all operations)
         self.problem_interface = ProblemInterface()
+        
+        # Lazy initialization for solver interfaces (true EAFP approach)
+        self._python_interface = None
+        self._matlab_interface = None
+        self._matlab_interface_attempted = False  # Track if MATLAB initialization was attempted
+        
+        # Build solver-to-interface mapping for efficient routing
+        self._solver_interface_map = self._build_solver_interface_map()
         
         # Collect environment info and git hash once (now cached)
         self.environment_info = collect_environment_info()
         self.commit_hash = get_git_commit_hash()
         
-        # Use pre-loaded registries for backward compatibility
+        # Solver configurations now managed by interfaces (no more solver registry YAML)
+        # Problem registry still passed for backward compatibility
         if registries:
-            self.solver_registry = registries.get('solver_registry', {})
-            # Problem registry now managed by problem interface
-            logger.debug("Using pre-loaded solver registry")
-        else:
-            # Fallback to loading solver configuration
-            self.solver_registry = self.load_solver_registry()
+            logger.debug("Using pre-loaded problem registry")
+        # Solver registry no longer needed - interfaces are the source of truth
         
-        logger.info("Benchmark runner initialized with symmetrical interfaces")
+        logger.info("Benchmark runner initialized with unified interfaces")
         logger.info(f"Git commit: {self.commit_hash}")
         logger.info(f"Environment: {self.environment_info['os']['system']} {self.environment_info['python']['version']}")
         
-        # Log interface statistics
-        python_stats = self.python_interface.get_solver_statistics()
+        python_configured = len(PythonInterface.PYTHON_SOLVER_CONFIGS)
+        matlab_configured = len(MatlabInterface.MATLAB_SOLVER_CONFIGS)
         problem_stats = self.problem_interface.get_problem_statistics()
-        logger.info(f"Python interface: {python_stats['total_available']}/{python_stats['total_configured']} solvers available")
+        
+        logger.info(f"Python interface: {python_configured} solvers configured (lazy detection)")
+        logger.info(f"MATLAB interface: {matlab_configured} solvers configured (lazy detection)")
         logger.info(f"Problem interface: {problem_stats['total_problems']} problems from {len(problem_stats['libraries'])} libraries")
     
-    def load_solver_registry(self) -> Dict[str, Any]:
-        """Load solver registry from config/solver_registry.yaml"""
-        try:
-            config_path = project_root / "config" / "solver_registry.yaml"
-            with open(config_path, 'r') as f:
-                return yaml.safe_load(f)
-        except Exception as e:
-            logger.error(f"Failed to load solver registry: {e}")
-            # Return empty registry to force configuration fix
-            return {'solvers': {}}
+    @property
+    def python_interface(self) -> PythonInterface:
+        """Lazy initialization of Python interface."""
+        if self._python_interface is None:
+            logger.debug("Initializing Python interface on first access")
+            self._python_interface = PythonInterface(
+                save_solutions=self.save_solutions,
+                problem_interface=self.problem_interface
+            )
+        return self._python_interface
+    
+    @property
+    def matlab_interface(self) -> Optional[MatlabInterface]:
+        """Lazy initialization of MATLAB interface."""
+        if self._matlab_interface is None and not self._matlab_interface_attempted:
+            self._matlab_interface_attempted = True
+            try:
+                logger.debug("Initializing MATLAB interface on first access")
+                self._matlab_interface = MatlabInterface(
+                    save_solutions=self.save_solutions,
+                    problem_interface=self.problem_interface
+                )
+            except Exception as e:
+                logger.warning(f"Failed to initialize MATLAB interface: {e}")
+                self._matlab_interface = None
+        return self._matlab_interface
+    
+    def _build_solver_interface_map(self) -> Dict[str, str]:
+        """
+        Build mapping from solver names to interface types.
+        
+        Returns:
+            Dictionary mapping solver_name -> interface_type ('python' or 'matlab')
+        """
+        from scripts.solvers.python.python_interface import PythonInterface
+        from scripts.solvers.matlab_octave.matlab_interface import MatlabInterface
+        
+        mapping = {}
+        
+        # Add Python solvers
+        for solver_name in PythonInterface.PYTHON_SOLVER_CONFIGS.keys():
+            mapping[solver_name] = 'python'
+        
+        # Add MATLAB solvers
+        for solver_name in MatlabInterface.MATLAB_SOLVER_CONFIGS.keys():
+            mapping[solver_name] = 'matlab'
+        
+        logger.debug(f"Built solver interface mapping: {len(mapping)} solvers")
+        return mapping
+    
     
     # Problem registry loading now handled by problem interface
     # Keeping method for backward compatibility but delegating to interface
@@ -121,7 +158,10 @@ class BenchmarkRunner:
     
     def create_solver(self, solver_name: str) -> SolverInterface:
         """
-        Create solver instance using symmetrical interface pattern.
+        Create solver instance (for backward compatibility).
+        
+        Note: This method is kept for backward compatibility but the preferred
+        approach is to use the unified solve methods on the interfaces directly.
         
         Args:
             solver_name: Name of solver to create
@@ -134,47 +174,36 @@ class BenchmarkRunner:
         """
         logger.debug(f"Creating solver via interface: {solver_name}")
         
-        # Try Python interface first
-        if solver_name in self.python_interface.get_available_solvers():
+        # EAFP approach: try Python interface first
+        try:
             return self.python_interface.create_solver(solver_name)
-        
-        # MATLAB solver integration (legacy direct creation for now)
-        elif solver_name == "matlab_sedumi":
-            if not MATLAB_SOLVERS_AVAILABLE:
-                raise ValueError(f"MATLAB solvers not available. Please check MATLAB installation and ensure SeDuMi is accessible.")
-            return SeDuMiSolver(save_solutions=self.save_solutions)
-        elif solver_name == "matlab_sdpt3":
-            if not MATLAB_SOLVERS_AVAILABLE:
-                raise ValueError(f"MATLAB solvers not available. Please check MATLAB installation and ensure SDPT3 is accessible.")
-            return SDPT3Solver(save_solutions=self.save_solutions)
-        
-        else:
+        except ValueError:
+            # If not a Python solver, try MATLAB interface
+            if self.matlab_interface:
+                try:
+                    return self.matlab_interface.create_solver(solver_name)
+                except ValueError:
+                    pass
+            
             # Provide helpful error message with available solvers
             available_solvers = self.get_available_solvers()
             raise ValueError(f"Unknown solver: {solver_name}. Available solvers: {available_solvers}")
     
     def get_available_solvers(self) -> List[str]:
         """
-        Get list of currently available solvers using symmetrical interfaces.
+        Get list of currently available solvers from all interfaces.
+        
+        Note: This method forces initialization of interfaces for validation purposes.
         
         Returns:
             List of solver names that can be created
         """
-        # Get Python solvers from interface
+        # Get Python solvers from interface (may trigger initialization)
         available_solvers = self.python_interface.get_available_solvers()
         
-        # Add MATLAB solvers if available (check by trying to import)
-        try:
-            from scripts.solvers.matlab_octave.matlab_interface import SeDuMiSolver, SDPT3Solver
-            available_solvers.extend([
-                "matlab_sedumi",
-                "matlab_sdpt3"
-            ])
-            logger.debug("MATLAB solvers added to available solvers list")
-        except ImportError as e:
-            logger.debug(f"MATLAB solvers not available for inclusion in available solvers: {e}")
-        except Exception as e:
-            logger.warning(f"Unexpected error checking MATLAB solver availability: {e}")
+        # Add MATLAB solvers if interface is available (may trigger initialization)
+        if self.matlab_interface:
+            available_solvers.extend(self.matlab_interface.get_available_solvers())
         
         return available_solvers
     
@@ -279,59 +308,60 @@ class BenchmarkRunner:
         
         self.store_result(solver_name, problem_name, error_result, problem_config)
     
-    def run_single_benchmark(self, problem_name: str, problem_config: Dict[str, Any], 
-                            solver_name: str, solver_config: Dict[str, Any]) -> None:
+    def run_single_benchmark(self, problem_name: str, solver_name: str) -> None:
         """
-        Execute single problem-solver combination and store result.
+        Execute single problem-solver combination using explicit interface routing.
+        
+        This method uses explicit solver-to-interface mapping to route directly to the
+        appropriate interface, eliminating unnecessary exceptions and improving efficiency.
         
         Args:
             problem_name: Name of the problem to solve
-            problem_config: Problem configuration from registry
-            solver_name: Name of the solver to use  
-            solver_config: Solver configuration from registry
+            solver_name: Name of the solver to use
         """
         logger.info(f"Running {solver_name} on {problem_name}")
         
         try:
-            # Load problem using appropriate loader
-            problem_data = self.load_problem(problem_name, problem_config)
+            # Get the appropriate interface type from mapping
+            interface_type = self._solver_interface_map.get(solver_name)
             
-            # Create solver
-            solver = self.create_solver(solver_name)
+            if interface_type == 'python':
+                # Route directly to Python interface
+                result = self.python_interface.solve(problem_name, solver_name)
+                
+            elif interface_type == 'matlab':
+                # Route directly to MATLAB interface
+                if self.matlab_interface:
+                    result = self.matlab_interface.solve(problem_name, solver_name)
+                else:
+                    raise ValueError(f"MATLAB interface not available for solver '{solver_name}'")
+                    
+            else:
+                # Unknown solver - not in any interface configuration
+                raise ValueError(f"Unknown solver '{solver_name}'. Available solvers: {list(self._solver_interface_map.keys())}")
             
-            # Check solver compatibility with problem type BEFORE execution
-            if not solver.validate_problem_compatibility(problem_data):
-                problem_type = problem_data.problem_class
-                logger.info(f"Skipping {solver_name} on {problem_name}: solver cannot handle {problem_type} problems")
-                return  # Skip execution entirely - no database entry
-            
-            # Execute solver with timing
-            start_time = time.time()
-            result = solver.solve(problem_data)
-            solve_time = time.time() - start_time
-            
-            # Ensure timing is accurate
-            result.solve_time = solve_time
-            result.solver_name = solver_name
-            result.solver_version = solver.get_version()
-            
-            # Store result in database with problem data for type detection
-            self.store_result(solver_name, problem_name, result, problem_config, problem_data)
+            # Success! Get problem configuration and store result
+            problem_config = self.problem_interface.get_problem_config(problem_name)
+            self.store_result(solver_name, problem_name, result, problem_config)
             
             # Enhanced logging with computation time and optimal value
             if result.primal_objective_value is not None:
-                logger.info(f"Completed {solver_name} on {problem_name}: {result.status} in {solve_time:.3f}s, objective: {result.primal_objective_value:.6e}")
+                logger.info(f"Completed {solver_name} on {problem_name}: {result.status} in {result.solve_time:.3f}s, objective: {result.primal_objective_value:.6e}")
             else:
-                logger.info(f"Completed {solver_name} on {problem_name}: {result.status} in {solve_time:.3f}s")
-            
+                logger.info(f"Completed {solver_name} on {problem_name}: {result.status} in {result.solve_time:.3f}s")
+                
         except Exception as e:
             error_msg = f"Benchmark execution failed: {str(e)}"
             logger.error(error_msg)
             
             # Store error result
-            if problem_name in self.problem_registry['problem_libraries']:
-                problem_config = self.problem_registry['problem_libraries'][problem_name]
+            try:
+                problem_config = self.problem_interface.get_problem_config(problem_name)
                 self.store_error_result(solver_name, problem_name, error_msg, problem_config)
+            except:
+                # If we can't even get problem config, create minimal config
+                minimal_config = {'library_name': 'unknown', 'problem_type': 'UNKNOWN'}
+                self.store_error_result(solver_name, problem_name, error_msg, minimal_config)
     
     def run_benchmark_batch(self, problems: List[str], solvers: List[str]) -> None:
         """

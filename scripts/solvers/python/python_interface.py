@@ -25,10 +25,11 @@ from typing import List, Optional, Dict, Any
 project_root = Path(__file__).parent.parent.parent.parent
 sys.path.insert(0, str(project_root))
 
-from scripts.solvers.solver_interface import SolverInterface
+from scripts.solvers.solver_interface import SolverInterface, SolverResult
 from scripts.solvers.python.scipy_runner import ScipySolver
 from scripts.solvers.python.cvxpy_runner import CvxpySolver
 from scripts.data_loaders.problem_loader import ProblemData
+from scripts.data_loaders.python.problem_interface import ProblemInterface
 from scripts.utils.logger import get_logger
 
 logger = get_logger("python_interface")
@@ -92,22 +93,25 @@ class PythonInterface:
         }
     }
     
-    def __init__(self, save_solutions: bool = False, **kwargs):
+    def __init__(self, save_solutions: bool = False, problem_interface: Optional[ProblemInterface] = None, **kwargs):
         """
         Initialize Python solver interface.
         
         Args:
             save_solutions: Whether to save optimal solutions to disk
+            problem_interface: Optional problem interface for loading problems
             **kwargs: Additional configuration parameters
         """
         self.save_solutions = save_solutions
         self.config = kwargs
         
-        # Detect available solvers on initialization
-        self.available_solvers = self._detect_available_solvers()
+        # Initialize or create problem interface
+        self.problem_interface = problem_interface or ProblemInterface()
         
-        logger.info(f"Initialized Python interface with {len(self.available_solvers)} available solvers")
-        logger.debug(f"Available Python solvers: {self.available_solvers}")
+        # Lazy initialization - solvers detected only when needed
+        self._available_solvers = None
+        
+        logger.info("Initialized Python interface (lazy solver detection)")
     
     def create_solver(self, solver_name: str) -> SolverInterface:
         """
@@ -120,22 +124,13 @@ class PythonInterface:
             Solver instance implementing SolverInterface
             
         Raises:
-            ValueError: If solver name is unknown or solver not available
+            ValueError: If solver name is unknown or cannot be created
         """
         logger.debug(f"Creating Python solver: {solver_name}")
         
         # Check if solver is known
         if solver_name not in self.PYTHON_SOLVER_CONFIGS:
-            available_names = list(self.PYTHON_SOLVER_CONFIGS.keys())
-            raise ValueError(f"Unknown Python solver: {solver_name}. "
-                           f"Available: {available_names}")
-        
-        # Check if solver is available (backend installed)
-        if solver_name not in self.available_solvers:
-            solver_config = self.PYTHON_SOLVER_CONFIGS[solver_name]
-            backend = solver_config.get("kwargs", {}).get("backend", "N/A")
-            raise ValueError(f"Python solver {solver_name} not available. "
-                           f"Backend {backend} may not be installed.")
+            raise ValueError(f"'{solver_name}' is not a Python solver")
         
         # Get solver configuration
         solver_config = self.PYTHON_SOLVER_CONFIGS[solver_name]
@@ -146,13 +141,16 @@ class PythonInterface:
         solver_kwargs["save_solutions"] = self.save_solutions
         solver_kwargs.update(self.config)
         
-        # Create and return solver instance
+        # Try to create solver instance (EAFP approach)
         try:
             solver = solver_class(**solver_kwargs)
             logger.debug(f"Successfully created {solver_name}: {solver.get_version()}")
             return solver
         except Exception as e:
-            raise ValueError(f"Failed to create Python solver {solver_name}: {e}")
+            # Include backend info in error message if available
+            backend = solver_config.get("kwargs", {}).get("backend", "")
+            backend_msg = f" (backend: {backend})" if backend else ""
+            raise ValueError(f"Failed to create solver '{solver_name}'{backend_msg}: {e}")
     
     def get_available_solvers(self) -> List[str]:
         """
@@ -161,38 +159,79 @@ class PythonInterface:
         Returns:
             List of solver names that can be created successfully
         """
-        return self.available_solvers.copy()
+        # Lazy detection - only detect when explicitly requested
+        if self._available_solvers is None:
+            self._available_solvers = self._detect_available_solvers()
+            logger.info(f"Detected {len(self._available_solvers)} available Python solvers on first access")
+            logger.debug(f"Available Python solvers: {self._available_solvers}")
+        return self._available_solvers.copy()
     
-    def get_solver_display_name(self, solver_name: str) -> str:
+    def solve(self, problem_name: str, solver_name: str,
+             problem_data: Optional[ProblemData] = None,
+             timeout: Optional[float] = None) -> SolverResult:
         """
-        Get display name for solver.
+        Unified solve method that handles problem loading and solver execution.
+        
+        This method provides a consistent interface matching the MATLAB implementation,
+        enabling symmetrical architecture across all solver ecosystems.
         
         Args:
-            solver_name: Internal solver name
+            problem_name: Name of the problem to solve
+            solver_name: Name of the solver to use
+            problem_data: Optional pre-loaded problem data (if None, will load)
+            timeout: Optional timeout for solver execution
             
         Returns:
-            Human-readable display name
+            SolverResult with standardized fields
+            
+        Raises:
+            ValueError: If solver not available or problem cannot be loaded
         """
-        return self.PYTHON_SOLVER_CONFIGS.get(solver_name, {}).get("display_name", solver_name)
-    
-    def validate_solver_compatibility(self, solver_name: str, problem_data: ProblemData) -> bool:
-        """
-        Check if Python solver can handle the given problem type.
+        logger.info(f"Solving {problem_name} with {solver_name}")
         
-        Args:
-            solver_name: Name of the solver
-            problem_data: Problem data to validate
-            
-        Returns:
-            True if solver can handle the problem, False otherwise
-        """
         try:
-            # Create solver temporarily to check compatibility
+            # 1. Create solver instance (will raise ValueError if not a Python solver)
             solver = self.create_solver(solver_name)
-            return solver.validate_problem_compatibility(problem_data)
+            
+            # 2. Load problem data if not provided
+            if problem_data is None:
+                logger.debug(f"Loading problem data for {problem_name}")
+                problem_data = self.problem_interface.load_problem(problem_name)
+            
+            # 3. Validate compatibility
+            if not solver.validate_problem_compatibility(problem_data):
+                problem_type = problem_data.problem_class
+                return SolverResult.create_error_result(
+                    f"Solver {solver_name} cannot handle {problem_type} problems",
+                    solve_time=0.0,
+                    solver_name=solver_name,
+                    solver_version=solver.get_version()
+                )
+            
+            # 4. Execute solver
+            result = solver.solve(problem_data, timeout=timeout)
+            
+            # 5. Ensure solver metadata is set
+            if not result.solver_name:
+                result.solver_name = solver_name
+            if not result.solver_version:
+                result.solver_version = solver.get_version()
+            
+            logger.info(f"Completed {solver_name} on {problem_name}: {result.status}")
+            return result
+            
+        except ValueError:
+            # Re-raise ValueError so EAFP pattern in runner can catch it
+            raise
         except Exception as e:
-            logger.debug(f"Compatibility check failed for {solver_name}: {e}")
-            return False
+            error_msg = f"Failed to solve {problem_name} with {solver_name}: {str(e)}"
+            logger.error(error_msg)
+            return SolverResult.create_error_result(
+                error_msg,
+                solve_time=0.0,
+                solver_name=solver_name,
+                solver_version="unknown"
+            )
     
     def get_solver_statistics(self) -> Dict[str, Any]:
         """
@@ -202,11 +241,14 @@ class PythonInterface:
             Dictionary with solver statistics
         """
         total_solvers = len(self.PYTHON_SOLVER_CONFIGS)
-        available_solvers = len(self.available_solvers)
+        
+        # For statistics, we need to actually detect solvers
+        available_solvers_list = self.get_available_solvers()
+        available_solvers = len(available_solvers_list)
         
         # Group by type
-        scipy_solvers = [name for name in self.available_solvers if name.startswith("scipy_")]
-        cvxpy_solvers = [name for name in self.available_solvers if name.startswith("cvxpy_")]
+        scipy_solvers = [name for name in available_solvers_list if name.startswith("scipy_")]
+        cvxpy_solvers = [name for name in available_solvers_list if name.startswith("cvxpy_")]
         
         return {
             "total_configured": total_solvers,
@@ -215,7 +257,7 @@ class PythonInterface:
             "scipy_solvers": len(scipy_solvers),
             "cvxpy_solvers": len(cvxpy_solvers),
             "cvxpy_backends": [name.split("_", 1)[1] for name in cvxpy_solvers],
-            "unavailable_solvers": list(set(self.PYTHON_SOLVER_CONFIGS.keys()) - set(self.available_solvers))
+            "unavailable_solvers": list(set(self.PYTHON_SOLVER_CONFIGS.keys()) - set(available_solvers_list))
         }
     
     def _detect_available_solvers(self) -> List[str]:
@@ -255,152 +297,3 @@ class PythonInterface:
         
         return available
     
-    def refresh_available_solvers(self) -> List[str]:
-        """
-        Refresh the list of available solvers (re-detect).
-        
-        Returns:
-            Updated list of available solver names
-        """
-        logger.info("Refreshing available Python solvers...")
-        self.available_solvers = self._detect_available_solvers()
-        return self.available_solvers
-    
-    def validate_environment(self) -> Dict[str, Any]:
-        """
-        Validate Python solver environment and return detailed report.
-        
-        Returns:
-            Dictionary with validation results
-        """
-        logger.info("Validating Python solver environment...")
-        
-        validation_report = {
-            "status": "success",
-            "solvers": {},
-            "summary": {
-                "total_solvers": len(self.PYTHON_SOLVER_CONFIGS),
-                "working_solvers": 0,
-                "failed_solvers": 0
-            },
-            "statistics": self.get_solver_statistics()
-        }
-        
-        # Test each configured solver
-        for solver_name in self.PYTHON_SOLVER_CONFIGS:
-            try:
-                solver = self.create_solver(solver_name)
-                version = solver.get_version()
-                
-                validation_report["solvers"][solver_name] = {
-                    "status": "working",
-                    "version": version,
-                    "display_name": self.get_solver_display_name(solver_name)
-                }
-                validation_report["summary"]["working_solvers"] += 1
-                
-            except Exception as e:
-                validation_report["solvers"][solver_name] = {
-                    "status": "error",
-                    "error": str(e),
-                    "display_name": self.get_solver_display_name(solver_name)
-                }
-                validation_report["summary"]["failed_solvers"] += 1
-                validation_report["status"] = "partial" if validation_report["summary"]["working_solvers"] > 0 else "failed"
-        
-        # Log summary
-        working = validation_report["summary"]["working_solvers"]
-        total = validation_report["summary"]["total_solvers"]
-        logger.info(f"Python solver validation complete: {working}/{total} working")
-        
-        return validation_report
-
-
-def get_python_interface(save_solutions: bool = False, **kwargs) -> PythonInterface:
-    """
-    Factory function to get Python interface instance.
-    
-    Args:
-        save_solutions: Whether to save optimal solutions to disk
-        **kwargs: Additional configuration parameters
-        
-    Returns:
-        Configured PythonInterface instance
-    """
-    return PythonInterface(save_solutions=save_solutions, **kwargs)
-
-
-# Module-level convenience functions for backward compatibility
-def create_python_solver(solver_name: str, save_solutions: bool = False, **kwargs) -> SolverInterface:
-    """
-    Convenience function to create a Python solver.
-    
-    Args:
-        solver_name: Name of solver to create
-        save_solutions: Whether to save solutions
-        **kwargs: Additional configuration
-        
-    Returns:
-        Solver instance
-    """
-    interface = get_python_interface(save_solutions=save_solutions, **kwargs)
-    return interface.create_solver(solver_name)
-
-
-def get_available_python_solvers() -> List[str]:
-    """
-    Convenience function to get available Python solvers.
-    
-    Returns:
-        List of available solver names
-    """
-    interface = get_python_interface()
-    return interface.get_available_solvers()
-
-
-if __name__ == "__main__":
-    # Test script for Python interface
-    print("Testing Python Solver Interface...")
-    print("=" * 50)
-    
-    # Initialize interface
-    print("\n1. Initializing Python interface...")
-    interface = get_python_interface()
-    print(f"   ✓ Interface initialized")
-    
-    # Show available solvers
-    available = interface.get_available_solvers()
-    print(f"\n2. Available solvers: {len(available)}")
-    for solver_name in available:
-        display_name = interface.get_solver_display_name(solver_name)
-        print(f"   • {solver_name}: {display_name}")
-    
-    # Show statistics
-    stats = interface.get_solver_statistics()
-    print(f"\n3. Statistics:")
-    print(f"   Total configured: {stats['total_configured']}")
-    print(f"   Available: {stats['total_available']}")
-    print(f"   Availability rate: {stats['availability_rate']:.1%}")
-    print(f"   SciPy solvers: {stats['scipy_solvers']}")
-    print(f"   CVXPY solvers: {stats['cvxpy_solvers']}")
-    
-    # Test solver creation
-    if available:
-        print(f"\n4. Testing solver creation...")
-        test_solver = available[0]
-        try:
-            solver = interface.create_solver(test_solver)
-            version = solver.get_version()
-            print(f"   ✓ Created {test_solver}: {version}")
-        except Exception as e:
-            print(f"   ✗ Failed to create {test_solver}: {e}")
-    
-    # Validation report
-    print(f"\n5. Environment validation...")
-    validation = interface.validate_environment()
-    print(f"   Status: {validation['status']}")
-    print(f"   Working: {validation['summary']['working_solvers']}")
-    print(f"   Failed: {validation['summary']['failed_solvers']}")
-    
-    print("\n" + "=" * 50)
-    print("✓ Python interface testing complete!")

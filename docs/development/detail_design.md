@@ -187,47 +187,64 @@ github:
   repository: "optimization-solver-benchmark"
 ```
 
-#### config/solver_registry.yaml - Solver Display Names Only
-```yaml
-# Simplified solver registry - only display names for reporting
-# Actual solver initialization logic is in code for better maintainability
-solvers:
-  scipy_linprog:
-    display_name: "SciPy linprog"
-    
-  cvxpy_clarabel:
-    display_name: "CLARABEL (via CVXPY)"
-    
-  cvxpy_scs:
-    display_name: "SCS (via CVXPY)"
-    
-  cvxpy_ecos:
-    display_name: "ECOS (via CVXPY)"
-    
-  cvxpy_osqp:
-    display_name: "OSQP (via CVXPY)"
-```
+#### Solver Configuration - Interface-based Architecture (EAFP)
 
-This simplified approach moves solver initialization logic to code while maintaining clean display names for reports. The solver selection logic becomes:
+**Note**: `config/solver_registry.yaml` has been **REMOVED** as part of the EAFP implementation. Solver configurations are now managed directly in the interface classes for better maintainability and performance.
 
 ```python
-# In BenchmarkRunner.create_solver()
-def create_solver(self, solver_name: str) -> SolverInterface:
-    """Create solver instance based on solver name"""
-    
-    if solver_name == "scipy_linprog":
-        return SciPySolver()
-    elif solver_name == "cvxpy_clarabel":
-        return CVXPYSolver(backend="CLARABEL")
-    elif solver_name == "cvxpy_scs":
-        return CVXPYSolver(backend="SCS")
-    elif solver_name == "cvxpy_ecos":
-        return CVXPYSolver(backend="ECOS")
-    elif solver_name == "cvxpy_osqp":
-        return CVXPYSolver(backend="OSQP")
-    else:
-        raise ValueError(f"Unknown solver: {solver_name}")
+# Solver configurations are now defined directly in interface classes
+# scripts/solvers/python/python_interface.py
+class PythonInterface:
+    PYTHON_SOLVER_CONFIGS = {
+        "scipy_linprog": {
+            "class": ScipySolver,
+            "display_name": "SciPy linprog",
+            "kwargs": {}
+        },
+        "cvxpy_clarabel": {
+            "class": CvxpySolver,
+            "display_name": "CLARABEL (via CVXPY)",
+            "kwargs": {"backend": "CLARABEL"}
+        },
+        "cvxpy_scs": {
+            "class": CvxpySolver,
+            "display_name": "SCS (via CVXPY)",
+            "kwargs": {"backend": "SCS"}
+        },
+        "cvxpy_ecos": {
+            "class": CvxpySolver,
+            "display_name": "ECOS (via CVXPY)",
+            "kwargs": {"backend": "ECOS"}
+        },
+        "cvxpy_osqp": {
+            "class": CvxpySolver,
+            "display_name": "OSQP (via CVXPY)",
+            "kwargs": {"backend": "OSQP"}
+        }
+    }
+
+# scripts/solvers/matlab_octave/matlab_interface.py
+class MatlabInterface:
+    MATLAB_SOLVER_CONFIGS = {
+        "matlab_sedumi": {
+            "class": SeDuMiSolver,
+            "display_name": "SeDuMi (MATLAB)",
+            "matlab_solver": "sedumi"
+        },
+        "matlab_sdpt3": {
+            "class": SDPT3Solver,
+            "display_name": "SDPT3 (MATLAB)",
+            "matlab_solver": "sdpt3"
+        }
+    }
 ```
+
+**EAFP Architecture Benefits:**
+- **Single Source of Truth**: Each interface manages its own solver configurations
+- **Lazy Detection**: Solver availability is only detected when explicitly needed
+- **Simplified Error Handling**: "Just try it" approach instead of pre-checking
+- **Better Performance**: No upfront solver detection during initialization
+- **Maintainability**: Solver logic is co-located with interface implementations
 
 #### config/problem_registry.yaml - External Problems Only
 ```yaml
@@ -292,65 +309,71 @@ This structure provides:
 - **Library attribution**: Clear source library tracking
 - **No synthetic problems**: All problems are from established optimization libraries
 
-### 3. Re-architected Benchmark Execution
+### 3. EAFP Benchmark Execution Architecture
 
-The new execution system removes complex backend selection and aggregation, focusing on simple, direct execution with standardized results storage.
+The EAFP (Easier to Ask for Forgiveness than Permission) implementation removes complex pre-checking and uses a "just try it" approach with graceful error handling.
 
-#### scripts/benchmark/runner.py - Main Execution Logic
+#### scripts/benchmark/runner.py - EAFP Execution Logic
 ```python
 class BenchmarkRunner:
-    """Simplified benchmark execution with direct database storage"""
+    """EAFP-based benchmark execution with unified interfaces"""
     
     def __init__(self, database_manager: DatabaseManager):
         self.db = database_manager
-        self.environment_info = self.gather_environment_info()
-        self.commit_hash = self.get_git_commit_hash()
+        self.environment_info = collect_environment_info()
+        self.commit_hash = get_git_commit_hash()
         
-        # Load configurations
-        self.solver_registry = self.load_solver_registry()
-        self.problem_registry = self.load_problem_registry()
+        # Initialize interfaces with lazy solver detection
+        self.problem_interface = ProblemInterface()
+        self.python_interface = PythonInterface(
+            save_solutions=save_solutions,
+            problem_interface=self.problem_interface
+        )
+        
+        # MATLAB interface with availability check
+        self.matlab_interface = None
+        if MATLAB_SOLVERS_AVAILABLE:
+            self.matlab_interface = MatlabInterface(
+                save_solutions=save_solutions,
+                problem_interface=self.problem_interface
+            )
     
     def run_single_benchmark(self, problem_name: str, solver_name: str) -> None:
-        """Execute single problem-solver combination and store result"""
+        """Execute single problem-solver combination using EAFP approach"""
         
-        # 1. Load problem using appropriate loader
-        problem_config = self.problem_registry[problem_name]
-        problem_data = self.load_problem(problem_name, problem_config)
-        
-        # 2. Initialize solver
-        solver = self.create_solver(solver_name)
-        
-        # 3. Execute solver with timeout (problem_data is already in solver-compatible format)
         try:
-            start_time = time.time()
-            result = solver.solve(problem_data)
-            solve_time = time.time() - start_time
+            # EAFP: Try Python interface first (most common case)
+            try:
+                result = self.python_interface.solve(problem_name, solver_name)
+            except ValueError as e:
+                # If not a Python solver, try MATLAB interface
+                if self.matlab_interface:
+                    try:
+                        result = self.matlab_interface.solve(problem_name, solver_name)
+                    except ValueError:
+                        # Neither interface has this solver
+                        raise ValueError(f"Solver '{solver_name}' not found in any interface")
+                else:
+                    # No MATLAB interface available
+                    raise ValueError(f"Solver '{solver_name}' not found (MATLAB interface not available)")
             
-            # 5. Store standardized result in database
-            self.store_result(solver_name, problem_name, result, solve_time)
+            # Success! Store result
+            problem_config = self.problem_interface.get_problem_config(problem_name)
+            self.store_result(solver_name, problem_name, result, problem_config)
             
         except Exception as e:
-            # Store error result
-            self.store_error_result(solver_name, problem_name, str(e))
-    
-    def run_benchmark_batch(self, problems: List[str], solvers: List[str]) -> None:
-        """Run benchmark for all problem-solver combinations"""
-        
-        total_combinations = len(problems) * len(solvers)
-        completed = 0
-        
-        for problem_name in problems:
-            for solver_name in solvers:
-                try:
-                    logger.info(f"Running {solver_name} on {problem_name}")
-                    self.run_single_benchmark(problem_name, solver_name)
-                    completed += 1
-                    logger.info(f"Progress: {completed}/{total_combinations}")
-                    
-                except Exception as e:
-                    logger.error(f"Failed {solver_name} on {problem_name}: {e}")
-                    completed += 1
+            error_msg = f"Benchmark execution failed: {str(e)}"
+            logger.error(error_msg)
+            # Store error result for tracking
+            self.store_error_result(solver_name, problem_name, error_msg)
 ```
+
+**Key EAFP Features:**
+- **No Pre-checking**: Solvers are not validated before execution
+- **Lazy Detection**: Solver availability is only checked when needed
+- **Unified Interface**: Both Python and MATLAB follow the same solve() signature
+- **Graceful Fallback**: Try Python first, then MATLAB if needed
+- **Clear Error Messages**: Specific error messages for debugging
 
 #### scripts/database/database_manager.py - Database Operations
 ```python
@@ -644,43 +667,130 @@ class SolverResult:
         self.solver_info: dict               # Additional solver-specific information
 ```
 
-#### Python Interface Module
+#### Python Interface Module (EAFP Implementation)
 ```python
 class PythonInterface:
-    """Interface for managing Python solver ecosystem"""
+    """Interface for managing Python solver ecosystem with EAFP approach"""
     
-    def __init__(self, save_solutions: bool = False):
+    def __init__(self, save_solutions: bool = False, problem_interface: Optional[ProblemInterface] = None):
         self.save_solutions = save_solutions
-        self.available_solvers = self._detect_available_solvers()
+        self.problem_interface = problem_interface or ProblemInterface()
+        
+        # Lazy initialization - solvers detected only when needed
+        self._available_solvers = None
+    
+    def solve(self, problem_name: str, solver_name: str, 
+             problem_data: Optional[ProblemData] = None,
+             timeout: Optional[float] = None) -> SolverResult:
+        """Unified solve method that handles problem loading and solver execution"""
+        
+        try:
+            # 1. Create solver instance (will raise ValueError if not a Python solver)
+            solver = self.create_solver(solver_name)
+            
+            # 2. Load problem data if not provided
+            if problem_data is None:
+                problem_data = self.problem_interface.load_problem(problem_name)
+            
+            # 3. Validate compatibility
+            if not solver.validate_problem_compatibility(problem_data):
+                return SolverResult.create_error_result(
+                    f"Solver {solver_name} cannot handle {problem_data.problem_class} problems"
+                )
+            
+            # 4. Execute solver
+            result = solver.solve(problem_data, timeout=timeout)
+            return result
+            
+        except ValueError:
+            # Re-raise ValueError so EAFP pattern in runner can catch it
+            raise
     
     def create_solver(self, solver_name: str) -> SolverInterface:
-        """Create Python solver instance based on solver name"""
-        # Handle Python-specific solver creation logic
-        # CVXPY backend management
-        # SciPy solver configuration
+        """Create Python solver instance (EAFP approach)"""
+        if solver_name not in self.PYTHON_SOLVER_CONFIGS:
+            raise ValueError(f"'{solver_name}' is not a Python solver")
         
+        # Try to create solver instance directly
+        solver_config = self.PYTHON_SOLVER_CONFIGS[solver_name]
+        try:
+            solver = solver_config["class"](**solver_config["kwargs"])
+            return solver
+        except Exception as e:
+            raise ValueError(f"Failed to create solver '{solver_name}': {e}")
+    
     def get_available_solvers(self) -> List[str]:
-        """Get list of available Python solvers"""
-        # Dynamic detection of available Python backends
-        
-    def validate_solver_compatibility(self, solver_name: str, problem_data: ProblemData) -> bool:
-        """Check if Python solver can handle problem type"""
+        """Get list of available Python solvers (lazy detection)"""
+        if self._available_solvers is None:
+            self._available_solvers = self._detect_available_solvers()
+        return self._available_solvers.copy()
 ```
 
-#### MATLAB Interface Module (Already Implemented)
+#### MATLAB Interface Module (EAFP Implementation)
 ```python
 class MatlabInterface:
-    """Interface for managing MATLAB solver ecosystem"""
+    """Interface for managing MATLAB solver ecosystem with EAFP approach"""
     
-    def create_solver(self, solver_name: str) -> SolverInterface:
-        """Create MATLAB solver instance (SeDuMi, SDPT3)"""
-        # Handle MATLAB-specific initialization
-        # Problem registry integration
-        # Version detection and validation
+    def __init__(self, save_solutions: bool = False, 
+                 problem_interface: Optional[ProblemInterface] = None,
+                 matlab_executable: str = 'matlab',
+                 use_octave: bool = False,
+                 timeout: Optional[float] = 300):
+        self.save_solutions = save_solutions
+        self.problem_interface = problem_interface or ProblemInterface()
+        self.matlab_executable = matlab_executable
+        self.use_octave = use_octave
         
+        # Lazy initialization - solvers detected only when needed
+        self._available_solvers = None
+    
+    def solve(self, problem_name: str, solver_name: str,
+             problem_data: Optional[ProblemData] = None,
+             timeout: Optional[float] = None) -> SolverResult:
+        """Unified solve method matching Python interface signature"""
+        
+        try:
+            # 1. Create solver instance (will raise ValueError if not a MATLAB solver)
+            solver = self.create_solver(solver_name)
+            
+            # 2. Load problem data if not provided
+            if problem_data is None:
+                problem_data = self.problem_interface.load_problem(problem_name)
+            
+            # 3. Ensure problem data has name attribute for MATLAB resolution
+            if not hasattr(problem_data, 'name'):
+                problem_data.name = problem_name
+            
+            # 4. Execute solver
+            result = solver.solve(problem_data, timeout=timeout or self.default_timeout)
+            return result
+            
+        except ValueError:
+            # Re-raise ValueError so EAFP pattern in runner can catch it
+            raise
+    
+    def create_solver(self, solver_name: str) -> MatlabSolver:
+        """Create MATLAB solver instance (EAFP approach)"""
+        if solver_name not in self.MATLAB_SOLVER_CONFIGS:
+            raise ValueError(f"'{solver_name}' is not a MATLAB solver")
+        
+        # Try to create solver instance directly
+        solver_config = self.MATLAB_SOLVER_CONFIGS[solver_name]
+        try:
+            solver = solver_config["class"](
+                matlab_executable=self.matlab_executable,
+                use_octave=self.use_octave,
+                save_solutions=self.save_solutions
+            )
+            return solver
+        except Exception as e:
+            raise ValueError(f"Failed to create solver '{solver_name}': {e}")
+    
     def get_available_solvers(self) -> List[str]:
-        """Get list of available MATLAB solvers"""
-        # Check MATLAB installation and solver availability
+        """Get list of available MATLAB solvers (lazy detection)"""
+        if self._available_solvers is None:
+            self._available_solvers = self._detect_available_solvers()
+        return self._available_solvers.copy()
 ```
 
 #### Individual Solver Implementations
@@ -868,57 +978,93 @@ h5py>=3.8.0           # For .mat file loading
 
 ## Main Execution Flow
 
-### Command Line Interface ✅ **IMPLEMENTED**
+### Command Line Interface (EAFP Implementation)
 ```bash
-# Main execution commands - simplified and working
-python main.py --benchmark --problems nb,nb_L2,arch0 --solvers cvxpy_clarabel,scipy_linprog
-python main.py --benchmark --problem-set external  # All DIMACS + SDPLIB problems
-python main.py --benchmark --problem-set dimacs    # DIMACS problems only
-python main.py --benchmark --problem-set sdplib    # SDPLIB problems only
-python main.py --benchmark --library-names DIMACS,SDPLIB  # Filter by library names
-python main.py --report                            # Generate reports only
-python main.py --all                               # Full benchmark + report
-python main.py --validate                          # Validate environment
-python main.py --dry-run                           # Show what would be executed
+# EAFP-based execution commands - no pre-filtering, just try it!
+python main.py --benchmark --problems nb --solvers cvxpy_ecos         # Single problem-solver
+python main.py --benchmark --problems nb,arch0 --solvers cvxpy_clarabel,scipy_linprog  # Multiple
+python main.py --benchmark --library-names DIMACS,SDPLIB              # Filter by library names
+python main.py --benchmark --solvers unknown_solver                    # Will show clear error message
+python main.py --report                                                # Generate reports only
+python main.py --all                                                   # Full benchmark + report
+python main.py --validate                                              # Validate environment
+python main.py --dry-run                                               # Show what would be executed
 ```
 
-### Execution Workflow ✅ **IMPLEMENTED**
+**EAFP Command Line Features:**
+- **No Pre-validation**: Solvers are not checked before execution starts
+- **Clear Error Messages**: Unknown solvers produce helpful error messages
+- **Graceful Degradation**: System continues with other solver-problem combinations
+- **Lazy Detection**: Solver availability is only checked when explicitly needed (e.g., --validate)
+- **Unified Interface**: Same command patterns work for both Python and MATLAB solvers
+
+### EAFP Execution Workflow
 ```
-1. Configuration Loading
-   ├── Load config/solvers.yaml (simplified solver registry)
+1. Configuration Loading (Simplified)
    ├── Load config/problem_registry.yaml (flat problem structure)
-   └── Initialize database connection (single denormalized table)
+   ├── Initialize database connection (single denormalized table)
+   └── NO solver registry loading (managed by interfaces)
 
-2. Problem and Solver Selection ✅ **WORKING**
+2. Interface Initialization (Lazy)
+   ├── Initialize ProblemInterface
+   ├── Initialize PythonInterface (lazy solver detection)
+   ├── Initialize MatlabInterface if available (lazy solver detection)
+   └── No upfront solver availability checking
+
+3. Problem and Solver Selection (EAFP)
    ├── Parse command line arguments (argparse-based CLI)
    ├── Filter problems by library/type/test_flag
-   └── Filter solvers by name patterns
+   └── NO solver pre-filtering - just use user-specified solvers directly
 
-3. Benchmark Execution ✅ **WORKING**
+4. Benchmark Execution (EAFP)
    ├── For each problem-solver combination:
-   │   ├── Load problem using appropriate loader (MPS, QPS, Python, MAT, DAT-S)
-   │   ├── Execute solver with standardized interface (SolverInterface)
-   │   └── Store result in database (append-only with full environment info)
+   │   ├── Try Python interface first (most common case)
+   │   ├── If ValueError, try MATLAB interface
+   │   ├── If still ValueError, store error result
+   │   └── Problem loading and database storage handled by interfaces
    └── Continue execution despite individual failures (robust error handling)
 
-4. Report Generation ✅ **WORKING**
+5. Report Generation (Unchanged)
    ├── Query latest results from database (ResultProcessor)
-   ├── Generate exactly 3 HTML reports (HTMLGenerator):
-   │   ├── index.html - Overview with summary statistics
-   │   ├── results_matrix.html - Problems × solvers matrix
-   │   └── raw_data.html - Detailed results table
+   ├── Generate exactly 3 HTML reports (HTMLGenerator)
    ├── Export JSON/CSV data (DataExporter)
    └── Save to docs/pages/ directory (GitHub Pages ready)
 ```
 
+**Key EAFP Workflow Changes:**
+- **No Solver Registry**: Solver configurations are managed by interfaces
+- **Lazy Detection**: Solver availability is only checked when explicitly needed
+- **No Pre-filtering**: Solvers are not validated before execution
+- **Unified Error Handling**: Clear error messages for unknown solvers
+- **Faster Startup**: No upfront solver detection during initialization
+
 ## Extension Points
 
-### Adding New Solvers ✅ **VERIFIED WORKING**
+### Adding New Solvers (EAFP Implementation)
 1. **Implement SolverInterface**: Create new solver class following the interface
-2. **Add to config/solvers.yaml**: Configure solver display name only
+2. **Add to Interface Configuration**: Update `*_SOLVER_CONFIGS` in appropriate interface class
 3. **Update requirements.txt**: Add solver dependencies  
-4. **Update BenchmarkRunner.create_solver()**: Add solver creation logic
+4. **NO Code Changes Needed**: EAFP approach automatically handles new solvers
 5. **Test Integration**: Validate with existing problems using --validate
+
+**Example: Adding New Python Solver**
+```python
+# In scripts/solvers/python/python_interface.py
+PYTHON_SOLVER_CONFIGS = {
+    # ... existing solvers ...
+    "cvxpy_new_solver": {
+        "class": CvxpySolver,
+        "display_name": "New Solver (via CVXPY)",
+        "kwargs": {"backend": "NEW_SOLVER"}
+    }
+}
+```
+
+**Benefits of EAFP for New Solvers:**
+- **Single Source of Truth**: All solver info in one place
+- **Automatic Integration**: No need to update multiple files
+- **Consistent Error Handling**: Unknown solvers automatically handled
+- **Lazy Detection**: New solver availability detected only when needed
 
 ### Adding New Problem Libraries ✅ **VERIFIED WORKING**
 1. **Create loader**: Implement format-specific loader in `scripts/data_loaders/`

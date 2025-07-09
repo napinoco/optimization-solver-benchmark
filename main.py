@@ -12,7 +12,9 @@ Usage Examples:
     python main.py --all                     # Run benchmarks and generate reports
     python main.py --validate               # Validate environment and solver setup
     python main.py --benchmark --problems DIMACS --solvers cvxpy_clarabel
-    python main.py --benchmark --problems nb,arch0,simple_lp_test
+    python main.py --benchmark --pro
+    from scripts.benchmark.runner import BenchmarkRunner
+    from scripts.database.database_manager import Datablems nb,arch0,simple_lp_test
     python main.py --benchmark --problems DIMACS,simple_lp_test
 """
 
@@ -78,7 +80,7 @@ def test_solver_availability(runner: BenchmarkRunner, solver_name: str) -> bool:
 
 
 def load_registries() -> Optional[Dict[str, Any]]:
-    """Load all registries once to avoid redundant loading."""
+    """Load problem registry only (solver config now in interfaces)."""
     logger = get_logger("registry_loader")
     
     try:
@@ -91,23 +93,13 @@ def load_registries() -> Optional[Dict[str, Any]]:
         with open(problem_registry_path, 'r') as f:
             problem_registry = yaml.safe_load(f)
         
-        # Load solver registry
-        solver_registry_path = Path("config/solver_registry.yaml")
-        if not solver_registry_path.exists():
-            logger.error("Solver registry not found")
-            return None
-        
-        with open(solver_registry_path, 'r') as f:
-            solver_registry = yaml.safe_load(f)
-        
-        logger.info("Registries loaded successfully")
+        logger.info("Problem registry loaded successfully")
         return {
-            'problem_registry': problem_registry,
-            'solver_registry': solver_registry
+            'problem_registry': problem_registry
         }
         
     except Exception as e:
-        logger.error(f"Failed to load registries: {e}")
+        logger.error(f"Failed to load problem registry: {e}")
         return None
 
 
@@ -126,7 +118,6 @@ def validate_environment() -> bool:
     # Check for configuration files
     config_files = [
         'config/site_config.yaml',
-        'config/solver_registry.yaml', 
         'config/problem_registry.yaml'
     ]
     for config_file in config_files:
@@ -240,16 +231,15 @@ def run_benchmark(library_names: Optional[List[str]] = None,
     try:
         logger.info("Starting benchmark execution...")
         
-        # Load registries once
+        # Load problem registry only (solver configs now in interfaces)
         registries = load_registries()
         if not registries:
-            logger.error("Failed to load registries")
+            logger.error("Failed to load problem registry")
             return False
         
         problem_registry = registries['problem_registry']
-        solver_registry = registries['solver_registry']
         
-        # Create benchmark runner with pre-loaded registries
+        # Create benchmark runner (no solver registry needed)
         db_manager = DatabaseManager()
         runner = BenchmarkRunner(db_manager, registries=registries, dry_run=dry_run, save_solutions=save_solutions)
         
@@ -272,41 +262,36 @@ def run_benchmark(library_names: Optional[List[str]] = None,
         
         logger.info(f"Selected {len(selected_problems)} problems")
         
-        # Filter solvers and test availability with caching
-        selected_solvers = {}
-        for solver_name, solver_config in solver_registry["solvers"].items():
-            # Filter by solver names if specified
-            if solvers and solver_name not in solvers:
-                continue
-            
-            # Test if solver is available using cached test
-            if test_solver_availability(runner, solver_name):
-                selected_solvers[solver_name] = solver_config
-                logger.debug(f"Solver {solver_name} is available")
-            else:
-                logger.debug(f"Solver {solver_name} not available")
+        # EAFP approach: No pre-filtering of solvers
+        if solvers:
+            # Use user-specified solvers directly
+            selected_solver_names = solvers
+            logger.info(f"Will attempt to run specified solvers: {selected_solver_names}")
+        else:
+            # Get all available solvers for default case
+            selected_solver_names = runner.get_available_solvers()
+            logger.info(f"Will attempt to run all available solvers: {len(selected_solver_names)} found")
         
-        if not selected_solvers:
-            logger.error("No solvers available. Check your --solvers filter or install solver dependencies.")
+        if not selected_solver_names:
+            logger.error("No solvers specified. Use --solvers to specify solvers or remove filter to run all.")
             return False
-        
-        logger.info(f"Selected {len(selected_solvers)} available solvers")
         
         # Run benchmarks using simple nested loop
         start_time = time.time()
-        total_combinations = len(selected_problems) * len(selected_solvers)
+        total_combinations = len(selected_problems) * len(selected_solver_names)
         logger.info(f"Running {total_combinations} problem-solver combinations...")
         
         success_count = 0
         combination_num = 0
         
-        for problem_name, problem_config in selected_problems.items():
-            for solver_name, solver_config in selected_solvers.items():
+        for problem_name in selected_problems.keys():
+            for solver_name in selected_solver_names:
                 combination_num += 1
                 logger.info(f"[{combination_num}/{total_combinations}] Running {solver_name} on {problem_name}")
                 
                 try:
-                    runner.run_single_benchmark(problem_name, problem_config, solver_name, solver_config)
+                    # EAFP: Just try it! Let runner handle unknown solvers
+                    runner.run_single_benchmark(problem_name, solver_name)
                     success_count += 1
                 except Exception as benchmark_error:
                     logger.warning(f"Failed to run {solver_name} on {problem_name}: {benchmark_error}")
