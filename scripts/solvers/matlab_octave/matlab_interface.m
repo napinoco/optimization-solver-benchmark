@@ -1,21 +1,25 @@
-function matlab_runner(problem_name, solver_name, result_file, save_solutions)
-    % Main MATLAB orchestrator for benchmark execution with integrated utilities
+function matlab_interface(problem_name, solver_name, result_file, save_solutions, runner_function)
+    % Main MATLAB interface for benchmark execution with integrated utilities
     %
     % Input:
     %   problem_name: Name of problem from problem_registry.yaml
     %   solver_name: Name of solver ('sedumi' or 'sdpt3')
     %   result_file: Path to output JSON file for results
     %   save_solutions: (optional) Boolean flag to save solutions to .mat file
+    %   runner_function: (optional) Name of the runner function to use
     %
     % This function:
     % 1. Loads problem_registry.yaml configuration
     % 2. Resolves problem file path and type
     % 3. Loads problem data using appropriate loader
-    % 4. Executes specified solver
+    % 4. Executes specified solver using dynamic function call
     % 5. Saves results to JSON file
     % 6. Optionally saves solution vectors to .mat file
 
     % Handle optional parameters
+    if nargin < 5
+        runner_function = [solver_name '_runner'];  % Default: solver_name + '_runner'
+    end
     if nargin < 4
         save_solutions = false;
     end
@@ -29,7 +33,7 @@ function matlab_runner(problem_name, solver_name, result_file, save_solutions)
         % Add necessary paths for solvers and loaders
         addpath(genpath('scripts/'));
         
-        fprintf('MATLAB Runner: Starting %s with %s\n', problem_name, solver_name);
+        fprintf('MATLAB Interface: Starting %s with %s\n', problem_name, solver_name);
         
         % Load problem registry configuration using integrated YAML reader
         [problem_config, file_path] = read_problem_registry(problem_name);
@@ -48,13 +52,13 @@ function matlab_runner(problem_name, solver_name, result_file, save_solutions)
         
         fprintf('Problem loaded: %d variables, %d constraints\n', size(A, 2), size(A, 1));
         
-        % Execute solver and get solutions
-        if strcmp(solver_name, 'sedumi')
-            [x, y, result] = sedumi_runner(A, b, c, K);
-        elseif strcmp(solver_name, 'sdpt3')
-            [x, y, result] = sdpt3_runner(A, b, c, K);
+        % Execute solver using dynamic function call
+        fprintf('Using runner function: %s\n', runner_function);
+        
+        if exist(runner_function, 'file')
+            [x, y, result] = feval(runner_function, A, b, c, K);
         else
-            error('Unknown solver: %s', solver_name);
+            error('Solver runner function not found: %s', runner_function);
         end
         
         % Calculate metrics using integrated metrics calculator
