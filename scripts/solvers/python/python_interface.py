@@ -216,6 +216,11 @@ class PythonInterface:
                 result.solver_name = solver_name
             if not result.solver_version:
                 result.solver_version = solver.get_version()
+                
+            # 6. Add problem class information to additional_info for database storage
+            if not result.additional_info:
+                result.additional_info = {}
+            result.additional_info['problem_class'] = problem_data.problem_class
             
             logger.info(f"Completed {solver_name} on {problem_name}: {result.status}")
             return result

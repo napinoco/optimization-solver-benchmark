@@ -129,6 +129,20 @@ class MatlabInterface:
             # 4. Ensure solver metadata is set
             if not result.solver_name:
                 result.solver_name = solver_name
+                
+            # 5. Add problem class information to additional_info for database storage
+            try:
+                from scripts.data_loaders.python.problem_interface import ProblemInterface
+                problem_interface = ProblemInterface()
+                problem_data = problem_interface.load_problem(problem_name)
+                if not result.additional_info:
+                    result.additional_info = {}
+                result.additional_info['problem_class'] = problem_data.problem_class
+            except Exception as e:
+                logger.debug(f"Could not get problem class for {problem_name}: {e}")
+                if not result.additional_info:
+                    result.additional_info = {}
+                result.additional_info['problem_class'] = 'UNKNOWN'
             
             logger.info(f"Completed {solver_name} on {problem_name}: {result.status}")
             return result
