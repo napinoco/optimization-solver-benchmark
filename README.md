@@ -25,7 +25,9 @@ Both libraries are included as fixed snapshots (committed on June 25, 2025) for 
 ## 🎯 Current Status: Production Ready
 
 - ✅ **Complete External Library Integration**: 139+ problems (DIMACS + SDPLIB)
-- ✅ **Comprehensive Solver Support**: 9 solvers (SciPy, CLARABEL, SCS, ECOS, OSQP, CVXOPT, SDPA, SCIP, HiGHS via CVXPY)
+- ✅ **Multi-Language Solver Support**: 11 solvers (9 Python + 2 MATLAB solvers)
+- ✅ **Python Solvers**: SciPy, CLARABEL, SCS, ECOS, OSQP, CVXOPT, SDPA, SCIP, HiGHS via CVXPY
+- ✅ **MATLAB/Octave Solvers**: SeDuMi, SDPT3 with unified interface architecture
 - ✅ **Unified ProblemData Architecture**: SeDuMi-like format for all problem types
 - ✅ **Professional Reporting**: Interactive HTML dashboards with problem structure analysis
 - ✅ **GitHub Actions CI/CD**: Automated benchmarking and report publishing
@@ -44,6 +46,12 @@ cd optimization-solver-benchmark
 python -m venv venv
 source venv/bin/activate  # On Windows: venv\Scripts\activate
 pip install -r requirements.txt
+
+# For MATLAB/Octave solver support (optional)
+# Install Octave (MATLAB-compatible environment)
+# Ubuntu/Debian: sudo apt-get install octave
+# macOS: brew install octave
+# Windows: Download from https://octave.org/download
 ```
 
 ### Run Benchmarks
@@ -63,6 +71,9 @@ python main.py --report
 
 # Dry-run mode for testing
 python main.py --benchmark --problems nb --dry-run
+
+# Test MATLAB/Octave solvers specifically
+python main.py --benchmark --problems nb --solvers matlab_sedumi,matlab_sdpt3
 ```
 
 ## 🎯 Design Philosophy: Fair Baseline Benchmarking
@@ -78,6 +89,7 @@ This system prioritizes **unbiased solver comparison** through minimal configura
 ## 📊 Current System Capabilities
 
 ### Supported Solvers ✅
+#### Python Solvers (9 total)
 - **SciPy**: Linear programming solver
 - **CVXPY Multi-Backend**: 
   - CLARABEL (modern Rust-based solver)
@@ -89,11 +101,21 @@ This system prioritizes **unbiased solver comparison** through minimal configura
   - SCIP (Mixed-integer programming)
   - HiGHS (Linear/mixed-integer programming)
 
+#### MATLAB/Octave Solvers (2 total)
+- **SeDuMi**: Interior-point method for conic optimization
+- **SDPT3**: Semidefinite-quadratic-linear programming solver
+
 ### Problem Type Coverage ✅
 - **LP**: Linear Programming (12+ results, 100% success rate)
 - **QP**: Quadratic Programming (6+ results, 100% success rate)
 - **SOCP**: Second-Order Cone Programming (31+ results, ~43% success rate)
 - **SDP**: Semidefinite Programming (38+ results, ~29% success rate)
+
+### Multi-Language Architecture ✅
+- **Unified Interface Design**: Symmetrical Python/MATLAB solver interfaces
+- **Seamless Integration**: Python-MATLAB bridge via JSON data exchange
+- **Fair Comparison**: Standardized metrics calculation across all solvers
+- **Dynamic Solver Selection**: Runtime solver selection via configuration
 
 ### Key Features ✅
 - **External Library Integration**: DIMACS (47 problems) + SDPLIB (92+ problems)
@@ -126,10 +148,13 @@ optimization-solver-benchmark/
 │   ├── main.py                     # Main entry point
 │   └── scripts/
 │       ├── benchmark/              # Benchmark execution engine
-│       ├── solvers/python/         # Solver implementations
+│       ├── solvers/
+│       │   ├── python/             # Python solver implementations
+│       │   └── matlab_octave/      # MATLAB/Octave solver integration
 │       ├── data_loaders/           # Problem loading (MAT/DAT)
 │       │   ├── problem_loader.py   # Unified ProblemData class
-│       │   └── python/             # Format-specific loaders
+│       │   ├── python/             # Python format loaders
+│       │   └── matlab_octave/      # MATLAB format loaders
 │       ├── external/               # External library loaders
 │       ├── utils/                  # Problem structure analysis
 │       ├── database/               # SQLite data models
@@ -157,8 +182,8 @@ optimization-solver-benchmark/
 Problem Type | Total Results | Success Rate | Top Performers
 LP           | 12 results   | 100%        | SciPy + CLARABEL + SCS + ECOS + OSQP
 QP           | 6 results    | 100%        | SciPy + CLARABEL + SCS + ECOS + OSQP  
-SOCP         | 31 results   | ~43%        | CLARABEL + SCS + ECOS
-SDP          | 38 results   | ~29%        | CLARABEL + SCS
+SOCP         | 31 results   | ~43%        | CLARABEL + SCS + ECOS + SeDuMi + SDPT3
+SDP          | 38 results   | ~29%        | CLARABEL + SCS + SeDuMi + SDPT3
 ```
 
 ### External Library Performance
@@ -212,14 +237,25 @@ python main.py --benchmark --dry-run         # Test without database changes
 
 ### Architecture Highlights
 - **Unified ProblemData**: SeDuMi-like format with first-class cone structure support
-- **Modular Loaders**: Separate MAT and DAT loaders for different formats
+- **Multi-Language Support**: Symmetrical Python/MATLAB solver interfaces with unified result format
+- **Modular Component Design**:
+  - **Loaders**: Convert problem_name → ProblemData (format-specific parsing)
+  - **Runners**: Convert ProblemData → SolverResult (solver-specific execution)
+  - **Interfaces**: Orchestrate problem_name → SolverResult (loader + runner coordination)
 - **CVXPY Integration**: Unified solver interface supporting multiple backends
 - **Version Tracking**: Complete solver backend and Git commit recording
 - **Error Resilience**: Continues benchmarking despite individual solver failures
 
 ### Adding New Solvers
+#### Python Solvers
 1. Extend the CVXPY runner with new backend
 2. Add solver configuration to `config/solver_registry.yaml`
+3. Test with validation framework
+4. Update documentation
+
+#### MATLAB/Octave Solvers
+1. Create solver-specific runner: `{solver}_runner.m` (ProblemData → SolverResult)
+2. Add solver configuration to MATLAB_SOLVER_CONFIGS in `matlab_interface.py`
 3. Test with validation framework
 4. Update documentation
 
@@ -232,8 +268,8 @@ python main.py --benchmark --dry-run         # Test without database changes
 
 ### Technical Accomplishments ✅
 - **Unified Architecture**: Single ProblemData format for all optimization types
+- **Multi-Language Integration**: 11 solvers (9 Python + 2 MATLAB) with symmetrical interfaces
 - **External Library Integration**: Professional-grade problem sets (DIMACS + SDPLIB)
-- **Comprehensive Solver Support**: 9 major optimization solvers
 - **Production-Ready Reporting**: Interactive dashboards suitable for research publication
 - **Fair Baseline Benchmarking**: Minimal configuration for unbiased comparison
 
@@ -260,7 +296,7 @@ python main.py --benchmark --dry-run         # Test without database changes
 
 ### System Completeness ✅
 - **139+ External Problems**: Real-world optimization challenges
-- **9 Major Solvers**: Comprehensive coverage across optimization types
+- **11 Major Solvers**: Multi-language coverage (9 Python + 2 MATLAB) across optimization types
 - **Professional Reporting**: Publication-ready HTML dashboards
 - **CI/CD Integration**: Automated benchmarking and deployment
 - **Fair Benchmarking Philosophy**: Unbiased solver comparison using defaults
@@ -278,7 +314,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 🙏 Acknowledgments
 
 - **External Problem Libraries**: VSDP team for DIMACS and SDPLIB repositories
-- **Open-Source Solvers**: SciPy, CVXPY, CLARABEL, SCS, ECOS, OSQP, CVXOPT, SDPA, SCIP, HiGHS
+- **Open-Source Solvers**: SciPy, CVXPY, CLARABEL, SCS, ECOS, OSQP, CVXOPT, SDPA, SCIP, HiGHS, SeDuMi, SDPT3
 - **Web Technologies**: Bootstrap 5, Chart.js for interactive visualizations
 - **CI/CD Platform**: GitHub Actions for automated benchmarking and deployment
 
