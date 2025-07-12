@@ -74,6 +74,17 @@ function matlab_interface(problem_name, solver_name, result_file, save_solutions
         end
         
         if save_json
+            % Remove old field names from result if they exist
+            if isfield(result, 'primal_objective')
+                result = rmfield(result, 'primal_objective');
+            end
+            if isfield(result, 'dual_objective')
+                result = rmfield(result, 'dual_objective');
+            end
+            if isfield(result, 'gap')
+                result = rmfield(result, 'gap');
+            end
+            
             % Convert result to JSON-compatible format (without solutions)
             json_result = convert_to_json_result(result);
             
@@ -105,23 +116,23 @@ function json_result = convert_to_json_result(result)
     json_result.status = result.status;
 
     % Handle optional numeric fields (convert [] to null)
-    % Use field names that match Python SolverResult interface
-    if isempty(result.primal_objective) || isnan(result.primal_objective)
+    % Field names now match Python SolverResult interface directly
+    if isempty(result.primal_objective_value) || isnan(result.primal_objective_value)
         json_result.primal_objective_value = [];
     else
-        json_result.primal_objective_value = result.primal_objective;
+        json_result.primal_objective_value = result.primal_objective_value;
     end
 
-    if isempty(result.dual_objective) || isnan(result.dual_objective)
+    if isempty(result.dual_objective_value) || isnan(result.dual_objective_value)
         json_result.dual_objective_value = [];
     else
-        json_result.dual_objective_value = result.dual_objective;
+        json_result.dual_objective_value = result.dual_objective_value;
     end
 
-    if isempty(result.gap) || isnan(result.gap)
+    if isempty(result.duality_gap) || isnan(result.duality_gap)
         json_result.duality_gap = [];
     else
-        json_result.duality_gap = result.gap;
+        json_result.duality_gap = result.duality_gap;
     end
 
     if isempty(result.primal_infeasibility) || isnan(result.primal_infeasibility)
@@ -359,12 +370,12 @@ function result = calculate_solver_metrics(result, x, y, A, b, c, K)
             c_vec = c(:);
             x_vec = x(:);
             if length(c_vec) == length(x_vec)
-                result.primal_objective = c_vec' * x_vec;
+                result.primal_objective_value = c_vec' * x_vec;
             else
-                result.primal_objective = NaN;
+                result.primal_objective_value = NaN;
             end
         catch
-            result.primal_objective = NaN;
+            result.primal_objective_value = NaN;
         end
     end
 
@@ -373,18 +384,18 @@ function result = calculate_solver_metrics(result, x, y, A, b, c, K)
             b_vec = b(:);
             y_vec = y(:);
             if length(b_vec) == length(y_vec)
-                result.dual_objective = b_vec' * y_vec;
+                result.dual_objective_value = b_vec' * y_vec;
             else
-                result.dual_objective = NaN;
+                result.dual_objective_value = NaN;
             end
         catch
-            result.dual_objective = NaN;
+            result.dual_objective_value = NaN;
         end
     end
 
     % Calculate duality gap
-    if ~isnan(result.primal_objective) && ~isnan(result.dual_objective)
-        result.gap = abs(result.primal_objective - result.dual_objective);
+    if ~isnan(result.primal_objective_value) && ~isnan(result.dual_objective_value)
+        result.duality_gap = abs(result.primal_objective_value - result.dual_objective_value);
     end
 
     % Calculate infeasibility measures
@@ -559,9 +570,9 @@ function success = save_json_safely(result, output_file)
             error_result.solve_time = NaN;
             error_result.setup_time = NaN;
             error_result.iterations = NaN;
-            error_result.primal_objective = NaN;
-            error_result.dual_objective = NaN;
-            error_result.gap = NaN;
+            error_result.primal_objective_value = NaN;
+            error_result.dual_objective_value = NaN;
+            error_result.duality_gap = NaN;
             error_result.primal_infeasibility = NaN;
             error_result.dual_infeasibility = NaN;
             error_result.solver_version = get_field_safe(result, 'solver_version', 'Unknown');
@@ -617,9 +628,9 @@ function json_str = format_result_to_json(result)
         error_result.solve_time = NaN;
         error_result.setup_time = NaN;
         error_result.iterations = NaN;
-        error_result.primal_objective = NaN;
-        error_result.dual_objective = NaN;
-        error_result.gap = NaN;
+        error_result.primal_objective_value = NaN;
+        error_result.dual_objective_value = NaN;
+        error_result.duality_gap = NaN;
         error_result.primal_infeasibility = NaN;
         error_result.dual_infeasibility = NaN;
         error_result.solver_version = get_field_safe(result, 'solver_version', 'Unknown');
@@ -646,9 +657,9 @@ function standardized_result = create_standardized_result(result)
         'solve_time', NaN;
         'setup_time', NaN;
         'iterations', NaN;
-        'primal_objective', NaN;
-        'dual_objective', NaN;
-        'gap', NaN;
+        'primal_objective_value', NaN;
+        'dual_objective_value', NaN;
+        'duality_gap', NaN;
         'primal_infeasibility', NaN;
         'dual_infeasibility', NaN;
         'solver_version', 'Unknown';
@@ -1016,7 +1027,7 @@ function field_value = get_field_safe(struct_input, field_name, default_value)
         
         % Additional type checking for specific fields
         switch field_name
-            case {'solve_time', 'setup_time', 'primal_objective', 'dual_objective', 'gap', 'primal_infeasibility', 'dual_infeasibility'}
+            case {'solve_time', 'setup_time', 'primal_objective_value', 'dual_objective_value', 'duality_gap', 'primal_infeasibility', 'dual_infeasibility'}
                 if ~isnumeric(field_value) || ~isscalar(field_value)
                     field_value = default_value;
                 end

@@ -200,9 +200,9 @@ function result = create_sedumi_result(info)
     % Initialize other fields
     result.solve_time = NaN;
     result.setup_time = NaN;
-    result.primal_objective = NaN;
-    result.dual_objective = NaN;
-    result.gap = NaN;
+    result.primal_objective_value = NaN;
+    result.dual_objective_value = NaN;
+    result.duality_gap = NaN;
     result.primal_infeasibility = NaN;
     result.dual_infeasibility = NaN;
     result.error_message = '';

@@ -50,7 +50,6 @@ class BenchmarkRunner:
     """Main benchmark execution engine with symmetrical solver interfaces"""
     
     def __init__(self, database_manager: Optional[DatabaseManager] = None, 
-                 registries: Optional[Dict[str, Any]] = None,
                  dry_run: bool = False,
                  save_solutions: bool = False):
         """
@@ -58,7 +57,6 @@ class BenchmarkRunner:
         
         Args:
             database_manager: Optional database manager (creates default if None)
-            registries: Pre-loaded registries to avoid redundant loading
             dry_run: If True, skip database operations (for testing)
             save_solutions: If True, save optimal solutions to disk
         """
@@ -82,11 +80,8 @@ class BenchmarkRunner:
         self.commit_hash = get_git_commit_hash()
         
         # Solver configurations now managed by interfaces (no more solver registry YAML)
-        # Problem registry still passed for backward compatibility
-        if registries:
-            logger.debug("Using pre-loaded problem registry")
-        # Solver registry no longer needed - interfaces are the source of truth
-        
+        # Problem registry is now loaded directly by ProblemInterface
+
         logger.info("Benchmark runner initialized with unified interfaces")
         logger.info(f"Git commit: {self.commit_hash}")
         logger.info(f"Environment: {self.environment_info['os']['system']} {self.environment_info['python']['version']}")
@@ -133,9 +128,6 @@ class BenchmarkRunner:
         Returns:
             Dictionary mapping solver_name -> interface_type ('python' or 'matlab')
         """
-        from scripts.solvers.python.python_interface import PythonInterface
-        from scripts.solvers.matlab_octave.matlab_interface import MatlabInterface
-        
         mapping = {}
         
         # Add Python solvers
@@ -149,12 +141,6 @@ class BenchmarkRunner:
         logger.debug(f"Built solver interface mapping: {len(mapping)} solvers")
         return mapping
     
-    
-    # Problem registry loading now handled by problem interface
-    # Keeping method for backward compatibility but delegating to interface
-    def load_problem_registry(self) -> Dict[str, Any]:
-        """Load problem registry (delegated to problem interface)"""
-        return self.problem_interface.problem_registry
     
     def create_solver(self, solver_name: str) -> SolverInterface:
         """
@@ -330,14 +316,9 @@ class BenchmarkRunner:
                 result = self.python_interface.solve(problem_name, solver_name)
                 
             elif interface_type == 'matlab':
-                # Route directly to MATLAB interface
-                if self.matlab_interface:
-                    result = self.matlab_interface.solve(problem_name, solver_name)
-                else:
-                    raise ValueError(f"MATLAB interface not available for solver '{solver_name}'")
-                    
+                result = self.matlab_interface.solve(problem_name, solver_name)
+
             else:
-                # Unknown solver - not in any interface configuration
                 raise ValueError(f"Unknown solver '{solver_name}'. Available solvers: {list(self._solver_interface_map.keys())}")
             
             # Success! Get problem configuration and store result

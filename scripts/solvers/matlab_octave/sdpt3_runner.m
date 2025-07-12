@@ -57,7 +57,7 @@ function [x, y, result] = sdpt3_runner(A, b, c, K, options)
         
         % Measure solve time
         solve_start_time = tic;
-        [obj, X, y, Z, info, runhist] = sqlp(blk, At, C, b_sdpt3, OPTIONS);
+        [obj, X, y, Z, info, runhist] = sdpt3(blk, At, C, b_sdpt3, OPTIONS);
         solve_time = toc(solve_start_time);
         
         % Convert SDPT3 solution back to SeDuMi format
@@ -212,9 +212,9 @@ function result = create_sdpt3_result(info)
     % Initialize other fields
     result.solve_time = NaN;
     result.setup_time = NaN;
-    result.primal_objective = NaN;
-    result.dual_objective = NaN;
-    result.gap = NaN;
+    result.primal_objective_value = NaN;
+    result.dual_objective_value = NaN;
+    result.duality_gap = NaN;
     result.primal_infeasibility = NaN;
     result.dual_infeasibility = NaN;
     result.error_message = '';

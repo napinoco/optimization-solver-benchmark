@@ -1,23 +1,4 @@
 #!/usr/bin/env python3
-"""
-Optimization Solver Benchmark - Main Entry Point
-
-This script provides a unified interface to run benchmarks and generate reports
-using the re-architected simplified system.
-
-Usage Examples:
-    python main.py --help                    # Show help
-    python main.py --benchmark               # Run benchmarks on all problems with all solvers
-    python main.py --report                  # Generate reports only
-    python main.py --all                     # Run benchmarks and generate reports
-    python main.py --validate               # Validate environment and solver setup
-    python main.py --benchmark --problems DIMACS --solvers cvxpy_clarabel
-    python main.py --benchmark --pro
-    from scripts.benchmark.runner import BenchmarkRunner
-    from scripts.database.database_manager import Datablems nb,arch0,simple_lp_test
-    python main.py --benchmark --problems DIMACS,simple_lp_test
-"""
-
 import sys
 import os
 import argparse
@@ -63,25 +44,9 @@ def setup_logging(verbose: bool = False, quiet: bool = False):
     )
 
 
-def test_solver_availability(runner: BenchmarkRunner, solver_name: str) -> bool:
-    """Test if a solver is available with caching to avoid expensive repeated tests."""
-    global _solver_availability_cache
-    
-    if solver_name in _solver_availability_cache:
-        return _solver_availability_cache[solver_name]
-    
-    try:
-        runner.create_solver(solver_name)
-        _solver_availability_cache[solver_name] = True
-        return True
-    except Exception:
-        _solver_availability_cache[solver_name] = False
-        return False
-
-
-def load_registries() -> Optional[Dict[str, Any]]:
-    """Load problem registry only (solver config now in interfaces)."""
-    logger = get_logger("registry_loader")
+def load_problem_registry() -> Optional[Dict[str, Any]]:
+    """Load problem registry configuration."""
+    logger = get_logger("problem_registry_loader")
     
     try:
         # Load problem registry
@@ -94,9 +59,7 @@ def load_registries() -> Optional[Dict[str, Any]]:
             problem_registry = yaml.safe_load(f)
         
         logger.info("Problem registry loaded successfully")
-        return {
-            'problem_registry': problem_registry
-        }
+        return problem_registry
         
     except Exception as e:
         logger.error(f"Failed to load problem registry: {e}")
@@ -231,18 +194,15 @@ def run_benchmark(library_names: Optional[List[str]] = None,
     try:
         logger.info("Starting benchmark execution...")
         
+        # Create benchmark runner (db_manager created internally by default)
+        runner = BenchmarkRunner(dry_run=dry_run, save_solutions=save_solutions)
+
         # Load problem registry only (solver configs now in interfaces)
-        registries = load_registries()
-        if not registries:
+        problem_registry = load_problem_registry()
+        if not problem_registry:
             logger.error("Failed to load problem registry")
             return False
-        
-        problem_registry = registries['problem_registry']
-        
-        # Create benchmark runner (no solver registry needed)
-        db_manager = DatabaseManager()
-        runner = BenchmarkRunner(db_manager, registries=registries, dry_run=dry_run, save_solutions=save_solutions)
-        
+
         # Filter problems based on library_names and problems arguments
         selected_problems = {}
         for problem_name, problem_config in problem_registry["problem_libraries"].items():
