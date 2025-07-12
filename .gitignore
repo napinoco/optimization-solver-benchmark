@@ -199,3 +199,8 @@ database/*.db.backup
 database/*_backup
 
 # Note: Database files are now sanitized and safe for public sharing
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
