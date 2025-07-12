@@ -22,8 +22,8 @@ This is an automated benchmark system for optimization solvers (LP, QP, SOCP, SD
 ### **REQUIRED READING** (Read these documents carefully before any development):
 
 1. **[📋 Basic Design](docs/development/basic_design.md)** - High-level concepts, project vision, and development roadmap
-2. **[🏗️ Detailed Design](docs/development/detail_design.md)** - Complete technical architecture and implementation specifications  
-3. **[📝 Development Conventions](docs/development/conventions.md)** - Coding standards, git protocols, and engineering guidelines
+2. **[🏗️ Detailed Design](docs/development/detail_design.md)** - Complete technical architecture and implementation specifications @docs/development/detail_design.md  
+3. **[📝 Development Conventions](docs/development/conventions.md)** - Coding standards, git protocols, and engineering guidelines @docs/development/conventions.md
 4. **[✅ Current Tasks](docs/development/tasks.md)** - Active development tasks for current phase
 5. **[📚 Development History](docs/development/history.md)** - Complete record of completed development phases
 
