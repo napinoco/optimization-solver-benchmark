@@ -152,43 +152,43 @@ def get_git_info() -> Dict[str, Any]:
     return info
 
 
-def format_git_commit_for_display(commit_hash: Optional[str]) -> str:
-    """
-    Format Git commit hash for display purposes.
-    
-    Args:
-        commit_hash: Full commit hash or None
-        
-    Returns:
-        Formatted commit hash (shortened) or 'unknown'
-    """
-    if commit_hash:
-        # Return first 8 characters for display
-        return commit_hash[:8]
-    else:
-        return 'unknown'
-
-
-def validate_git_commit_hash(commit_hash: str) -> bool:
-    """
-    Validate that a string looks like a Git commit hash.
-    
-    Args:
-        commit_hash: String to validate
-        
-    Returns:
-        True if it looks like a valid commit hash
-    """
-    if not commit_hash:
-        return False
-    
-    # Git commit hashes are 40 character hex strings
-    if len(commit_hash) == 40:
-        try:
-            int(commit_hash, 16)
-            return True
-        except ValueError:
-            return False
-    
-    return False
+# def format_git_commit_for_display(commit_hash: Optional[str]) -> str:
+#     """
+#     Format Git commit hash for display purposes.
+#
+#     Args:
+#         commit_hash: Full commit hash or None
+#
+#     Returns:
+#         Formatted commit hash (shortened) or 'unknown'
+#     """
+#     if commit_hash:
+#         # Return first 8 characters for display
+#         return commit_hash[:8]
+#     else:
+#         return 'unknown'
+#
+#
+# def validate_git_commit_hash(commit_hash: str) -> bool:
+#     """
+#     Validate that a string looks like a Git commit hash.
+#
+#     Args:
+#         commit_hash: String to validate
+#
+#     Returns:
+#         True if it looks like a valid commit hash
+#     """
+#     if not commit_hash:
+#         return False
+#
+#     # Git commit hashes are 40 character hex strings
+#     if len(commit_hash) == 40:
+#         try:
+#             int(commit_hash, 16)
+#             return True
+#         except ValueError:
+#             return False
+#
+#     return False
 

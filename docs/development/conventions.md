@@ -60,6 +60,74 @@ Co-Authored-By: Claude <noreply@anthropic.com>
 
 ## Coding Standards
 
+### MATLAB Code Standards
+
+#### General Principles
+- **Function Indentation**: All code within function blocks must be indented
+- **Consistent Spacing**: Use 4 spaces for indentation (no tabs)
+- **Clear Function Structure**: Separate function signature from body with proper indentation
+- **Nested Functions**: Apply consistent indentation for nested function definitions
+
+#### MATLAB Function Structure
+```matlab
+function result = example_function(param1, param2)
+    % Function description and documentation
+    % 
+    % Args:
+    %   param1: Description of parameter
+    %   param2: Description of parameter
+    %
+    % Returns:
+    %   result: Description of return value
+    
+    % All function body code must be indented
+    if nargin < 2
+        param2 = default_value;
+    end
+    
+    try
+        % Implementation logic with proper indentation
+        intermediate_value = process_data(param1);
+        result = combine_results(intermediate_value, param2);
+        
+        % Nested function calls maintain indentation
+        if result.status == 'success'
+            fprintf('Operation completed successfully\n');
+        end
+        
+    catch ME
+        % Error handling with consistent indentation
+        fprintf('Error in example_function: %s\n', ME.message);
+        result = create_error_result(ME);
+    end
+    
+end
+
+function nested_result = helper_function(data)
+    % Nested functions also follow indentation rules
+    
+    nested_result = struct();
+    nested_result.processed_data = data * 2;
+    nested_result.timestamp = datestr(now);
+    
+end
+```
+
+#### MATLAB Indentation Rules
+1. **Function Body**: All code within `function...end` blocks must be indented by 4 spaces
+2. **Control Structures**: `if`, `for`, `while`, `try` blocks require additional indentation
+3. **Nested Functions**: Each nested function follows the same indentation rules
+4. **Comments**: Maintain indentation level consistent with surrounding code
+5. **Line Continuation**: Use proper indentation for multi-line statements
+
+#### MATLAB Documentation Standards
+- Use `%` for single-line comments with proper indentation
+- Document function parameters and return values
+- Include usage examples for complex functions
+- Maintain consistent commenting style throughout functions
+
+---
+
 ### Python Code Standards
 
 #### General Principles

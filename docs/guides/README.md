@@ -6,6 +6,7 @@ Several guides in this directory contain outdated information that doesn't match
 
 ## ✅ Current and Accurate Guides:
 
+- **CONFIGURATION.md** - Complete configuration guide including MATLAB solver setup
 - **GITHUB_ACTIONS_SETUP.md** - Accurate description of deployment workflows
 - **PR_PREVIEW_GUIDE.md** - Correctly describes PR preview functionality
 

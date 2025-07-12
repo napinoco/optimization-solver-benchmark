@@ -253,45 +253,45 @@ def _sanitize_environment_info(env_info: Dict[str, Any]) -> Dict[str, Any]:
     
     return sanitized
 
-def get_environment_summary() -> str:
-    """Get a human-readable summary of the environment."""
-    env_info = collect_environment_info()
-    
-    # Enhanced OS description
-    os_desc = f"{env_info['os']['system']} {env_info['os']['release']}"
-    if 'ubuntu_version' in env_info['os']:
-        os_desc = env_info['os']['ubuntu_version']
-    elif 'lsb_description' in env_info['os']:
-        os_desc = env_info['os']['lsb_description']
-    
-    # Enhanced timezone description
-    tz_info = env_info['timezone']
-    timezone_desc = f"UTC{tz_info['utc_offset_hours']:+.1f} ({tz_info['timezone_name']})"
-    if 'system_timezone' in tz_info:
-        timezone_desc = f"{tz_info['system_timezone']} (UTC{tz_info['utc_offset_hours']:+.1f})"
-    elif 'timedatectl_timezone' in tz_info:
-        timezone_desc = f"{tz_info['timedatectl_timezone']} (UTC{tz_info['utc_offset_hours']:+.1f})"
-    elif 'macos_timezone' in tz_info:
-        timezone_desc = f"{tz_info['macos_timezone']} (UTC{tz_info['utc_offset_hours']:+.1f})"
-    
-    # Git information
-    git_info = env_info['git']
-    git_desc = "Not available"
-    if git_info['available']:
-        commit_hash = git_info['commit_hash'][:8] if git_info['commit_hash'] else 'unknown'
-        branch = git_info['branch'] or 'unknown'
-        dirty_flag = ' (dirty)' if git_info['is_dirty'] else ''
-        git_desc = f"{commit_hash} on {branch}{dirty_flag}"
-    
-    summary = f"""Environment Summary:
-OS: {os_desc} ({env_info['os']['machine']})
-CPU: {env_info['cpu']['processor']} ({env_info['cpu']['cpu_count']} cores)
-Memory: {env_info['memory']['total_gb']} GB total, {env_info['memory']['available_gb']} GB available
-Python: {env_info['python']['version']} ({env_info['python']['implementation']})
-Git: {git_desc}
-Timezone: {timezone_desc}
-Local Time: {tz_info['current_time_local']}
-Disk: {env_info['disk']['free_gb']} GB free of {env_info['disk']['total_gb']} GB total"""
-    
-    return summary
+# def get_environment_summary() -> str:
+#     """Get a human-readable summary of the environment."""
+#     env_info = collect_environment_info()
+#
+#     # Enhanced OS description
+#     os_desc = f"{env_info['os']['system']} {env_info['os']['release']}"
+#     if 'ubuntu_version' in env_info['os']:
+#         os_desc = env_info['os']['ubuntu_version']
+#     elif 'lsb_description' in env_info['os']:
+#         os_desc = env_info['os']['lsb_description']
+#
+#     # Enhanced timezone description
+#     tz_info = env_info['timezone']
+#     timezone_desc = f"UTC{tz_info['utc_offset_hours']:+.1f} ({tz_info['timezone_name']})"
+#     if 'system_timezone' in tz_info:
+#         timezone_desc = f"{tz_info['system_timezone']} (UTC{tz_info['utc_offset_hours']:+.1f})"
+#     elif 'timedatectl_timezone' in tz_info:
+#         timezone_desc = f"{tz_info['timedatectl_timezone']} (UTC{tz_info['utc_offset_hours']:+.1f})"
+#     elif 'macos_timezone' in tz_info:
+#         timezone_desc = f"{tz_info['macos_timezone']} (UTC{tz_info['utc_offset_hours']:+.1f})"
+#
+#     # Git information
+#     git_info = env_info['git']
+#     git_desc = "Not available"
+#     if git_info['available']:
+#         commit_hash = git_info['commit_hash'][:8] if git_info['commit_hash'] else 'unknown'
+#         branch = git_info['branch'] or 'unknown'
+#         dirty_flag = ' (dirty)' if git_info['is_dirty'] else ''
+#         git_desc = f"{commit_hash} on {branch}{dirty_flag}"
+#
+#     summary = f"""Environment Summary:
+# OS: {os_desc} ({env_info['os']['machine']})
+# CPU: {env_info['cpu']['processor']} ({env_info['cpu']['cpu_count']} cores)
+# Memory: {env_info['memory']['total_gb']} GB total, {env_info['memory']['available_gb']} GB available
+# Python: {env_info['python']['version']} ({env_info['python']['implementation']})
+# Git: {git_desc}
+# Timezone: {timezone_desc}
+# Local Time: {tz_info['current_time_local']}
+# Disk: {env_info['disk']['free_gb']} GB free of {env_info['disk']['total_gb']} GB total"""
+#
+#     return summary
 

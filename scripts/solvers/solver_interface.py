@@ -247,37 +247,6 @@ class SolverInterface(ABC):
             'config': self.config
         }
     
-    def solve_with_timing(self, problem_data: ProblemData, timeout: Optional[float] = None) -> SolverResult:
-        """
-        Solve problem with automatic timing measurement.
-        
-        This is a convenience method that wraps the solve() method with timing.
-        Subclasses can override this if they need custom timing logic.
-        
-        Args:
-            problem_data: Problem data in unified format
-            timeout: Optional timeout in seconds
-            
-        Returns:
-            SolverResult with accurate timing information
-        """
-        start_time = time.time()
-        
-        try:
-            result = self.solve(problem_data, timeout)
-            
-            # Ensure the result has the actual solve time
-            actual_solve_time = time.time() - start_time
-            result.solve_time = actual_solve_time
-            result.solver_name = self.solver_name
-            result.solver_version = self.get_version()
-            
-            return result
-            
-        except Exception as e:
-            solve_time = time.time() - start_time
-            self.logger.error(f"Solver {self.solver_name} failed: {e}")
-            return SolverResult.create_error_result(str(e), solve_time)
     
     def validate_problem_compatibility(self, problem_data: ProblemData) -> bool:
         """
@@ -292,16 +261,4 @@ class SolverInterface(ABC):
         # Default implementation - subclasses should override for specific checks
         return True
     
-    def preprocess_problem(self, problem_data: ProblemData) -> ProblemData:
-        """
-        Preprocess problem data before solving (optional).
-        
-        Args:
-            problem_data: Original problem data
-            
-        Returns:
-            Preprocessed problem data (default: returns original)
-        """
-        # Default implementation - no preprocessing
-        return problem_data
 

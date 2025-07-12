@@ -217,7 +217,7 @@
     <header>
         <h1>🔬 Optimization Solver Benchmark</h1>
         <p>Overview Dashboard - Latest Results</p>
-        <p><small>Generated: 2025-06-27 16:56:07</small></p>
+        <p><small>Generated: 2025-07-01 23:58:26</small></p>
     </header>
     
     <nav>
@@ -246,11 +246,11 @@ This system prioritizes unbiased solver comparison through minimal configuration
         <div class="stats-grid">
             <div class="stat-card">
                 <h3>Total Results</h3>
-                <span class="stat-value">43</span>
+                <span class="stat-value">45</span>
             </div>
             <div class="stat-card">
                 <h3>Solvers Tested</h3>
-                <span class="stat-value">9</span>
+                <span class="stat-value">10</span>
             </div>
             <div class="stat-card">
                 <h3>Problems Tested</h3>
@@ -258,7 +258,7 @@ This system prioritizes unbiased solver comparison through minimal configuration
             </div>
             <div class="stat-card">
                 <h3>Success Rate</h3>
-                <span class="stat-value">69.8%</span>
+                <span class="stat-value">66.7%</span>
             </div>
         </div>
 
@@ -356,20 +356,6 @@ This system prioritizes unbiased solver comparison through minimal configuration
                     </thead>
                     <tbody>
                 <tr>
-                    <td><strong>cvxpy_ecos</strong></td>
-                    <td>1</td>
-                    <td>1</td>
-                    <td class="success-rate">100.0%</td>
-                    <td class="solve-time">2.0738s</td>
-                </tr>
-                <tr>
-                    <td><strong>cvxpy_clarabel</strong></td>
-                    <td>1</td>
-                    <td>1</td>
-                    <td class="success-rate">100.0%</td>
-                    <td class="solve-time">2.3709s</td>
-                </tr>
-                <tr>
                     <td><strong>cvxpy_cvxopt</strong></td>
                     <td>1</td>
                     <td>1</td>
@@ -391,11 +377,32 @@ This system prioritizes unbiased solver comparison through minimal configuration
                     <td class="solve-time">8.8149s</td>
                 </tr>
                 <tr>
+                    <td><strong>cvxpy_ecos</strong></td>
+                    <td>1</td>
+                    <td>1</td>
+                    <td class="success-rate">100.0%</td>
+                    <td class="solve-time">15.0033s</td>
+                </tr>
+                <tr>
+                    <td><strong>cvxpy_clarabel</strong></td>
+                    <td>1</td>
+                    <td>1</td>
+                    <td class="success-rate">100.0%</td>
+                    <td class="solve-time">25.4521s</td>
+                </tr>
+                <tr>
                     <td><strong>cvxpy_scip</strong></td>
                     <td>1</td>
                     <td>1</td>
                     <td class="success-rate">100.0%</td>
                     <td class="solve-time">48.2575s</td>
+                </tr>
+                <tr>
+                    <td><strong>matlab_sedumi</strong></td>
+                    <td>1</td>
+                    <td>0</td>
+                    <td class="success-rate">0.0%</td>
+                    <td class="solve-time">5.5110s</td>
                 </tr>
                     </tbody>
                 </table>
@@ -413,18 +420,25 @@ This system prioritizes unbiased solver comparison through minimal configuration
                     </thead>
                     <tbody>
                 <tr>
-                    <td><strong>cvxpy_sdpa</strong></td>
+                    <td><strong>cvxpy_clarabel</strong></td>
                     <td>1</td>
                     <td>1</td>
                     <td class="success-rate">100.0%</td>
-                    <td class="solve-time">0.0575s</td>
+                    <td class="solve-time">0.0705s</td>
                 </tr>
                 <tr>
                     <td><strong>cvxpy_cvxopt</strong></td>
                     <td>1</td>
                     <td>1</td>
                     <td class="success-rate">100.0%</td>
-                    <td class="solve-time">0.0946s</td>
+                    <td class="solve-time">0.0955s</td>
+                </tr>
+                <tr>
+                    <td><strong>cvxpy_sdpa</strong></td>
+                    <td>1</td>
+                    <td>0</td>
+                    <td class="success-rate">0.0%</td>
+                    <td class="solve-time">0.0612s</td>
                 </tr>
                     </tbody>
                 </table>
@@ -447,17 +461,17 @@ This system prioritizes unbiased solver comparison through minimal configuration
             <tr>
                 <td><strong>UNKNOWN</strong></td>
                 <td>34</td>
-                <td>79.1%</td>
+                <td>75.6%</td>
             </tr>
             <tr>
                 <td><strong>SOCP</strong></td>
-                <td>7</td>
-                <td>16.3%</td>
+                <td>8</td>
+                <td>17.8%</td>
             </tr>
             <tr>
                 <td><strong>SDP</strong></td>
-                <td>2</td>
-                <td>4.7%</td>
+                <td>3</td>
+                <td>6.7%</td>
             </tr>
                     </tbody>
                 </table>
@@ -478,18 +492,18 @@ This system prioritizes unbiased solver comparison through minimal configuration
                     <tbody>
             <tr>
                 <td><strong>DIMACS</strong></td>
-                <td>39</td>
-                <td>90.7%</td>
+                <td>40</td>
+                <td>88.9%</td>
             </tr>
             <tr>
                 <td><strong>SDPLIB</strong></td>
-                <td>2</td>
-                <td>4.7%</td>
+                <td>3</td>
+                <td>6.7%</td>
             </tr>
             <tr>
                 <td><strong>internal</strong></td>
                 <td>2</td>
-                <td>4.7%</td>
+                <td>4.4%</td>
             </tr>
                     </tbody>
                 </table>
@@ -498,7 +512,7 @@ This system prioritizes unbiased solver comparison through minimal configuration
 
         <div class="metadata">
             <h3>🔧 Environment Information</h3>
-            <p><strong>Commit Hashes:</strong> 3dc1728a, 82612d7c, ce1969a2, cfc13857, e945508d</p><p><em>⚠️ Multiple environments detected: Results from 5 different Git commits</em></p><p><strong>Platform:</strong> macOS-14.5-arm64-arm-64bit (8CPU, 24GB)</p><p><strong>Python Version:</strong> 3.12.2</p>
+            <p><strong>Commit Hashes:</strong> 246332a2, 2b66a821, 3dc1728a, 7fe9c04a, 82612d7c, ce1969a2, e945508d</p><p><em>⚠️ Multiple environments detected: Results from 7 different Git commits</em></p><p><strong>Platform:</strong> Unknown</p><p><strong>Python Version:</strong> 3.12.2</p>
         </div>
     </main>
 

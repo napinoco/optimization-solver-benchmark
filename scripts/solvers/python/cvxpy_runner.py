@@ -342,15 +342,41 @@ class CvxpySolver(SolverInterface):
 
             # Get primal solution of SeDuMi format (=dual solution of CVXPY)
             x_list = []
-            for constraint in cvx_problem.constraints:
+            for i, constraint in enumerate(cvx_problem.constraints):
                 if not hasattr(constraint, 'dual_value') or constraint.dual_value is None:
+                    self.logger.debug(f"Constraint {i} has no dual value")
                     x_list = []
                     break
                 if isinstance(constraint, cp.SOC):
-                    x_list.append(constraint.dual_value[0].reshape(-1, 1))
-                    x_list.append(constraint.dual_value[1].reshape(-1, 1))
+                    # SOC constraint: dual_value is [t, x] where t is scalar, x is vector
+                    try:
+                        dual_val = constraint.dual_value
+                        if isinstance(dual_val, (list, tuple)) and len(dual_val) == 2:
+                            dual_t = dual_val[0]
+                            dual_x = dual_val[1]
+                            
+                            # Ensure both are numpy arrays and reshape to column vectors
+                            dual_t = np.array(dual_t).reshape(-1, 1)  
+                            dual_x = np.array(dual_x).reshape(-1, 1)  
+                            
+                            x_list.append(dual_t)
+                            x_list.append(dual_x)
+                        else:
+                            # Handle scalar case
+                            dual_array = np.array(dual_val).reshape(-1, 1)
+                            x_list.append(dual_array)
+                    except Exception as e:
+                        self.logger.debug(f"SOC constraint {i} dual value error: {e}")
+                        x_list = []
+                        break
                 else:
-                    x_list.append(constraint.dual_value.reshape(-1, 1))
+                    try:
+                        dual_array = np.array(constraint.dual_value).reshape(-1, 1)
+                        x_list.append(dual_array)
+                    except Exception as e:
+                        self.logger.debug(f"Constraint {i} dual value error: {e}")
+                        x_list = []
+                        break
 
             if x_list:
                 x = np.vstack(x_list)
@@ -393,7 +419,10 @@ class CvxpySolver(SolverInterface):
                         return np.zeros_like(z)
                     else:
                         scale = (z0 + znorm) / 2
-                        return np.concatenate(([1], z[1:] / znorm)) * scale
+                        # Ensure consistent dimensions: z is column vector, so result should be too
+                        z0_new = np.array([[1]])  # Make it a column vector
+                        z_tail_new = z[1:] / znorm  # Already column vector
+                        return np.vstack([z0_new, z_tail_new]) * scale
                 soc_cones = cone_structure['soc_cones']
                 for ndim in soc_cones:
                     if ndim <= 0:
@@ -414,57 +443,38 @@ class CvxpySolver(SolverInterface):
                     dinf2 += np.sum(neg_eigvals ** 2)
                     nvar_cnt = end
             dual_infeasibility = float(np.sqrt(dinf2) / (1 + np.sum(c ** 2)))
+            self.logger.debug(f"Calculated dual infeasibility: sqrt({dinf2}) / (1 + {np.sum(c ** 2)}) = {dual_infeasibility}")
 
             if primal_objective_value is not None and dual_objective_value is not None:
                 duality_gap = primal_objective_value - dual_objective_value
+                self.logger.debug(f"Calculated duality gap: primal={primal_objective_value} - dual={dual_objective_value} = {duality_gap}")
+            else:
+                self.logger.debug(f"Cannot calculate duality gap: primal={primal_objective_value}, dual={dual_objective_value}")
 
             # Save solution if requested
             if self.save_solutions:
                 self._save_solution(problem_data, x, y)
 
         except Exception as e:
-            self.logger.debug(f"Manual duality calculation failed: {e}")
+            self.logger.warning(f"Manual duality calculation failed: {e}")
+            import traceback
+            self.logger.debug(f"Full traceback: {traceback.format_exc()}")
         
         # Get iterations if available
         iterations = None
         if cvx_problem.solver_stats and hasattr(cvx_problem.solver_stats, 'num_iters'):
             iterations = cvx_problem.solver_stats.num_iters
         
-        # Extract solver-specific information
-        additional_info = {
-            "cvxpy_status": cvx_problem.status,
-            "backend_solver": self.backend,
-            "solver_stats": cvx_problem.solver_stats.__dict__ if cvx_problem.solver_stats else None,
-            "cvxpy_version": cp.__version__,
-            "manual_duality_used": True
-        }
+        # Extract minimal solver timing information for memo
+        additional_info = {}
         
-        # Add solver timing information to additional_info for memo
-        if cvx_problem.solver_stats:
-            if hasattr(cvx_problem.solver_stats, 'solve_time'):
-                additional_info["solver_solve_time"] = cvx_problem.solver_stats.solve_time
-            if hasattr(cvx_problem.solver_stats, 'setup_time'):
-                additional_info["solver_setup_time"] = cvx_problem.solver_stats.setup_time
-        
-        # Add timing breakdown for analysis
-        additional_info["wall_clock_solve_time"] = solve_time
+        # Only add solver internal timing for memo
         if cvx_problem.solver_stats and hasattr(cvx_problem.solver_stats, 'solve_time'):
-            solver_internal_time = cvx_problem.solver_stats.solve_time
-            additional_info["cvxpy_overhead"] = solve_time - solver_internal_time
-            additional_info["overhead_percentage"] = ((solve_time - solver_internal_time) / solve_time * 100) if solve_time > 0 else 0
-        
-        # Add solution information if available
-        try:
-            if cvx_problem.variables:
-                variables_list = list(cvx_problem.variables)
-                if variables_list and variables_list[0].value is not None:
-                    additional_info["solution_norm"] = float(np.linalg.norm(variables_list[0].value))
-        except Exception:
-            pass
+            additional_info["solver_solve_time"] = cvx_problem.solver_stats.solve_time
         
         self.logger.debug(f"Solve completed: status={status}, "
-                         f"objective={primal_objective_value}, time={solve_time:.3f}s, "
-                         f"dual_gap={duality_gap}")
+                         f"primal_obj={primal_objective_value}, dual_obj={dual_objective_value}, "
+                         f"time={solve_time:.3f}s, dual_gap={duality_gap}, dual_inf={dual_infeasibility}")
         
         return SolverResult(
             solve_time=solve_time,
@@ -558,24 +568,3 @@ class CvxpySolver(SolverInterface):
     def validate_problem_compatibility(self, problem_data: ProblemData) -> bool:
         """Check if the solver can handle the given problem type."""
         return problem_data.problem_class in self.backend_capabilities["supported_problem_types"]
-
-
-# Convenience function to create solvers with different backends
-def create_cvxpy_solvers(verbose: bool = False) -> List[CvxpySolver]:
-    """Create CVXPY solver instances for different available backends."""
-    available_backends = cp.installed_solvers()
-    solver_instances = []
-    
-    # Define open-source backends in order of preference
-    open_source_backends = ["CLARABEL", "SCS", "ECOS", "OSQP"]
-    
-    for backend_name in open_source_backends:
-        if backend_name in available_backends:
-            try:
-                solver_instance = CvxpySolver(backend=backend_name, verbose=verbose)
-                solver_instances.append(solver_instance)
-            except Exception as e:
-                logger.warning(f"Failed to create solver for backend {backend_name}: {e}")
-    
-    return solver_instances
-

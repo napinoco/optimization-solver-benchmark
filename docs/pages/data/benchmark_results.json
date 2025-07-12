@@ -1,24 +1,24 @@
 {
   "metadata": {
-    "generated_at": "2025-06-27T16:56:07.952156",
-    "total_results": 43,
+    "generated_at": "2025-07-01T23:58:26.374932",
+    "total_results": 45,
     "export_format": "simplified_benchmark_results",
     "version": "1.0"
   },
   "summary": {
-    "total_results": 43,
-    "total_solvers": 9,
+    "total_results": 45,
+    "total_solvers": 10,
     "total_problems": 7,
-    "success_rate": 0.6976744186046512,
-    "avg_solve_time": 881.7378752231598,
+    "success_rate": 0.6666666666666666,
+    "avg_solve_time": 843.4738995446099,
     "problem_type_distribution": {
       "UNKNOWN": 34,
-      "SOCP": 7,
-      "SDP": 2
+      "SOCP": 8,
+      "SDP": 3
     },
     "library_distribution": {
-      "DIMACS": 39,
-      "SDPLIB": 2,
+      "DIMACS": 40,
+      "SDPLIB": 3,
       "internal": 2
     },
     "solver_names": [
@@ -30,6 +30,7 @@
       "cvxpy_scip",
       "cvxpy_scs",
       "cvxpy_sdpa",
+      "matlab_sedumi",
       "scipy_linprog"
     ],
     "problem_names": [
@@ -44,15 +45,6 @@
   },
   "solver_comparison": [
     {
-      "solver_name": "cvxpy_sdpa",
-      "problems_attempted": 6,
-      "problems_solved": 6,
-      "success_rate": 1.0,
-      "avg_solve_time": 16.72089691956838,
-      "min_solve_time": 0.0575251579284668,
-      "max_solve_time": 79.02675819396973
-    },
-    {
       "solver_name": "cvxpy_scip",
       "problems_attempted": 3,
       "problems_solved": 3,
@@ -66,8 +58,8 @@
       "problems_attempted": 6,
       "problems_solved": 6,
       "success_rate": 1.0,
-      "avg_solve_time": 148.23881781101227,
-      "min_solve_time": 0.0945899486541748,
+      "avg_solve_time": 148.23897663752237,
+      "min_solve_time": 0.09554290771484375,
       "max_solve_time": 880.0794627666473
     },
     {
@@ -84,17 +76,26 @@
       "problems_attempted": 6,
       "problems_solved": 5,
       "success_rate": 0.8333333333333334,
-      "avg_solve_time": 1.3985809882481892,
+      "avg_solve_time": 3.5535029967625937,
       "min_solve_time": 3.814697265625e-05,
-      "max_solve_time": 2.0737509727478027
+      "max_solve_time": 15.003283023834229
+    },
+    {
+      "solver_name": "cvxpy_sdpa",
+      "problems_attempted": 6,
+      "problems_solved": 5,
+      "success_rate": 0.8333333333333334,
+      "avg_solve_time": 16.72150393327077,
+      "min_solve_time": 0.061167240142822266,
+      "max_solve_time": 79.02675819396973
     },
     {
       "solver_name": "cvxpy_clarabel",
-      "problems_attempted": 5,
-      "problems_solved": 4,
-      "success_rate": 0.8,
-      "avg_solve_time": 20.245548677444457,
-      "min_solve_time": 1.5329699516296387,
+      "problems_attempted": 6,
+      "problems_solved": 5,
+      "success_rate": 0.8333333333333334,
+      "avg_solve_time": 20.729901870091755,
+      "min_solve_time": 0.07054281234741211,
       "max_solve_time": 48.13991713523865
     },
     {
@@ -123,6 +124,15 @@
       "avg_solve_time": 4.868507385253906e-05,
       "min_solve_time": 3.719329833984375e-05,
       "max_solve_time": 7.891654968261719e-05
+    },
+    {
+      "solver_name": "matlab_sedumi",
+      "problems_attempted": 1,
+      "problems_solved": 0,
+      "success_rate": 0.0,
+      "avg_solve_time": 5.51104998588562,
+      "min_solve_time": 5.51104998588562,
+      "max_solve_time": 5.51104998588562
     }
   ],
   "results": [
@@ -137,16 +147,15 @@
         "cpu": {
           "cpu_count": 8,
           "cpu_count_physical": 8,
-          "processor": "arm"
+          "processor": "arm",
+          "architecture": "64bit"
         },
         "memory": {
           "total_gb": 24.0
         },
         "os": {
-          "architecture": "64bit",
-          "machine": "arm64",
           "system": "Darwin",
-          "platform": "macOS-14.5-arm64-arm-64bit",
+          "machine": "arm64",
           "release": "23.5.0"
         },
         "python": {
@@ -154,13 +163,9 @@
           "version": "3.12.2",
           "version_info": "3.12.2"
         },
-        "git": {
-          "available": true,
-          "commit_hash": "ce1969a22cbeb1ef396d49cbf1142984143d1297"
-        },
         "timezone": {
-          "timezone_name": "JST",
-          "utc_offset_hours": 9.0
+          "timezone_name": "UTC",
+          "utc_offset_hours": 0.0
         },
         "timestamp": 1750582016.0
       },
@@ -186,16 +191,15 @@
         "cpu": {
           "cpu_count": 8,
           "cpu_count_physical": 8,
-          "processor": "arm"
+          "processor": "arm",
+          "architecture": "64bit"
         },
         "memory": {
           "total_gb": 24.0
         },
         "os": {
-          "architecture": "64bit",
-          "machine": "arm64",
           "system": "Darwin",
-          "platform": "macOS-14.5-arm64-arm-64bit",
+          "machine": "arm64",
           "release": "23.5.0"
         },
         "python": {
@@ -203,13 +207,9 @@
           "version": "3.12.2",
           "version_info": "3.12.2"
         },
-        "git": {
-          "available": true,
-          "commit_hash": "ce1969a22cbeb1ef396d49cbf1142984143d1297"
-        },
         "timezone": {
-          "timezone_name": "JST",
-          "utc_offset_hours": 9.0
+          "timezone_name": "UTC",
+          "utc_offset_hours": 0.0
         },
         "timestamp": 1750582016.0
       },
@@ -235,16 +235,15 @@
         "cpu": {
           "cpu_count": 8,
           "cpu_count_physical": 8,
-          "processor": "arm"
+          "processor": "arm",
+          "architecture": "64bit"
         },
         "memory": {
           "total_gb": 24.0
         },
         "os": {
-          "architecture": "64bit",
-          "machine": "arm64",
           "system": "Darwin",
-          "platform": "macOS-14.5-arm64-arm-64bit",
+          "machine": "arm64",
           "release": "23.5.0"
         },
         "python": {
@@ -252,13 +251,9 @@
           "version": "3.12.2",
           "version_info": "3.12.2"
         },
-        "git": {
-          "available": true,
-          "commit_hash": "ce1969a22cbeb1ef396d49cbf1142984143d1297"
-        },
         "timezone": {
-          "timezone_name": "JST",
-          "utc_offset_hours": 9.0
+          "timezone_name": "UTC",
+          "utc_offset_hours": 0.0
         },
         "timestamp": 1750582016.0
       },
@@ -284,16 +279,15 @@
         "cpu": {
           "cpu_count": 8,
           "cpu_count_physical": 8,
-          "processor": "arm"
+          "processor": "arm",
+          "architecture": "64bit"
         },
         "memory": {
           "total_gb": 24.0
         },
         "os": {
-          "architecture": "64bit",
-          "machine": "arm64",
           "system": "Darwin",
-          "platform": "macOS-14.5-arm64-arm-64bit",
+          "machine": "arm64",
           "release": "23.5.0"
         },
         "python": {
@@ -301,13 +295,9 @@
           "version": "3.12.2",
           "version_info": "3.12.2"
         },
-        "git": {
-          "available": true,
-          "commit_hash": "ce1969a22cbeb1ef396d49cbf1142984143d1297"
-        },
         "timezone": {
-          "timezone_name": "JST",
-          "utc_offset_hours": 9.0
+          "timezone_name": "UTC",
+          "utc_offset_hours": 0.0
         },
         "timestamp": 1750582016.0
       },
@@ -333,16 +323,15 @@
         "cpu": {
           "cpu_count": 8,
           "cpu_count_physical": 8,
-          "processor": "arm"
+          "processor": "arm",
+          "architecture": "64bit"
         },
         "memory": {
           "total_gb": 24.0
         },
         "os": {
-          "architecture": "64bit",
-          "machine": "arm64",
           "system": "Darwin",
-          "platform": "macOS-14.5-arm64-arm-64bit",
+          "machine": "arm64",
           "release": "23.5.0"
         },
         "python": {
@@ -350,13 +339,9 @@
           "version": "3.12.2",
           "version_info": "3.12.2"
         },
-        "git": {
-          "available": true,
-          "commit_hash": "ce1969a22cbeb1ef396d49cbf1142984143d1297"
-        },
         "timezone": {
-          "timezone_name": "JST",
-          "utc_offset_hours": 9.0
+          "timezone_name": "UTC",
+          "utc_offset_hours": 0.0
         },
         "timestamp": 1750582016.0
       },
@@ -382,16 +367,15 @@
         "cpu": {
           "cpu_count": 8,
           "cpu_count_physical": 8,
-          "processor": "arm"
+          "processor": "arm",
+          "architecture": "64bit"
         },
         "memory": {
           "total_gb": 24.0
         },
         "os": {
-          "architecture": "64bit",
-          "machine": "arm64",
           "system": "Darwin",
-          "platform": "macOS-14.5-arm64-arm-64bit",
+          "machine": "arm64",
           "release": "23.5.0"
         },
         "python": {
@@ -399,13 +383,9 @@
           "version": "3.12.2",
           "version_info": "3.12.2"
         },
-        "git": {
-          "available": true,
-          "commit_hash": "ce1969a22cbeb1ef396d49cbf1142984143d1297"
-        },
         "timezone": {
-          "timezone_name": "JST",
-          "utc_offset_hours": 9.0
+          "timezone_name": "UTC",
+          "utc_offset_hours": 0.0
         },
         "timestamp": 1750582016.0
       },
@@ -431,16 +411,15 @@
         "cpu": {
           "cpu_count": 8,
           "cpu_count_physical": 8,
-          "processor": "arm"
+          "processor": "arm",
+          "architecture": "64bit"
         },
         "memory": {
           "total_gb": 24.0
         },
         "os": {
-          "architecture": "64bit",
-          "machine": "arm64",
           "system": "Darwin",
-          "platform": "macOS-14.5-arm64-arm-64bit",
+          "machine": "arm64",
           "release": "23.5.0"
         },
         "python": {
@@ -448,13 +427,9 @@
           "version": "3.12.2",
           "version_info": "3.12.2"
         },
-        "git": {
-          "available": true,
-          "commit_hash": "ce1969a22cbeb1ef396d49cbf1142984143d1297"
-        },
         "timezone": {
-          "timezone_name": "JST",
-          "utc_offset_hours": 9.0
+          "timezone_name": "UTC",
+          "utc_offset_hours": 0.0
         },
         "timestamp": 1750582016.0
       },
@@ -470,7 +445,7 @@
       "iterations": null
     },
     {
-      "id": 177,
+      "id": 202,
       "solver_name": "cvxpy_clarabel",
       "solver_version": "cvxpy-1.6.5-CLARABEL-0.11.0",
       "problem_library": "DIMACS",
@@ -480,16 +455,15 @@
         "cpu": {
           "cpu_count": 8,
           "cpu_count_physical": 8,
-          "processor": "arm"
+          "processor": "arm",
+          "architecture": "64bit"
         },
         "memory": {
           "total_gb": 24.0
         },
         "os": {
-          "architecture": "64bit",
-          "machine": "arm64",
           "system": "Darwin",
-          "platform": "macOS-14.5-arm64-arm-64bit",
+          "machine": "arm64",
           "release": "23.5.0"
         },
         "python": {
@@ -497,24 +471,20 @@
           "version": "3.12.2",
           "version_info": "3.12.2"
         },
-        "git": {
-          "available": true,
-          "commit_hash": "e945508d6718b1edb2f579ce0b5a56da98570dbd"
-        },
         "timezone": {
-          "timezone_name": "JST",
-          "utc_offset_hours": 9.0
+          "timezone_name": "UTC",
+          "utc_offset_hours": 0.0
         },
         "timestamp": 1750582016.0
       },
-      "commit_hash": "e945508d6718b1edb2f579ce0b5a56da98570dbd",
-      "timestamp": "2025-06-25T00:42:45",
-      "solve_time": 2.3709490299224854,
+      "commit_hash": "7fe9c04af0d21d63a50472b4562934160d8115c5",
+      "timestamp": "2025-07-01T14:50:11",
+      "solve_time": 25.45207405090332,
       "status": "OPTIMAL",
-      "primal_objective_value": -0.05070309464849496,
-      "dual_objective_value": null,
+      "primal_objective_value": -0.05070309464830916,
+      "dual_objective_value": -0.05070309464849496,
       "duality_gap": null,
-      "primal_infeasibility": null,
+      "primal_infeasibility": 7.801537245867477e-11,
       "dual_infeasibility": null,
       "iterations": 21
     },
@@ -529,16 +499,15 @@
         "cpu": {
           "cpu_count": 8,
           "cpu_count_physical": 8,
-          "processor": "arm"
+          "processor": "arm",
+          "architecture": "64bit"
         },
         "memory": {
           "total_gb": 24.0
         },
         "os": {
-          "architecture": "64bit",
-          "machine": "arm64",
           "system": "Darwin",
-          "platform": "macOS-14.5-arm64-arm-64bit",
+          "machine": "arm64",
           "release": "23.5.0"
         },
         "python": {
@@ -546,13 +515,9 @@
           "version": "3.12.2",
           "version_info": "3.12.2"
         },
-        "git": {
-          "available": true,
-          "commit_hash": "e945508d6718b1edb2f579ce0b5a56da98570dbd"
-        },
         "timezone": {
-          "timezone_name": "JST",
-          "utc_offset_hours": 9.0
+          "timezone_name": "UTC",
+          "utc_offset_hours": 0.0
         },
         "timestamp": 1750582016.0
       },
@@ -568,6 +533,50 @@
       "iterations": null
     },
     {
+      "id": 200,
+      "solver_name": "cvxpy_ecos",
+      "solver_version": "cvxpy-1.6.5-ECOS-2.0.14",
+      "problem_library": "DIMACS",
+      "problem_name": "nb",
+      "problem_type": "SOCP",
+      "environment_info": {
+        "cpu": {
+          "cpu_count": 8,
+          "cpu_count_physical": 8,
+          "processor": "arm",
+          "architecture": "64bit"
+        },
+        "memory": {
+          "total_gb": 24.0
+        },
+        "os": {
+          "system": "Darwin",
+          "machine": "arm64",
+          "release": "23.5.0"
+        },
+        "python": {
+          "implementation": "CPython",
+          "version": "3.12.2",
+          "version_info": "3.12.2"
+        },
+        "timezone": {
+          "timezone_name": "UTC",
+          "utc_offset_hours": 0.0
+        },
+        "timestamp": 1750582016.0
+      },
+      "commit_hash": "2b66a821bda2f5f8beee8a0568fea2cab5025175",
+      "timestamp": "2025-06-29T15:00:51",
+      "solve_time": 15.003283023834229,
+      "status": "OPTIMAL",
+      "primal_objective_value": -0.05070309464830582,
+      "dual_objective_value": -0.050703094648322636,
+      "duality_gap": null,
+      "primal_infeasibility": 2.4262814386207304e-12,
+      "dual_infeasibility": null,
+      "iterations": 20
+    },
+    {
       "id": 165,
       "solver_name": "cvxpy_ecos",
       "solver_version": "cvxpy-1.6.5-ECOS",
@@ -578,16 +587,15 @@
         "cpu": {
           "cpu_count": 8,
           "cpu_count_physical": 8,
-          "processor": "arm"
+          "processor": "arm",
+          "architecture": "64bit"
         },
         "memory": {
           "total_gb": 24.0
         },
         "os": {
-          "architecture": "64bit",
-          "machine": "arm64",
           "system": "Darwin",
-          "platform": "macOS-14.5-arm64-arm-64bit",
+          "machine": "arm64",
           "release": "23.5.0"
         },
         "python": {
@@ -595,68 +603,15 @@
           "version": "3.12.2",
           "version_info": "3.12.2"
         },
-        "git": {
-          "available": true,
-          "commit_hash": "82612d7c8346e9f418e4c4fb79124a2f7c3a48d4"
-        },
         "timezone": {
-          "timezone_name": "JST",
-          "utc_offset_hours": 9.0
+          "timezone_name": "UTC",
+          "utc_offset_hours": 0.0
         },
         "timestamp": 1750582016.0
       },
       "commit_hash": "82612d7c8346e9f418e4c4fb79124a2f7c3a48d4",
       "timestamp": "2025-06-24T13:12:07",
       "solve_time": 1.9608960151672363,
-      "status": "OPTIMAL",
-      "primal_objective_value": -0.050703094648322636,
-      "dual_objective_value": null,
-      "duality_gap": null,
-      "primal_infeasibility": null,
-      "dual_infeasibility": null,
-      "iterations": 20
-    },
-    {
-      "id": 179,
-      "solver_name": "cvxpy_ecos",
-      "solver_version": "cvxpy-1.6.5-ECOS-2.0.14",
-      "problem_library": "DIMACS",
-      "problem_name": "nb",
-      "problem_type": "SOCP",
-      "environment_info": {
-        "cpu": {
-          "cpu_count": 8,
-          "cpu_count_physical": 8,
-          "processor": "arm"
-        },
-        "memory": {
-          "total_gb": 24.0
-        },
-        "os": {
-          "architecture": "64bit",
-          "machine": "arm64",
-          "system": "Darwin",
-          "platform": "macOS-14.5-arm64-arm-64bit",
-          "release": "23.5.0"
-        },
-        "python": {
-          "implementation": "CPython",
-          "version": "3.12.2",
-          "version_info": "3.12.2"
-        },
-        "git": {
-          "available": true,
-          "commit_hash": "e945508d6718b1edb2f579ce0b5a56da98570dbd"
-        },
-        "timezone": {
-          "timezone_name": "JST",
-          "utc_offset_hours": 9.0
-        },
-        "timestamp": 1750582016.0
-      },
-      "commit_hash": "e945508d6718b1edb2f579ce0b5a56da98570dbd",
-      "timestamp": "2025-06-25T00:42:51",
-      "solve_time": 2.0737509727478027,
       "status": "OPTIMAL",
       "primal_objective_value": -0.050703094648322636,
       "dual_objective_value": null,
@@ -676,16 +631,15 @@
         "cpu": {
           "cpu_count": 8,
           "cpu_count_physical": 8,
-          "processor": "arm"
+          "processor": "arm",
+          "architecture": "64bit"
         },
         "memory": {
           "total_gb": 24.0
         },
         "os": {
-          "architecture": "64bit",
-          "machine": "arm64",
           "system": "Darwin",
-          "platform": "macOS-14.5-arm64-arm-64bit",
+          "machine": "arm64",
           "release": "23.5.0"
         },
         "python": {
@@ -693,13 +647,9 @@
           "version": "3.12.2",
           "version_info": "3.12.2"
         },
-        "git": {
-          "available": true,
-          "commit_hash": "82612d7c8346e9f418e4c4fb79124a2f7c3a48d4"
-        },
         "timezone": {
-          "timezone_name": "JST",
-          "utc_offset_hours": 9.0
+          "timezone_name": "UTC",
+          "utc_offset_hours": 0.0
         },
         "timestamp": 1750582016.0
       },
@@ -725,16 +675,15 @@
         "cpu": {
           "cpu_count": 8,
           "cpu_count_physical": 8,
-          "processor": "arm"
+          "processor": "arm",
+          "architecture": "64bit"
         },
         "memory": {
           "total_gb": 24.0
         },
         "os": {
-          "architecture": "64bit",
-          "machine": "arm64",
           "system": "Darwin",
-          "platform": "macOS-14.5-arm64-arm-64bit",
+          "machine": "arm64",
           "release": "23.5.0"
         },
         "python": {
@@ -742,13 +691,9 @@
           "version": "3.12.2",
           "version_info": "3.12.2"
         },
-        "git": {
-          "available": true,
-          "commit_hash": "82612d7c8346e9f418e4c4fb79124a2f7c3a48d4"
-        },
         "timezone": {
-          "timezone_name": "JST",
-          "utc_offset_hours": 9.0
+          "timezone_name": "UTC",
+          "utc_offset_hours": 0.0
         },
         "timestamp": 1750582016.0
       },
@@ -774,16 +719,15 @@
         "cpu": {
           "cpu_count": 8,
           "cpu_count_physical": 8,
-          "processor": "arm"
+          "processor": "arm",
+          "architecture": "64bit"
         },
         "memory": {
           "total_gb": 24.0
         },
         "os": {
-          "architecture": "64bit",
-          "machine": "arm64",
           "system": "Darwin",
-          "platform": "macOS-14.5-arm64-arm-64bit",
+          "machine": "arm64",
           "release": "23.5.0"
         },
         "python": {
@@ -791,13 +735,9 @@
           "version": "3.12.2",
           "version_info": "3.12.2"
         },
-        "git": {
-          "available": true,
-          "commit_hash": "82612d7c8346e9f418e4c4fb79124a2f7c3a48d4"
-        },
         "timezone": {
-          "timezone_name": "JST",
-          "utc_offset_hours": 9.0
+          "timezone_name": "UTC",
+          "utc_offset_hours": 0.0
         },
         "timestamp": 1750582016.0
       },
@@ -823,16 +763,15 @@
         "cpu": {
           "cpu_count": 8,
           "cpu_count_physical": 8,
-          "processor": "arm"
+          "processor": "arm",
+          "architecture": "64bit"
         },
         "memory": {
           "total_gb": 24.0
         },
         "os": {
-          "architecture": "64bit",
-          "machine": "arm64",
           "system": "Darwin",
-          "platform": "macOS-14.5-arm64-arm-64bit",
+          "machine": "arm64",
           "release": "23.5.0"
         },
         "python": {
@@ -840,13 +779,9 @@
           "version": "3.12.2",
           "version_info": "3.12.2"
         },
-        "git": {
-          "available": true,
-          "commit_hash": "e945508d6718b1edb2f579ce0b5a56da98570dbd"
-        },
         "timezone": {
-          "timezone_name": "JST",
-          "utc_offset_hours": 9.0
+          "timezone_name": "UTC",
+          "utc_offset_hours": 0.0
         },
         "timestamp": 1750582016.0
       },
@@ -872,16 +807,15 @@
         "cpu": {
           "cpu_count": 8,
           "cpu_count_physical": 8,
-          "processor": "arm"
+          "processor": "arm",
+          "architecture": "64bit"
         },
         "memory": {
           "total_gb": 24.0
         },
         "os": {
-          "architecture": "64bit",
-          "machine": "arm64",
           "system": "Darwin",
-          "platform": "macOS-14.5-arm64-arm-64bit",
+          "machine": "arm64",
           "release": "23.5.0"
         },
         "python": {
@@ -889,13 +823,9 @@
           "version": "3.12.2",
           "version_info": "3.12.2"
         },
-        "git": {
-          "available": true,
-          "commit_hash": "e945508d6718b1edb2f579ce0b5a56da98570dbd"
-        },
         "timezone": {
-          "timezone_name": "JST",
-          "utc_offset_hours": 9.0
+          "timezone_name": "UTC",
+          "utc_offset_hours": 0.0
         },
         "timestamp": 1750582016.0
       },
@@ -921,16 +851,15 @@
         "cpu": {
           "cpu_count": 8,
           "cpu_count_physical": 8,
-          "processor": "arm"
+          "processor": "arm",
+          "architecture": "64bit"
         },
         "memory": {
           "total_gb": 24.0
         },
         "os": {
-          "architecture": "64bit",
-          "machine": "arm64",
           "system": "Darwin",
-          "platform": "macOS-14.5-arm64-arm-64bit",
+          "machine": "arm64",
           "release": "23.5.0"
         },
         "python": {
@@ -938,13 +867,9 @@
           "version": "3.12.2",
           "version_info": "3.12.2"
         },
-        "git": {
-          "available": true,
-          "commit_hash": "e945508d6718b1edb2f579ce0b5a56da98570dbd"
-        },
         "timezone": {
-          "timezone_name": "JST",
-          "utc_offset_hours": 9.0
+          "timezone_name": "UTC",
+          "utc_offset_hours": 0.0
         },
         "timestamp": 1750582016.0
       },
@@ -953,6 +878,50 @@
       "solve_time": 5.9592790603637695,
       "status": "OPTIMAL",
       "primal_objective_value": -1.8772174263594055,
+      "dual_objective_value": null,
+      "duality_gap": null,
+      "primal_infeasibility": null,
+      "dual_infeasibility": null,
+      "iterations": null
+    },
+    {
+      "id": 201,
+      "solver_name": "matlab_sedumi",
+      "solver_version": "SeDuMi (version unknown)",
+      "problem_library": "DIMACS",
+      "problem_name": "nb",
+      "problem_type": "SOCP",
+      "environment_info": {
+        "cpu": {
+          "cpu_count": 8,
+          "cpu_count_physical": 8,
+          "processor": "arm",
+          "architecture": "64bit"
+        },
+        "memory": {
+          "total_gb": 24.0
+        },
+        "os": {
+          "system": "Darwin",
+          "machine": "arm64",
+          "release": "23.5.0"
+        },
+        "python": {
+          "implementation": "CPython",
+          "version": "3.12.2",
+          "version_info": "3.12.2"
+        },
+        "timezone": {
+          "timezone_name": "UTC",
+          "utc_offset_hours": 0.0
+        },
+        "timestamp": 1750582016.0
+      },
+      "commit_hash": "7fe9c04af0d21d63a50472b4562934160d8115c5",
+      "timestamp": "2025-07-01T14:49:35",
+      "solve_time": 5.51104998588562,
+      "status": "ERROR",
+      "primal_objective_value": null,
       "dual_objective_value": null,
       "duality_gap": null,
       "primal_infeasibility": null,
@@ -970,16 +939,15 @@
         "cpu": {
           "cpu_count": 8,
           "cpu_count_physical": 8,
-          "processor": "arm"
+          "processor": "arm",
+          "architecture": "64bit"
         },
         "memory": {
           "total_gb": 24.0
         },
         "os": {
-          "architecture": "64bit",
-          "machine": "arm64",
           "system": "Darwin",
-          "platform": "macOS-14.5-arm64-arm-64bit",
+          "machine": "arm64",
           "release": "23.5.0"
         },
         "python": {
@@ -987,13 +955,9 @@
           "version": "3.12.2",
           "version_info": "3.12.2"
         },
-        "git": {
-          "available": true,
-          "commit_hash": "82612d7c8346e9f418e4c4fb79124a2f7c3a48d4"
-        },
         "timezone": {
-          "timezone_name": "JST",
-          "utc_offset_hours": 9.0
+          "timezone_name": "UTC",
+          "utc_offset_hours": 0.0
         },
         "timestamp": 1750582016.0
       },
@@ -1019,16 +983,15 @@
         "cpu": {
           "cpu_count": 8,
           "cpu_count_physical": 8,
-          "processor": "arm"
+          "processor": "arm",
+          "architecture": "64bit"
         },
         "memory": {
           "total_gb": 24.0
         },
         "os": {
-          "architecture": "64bit",
-          "machine": "arm64",
           "system": "Darwin",
-          "platform": "macOS-14.5-arm64-arm-64bit",
+          "machine": "arm64",
           "release": "23.5.0"
         },
         "python": {
@@ -1036,13 +999,9 @@
           "version": "3.12.2",
           "version_info": "3.12.2"
         },
-        "git": {
-          "available": true,
-          "commit_hash": "ce1969a22cbeb1ef396d49cbf1142984143d1297"
-        },
         "timezone": {
-          "timezone_name": "JST",
-          "utc_offset_hours": 9.0
+          "timezone_name": "UTC",
+          "utc_offset_hours": 0.0
         },
         "timestamp": 1750582016.0
       },
@@ -1068,16 +1027,15 @@
         "cpu": {
           "cpu_count": 8,
           "cpu_count_physical": 8,
-          "processor": "arm"
+          "processor": "arm",
+          "architecture": "64bit"
         },
         "memory": {
           "total_gb": 24.0
         },
         "os": {
-          "architecture": "64bit",
-          "machine": "arm64",
           "system": "Darwin",
-          "platform": "macOS-14.5-arm64-arm-64bit",
+          "machine": "arm64",
           "release": "23.5.0"
         },
         "python": {
@@ -1085,13 +1043,9 @@
           "version": "3.12.2",
           "version_info": "3.12.2"
         },
-        "git": {
-          "available": true,
-          "commit_hash": "ce1969a22cbeb1ef396d49cbf1142984143d1297"
-        },
         "timezone": {
-          "timezone_name": "JST",
-          "utc_offset_hours": 9.0
+          "timezone_name": "UTC",
+          "utc_offset_hours": 0.0
         },
         "timestamp": 1750582016.0
       },
@@ -1117,16 +1071,15 @@
         "cpu": {
           "cpu_count": 8,
           "cpu_count_physical": 8,
-          "processor": "arm"
+          "processor": "arm",
+          "architecture": "64bit"
         },
         "memory": {
           "total_gb": 24.0
         },
         "os": {
-          "architecture": "64bit",
-          "machine": "arm64",
           "system": "Darwin",
-          "platform": "macOS-14.5-arm64-arm-64bit",
+          "machine": "arm64",
           "release": "23.5.0"
         },
         "python": {
@@ -1134,13 +1087,9 @@
           "version": "3.12.2",
           "version_info": "3.12.2"
         },
-        "git": {
-          "available": true,
-          "commit_hash": "ce1969a22cbeb1ef396d49cbf1142984143d1297"
-        },
         "timezone": {
-          "timezone_name": "JST",
-          "utc_offset_hours": 9.0
+          "timezone_name": "UTC",
+          "utc_offset_hours": 0.0
         },
         "timestamp": 1750582016.0
       },
@@ -1166,16 +1115,15 @@
         "cpu": {
           "cpu_count": 8,
           "cpu_count_physical": 8,
-          "processor": "arm"
+          "processor": "arm",
+          "architecture": "64bit"
         },
         "memory": {
           "total_gb": 24.0
         },
         "os": {
-          "architecture": "64bit",
-          "machine": "arm64",
           "system": "Darwin",
-          "platform": "macOS-14.5-arm64-arm-64bit",
+          "machine": "arm64",
           "release": "23.5.0"
         },
         "python": {
@@ -1183,13 +1131,9 @@
           "version": "3.12.2",
           "version_info": "3.12.2"
         },
-        "git": {
-          "available": true,
-          "commit_hash": "ce1969a22cbeb1ef396d49cbf1142984143d1297"
-        },
         "timezone": {
-          "timezone_name": "JST",
-          "utc_offset_hours": 9.0
+          "timezone_name": "UTC",
+          "utc_offset_hours": 0.0
         },
         "timestamp": 1750582016.0
       },
@@ -1215,16 +1159,15 @@
         "cpu": {
           "cpu_count": 8,
           "cpu_count_physical": 8,
-          "processor": "arm"
+          "processor": "arm",
+          "architecture": "64bit"
         },
         "memory": {
           "total_gb": 24.0
         },
         "os": {
-          "architecture": "64bit",
-          "machine": "arm64",
           "system": "Darwin",
-          "platform": "macOS-14.5-arm64-arm-64bit",
+          "machine": "arm64",
           "release": "23.5.0"
         },
         "python": {
@@ -1232,13 +1175,9 @@
           "version": "3.12.2",
           "version_info": "3.12.2"
         },
-        "git": {
-          "available": true,
-          "commit_hash": "ce1969a22cbeb1ef396d49cbf1142984143d1297"
-        },
         "timezone": {
-          "timezone_name": "JST",
-          "utc_offset_hours": 9.0
+          "timezone_name": "UTC",
+          "utc_offset_hours": 0.0
         },
         "timestamp": 1750582016.0
       },
@@ -1264,16 +1203,15 @@
         "cpu": {
           "cpu_count": 8,
           "cpu_count_physical": 8,
-          "processor": "arm"
+          "processor": "arm",
+          "architecture": "64bit"
         },
         "memory": {
           "total_gb": 24.0
         },
         "os": {
-          "architecture": "64bit",
-          "machine": "arm64",
           "system": "Darwin",
-          "platform": "macOS-14.5-arm64-arm-64bit",
+          "machine": "arm64",
           "release": "23.5.0"
         },
         "python": {
@@ -1281,13 +1219,9 @@
           "version": "3.12.2",
           "version_info": "3.12.2"
         },
-        "git": {
-          "available": true,
-          "commit_hash": "e945508d6718b1edb2f579ce0b5a56da98570dbd"
-        },
         "timezone": {
-          "timezone_name": "JST",
-          "utc_offset_hours": 9.0
+          "timezone_name": "UTC",
+          "utc_offset_hours": 0.0
         },
         "timestamp": 1750582016.0
       },
@@ -1313,16 +1247,15 @@
         "cpu": {
           "cpu_count": 8,
           "cpu_count_physical": 8,
-          "processor": "arm"
+          "processor": "arm",
+          "architecture": "64bit"
         },
         "memory": {
           "total_gb": 24.0
         },
         "os": {
-          "architecture": "64bit",
-          "machine": "arm64",
           "system": "Darwin",
-          "platform": "macOS-14.5-arm64-arm-64bit",
+          "machine": "arm64",
           "release": "23.5.0"
         },
         "python": {
@@ -1330,13 +1263,9 @@
           "version": "3.12.2",
           "version_info": "3.12.2"
         },
-        "git": {
-          "available": true,
-          "commit_hash": "ce1969a22cbeb1ef396d49cbf1142984143d1297"
-        },
         "timezone": {
-          "timezone_name": "JST",
-          "utc_offset_hours": 9.0
+          "timezone_name": "UTC",
+          "utc_offset_hours": 0.0
         },
         "timestamp": 1750582016.0
       },
@@ -1362,16 +1291,15 @@
         "cpu": {
           "cpu_count": 8,
           "cpu_count_physical": 8,
-          "processor": "arm"
+          "processor": "arm",
+          "architecture": "64bit"
         },
         "memory": {
           "total_gb": 24.0
         },
         "os": {
-          "architecture": "64bit",
-          "machine": "arm64",
           "system": "Darwin",
-          "platform": "macOS-14.5-arm64-arm-64bit",
+          "machine": "arm64",
           "release": "23.5.0"
         },
         "python": {
@@ -1379,13 +1307,9 @@
           "version": "3.12.2",
           "version_info": "3.12.2"
         },
-        "git": {
-          "available": true,
-          "commit_hash": "ce1969a22cbeb1ef396d49cbf1142984143d1297"
-        },
         "timezone": {
-          "timezone_name": "JST",
-          "utc_offset_hours": 9.0
+          "timezone_name": "UTC",
+          "utc_offset_hours": 0.0
         },
         "timestamp": 1750582016.0
       },
@@ -1411,16 +1335,15 @@
         "cpu": {
           "cpu_count": 8,
           "cpu_count_physical": 8,
-          "processor": "arm"
+          "processor": "arm",
+          "architecture": "64bit"
         },
         "memory": {
           "total_gb": 24.0
         },
         "os": {
-          "architecture": "64bit",
-          "machine": "arm64",
           "system": "Darwin",
-          "platform": "macOS-14.5-arm64-arm-64bit",
+          "machine": "arm64",
           "release": "23.5.0"
         },
         "python": {
@@ -1428,13 +1351,9 @@
           "version": "3.12.2",
           "version_info": "3.12.2"
         },
-        "git": {
-          "available": true,
-          "commit_hash": "ce1969a22cbeb1ef396d49cbf1142984143d1297"
-        },
         "timezone": {
-          "timezone_name": "JST",
-          "utc_offset_hours": 9.0
+          "timezone_name": "UTC",
+          "utc_offset_hours": 0.0
         },
         "timestamp": 1750582016.0
       },
@@ -1460,16 +1379,15 @@
         "cpu": {
           "cpu_count": 8,
           "cpu_count_physical": 8,
-          "processor": "arm"
+          "processor": "arm",
+          "architecture": "64bit"
         },
         "memory": {
           "total_gb": 24.0
         },
         "os": {
-          "architecture": "64bit",
-          "machine": "arm64",
           "system": "Darwin",
-          "platform": "macOS-14.5-arm64-arm-64bit",
+          "machine": "arm64",
           "release": "23.5.0"
         },
         "python": {
@@ -1477,13 +1395,9 @@
           "version": "3.12.2",
           "version_info": "3.12.2"
         },
-        "git": {
-          "available": true,
-          "commit_hash": "ce1969a22cbeb1ef396d49cbf1142984143d1297"
-        },
         "timezone": {
-          "timezone_name": "JST",
-          "utc_offset_hours": 9.0
+          "timezone_name": "UTC",
+          "utc_offset_hours": 0.0
         },
         "timestamp": 1750582016.0
       },
@@ -1509,16 +1423,15 @@
         "cpu": {
           "cpu_count": 8,
           "cpu_count_physical": 8,
-          "processor": "arm"
+          "processor": "arm",
+          "architecture": "64bit"
         },
         "memory": {
           "total_gb": 24.0
         },
         "os": {
-          "architecture": "64bit",
-          "machine": "arm64",
           "system": "Darwin",
-          "platform": "macOS-14.5-arm64-arm-64bit",
+          "machine": "arm64",
           "release": "23.5.0"
         },
         "python": {
@@ -1526,13 +1439,9 @@
           "version": "3.12.2",
           "version_info": "3.12.2"
         },
-        "git": {
-          "available": true,
-          "commit_hash": "ce1969a22cbeb1ef396d49cbf1142984143d1297"
-        },
         "timezone": {
-          "timezone_name": "JST",
-          "utc_offset_hours": 9.0
+          "timezone_name": "UTC",
+          "utc_offset_hours": 0.0
         },
         "timestamp": 1750582016.0
       },
@@ -1558,16 +1467,15 @@
         "cpu": {
           "cpu_count": 8,
           "cpu_count_physical": 8,
-          "processor": "arm"
+          "processor": "arm",
+          "architecture": "64bit"
         },
         "memory": {
           "total_gb": 24.0
         },
         "os": {
-          "architecture": "64bit",
-          "machine": "arm64",
           "system": "Darwin",
-          "platform": "macOS-14.5-arm64-arm-64bit",
+          "machine": "arm64",
           "release": "23.5.0"
         },
         "python": {
@@ -1575,13 +1483,9 @@
           "version": "3.12.2",
           "version_info": "3.12.2"
         },
-        "git": {
-          "available": true,
-          "commit_hash": "ce1969a22cbeb1ef396d49cbf1142984143d1297"
-        },
         "timezone": {
-          "timezone_name": "JST",
-          "utc_offset_hours": 9.0
+          "timezone_name": "UTC",
+          "utc_offset_hours": 0.0
         },
         "timestamp": 1750582016.0
       },
@@ -1607,16 +1511,15 @@
         "cpu": {
           "cpu_count": 8,
           "cpu_count_physical": 8,
-          "processor": "arm"
+          "processor": "arm",
+          "architecture": "64bit"
         },
         "memory": {
           "total_gb": 24.0
         },
         "os": {
-          "architecture": "64bit",
-          "machine": "arm64",
           "system": "Darwin",
-          "platform": "macOS-14.5-arm64-arm-64bit",
+          "machine": "arm64",
           "release": "23.5.0"
         },
         "python": {
@@ -1624,13 +1527,9 @@
           "version": "3.12.2",
           "version_info": "3.12.2"
         },
-        "git": {
-          "available": true,
-          "commit_hash": "ce1969a22cbeb1ef396d49cbf1142984143d1297"
-        },
         "timezone": {
-          "timezone_name": "JST",
-          "utc_offset_hours": 9.0
+          "timezone_name": "UTC",
+          "utc_offset_hours": 0.0
         },
         "timestamp": 1750582016.0
       },
@@ -1656,16 +1555,15 @@
         "cpu": {
           "cpu_count": 8,
           "cpu_count_physical": 8,
-          "processor": "arm"
+          "processor": "arm",
+          "architecture": "64bit"
         },
         "memory": {
           "total_gb": 24.0
         },
         "os": {
-          "architecture": "64bit",
-          "machine": "arm64",
           "system": "Darwin",
-          "platform": "macOS-14.5-arm64-arm-64bit",
+          "machine": "arm64",
           "release": "23.5.0"
         },
         "python": {
@@ -1673,13 +1571,9 @@
           "version": "3.12.2",
           "version_info": "3.12.2"
         },
-        "git": {
-          "available": true,
-          "commit_hash": "ce1969a22cbeb1ef396d49cbf1142984143d1297"
-        },
         "timezone": {
-          "timezone_name": "JST",
-          "utc_offset_hours": 9.0
+          "timezone_name": "UTC",
+          "utc_offset_hours": 0.0
         },
         "timestamp": 1750582016.0
       },
@@ -1705,16 +1599,15 @@
         "cpu": {
           "cpu_count": 8,
           "cpu_count_physical": 8,
-          "processor": "arm"
+          "processor": "arm",
+          "architecture": "64bit"
         },
         "memory": {
           "total_gb": 24.0
         },
         "os": {
-          "architecture": "64bit",
-          "machine": "arm64",
           "system": "Darwin",
-          "platform": "macOS-14.5-arm64-arm-64bit",
+          "machine": "arm64",
           "release": "23.5.0"
         },
         "python": {
@@ -1722,13 +1615,9 @@
           "version": "3.12.2",
           "version_info": "3.12.2"
         },
-        "git": {
-          "available": true,
-          "commit_hash": "ce1969a22cbeb1ef396d49cbf1142984143d1297"
-        },
         "timezone": {
-          "timezone_name": "JST",
-          "utc_offset_hours": 9.0
+          "timezone_name": "UTC",
+          "utc_offset_hours": 0.0
         },
         "timestamp": 1750582016.0
       },
@@ -1754,16 +1643,15 @@
         "cpu": {
           "cpu_count": 8,
           "cpu_count_physical": 8,
-          "processor": "arm"
+          "processor": "arm",
+          "architecture": "64bit"
         },
         "memory": {
           "total_gb": 24.0
         },
         "os": {
-          "architecture": "64bit",
-          "machine": "arm64",
           "system": "Darwin",
-          "platform": "macOS-14.5-arm64-arm-64bit",
+          "machine": "arm64",
           "release": "23.5.0"
         },
         "python": {
@@ -1771,13 +1659,9 @@
           "version": "3.12.2",
           "version_info": "3.12.2"
         },
-        "git": {
-          "available": true,
-          "commit_hash": "ce1969a22cbeb1ef396d49cbf1142984143d1297"
-        },
         "timezone": {
-          "timezone_name": "JST",
-          "utc_offset_hours": 9.0
+          "timezone_name": "UTC",
+          "utc_offset_hours": 0.0
         },
         "timestamp": 1750582016.0
       },
@@ -1803,16 +1687,15 @@
         "cpu": {
           "cpu_count": 8,
           "cpu_count_physical": 8,
-          "processor": "arm"
+          "processor": "arm",
+          "architecture": "64bit"
         },
         "memory": {
           "total_gb": 24.0
         },
         "os": {
-          "architecture": "64bit",
-          "machine": "arm64",
           "system": "Darwin",
-          "platform": "macOS-14.5-arm64-arm-64bit",
+          "machine": "arm64",
           "release": "23.5.0"
         },
         "python": {
@@ -1820,13 +1703,9 @@
           "version": "3.12.2",
           "version_info": "3.12.2"
         },
-        "git": {
-          "available": true,
-          "commit_hash": "ce1969a22cbeb1ef396d49cbf1142984143d1297"
-        },
         "timezone": {
-          "timezone_name": "JST",
-          "utc_offset_hours": 9.0
+          "timezone_name": "UTC",
+          "utc_offset_hours": 0.0
         },
         "timestamp": 1750582016.0
       },
@@ -1852,16 +1731,15 @@
         "cpu": {
           "cpu_count": 8,
           "cpu_count_physical": 8,
-          "processor": "arm"
+          "processor": "arm",
+          "architecture": "64bit"
         },
         "memory": {
           "total_gb": 24.0
         },
         "os": {
-          "architecture": "64bit",
-          "machine": "arm64",
           "system": "Darwin",
-          "platform": "macOS-14.5-arm64-arm-64bit",
+          "machine": "arm64",
           "release": "23.5.0"
         },
         "python": {
@@ -1869,13 +1747,9 @@
           "version": "3.12.2",
           "version_info": "3.12.2"
         },
-        "git": {
-          "available": true,
-          "commit_hash": "ce1969a22cbeb1ef396d49cbf1142984143d1297"
-        },
         "timezone": {
-          "timezone_name": "JST",
-          "utc_offset_hours": 9.0
+          "timezone_name": "UTC",
+          "utc_offset_hours": 0.0
         },
         "timestamp": 1750582016.0
       },
@@ -1901,16 +1775,15 @@
         "cpu": {
           "cpu_count": 8,
           "cpu_count_physical": 8,
-          "processor": "arm"
+          "processor": "arm",
+          "architecture": "64bit"
         },
         "memory": {
           "total_gb": 24.0
         },
         "os": {
-          "architecture": "64bit",
-          "machine": "arm64",
           "system": "Darwin",
-          "platform": "macOS-14.5-arm64-arm-64bit",
+          "machine": "arm64",
           "release": "23.5.0"
         },
         "python": {
@@ -1918,13 +1791,9 @@
           "version": "3.12.2",
           "version_info": "3.12.2"
         },
-        "git": {
-          "available": true,
-          "commit_hash": "ce1969a22cbeb1ef396d49cbf1142984143d1297"
-        },
         "timezone": {
-          "timezone_name": "JST",
-          "utc_offset_hours": 9.0
+          "timezone_name": "UTC",
+          "utc_offset_hours": 0.0
         },
         "timestamp": 1750582016.0
       },
@@ -1950,16 +1819,15 @@
         "cpu": {
           "cpu_count": 8,
           "cpu_count_physical": 8,
-          "processor": "arm"
+          "processor": "arm",
+          "architecture": "64bit"
         },
         "memory": {
           "total_gb": 24.0
         },
         "os": {
-          "architecture": "64bit",
-          "machine": "arm64",
           "system": "Darwin",
-          "platform": "macOS-14.5-arm64-arm-64bit",
+          "machine": "arm64",
           "release": "23.5.0"
         },
         "python": {
@@ -1967,13 +1835,9 @@
           "version": "3.12.2",
           "version_info": "3.12.2"
         },
-        "git": {
-          "available": true,
-          "commit_hash": "ce1969a22cbeb1ef396d49cbf1142984143d1297"
-        },
         "timezone": {
-          "timezone_name": "JST",
-          "utc_offset_hours": 9.0
+          "timezone_name": "UTC",
+          "utc_offset_hours": 0.0
         },
         "timestamp": 1750582016.0
       },
@@ -1999,16 +1863,15 @@
         "cpu": {
           "cpu_count": 8,
           "cpu_count_physical": 8,
-          "processor": "arm"
+          "processor": "arm",
+          "architecture": "64bit"
         },
         "memory": {
           "total_gb": 24.0
         },
         "os": {
-          "architecture": "64bit",
-          "machine": "arm64",
           "system": "Darwin",
-          "platform": "macOS-14.5-arm64-arm-64bit",
+          "machine": "arm64",
           "release": "23.5.0"
         },
         "python": {
@@ -2016,13 +1879,9 @@
           "version": "3.12.2",
           "version_info": "3.12.2"
         },
-        "git": {
-          "available": true,
-          "commit_hash": "ce1969a22cbeb1ef396d49cbf1142984143d1297"
-        },
         "timezone": {
-          "timezone_name": "JST",
-          "utc_offset_hours": 9.0
+          "timezone_name": "UTC",
+          "utc_offset_hours": 0.0
         },
         "timestamp": 1750582016.0
       },
@@ -2038,7 +1897,51 @@
       "iterations": null
     },
     {
-      "id": 191,
+      "id": 197,
+      "solver_name": "cvxpy_clarabel",
+      "solver_version": "cvxpy-1.6.5-CLARABEL-0.11.0",
+      "problem_library": "SDPLIB",
+      "problem_name": "qap5",
+      "problem_type": "SDP",
+      "environment_info": {
+        "cpu": {
+          "cpu_count": 8,
+          "cpu_count_physical": 8,
+          "processor": "arm",
+          "architecture": "64bit"
+        },
+        "memory": {
+          "total_gb": 24.0
+        },
+        "os": {
+          "system": "Darwin",
+          "machine": "arm64",
+          "release": "23.5.0"
+        },
+        "python": {
+          "implementation": "CPython",
+          "version": "3.12.2",
+          "version_info": "3.12.2"
+        },
+        "timezone": {
+          "timezone_name": "UTC",
+          "utc_offset_hours": 0.0
+        },
+        "timestamp": 1750582016.0
+      },
+      "commit_hash": "246332a289c6cb2d9278620672101e08a7cf767a",
+      "timestamp": "2025-06-28T16:53:44",
+      "solve_time": 0.07054281234741211,
+      "status": "OPTIMAL",
+      "primal_objective_value": 436.00000012500374,
+      "dual_objective_value": 436.0000001787257,
+      "duality_gap": -5.3721976200904464e-08,
+      "primal_infeasibility": 8.543064997221504e-10,
+      "dual_infeasibility": 8.700480256542984e-14,
+      "iterations": 9
+    },
+    {
+      "id": 199,
       "solver_name": "cvxpy_cvxopt",
       "solver_version": "cvxpy-1.6.5-CVXOPT-1.3.2",
       "problem_library": "SDPLIB",
@@ -2048,16 +1951,15 @@
         "cpu": {
           "cpu_count": 8,
           "cpu_count_physical": 8,
-          "processor": "arm"
+          "processor": "arm",
+          "architecture": "64bit"
         },
         "memory": {
           "total_gb": 24.0
         },
         "os": {
-          "architecture": "64bit",
-          "machine": "arm64",
           "system": "Darwin",
-          "platform": "macOS-14.5-arm64-arm-64bit",
+          "machine": "arm64",
           "release": "23.5.0"
         },
         "python": {
@@ -2065,29 +1967,25 @@
           "version": "3.12.2",
           "version_info": "3.12.2"
         },
-        "git": {
-          "available": true,
-          "commit_hash": "cfc13857622458340de916f7b88e151405ec7ef9"
-        },
         "timezone": {
-          "timezone_name": "JST",
-          "utc_offset_hours": 9.0
+          "timezone_name": "UTC",
+          "utc_offset_hours": 0.0
         },
         "timestamp": 1750582016.0
       },
-      "commit_hash": "cfc13857622458340de916f7b88e151405ec7ef9",
-      "timestamp": "2025-06-25T15:49:04",
-      "solve_time": 0.0945899486541748,
+      "commit_hash": "246332a289c6cb2d9278620672101e08a7cf767a",
+      "timestamp": "2025-06-28T16:54:48",
+      "solve_time": 0.09554290771484375,
       "status": "OPTIMAL",
-      "primal_objective_value": -583.9999934166422,
-      "dual_objective_value": null,
-      "duality_gap": null,
-      "primal_infeasibility": null,
-      "dual_infeasibility": null,
+      "primal_objective_value": 436.00000638953816,
+      "dual_objective_value": 436.0000103135326,
+      "duality_gap": -3.923994427168509e-06,
+      "primal_infeasibility": 6.573074355875933e-08,
+      "dual_infeasibility": 5.296699388254977e-12,
       "iterations": null
     },
     {
-      "id": 187,
+      "id": 198,
       "solver_name": "cvxpy_sdpa",
       "solver_version": "cvxpy-1.6.5-SDPA-0.2.2",
       "problem_library": "SDPLIB",
@@ -2097,16 +1995,15 @@
         "cpu": {
           "cpu_count": 8,
           "cpu_count_physical": 8,
-          "processor": "arm"
+          "processor": "arm",
+          "architecture": "64bit"
         },
         "memory": {
           "total_gb": 24.0
         },
         "os": {
-          "architecture": "64bit",
-          "machine": "arm64",
           "system": "Darwin",
-          "platform": "macOS-14.5-arm64-arm-64bit",
+          "machine": "arm64",
           "release": "23.5.0"
         },
         "python": {
@@ -2114,25 +2011,21 @@
           "version": "3.12.2",
           "version_info": "3.12.2"
         },
-        "git": {
-          "available": true,
-          "commit_hash": "cfc13857622458340de916f7b88e151405ec7ef9"
-        },
         "timezone": {
-          "timezone_name": "JST",
-          "utc_offset_hours": 9.0
+          "timezone_name": "UTC",
+          "utc_offset_hours": 0.0
         },
         "timestamp": 1750582016.0
       },
-      "commit_hash": "cfc13857622458340de916f7b88e151405ec7ef9",
-      "timestamp": "2025-06-25T15:46:14",
-      "solve_time": 0.0575251579284668,
-      "status": "OPTIMAL",
-      "primal_objective_value": -584.0007589021698,
-      "dual_objective_value": null,
-      "duality_gap": null,
-      "primal_infeasibility": null,
-      "dual_infeasibility": null,
+      "commit_hash": "246332a289c6cb2d9278620672101e08a7cf767a",
+      "timestamp": "2025-06-28T16:54:11",
+      "solve_time": 0.061167240142822266,
+      "status": "OPTIMAL (INACCURATE)",
+      "primal_objective_value": 436.0403897924358,
+      "dual_objective_value": 435.9998304004548,
+      "duality_gap": 0.04055939198099168,
+      "primal_infeasibility": 9.059329771695843e-08,
+      "dual_infeasibility": 0.0,
       "iterations": null
     },
     {
@@ -2146,16 +2039,15 @@
         "cpu": {
           "cpu_count": 8,
           "cpu_count_physical": 8,
-          "processor": "arm"
+          "processor": "arm",
+          "architecture": "64bit"
         },
         "memory": {
           "total_gb": 24.0
         },
         "os": {
-          "architecture": "64bit",
-          "machine": "arm64",
           "system": "Darwin",
-          "platform": "macOS-14.5-arm64-arm-64bit",
+          "machine": "arm64",
           "release": "23.5.0"
         },
         "python": {
@@ -2163,13 +2055,9 @@
           "version": "3.12.2",
           "version_info": "3.12.2"
         },
-        "git": {
-          "available": true,
-          "commit_hash": "3dc1728a0d0428c00c35221f7a17fc1dd250035f"
-        },
         "timezone": {
-          "timezone_name": "JST",
-          "utc_offset_hours": 9.0
+          "timezone_name": "UTC",
+          "utc_offset_hours": 0.0
         },
         "timestamp": 1750582016.0
       },
@@ -2195,16 +2083,15 @@
         "cpu": {
           "cpu_count": 8,
           "cpu_count_physical": 8,
-          "processor": "arm"
+          "processor": "arm",
+          "architecture": "64bit"
         },
         "memory": {
           "total_gb": 24.0
         },
         "os": {
-          "architecture": "64bit",
-          "machine": "arm64",
           "system": "Darwin",
-          "platform": "macOS-14.5-arm64-arm-64bit",
+          "machine": "arm64",
           "release": "23.5.0"
         },
         "python": {
@@ -2212,13 +2099,9 @@
           "version": "3.12.2",
           "version_info": "3.12.2"
         },
-        "git": {
-          "available": true,
-          "commit_hash": "3dc1728a0d0428c00c35221f7a17fc1dd250035f"
-        },
         "timezone": {
-          "timezone_name": "JST",
-          "utc_offset_hours": 9.0
+          "timezone_name": "UTC",
+          "utc_offset_hours": 0.0
         },
         "timestamp": 1750582016.0
       },

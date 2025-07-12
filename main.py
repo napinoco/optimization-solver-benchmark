@@ -1,21 +1,4 @@
 #!/usr/bin/env python3
-"""
-Optimization Solver Benchmark - Main Entry Point
-
-This script provides a unified interface to run benchmarks and generate reports
-using the re-architected simplified system.
-
-Usage Examples:
-    python main.py --help                    # Show help
-    python main.py --benchmark               # Run benchmarks on all problems with all solvers
-    python main.py --report                  # Generate reports only
-    python main.py --all                     # Run benchmarks and generate reports
-    python main.py --validate               # Validate environment and solver setup
-    python main.py --benchmark --problems DIMACS --solvers cvxpy_clarabel
-    python main.py --benchmark --problems nb,arch0,simple_lp_test
-    python main.py --benchmark --problems DIMACS,simple_lp_test
-"""
-
 import sys
 import os
 import argparse
@@ -61,25 +44,9 @@ def setup_logging(verbose: bool = False, quiet: bool = False):
     )
 
 
-def test_solver_availability(runner: BenchmarkRunner, solver_name: str) -> bool:
-    """Test if a solver is available with caching to avoid expensive repeated tests."""
-    global _solver_availability_cache
-    
-    if solver_name in _solver_availability_cache:
-        return _solver_availability_cache[solver_name]
-    
-    try:
-        runner.create_solver(solver_name)
-        _solver_availability_cache[solver_name] = True
-        return True
-    except Exception:
-        _solver_availability_cache[solver_name] = False
-        return False
-
-
-def load_registries() -> Optional[Dict[str, Any]]:
-    """Load all registries once to avoid redundant loading."""
-    logger = get_logger("registry_loader")
+def load_problem_registry() -> Optional[Dict[str, Any]]:
+    """Load problem registry configuration."""
+    logger = get_logger("problem_registry_loader")
     
     try:
         # Load problem registry
@@ -91,23 +58,11 @@ def load_registries() -> Optional[Dict[str, Any]]:
         with open(problem_registry_path, 'r') as f:
             problem_registry = yaml.safe_load(f)
         
-        # Load solver registry
-        solver_registry_path = Path("config/solver_registry.yaml")
-        if not solver_registry_path.exists():
-            logger.error("Solver registry not found")
-            return None
-        
-        with open(solver_registry_path, 'r') as f:
-            solver_registry = yaml.safe_load(f)
-        
-        logger.info("Registries loaded successfully")
-        return {
-            'problem_registry': problem_registry,
-            'solver_registry': solver_registry
-        }
+        logger.info("Problem registry loaded successfully")
+        return problem_registry
         
     except Exception as e:
-        logger.error(f"Failed to load registries: {e}")
+        logger.error(f"Failed to load problem registry: {e}")
         return None
 
 
@@ -126,7 +81,6 @@ def validate_environment() -> bool:
     # Check for configuration files
     config_files = [
         'config/site_config.yaml',
-        'config/solver_registry.yaml', 
         'config/problem_registry.yaml'
     ]
     for config_file in config_files:
@@ -154,6 +108,72 @@ def validate_environment() -> bool:
     return True
 
 
+def validate_solver_setup(verbose: bool = False) -> bool:
+    """Validate solver setup and availability."""
+    
+    logger = get_logger("solver_validation")
+    
+    try:
+        # Initialize benchmark runner to test solver availability
+        runner = BenchmarkRunner()
+        
+        # Run comprehensive validation
+        print("Running comprehensive solver validation...")
+        validation_report = runner.validate_setup()
+        
+        working_solvers = validation_report['summary']['working_solvers']
+        total_solvers = validation_report['summary']['total_solvers']
+        working_problems = validation_report['summary']['working_problems']
+        total_problems = validation_report['summary']['total_problems']
+        
+        print(f"\nSolver Validation Results:")
+        print(f"  Working Solvers: {working_solvers}/{total_solvers}")
+        print(f"  Working Problems: {working_problems}/{total_problems}")
+        
+        # Show solver details
+        if verbose:
+            print(f"\nDetailed Solver Status:")
+            for solver_name, info in validation_report['solvers'].items():
+                status = "✓" if info['status'] == 'working' else "✗"
+                if info['status'] == 'working':
+                    print(f"  {status} {solver_name}: {info['version']}")
+                else:
+                    print(f"  {status} {solver_name}: {info['error']}")
+        
+        # Check MATLAB solver availability
+        matlab_solvers = {name: info for name, info in validation_report['solvers'].items() 
+                         if name.startswith('matlab_')}
+        
+        if matlab_solvers:
+            matlab_working = sum(1 for info in matlab_solvers.values() if info['status'] == 'working')
+            print(f"\nMATLAB Solver Status: {matlab_working}/{len(matlab_solvers)} working")
+            
+            if verbose:
+                for solver_name, info in matlab_solvers.items():
+                    status = "✓" if info['status'] == 'working' else "✗"
+                    if info['status'] == 'working':
+                        print(f"  {status} {solver_name}: {info['version']}")
+                    else:
+                        print(f"  {status} {solver_name}: {info['error']}")
+        
+        # Validation passes if we have at least some working solvers
+        if working_solvers == 0:
+            logger.error("No working solvers found")
+            return False
+        
+        # Show warnings for missing solvers
+        missing_solvers = total_solvers - working_solvers
+        if missing_solvers > 0:
+            logger.warning(f"{missing_solvers} solvers are not available")
+        
+        logger.info(f"Solver validation completed: {working_solvers}/{total_solvers} solvers working")
+        return True
+        
+    except Exception as e:
+        logger.error(f"Solver validation failed: {e}")
+        return False
+
+
 def run_benchmark(library_names: Optional[List[str]] = None,
                  problems: Optional[List[str]] = None,
                  solvers: Optional[List[str]] = None,
@@ -174,19 +194,15 @@ def run_benchmark(library_names: Optional[List[str]] = None,
     try:
         logger.info("Starting benchmark execution...")
         
-        # Load registries once
-        registries = load_registries()
-        if not registries:
-            logger.error("Failed to load registries")
+        # Create benchmark runner (db_manager created internally by default)
+        runner = BenchmarkRunner(dry_run=dry_run, save_solutions=save_solutions)
+
+        # Load problem registry only (solver configs now in interfaces)
+        problem_registry = load_problem_registry()
+        if not problem_registry:
+            logger.error("Failed to load problem registry")
             return False
-        
-        problem_registry = registries['problem_registry']
-        solver_registry = registries['solver_registry']
-        
-        # Create benchmark runner with pre-loaded registries
-        db_manager = DatabaseManager()
-        runner = BenchmarkRunner(db_manager, registries=registries, dry_run=dry_run, save_solutions=save_solutions)
-        
+
         # Filter problems based on library_names and problems arguments
         selected_problems = {}
         for problem_name, problem_config in problem_registry["problem_libraries"].items():
@@ -206,41 +222,36 @@ def run_benchmark(library_names: Optional[List[str]] = None,
         
         logger.info(f"Selected {len(selected_problems)} problems")
         
-        # Filter solvers and test availability with caching
-        selected_solvers = {}
-        for solver_name, solver_config in solver_registry["solvers"].items():
-            # Filter by solver names if specified
-            if solvers and solver_name not in solvers:
-                continue
-            
-            # Test if solver is available using cached test
-            if test_solver_availability(runner, solver_name):
-                selected_solvers[solver_name] = solver_config
-                logger.debug(f"Solver {solver_name} is available")
-            else:
-                logger.debug(f"Solver {solver_name} not available")
+        # EAFP approach: No pre-filtering of solvers
+        if solvers:
+            # Use user-specified solvers directly
+            selected_solver_names = solvers
+            logger.info(f"Will attempt to run specified solvers: {selected_solver_names}")
+        else:
+            # Get all available solvers for default case
+            selected_solver_names = runner.get_available_solvers()
+            logger.info(f"Will attempt to run all available solvers: {len(selected_solver_names)} found")
         
-        if not selected_solvers:
-            logger.error("No solvers available. Check your --solvers filter or install solver dependencies.")
+        if not selected_solver_names:
+            logger.error("No solvers specified. Use --solvers to specify solvers or remove filter to run all.")
             return False
-        
-        logger.info(f"Selected {len(selected_solvers)} available solvers")
         
         # Run benchmarks using simple nested loop
         start_time = time.time()
-        total_combinations = len(selected_problems) * len(selected_solvers)
+        total_combinations = len(selected_problems) * len(selected_solver_names)
         logger.info(f"Running {total_combinations} problem-solver combinations...")
         
         success_count = 0
         combination_num = 0
         
-        for problem_name, problem_config in selected_problems.items():
-            for solver_name, solver_config in selected_solvers.items():
+        for problem_name in selected_problems.keys():
+            for solver_name in selected_solver_names:
                 combination_num += 1
                 logger.info(f"[{combination_num}/{total_combinations}] Running {solver_name} on {problem_name}")
                 
                 try:
-                    runner.run_single_benchmark(problem_name, problem_config, solver_name, solver_config)
+                    # EAFP: Just try it! Let runner handle unknown solvers
+                    runner.run_single_benchmark(problem_name, solver_name)
                     success_count += 1
                 except Exception as benchmark_error:
                     logger.warning(f"Failed to run {solver_name} on {problem_name}: {benchmark_error}")
@@ -359,7 +370,12 @@ Examples:
     operation_group.add_argument(
         '--validate',
         action='store_true',
-        help='Validate environment setup only'
+        help='Validate environment and solver setup'
+    )
+    operation_group.add_argument(
+        '--validate-verbose',
+        action='store_true',
+        help='Validate environment and solver setup with detailed output'
     )
     
     # Options
@@ -436,9 +452,14 @@ Examples:
         # Execute requested operation
         success = False
         
-        if args.validate:
-            print("Environment validation completed successfully")
-            success = True
+        if args.validate or args.validate_verbose:
+            # Run enhanced validation including solver testing
+            solver_validation_success = validate_solver_setup(verbose=args.validate_verbose)
+            if solver_validation_success:
+                print("Validation completed successfully")
+            else:
+                print("Validation completed with issues")
+            success = solver_validation_success
             
         elif args.benchmark:
             success = run_benchmark(

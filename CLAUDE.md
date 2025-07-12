@@ -235,6 +235,11 @@ This system prioritizes:
 
 ---
 
+## 📝 Development Memories
+
+### Task Management
+- **Reflection Note**: Please reflect the latest situation into task.md after completing each task.
+
 *This dispatch document provides entry point context only. All implementation details, coding standards, and development protocols are documented in the linked files above.*
 
 *Last Updated: June 2025 - Production Ready Implementation Complete*
