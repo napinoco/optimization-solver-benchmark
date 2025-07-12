@@ -1,0 +1,141 @@
+{
+  "metadata": {
+    "generated_at": "2025-07-01T23:58:26.380630",
+    "total_results": 45,
+    "format": "summary_only"
+  },
+  "overall_statistics": {
+    "total_results": 45,
+    "total_solvers": 10,
+    "total_problems": 7,
+    "success_rate": 0.6666666666666666,
+    "avg_solve_time": 843.4738995446099,
+    "problem_type_distribution": {
+      "UNKNOWN": 34,
+      "SOCP": 8,
+      "SDP": 3
+    },
+    "library_distribution": {
+      "DIMACS": 40,
+      "SDPLIB": 3,
+      "internal": 2
+    },
+    "solver_names": [
+      "cvxpy_clarabel",
+      "cvxpy_cvxopt",
+      "cvxpy_ecos",
+      "cvxpy_highs",
+      "cvxpy_osqp",
+      "cvxpy_scip",
+      "cvxpy_scs",
+      "cvxpy_sdpa",
+      "matlab_sedumi",
+      "scipy_linprog"
+    ],
+    "problem_names": [
+      "bm1",
+      "nb",
+      "nb_L1",
+      "nb_L2",
+      "nb_L2_bessel",
+      "qap5",
+      "simple_lp_test"
+    ]
+  },
+  "solver_performance": [
+    {
+      "solver_name": "cvxpy_scip",
+      "problems_attempted": 3,
+      "problems_solved": 3,
+      "success_rate": 1.0,
+      "avg_solve_time": 32.214994033177696,
+      "min_solve_time": 0.005051851272583008,
+      "max_solve_time": 48.382381200790405
+    },
+    {
+      "solver_name": "cvxpy_cvxopt",
+      "problems_attempted": 6,
+      "problems_solved": 6,
+      "success_rate": 1.0,
+      "avg_solve_time": 148.23897663752237,
+      "min_solve_time": 0.09554290771484375,
+      "max_solve_time": 880.0794627666473
+    },
+    {
+      "solver_name": "cvxpy_scs",
+      "problems_attempted": 5,
+      "problems_solved": 5,
+      "success_rate": 1.0,
+      "avg_solve_time": 7343.74034819603,
+      "min_solve_time": 1.1490800380706787,
+      "max_solve_time": 36704.034167051315
+    },
+    {
+      "solver_name": "cvxpy_ecos",
+      "problems_attempted": 6,
+      "problems_solved": 5,
+      "success_rate": 0.8333333333333334,
+      "avg_solve_time": 3.5535029967625937,
+      "min_solve_time": 3.814697265625e-05,
+      "max_solve_time": 15.003283023834229
+    },
+    {
+      "solver_name": "cvxpy_sdpa",
+      "problems_attempted": 6,
+      "problems_solved": 5,
+      "success_rate": 0.8333333333333334,
+      "avg_solve_time": 16.72150393327077,
+      "min_solve_time": 0.061167240142822266,
+      "max_solve_time": 79.02675819396973
+    },
+    {
+      "solver_name": "cvxpy_clarabel",
+      "problems_attempted": 6,
+      "problems_solved": 5,
+      "success_rate": 0.8333333333333334,
+      "avg_solve_time": 20.729901870091755,
+      "min_solve_time": 0.07054281234741211,
+      "max_solve_time": 48.13991713523865
+    },
+    {
+      "solver_name": "cvxpy_highs",
+      "problems_attempted": 2,
+      "problems_solved": 1,
+      "success_rate": 0.5,
+      "avg_solve_time": 0.0019685029983520508,
+      "min_solve_time": 5.793571472167969e-05,
+      "max_solve_time": 0.003879070281982422
+    },
+    {
+      "solver_name": "cvxpy_osqp",
+      "problems_attempted": 5,
+      "problems_solved": 0,
+      "success_rate": 0.0,
+      "avg_solve_time": 4.267692565917969e-05,
+      "min_solve_time": 3.3855438232421875e-05,
+      "max_solve_time": 6.29425048828125e-05
+    },
+    {
+      "solver_name": "scipy_linprog",
+      "problems_attempted": 5,
+      "problems_solved": 0,
+      "success_rate": 0.0,
+      "avg_solve_time": 4.868507385253906e-05,
+      "min_solve_time": 3.719329833984375e-05,
+      "max_solve_time": 7.891654968261719e-05
+    },
+    {
+      "solver_name": "matlab_sedumi",
+      "problems_attempted": 1,
+      "problems_solved": 0,
+      "success_rate": 0.0,
+      "avg_solve_time": 5.51104998588562,
+      "min_solve_time": 5.51104998588562,
+      "max_solve_time": 5.51104998588562
+    }
+  ],
+  "environment": {
+    "commit_hash": "ce1969a22cbeb1ef396d49cbf1142984143d1297",
+    "platform": "Unknown"
+  }
+}
