@@ -551,6 +551,44 @@ class HTMLGenerator:
         .overview-content strong {{
             color: #2c3e50;
         }}
+        
+        .status-distribution {{
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            padding: 1rem;
+        }}
+        
+        .status-card {{
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 6px;
+            text-align: center;
+            border: 1px solid #e9ecef;
+        }}
+        
+        .status-card span {{
+            display: block;
+            margin-bottom: 0.5rem;
+        }}
+        
+        .status-stats {{
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0.5rem;
+        }}
+        
+        .status-count {{
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #2c3e50;
+        }}
+        
+        .status-percentage {{
+            font-size: 0.9rem;
+            color: #6c757d;
+        }}
     </style>
 </head>
 <body>
@@ -588,6 +626,46 @@ class HTMLGenerator:
             <div class="stat-card">
                 <h3>Success Rate</h3>
                 <span class="stat-value">{summary['success_rate']:.1%}</span>
+            </div>
+        </div>
+        
+        <!-- Status Distribution Section -->
+        <div class="section">
+            <h2>📊 Status Distribution</h2>
+            <div class="section-content">
+                <div class="status-distribution">"""
+        
+        # Add status distribution cards
+        status_dist = summary.get('status_distribution', {})
+        for status, count in sorted(status_dist.items()):
+            percentage = (count / summary['total_results'] * 100) if summary['total_results'] > 0 else 0
+            status_lower = status.lower()
+            
+            # Determine CSS class for status
+            if status_lower == 'optimal':
+                status_class = 'status-optimal'
+            elif status_lower == 'optimal (inaccurate)':
+                status_class = 'status-optimal-inaccurate'
+            elif status_lower == 'unsupported':
+                status_class = 'status-unsupported'
+            elif status_lower == 'error':
+                status_class = 'status-error'
+            elif status_lower in ['infeasible', 'unbounded']:
+                status_class = 'status-infeasible'
+            else:
+                status_class = 'status-unknown'
+            
+            html_content += f"""
+                    <div class="status-card">
+                        <span class="{status_class}">{status}</span>
+                        <div class="status-stats">
+                            <span class="status-count">{count}</span>
+                            <span class="status-percentage">({percentage:.1f}%)</span>
+                        </div>
+                    </div>"""
+        
+        html_content += """
+                </div>
             </div>
         </div>
 
@@ -841,6 +919,12 @@ class HTMLGenerator:
             font-weight: bold;
         }
         
+        .status-optimal-inaccurate {
+            background-color: #fff3cd;
+            color: #856404;
+            font-weight: bold;
+        }
+        
         .status-error {
             background-color: #f8d7da;
             color: #721c24;
@@ -850,6 +934,12 @@ class HTMLGenerator:
         .status-infeasible {
             background-color: #fff3cd;
             color: #856404;
+            font-weight: bold;
+        }
+        
+        .status-unsupported {
+            background-color: #e7f3ff;
+            color: #0c5460;
             font-weight: bold;
         }
         
@@ -995,6 +1085,10 @@ class HTMLGenerator:
                     status_lower = status.lower()
                     if status_lower == 'optimal':
                         css_class = 'status-optimal'
+                    elif status_lower == 'optimal (inaccurate)':
+                        css_class = 'status-optimal-inaccurate'
+                    elif status_lower == 'unsupported':
+                        css_class = 'status-unsupported'
                     elif status_lower == 'error':
                         css_class = 'status-error'
                     elif status_lower in ['infeasible', 'unbounded']:
@@ -1032,6 +1126,7 @@ class HTMLGenerator:
         <div class="legend">
             <h3>📋 Status Legend</h3>
             <p><span class="status-optimal" style="padding: 5px 10px; border-radius: 3px;">OPTIMAL</span> - Successfully solved to optimality</p>
+            <p><span class="status-unsupported" style="padding: 5px 10px; border-radius: 3px;">UNSUPPORTED</span> - Solver does not support this problem type</p>
             <p><span class="status-error" style="padding: 5px 10px; border-radius: 3px;">ERROR</span> - Solver encountered an error</p>
             <p><span class="status-infeasible" style="padding: 5px 10px; border-radius: 3px;">INFEASIBLE/UNBOUNDED</span> - Problem has no feasible solution</p>
             <p><span class="status-unknown" style="padding: 5px 10px; border-radius: 3px;">—</span> - No result available</p>
@@ -1188,6 +1283,14 @@ class HTMLGenerator:
             border-radius: 4px;
         }
         
+        .status-optimal-inaccurate {
+            background-color: #fff3cd;
+            color: #856404;
+            font-weight: bold;
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
+        
         .status-error {
             background-color: #f8d7da;
             color: #721c24;
@@ -1199,6 +1302,14 @@ class HTMLGenerator:
         .status-infeasible {
             background-color: #fff3cd;
             color: #856404;
+            font-weight: bold;
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
+        
+        .status-unsupported {
+            background-color: #e7f3ff;
+            color: #0c5460;
             font-weight: bold;
             padding: 4px 8px;
             border-radius: 4px;
@@ -1347,6 +1458,10 @@ class HTMLGenerator:
             status_lower = status.lower()
             if status_lower == 'optimal':
                 status_class = 'status-optimal'
+            elif status_lower == 'optimal (inaccurate)':
+                status_class = 'status-optimal-inaccurate'
+            elif status_lower == 'unsupported':
+                status_class = 'status-unsupported'
             elif status_lower == 'error':
                 status_class = 'status-error'
             elif status_lower in ['infeasible', 'unbounded']:

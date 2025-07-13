@@ -204,3 +204,5 @@ database/*_backup
 .DS_Store
 .AppleDouble
 .LSOverride
+
+workspace.py

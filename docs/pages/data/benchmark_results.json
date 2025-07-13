@@ -1,25 +1,35 @@
 {
   "metadata": {
-    "generated_at": "2025-07-01T23:58:26.374932",
-    "total_results": 45,
+    "generated_at": "2025-07-13T16:25:36.978983",
+    "total_results": 49,
     "export_format": "simplified_benchmark_results",
     "version": "1.0"
   },
   "summary": {
-    "total_results": 45,
-    "total_solvers": 10,
-    "total_problems": 7,
-    "success_rate": 0.6666666666666666,
-    "avg_solve_time": 843.4738995446099,
+    "total_results": 49,
+    "total_solvers": 12,
+    "total_problems": 8,
+    "success_rate": 0.6382978723404256,
+    "avg_solve_time": 926.8594516312204,
+    "successful_results": 30,
+    "unsupported_results": 2,
+    "applicable_results": 47,
     "problem_type_distribution": {
       "UNKNOWN": 34,
-      "SOCP": 8,
+      "SOCP": 12,
       "SDP": 3
     },
     "library_distribution": {
-      "DIMACS": 40,
+      "DIMACS": 43,
       "SDPLIB": 3,
-      "internal": 2
+      "internal": 2,
+      "unknown": 1
+    },
+    "status_distribution": {
+      "ERROR": 15,
+      "OPTIMAL": 30,
+      "OPTIMAL (INACCURATE)": 2,
+      "UNSUPPORTED": 2
     },
     "solver_names": [
       "cvxpy_clarabel",
@@ -30,8 +40,10 @@
       "cvxpy_scip",
       "cvxpy_scs",
       "cvxpy_sdpa",
+      "matlab_sdpt3",
       "matlab_sedumi",
-      "scipy_linprog"
+      "scipy_linprog",
+      "unknown_solver"
     ],
     "problem_names": [
       "bm1",
@@ -40,99 +52,142 @@
       "nb_L2",
       "nb_L2_bessel",
       "qap5",
-      "simple_lp_test"
+      "simple_lp_test",
+      "test_simple"
     ]
   },
   "solver_comparison": [
     {
-      "solver_name": "cvxpy_scip",
-      "problems_attempted": 3,
-      "problems_solved": 3,
+      "solver_name": "matlab_sdpt3",
+      "problems_attempted": 1,
+      "problems_applicable": 1,
+      "problems_solved": 1,
+      "problems_unsupported": 0,
       "success_rate": 1.0,
-      "avg_solve_time": 32.214994033177696,
+      "avg_solve_time": 5.676074981689453,
+      "min_solve_time": 5.676074981689453,
+      "max_solve_time": 5.676074981689453
+    },
+    {
+      "solver_name": "cvxpy_scip",
+      "problems_attempted": 2,
+      "problems_applicable": 2,
+      "problems_solved": 2,
+      "problems_unsupported": 0,
+      "success_rate": 1.0,
+      "avg_solve_time": 20.91120994091034,
       "min_solve_time": 0.005051851272583008,
-      "max_solve_time": 48.382381200790405
+      "max_solve_time": 41.817368030548096
     },
     {
       "solver_name": "cvxpy_cvxopt",
       "problems_attempted": 6,
+      "problems_applicable": 6,
       "problems_solved": 6,
+      "problems_unsupported": 0,
       "success_rate": 1.0,
-      "avg_solve_time": 148.23897663752237,
+      "avg_solve_time": 151.79628427823386,
       "min_solve_time": 0.09554290771484375,
       "max_solve_time": 880.0794627666473
     },
     {
       "solver_name": "cvxpy_scs",
       "problems_attempted": 5,
+      "problems_applicable": 5,
       "problems_solved": 5,
+      "problems_unsupported": 0,
       "success_rate": 1.0,
-      "avg_solve_time": 7343.74034819603,
+      "avg_solve_time": 7346.067382764816,
       "min_solve_time": 1.1490800380706787,
       "max_solve_time": 36704.034167051315
     },
     {
-      "solver_name": "cvxpy_ecos",
-      "problems_attempted": 6,
-      "problems_solved": 5,
-      "success_rate": 0.8333333333333334,
-      "avg_solve_time": 3.5535029967625937,
-      "min_solve_time": 3.814697265625e-05,
-      "max_solve_time": 15.003283023834229
-    },
-    {
-      "solver_name": "cvxpy_sdpa",
-      "problems_attempted": 6,
-      "problems_solved": 5,
-      "success_rate": 0.8333333333333334,
-      "avg_solve_time": 16.72150393327077,
-      "min_solve_time": 0.061167240142822266,
-      "max_solve_time": 79.02675819396973
-    },
-    {
       "solver_name": "cvxpy_clarabel",
       "problems_attempted": 6,
+      "problems_applicable": 6,
       "problems_solved": 5,
+      "problems_unsupported": 0,
       "success_rate": 0.8333333333333334,
-      "avg_solve_time": 20.729901870091755,
+      "avg_solve_time": 22.91724169254303,
       "min_solve_time": 0.07054281234741211,
       "max_solve_time": 48.13991713523865
     },
     {
-      "solver_name": "cvxpy_highs",
-      "problems_attempted": 2,
-      "problems_solved": 1,
-      "success_rate": 0.5,
-      "avg_solve_time": 0.0019685029983520508,
-      "min_solve_time": 5.793571472167969e-05,
-      "max_solve_time": 0.003879070281982422
-    },
-    {
-      "solver_name": "cvxpy_osqp",
+      "solver_name": "cvxpy_ecos",
       "problems_attempted": 5,
-      "problems_solved": 0,
-      "success_rate": 0.0,
-      "avg_solve_time": 4.267692565917969e-05,
-      "min_solve_time": 3.3855438232421875e-05,
-      "max_solve_time": 6.29425048828125e-05
-    },
-    {
-      "solver_name": "scipy_linprog",
-      "problems_attempted": 5,
-      "problems_solved": 0,
-      "success_rate": 0.0,
-      "avg_solve_time": 4.868507385253906e-05,
-      "min_solve_time": 3.719329833984375e-05,
-      "max_solve_time": 7.891654968261719e-05
+      "problems_applicable": 5,
+      "problems_solved": 4,
+      "problems_unsupported": 0,
+      "success_rate": 0.8,
+      "avg_solve_time": 3.915484619140625,
+      "min_solve_time": 3.814697265625e-05,
+      "max_solve_time": 15.220584154129028
     },
     {
       "solver_name": "matlab_sedumi",
+      "problems_attempted": 3,
+      "problems_applicable": 3,
+      "problems_solved": 2,
+      "problems_unsupported": 0,
+      "success_rate": 0.6666666666666666,
+      "avg_solve_time": 6.342040061950684,
+      "min_solve_time": 5.810866117477417,
+      "max_solve_time": 6.87321400642395
+    },
+    {
+      "solver_name": "cvxpy_sdpa",
+      "problems_attempted": 6,
+      "problems_applicable": 6,
+      "problems_solved": 4,
+      "problems_unsupported": 0,
+      "success_rate": 0.6666666666666666,
+      "avg_solve_time": 23.809215386708576,
+      "min_solve_time": 0.061167240142822266,
+      "max_solve_time": 79.02675819396973
+    },
+    {
+      "solver_name": "cvxpy_highs",
+      "problems_attempted": 2,
+      "problems_applicable": 2,
+      "problems_solved": 1,
+      "problems_unsupported": 0,
+      "success_rate": 0.5,
+      "avg_solve_time": 0.003879070281982422,
+      "min_solve_time": 0.003879070281982422,
+      "max_solve_time": 0.003879070281982422
+    },
+    {
+      "solver_name": "unknown_solver",
       "problems_attempted": 1,
+      "problems_applicable": 1,
       "problems_solved": 0,
+      "problems_unsupported": 0,
       "success_rate": 0.0,
-      "avg_solve_time": 5.51104998588562,
-      "min_solve_time": 5.51104998588562,
-      "max_solve_time": 5.51104998588562
+      "avg_solve_time": 0.0,
+      "min_solve_time": 0.0,
+      "max_solve_time": 0.0
+    },
+    {
+      "solver_name": "cvxpy_osqp",
+      "problems_attempted": 6,
+      "problems_applicable": 5,
+      "problems_solved": 0,
+      "problems_unsupported": 1,
+      "success_rate": 0.0,
+      "avg_solve_time": 3.7610530853271484e-05,
+      "min_solve_time": 3.3855438232421875e-05,
+      "max_solve_time": 4.124641418457031e-05
+    },
+    {
+      "solver_name": "scipy_linprog",
+      "problems_attempted": 6,
+      "problems_applicable": 5,
+      "problems_solved": 0,
+      "problems_unsupported": 1,
+      "success_rate": 0.0,
+      "avg_solve_time": 4.2438507080078125e-05,
+      "min_solve_time": 3.910064697265625e-05,
+      "max_solve_time": 4.7206878662109375e-05
     }
   ],
   "results": [
@@ -445,7 +500,7 @@
       "iterations": null
     },
     {
-      "id": 202,
+      "id": 264,
       "solver_name": "cvxpy_clarabel",
       "solver_version": "cvxpy-1.6.5-CLARABEL-0.11.0",
       "problem_library": "DIMACS",
@@ -477,19 +532,19 @@
         },
         "timestamp": 1750582016.0
       },
-      "commit_hash": "7fe9c04af0d21d63a50472b4562934160d8115c5",
-      "timestamp": "2025-07-01T14:50:11",
-      "solve_time": 25.45207405090332,
+      "commit_hash": "e0f440dd0fe8fd3b879b2314c64621e74e9cb065",
+      "timestamp": "2025-07-12T15:45:42",
+      "solve_time": 23.807657957077026,
       "status": "OPTIMAL",
       "primal_objective_value": -0.05070309464830916,
       "dual_objective_value": -0.05070309464849496,
-      "duality_gap": null,
+      "duality_gap": 1.8580276206492385e-13,
       "primal_infeasibility": 7.801537245867477e-11,
-      "dual_infeasibility": null,
+      "dual_infeasibility": 1.057716256457834e-13,
       "iterations": 21
     },
     {
-      "id": 180,
+      "id": 262,
       "solver_name": "cvxpy_cvxopt",
       "solver_version": "cvxpy-1.6.5-CVXOPT-1.3.2",
       "problem_library": "DIMACS",
@@ -521,19 +576,19 @@
         },
         "timestamp": 1750582016.0
       },
-      "commit_hash": "e945508d6718b1edb2f579ce0b5a56da98570dbd",
-      "timestamp": "2025-06-25T00:42:54",
-      "solve_time": 2.5139200687408447,
+      "commit_hash": "e0f440dd0fe8fd3b879b2314c64621e74e9cb065",
+      "timestamp": "2025-07-12T15:44:01",
+      "solve_time": 23.857765913009644,
       "status": "OPTIMAL",
-      "primal_objective_value": -0.05070309469591302,
-      "dual_objective_value": null,
-      "duality_gap": null,
-      "primal_infeasibility": null,
-      "dual_infeasibility": null,
+      "primal_objective_value": -0.05070309466231132,
+      "dual_objective_value": -0.05070309469591302,
+      "duality_gap": 3.360169781307931e-11,
+      "primal_infeasibility": 1.5016518474646274e-08,
+      "dual_infeasibility": 1.6949506707727528e-11,
       "iterations": null
     },
     {
-      "id": 200,
+      "id": 251,
       "solver_name": "cvxpy_ecos",
       "solver_version": "cvxpy-1.6.5-ECOS-2.0.14",
       "problem_library": "DIMACS",
@@ -565,65 +620,21 @@
         },
         "timestamp": 1750582016.0
       },
-      "commit_hash": "2b66a821bda2f5f8beee8a0568fea2cab5025175",
-      "timestamp": "2025-06-29T15:00:51",
-      "solve_time": 15.003283023834229,
+      "commit_hash": "e0f440dd0fe8fd3b879b2314c64621e74e9cb065",
+      "timestamp": "2025-07-12T15:37:11",
+      "solve_time": 15.220584154129028,
       "status": "OPTIMAL",
       "primal_objective_value": -0.05070309464830582,
       "dual_objective_value": -0.050703094648322636,
-      "duality_gap": null,
+      "duality_gap": 1.6812939929167214e-14,
       "primal_infeasibility": 2.4262814386207304e-12,
-      "dual_infeasibility": null,
+      "dual_infeasibility": 5.091116743383869e-14,
       "iterations": 20
     },
     {
-      "id": 165,
-      "solver_name": "cvxpy_ecos",
-      "solver_version": "cvxpy-1.6.5-ECOS",
-      "problem_library": "DIMACS",
-      "problem_name": "nb",
-      "problem_type": "UNKNOWN",
-      "environment_info": {
-        "cpu": {
-          "cpu_count": 8,
-          "cpu_count_physical": 8,
-          "processor": "arm",
-          "architecture": "64bit"
-        },
-        "memory": {
-          "total_gb": 24.0
-        },
-        "os": {
-          "system": "Darwin",
-          "machine": "arm64",
-          "release": "23.5.0"
-        },
-        "python": {
-          "implementation": "CPython",
-          "version": "3.12.2",
-          "version_info": "3.12.2"
-        },
-        "timezone": {
-          "timezone_name": "UTC",
-          "utc_offset_hours": 0.0
-        },
-        "timestamp": 1750582016.0
-      },
-      "commit_hash": "82612d7c8346e9f418e4c4fb79124a2f7c3a48d4",
-      "timestamp": "2025-06-24T13:12:07",
-      "solve_time": 1.9608960151672363,
-      "status": "OPTIMAL",
-      "primal_objective_value": -0.050703094648322636,
-      "dual_objective_value": null,
-      "duality_gap": null,
-      "primal_infeasibility": null,
-      "dual_infeasibility": null,
-      "iterations": 20
-    },
-    {
-      "id": 170,
+      "id": 256,
       "solver_name": "cvxpy_highs",
-      "solver_version": "cvxpy-1.6.5-HIGHS",
+      "solver_version": "cvxpy-1.6.5-HIGHS-1.11.0",
       "problem_library": "DIMACS",
       "problem_name": "nb",
       "problem_type": "UNKNOWN",
@@ -653,9 +664,9 @@
         },
         "timestamp": 1750582016.0
       },
-      "commit_hash": "82612d7c8346e9f418e4c4fb79124a2f7c3a48d4",
-      "timestamp": "2025-06-24T13:13:03",
-      "solve_time": 5.793571472167969e-05,
+      "commit_hash": "e0f440dd0fe8fd3b879b2314c64621e74e9cb065",
+      "timestamp": "2025-07-12T15:38:38",
+      "solve_time": 0.0,
       "status": "ERROR",
       "primal_objective_value": null,
       "dual_objective_value": null,
@@ -665,9 +676,9 @@
       "iterations": null
     },
     {
-      "id": 166,
+      "id": 252,
       "solver_name": "cvxpy_osqp",
-      "solver_version": "cvxpy-1.6.5-OSQP",
+      "solver_version": "cvxpy-1.6.5-OSQP-1.0.4",
       "problem_library": "DIMACS",
       "problem_name": "nb",
       "problem_type": "UNKNOWN",
@@ -697,9 +708,9 @@
         },
         "timestamp": 1750582016.0
       },
-      "commit_hash": "82612d7c8346e9f418e4c4fb79124a2f7c3a48d4",
-      "timestamp": "2025-06-24T13:12:07",
-      "solve_time": 6.29425048828125e-05,
+      "commit_hash": "e0f440dd0fe8fd3b879b2314c64621e74e9cb065",
+      "timestamp": "2025-07-12T15:37:11",
+      "solve_time": 0.0,
       "status": "ERROR",
       "primal_objective_value": null,
       "dual_objective_value": null,
@@ -709,51 +720,7 @@
       "iterations": null
     },
     {
-      "id": 169,
-      "solver_name": "cvxpy_scip",
-      "solver_version": "cvxpy-1.6.5-SCIP",
-      "problem_library": "DIMACS",
-      "problem_name": "nb",
-      "problem_type": "UNKNOWN",
-      "environment_info": {
-        "cpu": {
-          "cpu_count": 8,
-          "cpu_count_physical": 8,
-          "processor": "arm",
-          "architecture": "64bit"
-        },
-        "memory": {
-          "total_gb": 24.0
-        },
-        "os": {
-          "system": "Darwin",
-          "machine": "arm64",
-          "release": "23.5.0"
-        },
-        "python": {
-          "implementation": "CPython",
-          "version": "3.12.2",
-          "version_info": "3.12.2"
-        },
-        "timezone": {
-          "timezone_name": "UTC",
-          "utc_offset_hours": 0.0
-        },
-        "timestamp": 1750582016.0
-      },
-      "commit_hash": "82612d7c8346e9f418e4c4fb79124a2f7c3a48d4",
-      "timestamp": "2025-06-24T13:13:03",
-      "solve_time": 48.382381200790405,
-      "status": "OPTIMAL",
-      "primal_objective_value": -0.0507029966950411,
-      "dual_objective_value": null,
-      "duality_gap": null,
-      "primal_infeasibility": null,
-      "dual_infeasibility": null,
-      "iterations": null
-    },
-    {
-      "id": 182,
+      "id": 255,
       "solver_name": "cvxpy_scip",
       "solver_version": "cvxpy-1.6.5-SCIP-5.5.0",
       "problem_library": "DIMACS",
@@ -785,19 +752,19 @@
         },
         "timestamp": 1750582016.0
       },
-      "commit_hash": "e945508d6718b1edb2f579ce0b5a56da98570dbd",
-      "timestamp": "2025-06-25T00:43:48",
-      "solve_time": 48.25754904747009,
+      "commit_hash": "e0f440dd0fe8fd3b879b2314c64621e74e9cb065",
+      "timestamp": "2025-07-12T15:38:38",
+      "solve_time": 41.817368030548096,
       "status": "OPTIMAL",
-      "primal_objective_value": -0.0507029966950411,
-      "dual_objective_value": null,
+      "primal_objective_value": null,
+      "dual_objective_value": -0.0507029966950411,
       "duality_gap": null,
       "primal_infeasibility": null,
-      "dual_infeasibility": null,
+      "dual_infeasibility": 1.7150846669879644e-07,
       "iterations": null
     },
     {
-      "id": 178,
+      "id": 250,
       "solver_name": "cvxpy_scs",
       "solver_version": "cvxpy-1.6.5-SCS-3.2.7.post2",
       "problem_library": "DIMACS",
@@ -829,19 +796,19 @@
         },
         "timestamp": 1750582016.0
       },
-      "commit_hash": "e945508d6718b1edb2f579ce0b5a56da98570dbd",
-      "timestamp": "2025-06-25T00:42:49",
-      "solve_time": 4.158452987670898,
+      "commit_hash": "e0f440dd0fe8fd3b879b2314c64621e74e9cb065",
+      "timestamp": "2025-07-12T15:36:56",
+      "solve_time": 15.793625831604004,
       "status": "OPTIMAL",
-      "primal_objective_value": -0.05070061603883091,
-      "dual_objective_value": null,
-      "duality_gap": null,
-      "primal_infeasibility": null,
-      "dual_infeasibility": null,
+      "primal_objective_value": -0.050702584699806943,
+      "dual_objective_value": -0.05070061603883091,
+      "duality_gap": -1.9686609760358187e-06,
+      "primal_infeasibility": 2.472512073576291e-05,
+      "dual_infeasibility": 1.3696595465415478e-05,
       "iterations": 5425
     },
     {
-      "id": 183,
+      "id": 263,
       "solver_name": "cvxpy_sdpa",
       "solver_version": "cvxpy-1.6.5-SDPA-0.2.2",
       "problem_library": "DIMACS",
@@ -873,21 +840,21 @@
         },
         "timestamp": 1750582016.0
       },
-      "commit_hash": "e945508d6718b1edb2f579ce0b5a56da98570dbd",
-      "timestamp": "2025-06-25T00:47:58",
-      "solve_time": 5.9592790603637695,
-      "status": "OPTIMAL",
-      "primal_objective_value": -1.8772174263594055,
-      "dual_objective_value": null,
-      "duality_gap": null,
-      "primal_infeasibility": null,
-      "dual_infeasibility": null,
+      "commit_hash": "e0f440dd0fe8fd3b879b2314c64621e74e9cb065",
+      "timestamp": "2025-07-12T15:45:02",
+      "solve_time": 48.4855477809906,
+      "status": "OPTIMAL (INACCURATE)",
+      "primal_objective_value": -0.002033656695857644,
+      "dual_objective_value": -1.8772174263594055,
+      "duality_gap": 1.8751837696635478,
+      "primal_infeasibility": 0.16647016188566816,
+      "dual_infeasibility": 3.539291082432821e-11,
       "iterations": null
     },
     {
-      "id": 201,
-      "solver_name": "matlab_sedumi",
-      "solver_version": "SeDuMi (version unknown)",
+      "id": 258,
+      "solver_name": "matlab_sdpt3",
+      "solver_version": "SDPT3-4.0-20240410 (MATLAB 24.1.0.2537033 (R2024a))",
       "problem_library": "DIMACS",
       "problem_name": "nb",
       "problem_type": "SOCP",
@@ -917,19 +884,107 @@
         },
         "timestamp": 1750582016.0
       },
-      "commit_hash": "7fe9c04af0d21d63a50472b4562934160d8115c5",
-      "timestamp": "2025-07-01T14:49:35",
-      "solve_time": 5.51104998588562,
-      "status": "ERROR",
+      "commit_hash": "e0f440dd0fe8fd3b879b2314c64621e74e9cb065",
+      "timestamp": "2025-07-12T15:38:49",
+      "solve_time": 5.676074981689453,
+      "status": "OPTIMAL",
+      "primal_objective_value": -0.05070308578560933,
+      "dual_objective_value": -0.050703094832485564,
+      "duality_gap": 9.046876234264367e-09,
+      "primal_infeasibility": 1.59782982293915e-10,
+      "dual_infeasibility": 1.4016403840157828e-09,
+      "iterations": 25
+    },
+    {
+      "id": 211,
+      "solver_name": "matlab_sedumi",
+      "solver_version": "SeDuMi-1.3.7 (MATLAB 24.1.0.2537033 (R2024a))",
+      "problem_library": "DIMACS",
+      "problem_name": "nb",
+      "problem_type": "UNKNOWN",
+      "environment_info": {
+        "cpu": {
+          "cpu_count": 8,
+          "cpu_count_physical": 8,
+          "processor": "arm",
+          "architecture": "64bit"
+        },
+        "memory": {
+          "total_gb": 24.0
+        },
+        "os": {
+          "system": "Darwin",
+          "machine": "arm64",
+          "release": "23.5.0"
+        },
+        "python": {
+          "implementation": "CPython",
+          "version": "3.12.2",
+          "version_info": "3.12.2"
+        },
+        "timezone": {
+          "timezone_name": "UTC",
+          "utc_offset_hours": 0.0
+        },
+        "timestamp": 1750582016.0
+      },
+      "commit_hash": "a6b5437833327b41da26ca61bea8b54301d4c11e",
+      "timestamp": "2025-07-09T10:13:11",
+      "solve_time": 6.87321400642395,
+      "status": "OPTIMAL",
       "primal_objective_value": null,
       "dual_objective_value": null,
       "duality_gap": null,
-      "primal_infeasibility": null,
-      "dual_infeasibility": null,
-      "iterations": null
+      "primal_infeasibility": 2.6686184534778507e-11,
+      "dual_infeasibility": 1.8115531992636216e-11,
+      "iterations": 20
     },
     {
-      "id": 162,
+      "id": 257,
+      "solver_name": "matlab_sedumi",
+      "solver_version": "SeDuMi-1.3.7 (MATLAB 24.1.0.2537033 (R2024a))",
+      "problem_library": "DIMACS",
+      "problem_name": "nb",
+      "problem_type": "SOCP",
+      "environment_info": {
+        "cpu": {
+          "cpu_count": 8,
+          "cpu_count_physical": 8,
+          "processor": "arm",
+          "architecture": "64bit"
+        },
+        "memory": {
+          "total_gb": 24.0
+        },
+        "os": {
+          "system": "Darwin",
+          "machine": "arm64",
+          "release": "23.5.0"
+        },
+        "python": {
+          "implementation": "CPython",
+          "version": "3.12.2",
+          "version_info": "3.12.2"
+        },
+        "timezone": {
+          "timezone_name": "UTC",
+          "utc_offset_hours": 0.0
+        },
+        "timestamp": 1750582016.0
+      },
+      "commit_hash": "e0f440dd0fe8fd3b879b2314c64621e74e9cb065",
+      "timestamp": "2025-07-12T15:38:44",
+      "solve_time": 5.810866117477417,
+      "status": "OPTIMAL",
+      "primal_objective_value": -0.05070309464513528,
+      "dual_objective_value": -0.05070309464949991,
+      "duality_gap": 4.364626715602782e-12,
+      "primal_infeasibility": 2.6686184534778507e-11,
+      "dual_infeasibility": 1.8115531992636216e-11,
+      "iterations": 20
+    },
+    {
+      "id": 248,
       "solver_name": "scipy_linprog",
       "solver_version": "scipy-1.15.3",
       "problem_library": "DIMACS",
@@ -961,9 +1016,9 @@
         },
         "timestamp": 1750582016.0
       },
-      "commit_hash": "82612d7c8346e9f418e4c4fb79124a2f7c3a48d4",
-      "timestamp": "2025-06-24T13:11:59",
-      "solve_time": 7.891654968261719e-05,
+      "commit_hash": "e0f440dd0fe8fd3b879b2314c64621e74e9cb065",
+      "timestamp": "2025-07-12T15:36:26",
+      "solve_time": 0.0,
       "status": "ERROR",
       "primal_objective_value": null,
       "dual_objective_value": null,
@@ -973,11 +1028,11 @@
       "iterations": null
     },
     {
-      "id": 118,
-      "solver_name": "cvxpy_clarabel",
-      "solver_version": "cvxpy-1.6.5-CLARABEL",
+      "id": 212,
+      "solver_name": "unknown_solver",
+      "solver_version": "unknown",
       "problem_library": "DIMACS",
-      "problem_name": "nb_L1",
+      "problem_name": "nb",
       "problem_type": "UNKNOWN",
       "environment_info": {
         "cpu": {
@@ -1005,15 +1060,59 @@
         },
         "timestamp": 1750582016.0
       },
-      "commit_hash": "ce1969a22cbeb1ef396d49cbf1142984143d1297",
-      "timestamp": "2025-06-22T09:46:39",
-      "solve_time": 1.5329699516296387,
-      "status": "OPTIMAL",
-      "primal_objective_value": -13.012270672238593,
+      "commit_hash": "a6b5437833327b41da26ca61bea8b54301d4c11e",
+      "timestamp": "2025-07-09T10:13:11",
+      "solve_time": 0.0,
+      "status": "ERROR",
+      "primal_objective_value": null,
       "dual_objective_value": null,
       "duality_gap": null,
       "primal_infeasibility": null,
       "dual_infeasibility": null,
+      "iterations": null
+    },
+    {
+      "id": 267,
+      "solver_name": "cvxpy_clarabel",
+      "solver_version": "cvxpy-1.6.5-CLARABEL-0.11.0",
+      "problem_library": "DIMACS",
+      "problem_name": "nb_L1",
+      "problem_type": "SOCP",
+      "environment_info": {
+        "cpu": {
+          "cpu_count": 8,
+          "cpu_count_physical": 8,
+          "processor": "arm",
+          "architecture": "64bit"
+        },
+        "memory": {
+          "total_gb": 24.0
+        },
+        "os": {
+          "system": "Darwin",
+          "machine": "arm64",
+          "release": "23.5.0"
+        },
+        "python": {
+          "implementation": "CPython",
+          "version": "3.12.2",
+          "version_info": "3.12.2"
+        },
+        "timezone": {
+          "timezone_name": "UTC",
+          "utc_offset_hours": 0.0
+        },
+        "timestamp": 1752362240.0
+      },
+      "commit_hash": "949fc80f872ff80f86f08a2b22df1565a26acc48",
+      "timestamp": "2025-07-13T04:20:50",
+      "solve_time": 16.301424980163574,
+      "status": "OPTIMAL",
+      "primal_objective_value": -13.012270670036738,
+      "dual_objective_value": -13.012270672238593,
+      "duality_gap": 2.20185469856915e-09,
+      "primal_infeasibility": 5.357543858712498e-15,
+      "dual_infeasibility": 1.1266917166933884e-12,
       "iterations": 17
     },
     {
@@ -1103,6 +1202,50 @@
       "primal_infeasibility": null,
       "dual_infeasibility": null,
       "iterations": 19
+    },
+    {
+      "id": 266,
+      "solver_name": "cvxpy_osqp",
+      "solver_version": "cvxpy-1.6.5-OSQP-1.0.4",
+      "problem_library": "DIMACS",
+      "problem_name": "nb_L1",
+      "problem_type": "SOCP",
+      "environment_info": {
+        "cpu": {
+          "cpu_count": 8,
+          "cpu_count_physical": 8,
+          "processor": "arm",
+          "architecture": "64bit"
+        },
+        "memory": {
+          "total_gb": 24.0
+        },
+        "os": {
+          "system": "Darwin",
+          "machine": "arm64",
+          "release": "23.5.0"
+        },
+        "python": {
+          "implementation": "CPython",
+          "version": "3.12.2",
+          "version_info": "3.12.2"
+        },
+        "timezone": {
+          "timezone_name": "UTC",
+          "utc_offset_hours": 0.0
+        },
+        "timestamp": 1752362240.0
+      },
+      "commit_hash": "949fc80f872ff80f86f08a2b22df1565a26acc48",
+      "timestamp": "2025-07-13T04:20:21",
+      "solve_time": null,
+      "status": "UNSUPPORTED",
+      "primal_objective_value": null,
+      "dual_objective_value": null,
+      "duality_gap": null,
+      "primal_infeasibility": null,
+      "dual_infeasibility": null,
+      "iterations": null
     },
     {
       "id": 121,
@@ -1237,7 +1380,51 @@
       "iterations": null
     },
     {
-      "id": 117,
+      "id": 265,
+      "solver_name": "scipy_linprog",
+      "solver_version": "scipy-1.15.3",
+      "problem_library": "DIMACS",
+      "problem_name": "nb_L1",
+      "problem_type": "SOCP",
+      "environment_info": {
+        "cpu": {
+          "cpu_count": 8,
+          "cpu_count_physical": 8,
+          "processor": "arm",
+          "architecture": "64bit"
+        },
+        "memory": {
+          "total_gb": 24.0
+        },
+        "os": {
+          "system": "Darwin",
+          "machine": "arm64",
+          "release": "23.5.0"
+        },
+        "python": {
+          "implementation": "CPython",
+          "version": "3.12.2",
+          "version_info": "3.12.2"
+        },
+        "timezone": {
+          "timezone_name": "UTC",
+          "utc_offset_hours": 0.0
+        },
+        "timestamp": 1752362240.0
+      },
+      "commit_hash": "949fc80f872ff80f86f08a2b22df1565a26acc48",
+      "timestamp": "2025-07-13T04:20:07",
+      "solve_time": null,
+      "status": "UNSUPPORTED",
+      "primal_objective_value": null,
+      "dual_objective_value": null,
+      "duality_gap": null,
+      "primal_infeasibility": null,
+      "dual_infeasibility": null,
+      "iterations": null
+    },
+    {
+      "id": 259,
       "solver_name": "scipy_linprog",
       "solver_version": "scipy-1.15.3",
       "problem_library": "DIMACS",
@@ -1269,9 +1456,9 @@
         },
         "timestamp": 1750582016.0
       },
-      "commit_hash": "ce1969a22cbeb1ef396d49cbf1142984143d1297",
-      "timestamp": "2025-06-22T09:46:38",
-      "solve_time": 3.719329833984375e-05,
+      "commit_hash": "e0f440dd0fe8fd3b879b2314c64621e74e9cb065",
+      "timestamp": "2025-07-12T15:38:49",
+      "solve_time": 0.0,
       "status": "ERROR",
       "primal_objective_value": null,
       "dual_objective_value": null,
@@ -2110,6 +2297,50 @@
       "solve_time": 0.005051851272583008,
       "status": "OPTIMAL",
       "primal_objective_value": 0.0,
+      "dual_objective_value": null,
+      "duality_gap": null,
+      "primal_infeasibility": null,
+      "dual_infeasibility": null,
+      "iterations": null
+    },
+    {
+      "id": 213,
+      "solver_name": "matlab_sedumi",
+      "solver_version": "unknown",
+      "problem_library": "unknown",
+      "problem_name": "test_simple",
+      "problem_type": "UNKNOWN",
+      "environment_info": {
+        "cpu": {
+          "cpu_count": 8,
+          "cpu_count_physical": 8,
+          "processor": "arm",
+          "architecture": "64bit"
+        },
+        "memory": {
+          "total_gb": 24.0
+        },
+        "os": {
+          "system": "Darwin",
+          "machine": "arm64",
+          "release": "23.5.0"
+        },
+        "python": {
+          "implementation": "CPython",
+          "version": "3.12.2",
+          "version_info": "3.12.2"
+        },
+        "timezone": {
+          "timezone_name": "UTC",
+          "utc_offset_hours": 0.0
+        },
+        "timestamp": 1750582016.0
+      },
+      "commit_hash": "0ee454e7fc43ae25df93351d951caa7dc0fada8b",
+      "timestamp": "2025-07-12T13:37:38",
+      "solve_time": 0.0,
+      "status": "ERROR",
+      "primal_objective_value": null,
       "dual_objective_value": null,
       "duality_gap": null,
       "primal_infeasibility": null,
