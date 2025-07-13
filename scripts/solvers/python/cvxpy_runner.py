@@ -460,13 +460,46 @@ class CvxpySolver(SolverInterface):
             import traceback
             self.logger.debug(f"Full traceback: {traceback.format_exc()}")
         
-        # Get iterations if available
+        # Get iterations if available (enhanced for multiple backends)
         iterations = None
-        if cvx_problem.solver_stats and hasattr(cvx_problem.solver_stats, 'num_iters'):
-            iterations = cvx_problem.solver_stats.num_iters
+        if cvx_problem.solver_stats:
+            # Primary method: standard num_iters attribute
+            if hasattr(cvx_problem.solver_stats, 'num_iters') and cvx_problem.solver_stats.num_iters is not None:
+                iterations = cvx_problem.solver_stats.num_iters
+            # Alternative method: check extra_stats for iteration information
+            elif (cvx_problem.solver_stats.extra_stats and 
+                  isinstance(cvx_problem.solver_stats.extra_stats, dict)):
+                extra_stats = cvx_problem.solver_stats.extra_stats
+                
+                # Try different possible keys for iteration information
+                possible_keys = ['iter', 'iterations', 'num_iters', 'niter']
+                for key in possible_keys:
+                    if key in extra_stats:
+                        iterations = extra_stats[key]
+                        break
+                
+                # For solvers that nest iteration info (e.g., SCS has info.iter)
+                if iterations is None and 'info' in extra_stats:
+                    info_dict = extra_stats['info']
+                    if isinstance(info_dict, dict):
+                        for key in possible_keys:
+                            if key in info_dict:
+                                iterations = info_dict[key]
+                                break
         
         # Extract minimal solver timing information for memo
         additional_info = {}
+        
+        # Log iteration extraction attempts for debugging
+        if iterations is not None:
+            self.logger.debug(f"Extracted iterations: {iterations} for backend {self.backend}")
+        else:
+            self.logger.debug(f"No iteration information available for backend {self.backend}")
+            # Document known limitations for specific backends
+            if self.backend in ['CVXOPT', 'SDPA']:
+                self.logger.debug(f"Backend {self.backend} does not expose iteration information through CVXPY interface")
+                # Add this limitation to additional_info for transparency
+                additional_info["iteration_info_limitation"] = f"{self.backend} does not provide iteration count through CVXPY"
         
         # Only add solver internal timing for memo
         if cvx_problem.solver_stats and hasattr(cvx_problem.solver_stats, 'solve_time'):
