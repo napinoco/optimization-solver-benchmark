@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Optimization Solver Benchmark - Overview</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f8f9fa;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+            color: white;
+            text-align: center;
+            padding: 2rem 1rem;
+            margin-bottom: 2rem;
+        }
+        
+        header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+        
+        nav {
+            background: white;
+            padding: 1rem;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+        
+        nav a {
+            color: #2c3e50;
+            text-decoration: none;
+            margin: 0 1rem;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            transition: background-color 0.2s;
+        }
+        
+        nav a:hover {
+            background-color: #ecf0f1;
+        }
+        
+        nav a.active {
+            background-color: #3498db;
+            color: white;
+        }
+        
+        main {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1rem;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            text-align: center;
+            transition: transform 0.2s;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+        }
+        
+        .stat-card h3 {
+            color: #2c3e50;
+            margin-bottom: 0.5rem;
+            font-size: 1rem;
+        }
+        
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #3498db;
+        }
+        
+        .section {
+            background: white;
+            margin: 2rem 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .section h2 {
+            background: linear-gradient(135deg, #34495e 0%, #2c3e50 100%);
+            color: white;
+            padding: 1rem 1.5rem;
+            margin: 0;
+            border-radius: 8px 8px 0 0;
+            font-size: 1.5rem;
+        }
+        
+        .section-content {
+            padding: 1.5rem;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+        }
+        
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #ecf0f1;
+        }
+        
+        th {
+            background-color: #f8f9fa;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        
+        tr:hover {
+            background-color: #f8f9fa;
+        }
+        
+        .success-rate {
+            color: #27ae60;
+            font-weight: bold;
+        }
+        
+        .solve-time {
+            color: #7f8c8d;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .metadata {
+            background: #ecf0f1;
+            padding: 1.5rem;
+            border-radius: 6px;
+            margin: 2rem 0;
+        }
+        
+        .metadata h3 {
+            color: #2c3e50;
+            margin-bottom: 1rem;
+        }
+        
+        .metadata p {
+            margin: 0.5rem 0;
+            color: #34495e;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 2rem;
+            color: #7f8c8d;
+            border-top: 1px solid #ecf0f1;
+            margin-top: 3rem;
+        }
+        
+        footer a {
+            color: #3498db;
+            text-decoration: none;
+            margin: 0 1rem;
+        }
+        
+        footer a:hover {
+            text-decoration: underline;
+        }
+        
+        .overview-section {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+        
+        .overview-section h2 {
+            color: #2c3e50;
+            margin-bottom: 1rem;
+            font-size: 1.5rem;
+        }
+        
+        .overview-content {
+            color: #34495e;
+            line-height: 1.8;
+            white-space: pre-line;
+        }
+        
+        .overview-content strong {
+            color: #2c3e50;
+        }
+        
+        .status-distribution {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            padding: 1rem;
+        }
+        
+        .status-card {
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 6px;
+            text-align: center;
+            border: 1px solid #e9ecef;
+        }
+        
+        .status-card span {
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+        
+        .status-stats {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .status-count {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        
+        .status-percentage {
+            font-size: 0.9rem;
+            color: #6c757d;
+        }
+    </style>
+</head>
+<body>
+    <header>
+    <div style="background: #fff3cd; border: 1px solid #ffeaa7; padding: 10px; margin: 10px 0; border-radius: 5px; text-align: center;">
+        <strong>🚧 Preview Environment</strong> - This is a preview of PR #7. 
+        <a href="https://github.com/napinoco/optimization-solver-benchmark/pull/7">View Pull Request →</a>
+    </div>
+        <h1>🔬 Optimization Solver Benchmark</h1>
+        <p>Overview Dashboard - Latest Results</p>
+        <p><small>Generated: 2025-07-19 23:39:48</small></p>
+    </header>
+    
+    <nav>
+        <a href="index.html" class="active">Overview</a>
+        <a href="results_matrix.html">Results Matrix</a>
+        <a href="raw_data.html">Raw Data</a>
+        <a href="data/">Data Exports</a>
+    </nav>
+    
+    <main>
+        
+        <!-- Project Overview Section -->
+        
+        <div class="overview-section">
+            <h2>📋 Project Overview</h2>
+            <div class="overview-content"><strong>Project Vision</strong>
+Create the leading open-source platform for benchmarking optimization solvers across multiple problem types, providing researchers and practitioners with comprehensive performance insights through automated execution, transparent reporting, and fair baseline comparisons.
+
+<strong>Core Mission</strong>
+"Regularly benchmark publicly available solvers and publish the results as data"
+
+This system prioritizes unbiased solver comparison through minimal configuration, establishing "out of the box" performance baselines rather than optimized configurations.</div>
+        </div>
+        
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <h3>Total Results</h3>
+                <span class="stat-value">1026</span>
+            </div>
+            <div class="stat-card">
+                <h3>Solvers Tested</h3>
+                <span class="stat-value">11</span>
+            </div>
+            <div class="stat-card">
+                <h3>Problems Tested</h3>
+                <span class="stat-value">138</span>
+            </div>
+            <div class="stat-card">
+                <h3>Success Rate</h3>
+                <span class="stat-value">40.0%</span>
+            </div>
+        </div>
+        
+        <!-- Status Distribution Section -->
+        <div class="section">
+            <h2>📊 Status Distribution</h2>
+            <div class="section-content">
+                <div class="status-distribution">
+                    <div class="status-card">
+                        <span class="status-error">ERROR</span>
+                        <div class="status-stats">
+                            <span class="status-count">145</span>
+                            <span class="status-percentage">(14.1%)</span>
+                        </div>
+                    </div>
+                    <div class="status-card">
+                        <span class="status-infeasible">INFEASIBLE</span>
+                        <div class="status-stats">
+                            <span class="status-count">16</span>
+                            <span class="status-percentage">(1.6%)</span>
+                        </div>
+                    </div>
+                    <div class="status-card">
+                        <span class="status-unknown">INFEASIBLE (INACCURATE)</span>
+                        <div class="status-stats">
+                            <span class="status-count">2</span>
+                            <span class="status-percentage">(0.2%)</span>
+                        </div>
+                    </div>
+                    <div class="status-card">
+                        <span class="status-unknown">MAX_ITER</span>
+                        <div class="status-stats">
+                            <span class="status-count">10</span>
+                            <span class="status-percentage">(1.0%)</span>
+                        </div>
+                    </div>
+                    <div class="status-card">
+                        <span class="status-unknown">NUM_ERROR</span>
+                        <div class="status-stats">
+                            <span class="status-count">40</span>
+                            <span class="status-percentage">(3.9%)</span>
+                        </div>
+                    </div>
+                    <div class="status-card">
+                        <span class="status-optimal">OPTIMAL</span>
+                        <div class="status-stats">
+                            <span class="status-count">232</span>
+                            <span class="status-percentage">(22.6%)</span>
+                        </div>
+                    </div>
+                    <div class="status-card">
+                        <span class="status-optimal-inaccurate">OPTIMAL (INACCURATE)</span>
+                        <div class="status-stats">
+                            <span class="status-count">86</span>
+                            <span class="status-percentage">(8.4%)</span>
+                        </div>
+                    </div>
+                    <div class="status-card">
+                        <span class="status-unknown">TIMEOUT</span>
+                        <div class="status-stats">
+                            <span class="status-count">3</span>
+                            <span class="status-percentage">(0.3%)</span>
+                        </div>
+                    </div>
+                    <div class="status-card">
+                        <span class="status-infeasible">UNBOUNDED</span>
+                        <div class="status-stats">
+                            <span class="status-count">12</span>
+                            <span class="status-percentage">(1.2%)</span>
+                        </div>
+                    </div>
+                    <div class="status-card">
+                        <span class="status-unknown">UNBOUNDED (INACCURATE)</span>
+                        <div class="status-stats">
+                            <span class="status-count">1</span>
+                            <span class="status-percentage">(0.1%)</span>
+                        </div>
+                    </div>
+                    <div class="status-card">
+                        <span class="status-unknown">UNKNOWN</span>
+                        <div class="status-stats">
+                            <span class="status-count">33</span>
+                            <span class="status-percentage">(3.2%)</span>
+                        </div>
+                    </div>
+                    <div class="status-card">
+                        <span class="status-unsupported">UNSUPPORTED</span>
+                        <div class="status-stats">
+                            <span class="status-count">446</span>
+                            <span class="status-percentage">(43.5%)</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>🏆 Solver Comparison by Problem Type</h2>
+            <div class="section-content">
+                <h3>UNKNOWN Problems</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Solver</th>
+                            <th>Problems Attempted</th>
+                            <th>Problems Solved</th>
+                            <th>Success Rate</th>
+                            <th>Avg Solve Time</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                <tr>
+                    <td><strong>matlab_sdpt3</strong></td>
+                    <td>28</td>
+                    <td>0</td>
+                    <td class="success-rate">0.0%</td>
+                    <td class="solve-time">0.0000s</td>
+                </tr>
+                <tr>
+                    <td><strong>cvxpy_clarabel</strong></td>
+                    <td>3</td>
+                    <td>0</td>
+                    <td class="success-rate">0.0%</td>
+                    <td class="solve-time">0.0000s</td>
+                </tr>
+                <tr>
+                    <td><strong>cvxpy_cvxopt</strong></td>
+                    <td>1</td>
+                    <td>0</td>
+                    <td class="success-rate">0.0%</td>
+                    <td class="solve-time">0.0000s</td>
+                </tr>
+                <tr>
+                    <td><strong>cvxpy_ecos</strong></td>
+                    <td>1</td>
+                    <td>0</td>
+                    <td class="success-rate">0.0%</td>
+                    <td class="solve-time">0.0000s</td>
+                </tr>
+                <tr>
+                    <td><strong>cvxpy_highs</strong></td>
+                    <td>1</td>
+                    <td>0</td>
+                    <td class="success-rate">0.0%</td>
+                    <td class="solve-time">0.0000s</td>
+                </tr>
+                <tr>
+                    <td><strong>cvxpy_osqp</strong></td>
+                    <td>1</td>
+                    <td>0</td>
+                    <td class="success-rate">0.0%</td>
+                    <td class="solve-time">0.0000s</td>
+                </tr>
+                <tr>
+                    <td><strong>cvxpy_scip</strong></td>
+                    <td>1</td>
+                    <td>0</td>
+                    <td class="success-rate">0.0%</td>
+                    <td class="solve-time">0.0000s</td>
+                </tr>
+                <tr>
+                    <td><strong>cvxpy_scs</strong></td>
+                    <td>1</td>
+                    <td>0</td>
+                    <td class="success-rate">0.0%</td>
+                    <td class="solve-time">0.0000s</td>
+                </tr>
+                <tr>
+                    <td><strong>cvxpy_sdpa</strong></td>
+                    <td>1</td>
+                    <td>0</td>
+                    <td class="success-rate">0.0%</td>
+                    <td class="solve-time">0.0000s</td>
+                </tr>
+                <tr>
+                    <td><strong>scipy_linprog</strong></td>
+                    <td>1</td>
+                    <td>0</td>
+                    <td class="success-rate">0.0%</td>
+                    <td class="solve-time">0.0000s</td>
+                </tr>
+                <tr>
+                    <td><strong>matlab_sedumi</strong></td>
+                    <td>30</td>
+                    <td>0</td>
+                    <td class="success-rate">0.0%</td>
+                    <td class="solve-time">4.2789s</td>
+                </tr>
+                    </tbody>
+                </table>
+                <br>
+                <h3>SDP Problems</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Solver</th>
+                            <th>Problems Attempted</th>
+                            <th>Problems Solved</th>
+                            <th>Success Rate</th>
+                            <th>Avg Solve Time</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                <tr>
+                    <td><strong>cvxpy_clarabel</strong></td>
+                    <td>65</td>
+                    <td>42</td>
+                    <td class="success-rate">64.6%</td>
+                    <td class="solve-time">5.8926s</td>
+                </tr>
+                <tr>
+                    <td><strong>cvxpy_scs</strong></td>
+                    <td>53</td>
+                    <td>27</td>
+                    <td class="success-rate">50.9%</td>
+                    <td class="solve-time">11.0948s</td>
+                </tr>
+                <tr>
+                    <td><strong>matlab_sdpt3</strong></td>
+                    <td>85</td>
+                    <td>39</td>
+                    <td class="success-rate">45.9%</td>
+                    <td class="solve-time">8.6853s</td>
+                </tr>
+                <tr>
+                    <td><strong>matlab_sedumi</strong></td>
+                    <td>85</td>
+                    <td>36</td>
+                    <td class="success-rate">42.4%</td>
+                    <td class="solve-time">23.1333s</td>
+                </tr>
+                <tr>
+                    <td><strong>cvxpy_cvxopt</strong></td>
+                    <td>65</td>
+                    <td>23</td>
+                    <td class="success-rate">35.4%</td>
+                    <td class="solve-time">8.2868s</td>
+                </tr>
+                <tr>
+                    <td><strong>cvxpy_sdpa</strong></td>
+                    <td>67</td>
+                    <td>22</td>
+                    <td class="success-rate">32.8%</td>
+                    <td class="solve-time">5.0452s</td>
+                </tr>
+                <tr>
+                    <td><strong>cvxpy_ecos</strong></td>
+                    <td>78</td>
+                    <td>0</td>
+                    <td class="success-rate">0.0%</td>
+                    <td class="solve-time">0.0000s</td>
+                </tr>
+                <tr>
+                    <td><strong>cvxpy_highs</strong></td>
+                    <td>78</td>
+                    <td>0</td>
+                    <td class="success-rate">0.0%</td>
+                    <td class="solve-time">0.0000s</td>
+                </tr>
+                <tr>
+                    <td><strong>cvxpy_osqp</strong></td>
+                    <td>78</td>
+                    <td>0</td>
+                    <td class="success-rate">0.0%</td>
+                    <td class="solve-time">0.0000s</td>
+                </tr>
+                <tr>
+                    <td><strong>cvxpy_scip</strong></td>
+                    <td>78</td>
+                    <td>0</td>
+                    <td class="success-rate">0.0%</td>
+                    <td class="solve-time">0.0000s</td>
+                </tr>
+                <tr>
+                    <td><strong>scipy_linprog</strong></td>
+                    <td>77</td>
+                    <td>0</td>
+                    <td class="success-rate">0.0%</td>
+                    <td class="solve-time">0.0000s</td>
+                </tr>
+                    </tbody>
+                </table>
+                <br>
+                <h3>SOCP Problems</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Solver</th>
+                            <th>Problems Attempted</th>
+                            <th>Problems Solved</th>
+                            <th>Success Rate</th>
+                            <th>Avg Solve Time</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                <tr>
+                    <td><strong>cvxpy_scip</strong></td>
+                    <td>2</td>
+                    <td>2</td>
+                    <td class="success-rate">100.0%</td>
+                    <td class="solve-time">54.1060s</td>
+                </tr>
+                <tr>
+                    <td><strong>matlab_sedumi</strong></td>
+                    <td>23</td>
+                    <td>15</td>
+                    <td class="success-rate">65.2%</td>
+                    <td class="solve-time">7.3959s</td>
+                </tr>
+                <tr>
+                    <td><strong>matlab_sdpt3</strong></td>
+                    <td>22</td>
+                    <td>11</td>
+                    <td class="success-rate">50.0%</td>
+                    <td class="solve-time">8.9241s</td>
+                </tr>
+                <tr>
+                    <td><strong>cvxpy_scs</strong></td>
+                    <td>8</td>
+                    <td>4</td>
+                    <td class="success-rate">50.0%</td>
+                    <td class="solve-time">33.4558s</td>
+                </tr>
+                <tr>
+                    <td><strong>cvxpy_clarabel</strong></td>
+                    <td>11</td>
+                    <td>5</td>
+                    <td class="success-rate">45.5%</td>
+                    <td class="solve-time">21.9695s</td>
+                </tr>
+                <tr>
+                    <td><strong>cvxpy_ecos</strong></td>
+                    <td>11</td>
+                    <td>4</td>
+                    <td class="success-rate">36.4%</td>
+                    <td class="solve-time">13.6325s</td>
+                </tr>
+                <tr>
+                    <td><strong>cvxpy_cvxopt</strong></td>
+                    <td>8</td>
+                    <td>2</td>
+                    <td class="success-rate">25.0%</td>
+                    <td class="solve-time">50.7982s</td>
+                </tr>
+                <tr>
+                    <td><strong>cvxpy_highs</strong></td>
+                    <td>19</td>
+                    <td>0</td>
+                    <td class="success-rate">0.0%</td>
+                    <td class="solve-time">0.0000s</td>
+                </tr>
+                <tr>
+                    <td><strong>cvxpy_osqp</strong></td>
+                    <td>19</td>
+                    <td>0</td>
+                    <td class="success-rate">0.0%</td>
+                    <td class="solve-time">0.0000s</td>
+                </tr>
+                <tr>
+                    <td><strong>scipy_linprog</strong></td>
+                    <td>19</td>
+                    <td>0</td>
+                    <td class="success-rate">0.0%</td>
+                    <td class="solve-time">0.0000s</td>
+                </tr>
+                <tr>
+                    <td><strong>cvxpy_sdpa</strong></td>
+                    <td>6</td>
+                    <td>0</td>
+                    <td class="success-rate">0.0%</td>
+                    <td class="solve-time">59.0400s</td>
+                </tr>
+                    </tbody>
+                </table>
+                <br>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>📊 Problem Type Distribution</h2>
+            <div class="section-content">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Problem Type</th>
+                            <th>Count</th>
+                            <th>Percentage</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            <tr>
+                <td><strong>UNKNOWN</strong></td>
+                <td>69</td>
+                <td>6.7%</td>
+            </tr>
+            <tr>
+                <td><strong>SDP</strong></td>
+                <td>809</td>
+                <td>78.8%</td>
+            </tr>
+            <tr>
+                <td><strong>SOCP</strong></td>
+                <td>148</td>
+                <td>14.4%</td>
+            </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>📚 Library Distribution</h2>
+            <div class="section-content">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Library</th>
+                            <th>Count</th>
+                            <th>Percentage</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            <tr>
+                <td><strong>DIMACS</strong></td>
+                <td>330</td>
+                <td>32.2%</td>
+            </tr>
+            <tr>
+                <td><strong>SDPLIB</strong></td>
+                <td>696</td>
+                <td>67.8%</td>
+            </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="metadata">
+            <h3>🔧 Environment Information</h3>
+            <p><strong>Commit Hashes:</strong> 443b599d, 96ca0437</p><p><em>⚠️ Multiple environments detected: Results from 2 different Git commits</em></p><p><strong>Platform:</strong> Darwin (8CPU, 24GB)</p><p><strong>Python Version:</strong> 3.12.2</p>
+        </div>
+    </main>
+
+    <footer>
+        <p>
+            <a href="results_matrix.html">Results Matrix</a> |
+            <a href="raw_data.html">Raw Data</a> |
+            <a href="data/">Data Exports</a>
+        </p>
+        <p><small>Generated by Optimization Solver Benchmark System</small></p>
+    </footer>
+</body>
+</html>
