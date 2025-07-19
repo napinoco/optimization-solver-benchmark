@@ -219,8 +219,6 @@ class MatlabInterface:
                         cwd=project_root
                     )
                     
-                    solve_time = time.time() - start_time
-                    
                     # Check execution success
                     if result.returncode != 0:
                         error_msg = self._parse_matlab_error(result.stderr, result.stdout)
@@ -229,7 +227,7 @@ class MatlabInterface:
                         
                         return SolverResult.create_error_result(
                             full_error,
-                            solve_time=solve_time,
+                            solve_time=float('nan'),
                             solver_name=f"matlab_{matlab_solver}",
                             solver_version="unknown"
                         )
@@ -238,7 +236,7 @@ class MatlabInterface:
                     if not os.path.exists(result_file):
                         return SolverResult.create_error_result(
                             "MATLAB interface did not produce result file",
-                            solve_time=solve_time,
+                            solve_time=float('nan'),
                             solver_name=f"matlab_{matlab_solver}",
                             solver_version="unknown"
                         )
@@ -249,14 +247,14 @@ class MatlabInterface:
                         if file_stat.st_size == 0:
                             return SolverResult.create_error_result(
                                 "MATLAB interface produced empty result file",
-                                solve_time=solve_time,
+                                solve_time=float('nan'),
                                 solver_name=f"matlab_{matlab_solver}",
                                 solver_version="unknown"
                             )
                     except OSError as e:
                         return SolverResult.create_error_result(
                             f"Error accessing result file: {e}",
-                            solve_time=solve_time,
+                            solve_time=float('nan'),
                             solver_name=f"matlab_{matlab_solver}",
                             solver_version="unknown"
                         )
@@ -268,20 +266,20 @@ class MatlabInterface:
                     except json.JSONDecodeError as e:
                         return SolverResult.create_error_result(
                             f"Invalid JSON in result file: {e}",
-                            solve_time=solve_time,
+                            solve_time=float('nan'),
                             solver_name=f"matlab_{matlab_solver}",
                             solver_version="unknown"
                         )
                     except IOError as e:
                         return SolverResult.create_error_result(
                             f"Error reading result file: {e}",
-                            solve_time=solve_time,
+                            solve_time=float('nan'),
                             solver_name=f"matlab_{matlab_solver}",
                             solver_version="unknown"
                         )
                     
                     # Convert MATLAB result to SolverResult
-                    return self._convert_matlab_result(matlab_result, solve_time, matlab_solver)
+                    return self._convert_matlab_result(matlab_result, matlab_solver)
                     
                 except subprocess.TimeoutExpired:
                     return SolverResult.create_timeout_result(
@@ -291,17 +289,15 @@ class MatlabInterface:
                     )
                     
         except Exception as e:
-            solve_time = time.time() - start_time
             logger.error(f"MATLAB interface execution failed: {e}")
             return SolverResult.create_error_result(
                 str(e),
-                solve_time=solve_time,
+                solve_time=float('nan'),
                 solver_name=f"matlab_{matlab_solver}",
                 solver_version="unknown"
             )
     
-    def _convert_matlab_result(self, matlab_result: Dict[str, Any], 
-                             solve_time: float, matlab_solver: str) -> SolverResult:
+    def _convert_matlab_result(self, matlab_result: Dict[str, Any], matlab_solver: str) -> SolverResult:
         """Convert MATLAB JSON result to SolverResult format."""
         
         # Extract solver version information
@@ -317,8 +313,19 @@ class MatlabInterface:
             return None if value is None or value == [] else int(value)
         
         try:
+            # Extract solve_time from MATLAB result, prioritizing actual solver execution time
+            matlab_solve_time = safe_float(matlab_result.get('solve_time'))
+            
+            # Use MATLAB's solve_time if valid, otherwise set to NaN (don't use subprocess time)
+            if matlab_solve_time is not None and matlab_solve_time >= 0:
+                final_solve_time = matlab_solve_time
+            else:
+                # Don't mask errors by using subprocess time - set to NaN for transparency
+                final_solve_time = float('nan')
+                self.logger.warning(f"Invalid solve_time from MATLAB result: {matlab_solve_time}, setting to NaN")
+            
             return SolverResult(
-                solve_time=solve_time,
+                solve_time=final_solve_time,
                 status=matlab_result.get('status', 'unknown').upper(),
                 primal_objective_value=safe_float(matlab_result.get('primal_objective_value')),
                 dual_objective_value=safe_float(matlab_result.get('dual_objective_value')),
@@ -336,10 +343,10 @@ class MatlabInterface:
                 }
             )
         except Exception as e:
-            # If conversion fails, return error result
+            # If conversion fails, return error result with NaN solve_time (don't use subprocess time)
             return SolverResult.create_error_result(
                 f"Failed to convert MATLAB result: {e}",
-                solve_time=solve_time,
+                solve_time=float('nan'),
                 solver_name=f"matlab_{matlab_solver}",
                 solver_version=combined_version
             )
