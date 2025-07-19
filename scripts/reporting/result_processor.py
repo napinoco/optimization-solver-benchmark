@@ -181,6 +181,16 @@ class ResultProcessor:
             self.logger.warning(f"Failed to load problem registry: {e}")
             return {'problem_libraries': {}}
     
+    def _load_site_config(self) -> Dict[str, Any]:
+        """Load site configuration from config/site_config.yaml"""
+        try:
+            config_path = project_root / "config" / "site_config.yaml"
+            with open(config_path, 'r') as f:
+                return yaml.safe_load(f)
+        except Exception as e:
+            self.logger.warning(f"Failed to load site config: {e}")
+            return {}
+    
     def get_latest_results_for_reporting(self) -> List[BenchmarkResult]:
         """
         Get latest results using commit_hash and environment_info with timestamp tiebreaker.
@@ -415,7 +425,21 @@ class ResultProcessor:
         
         # Get unique problems and solvers
         unique_problems = set(r.problem_name for r in results)
-        solvers = sorted(set(r.solver_name for r in results))
+        available_solvers = set(r.solver_name for r in results)
+        
+        # Load site config to get solver display order
+        site_config = self._load_site_config()
+        display_order = site_config.get('solvers', {}).get('display_order', [])
+        
+        # Sort solvers according to display_order, with undefined solvers at the end
+        solvers = []
+        for solver in display_order:
+            if solver in available_solvers:
+                solvers.append(solver)
+                available_solvers.remove(solver)
+        
+        # Add any remaining solvers in alphabetical order
+        solvers.extend(sorted(available_solvers))
         
         # Load problem registry to get known objective values
         problem_registry = self._load_problem_registry()
