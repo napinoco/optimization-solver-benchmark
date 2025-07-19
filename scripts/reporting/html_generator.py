@@ -149,7 +149,7 @@ class HTMLGenerator:
         cpu_info = environment_info.get('cpu', {})
         memory_info = environment_info.get('memory', {})
         
-        platform_base = os_info.get('platform', 'Unknown')
+        platform_base = os_info.get('system', 'Unknown')
         cpu_count = cpu_info.get('cpu_count', 'Unknown')
         memory_gb = memory_info.get('total_gb', 'Unknown')
         
