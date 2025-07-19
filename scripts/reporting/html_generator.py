@@ -690,13 +690,23 @@ class HTMLGenerator:
                     <tbody>"""
             
             for solver in type_solvers:
+                # Format avg_solve_time safely
+                if solver['avg_solve_time'] is not None:
+                    try:
+                        avg_time = float(solver['avg_solve_time'])
+                        avg_time_str = f"{avg_time:.4f}s"
+                    except (ValueError, TypeError):
+                        avg_time_str = f"{solver['avg_solve_time']}s"
+                else:
+                    avg_time_str = "—"
+                
                 html_content += f"""
                 <tr>
                     <td><strong>{solver['solver_name']}</strong></td>
                     <td>{solver['problems_attempted']}</td>
                     <td>{solver['problems_solved']}</td>
                     <td class="success-rate">{solver['success_rate']:.1%}</td>
-                    <td class="solve-time">{solver['avg_solve_time']:.4f}s</td>
+                    <td class="solve-time">{avg_time_str}</td>
                 </tr>"""
             
             html_content += f"""
@@ -1064,7 +1074,21 @@ class HTMLGenerator:
         for problem in problems:
             metadata = problem_metadata[problem]
             known_obj = metadata['known_objective_value']
-            known_obj_str = f"{known_obj:.6f}" if known_obj is not None else "—"
+            
+            # Handle known objective value formatting
+            if known_obj is None:
+                known_obj_str = "—"
+            else:
+                try:
+                    # Try to convert to float and format
+                    obj_float = float(known_obj)
+                    if abs(obj_float) >= 1000 or (abs(obj_float) <= 0.001 and obj_float != 0):
+                        known_obj_str = f"{obj_float:.2e}"
+                    else:
+                        known_obj_str = f"{obj_float:.6f}"
+                except (ValueError, TypeError):
+                    # If conversion fails, use the string as-is
+                    known_obj_str = str(known_obj)
             
             html_content += f"""
             <tr>
@@ -1104,12 +1128,18 @@ class HTMLGenerator:
                     # Add objective value if available
                     if result['objective_value'] is not None:
                         obj_val = result['objective_value']
-                        if abs(obj_val) >= 1000 or abs(obj_val) <= 0.001 and obj_val != 0:
-                            # Use scientific notation for very large or very small numbers
-                            cell_content += f'<br><span class="objective-value">{obj_val:.2e}</span>'
-                        else:
-                            # Use regular notation for normal range numbers
-                            cell_content += f'<br><span class="objective-value">{obj_val:.6f}</span>'
+                        try:
+                            # Try to convert to float and format
+                            obj_float = float(obj_val)
+                            if abs(obj_float) >= 1000 or (abs(obj_float) <= 0.001 and obj_float != 0):
+                                # Use scientific notation for very large or very small numbers
+                                cell_content += f'<br><span class="objective-value">{obj_float:.2e}</span>'
+                            else:
+                                # Use regular notation for normal range numbers
+                                cell_content += f'<br><span class="objective-value">{obj_float:.6f}</span>'
+                        except (ValueError, TypeError):
+                            # If conversion fails, use the string as-is
+                            cell_content += f'<br><span class="objective-value">{str(obj_val)}</span>'
                     
                     html_content += f'<td class="{css_class}">{cell_content}</td>'
             
@@ -1438,9 +1468,27 @@ class HTMLGenerator:
         for result in sorted_results:
             # Format values
             solve_time = f"{result.solve_time:.4f}" if result.solve_time is not None else "—"
-            objective = f"{result.primal_objective_value:.6e}" if result.primal_objective_value is not None else "—"
+            
+            # Handle objective value formatting
+            if result.primal_objective_value is not None:
+                try:
+                    obj_float = float(result.primal_objective_value)
+                    objective = f"{obj_float:.6e}"
+                except (ValueError, TypeError):
+                    objective = str(result.primal_objective_value)
+            else:
+                objective = "—"
             iterations = str(result.iterations) if result.iterations is not None else "—"
-            duality_gap = f"{result.duality_gap:.6e}" if result.duality_gap is not None else "—"
+            
+            # Handle duality gap formatting
+            if result.duality_gap is not None:
+                try:
+                    gap_float = float(result.duality_gap)
+                    duality_gap = f"{gap_float:.6e}"
+                except (ValueError, TypeError):
+                    duality_gap = str(result.duality_gap)
+            else:
+                duality_gap = "—"
             timestamp = result.timestamp.strftime('%Y-%m-%d %H:%M:%S') if result.timestamp else "—"
             
             # Format commit hash and environment
