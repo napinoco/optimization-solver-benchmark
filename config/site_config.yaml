@@ -12,7 +12,7 @@ site:
     
     This system prioritizes unbiased solver comparison through minimal configuration, establishing "out of the box" performance baselines rather than optimized configurations.
   results_matrix_note: |
-    ⚠️ <strong>Important Note</strong>: The bm1 problem shows CLARABEL with an ERROR status and extended solve time (48.140s). This occurred because CLARABEL consumed excessive memory and was terminated by the system with SIGKILL (signal 9) before completing the optimization process.
+    ⚠️ CLARABEL has SIGKILL issue due to excessive memory consumption on large SDP problems, e.g. bm1.
 
 github:
   username: "napinoco"

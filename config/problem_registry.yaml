@@ -49,7 +49,7 @@ problem_libraries:
   biomedP:
     display_name: "Biomed P (DIMACS)"
     file_path: "problems/DIMACS/data/BISECT/biomedP.dat.gz"
-    file_type: "mat"
+    file_type: "dat"
     library_name: "DIMACS"
     for_test_flag: false
     known_objective_value: 33.6
@@ -57,7 +57,7 @@ problem_libraries:
   industry2:
     display_name: "Industry2 (DIMACS)"
     file_path: "problems/DIMACS/data/BISECT/industry2.dat.gz"
-    file_type: "mat"
+    file_type: "dat"
     library_name: "DIMACS"
     for_test_flag: false
     known_objective_value: 65.6
