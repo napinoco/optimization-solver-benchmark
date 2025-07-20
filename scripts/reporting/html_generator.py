@@ -14,7 +14,7 @@ from pathlib import Path
 from typing import List, Dict, Any
 import sys
 import yaml
-from datetime import datetime
+from datetime import datetime, timezone
 
 # Add project root to path for imports
 project_root = Path(__file__).parent.parent.parent
@@ -116,13 +116,13 @@ class HTMLGenerator:
         
         # Generate commit hash display
         if len(commit_hashes) == 1:
-            commit_display = f"<p><strong>Commit Hash:</strong> {commit_hashes[0][:8]}</p>"
+            commit_display = f"<p><strong>Git Commit Hash:</strong> <code>{commit_hashes[0][:8]}</code></p>"
         elif len(commit_hashes) > 1:
-            commit_list = ', '.join([ch[:8] for ch in commit_hashes])
-            commit_display = f"<p><strong>Commit Hashes:</strong> {commit_list}</p>"
+            commit_list = ', '.join([f"<code>{ch[:8]}</code>" for ch in commit_hashes])
+            commit_display = f"<p><strong>Git Commit Hashes:</strong> {commit_list}</p>"
             commit_display += f"<p><em>⚠️ Multiple environments detected: Results from {len(commit_hashes)} different Git commits</em></p>"
         else:
-            commit_display = "<p><strong>Commit Hash:</strong> Unknown</p>"
+            commit_display = "<p><strong>Git Commit Hash:</strong> Unknown</p>"
         
         # Generate environment display
         if len(environments) == 1:
@@ -135,10 +135,46 @@ class HTMLGenerator:
             env_display = "<p><strong>Platform:</strong> Unknown</p>"
         
         # Python version (from latest result)
-        python_version = env_info.get('python', {}).get('version', 'Unknown')
-        python_display = f"<p><strong>Python Version:</strong> {python_version}</p>"
+        python_info = env_info.get('python', {})
+        python_version = python_info.get('version', 'Unknown')
+        python_implementation = python_info.get('implementation', 'Unknown')
+        if python_implementation != 'Unknown' and python_implementation != python_version:
+            python_display = f"<p><strong>Python Version:</strong> {python_implementation} {python_version}</p>"
+        else:
+            python_display = f"<p><strong>Python Version:</strong> {python_version}</p>"
         
-        return commit_display + env_display + python_display
+        # Operating System details
+        os_info = env_info.get('os', {})
+        os_system = os_info.get('system', 'Unknown')
+        os_release = os_info.get('release', 'Unknown')
+        if os_release != 'Unknown':
+            os_display = f"<p><strong>Operating System:</strong> {os_system} {os_release}</p>"
+        else:
+            os_display = f"<p><strong>Operating System:</strong> {os_system}</p>"
+        
+        # CPU information
+        cpu_info = env_info.get('cpu', {})
+        cpu_count = cpu_info.get('cpu_count', 'Unknown')
+        processor = cpu_info.get('processor', 'Unknown')
+        if processor != 'Unknown' and cpu_count != 'Unknown':
+            cpu_display = f"<p><strong>CPU:</strong> {processor} ({cpu_count} cores)</p>"
+        elif cpu_count != 'Unknown':
+            cpu_display = f"<p><strong>CPU Cores:</strong> {cpu_count}</p>"
+        else:
+            cpu_display = f"<p><strong>CPU:</strong> {processor}</p>"
+        
+        # Memory information
+        memory_info = env_info.get('memory', {})
+        memory_gb = memory_info.get('total_gb', 'Unknown')
+        if memory_gb != 'Unknown':
+            memory_display = f"<p><strong>Memory:</strong> {memory_gb:.1f} GB</p>"
+        else:
+            memory_display = "<p><strong>Memory:</strong> Unknown</p>"
+        
+        # Note about MATLAB/Octave (since we can't easily detect versions from environment)
+        matlab_note = "<p><strong>MATLAB/Octave:</strong> Available (version detection via solver results)</p>"
+        
+        return commit_display + env_display + python_display + os_display + cpu_display + memory_display + matlab_note
     
     def _get_platform_info(self, environment_info: Dict[str, Any]) -> str:
         """Extract platform information including CPU and memory details"""
@@ -300,10 +336,11 @@ class HTMLGenerator:
                 self.logger.warning("No results found for report generation")
                 return False
             
-            # Generate all three reports
+            # Generate all four reports
             self.generate_overview(results)
             self.generate_results_matrix(results)
             self.generate_raw_data(results)
+            self.generate_data_index()
             
             self.logger.info("All simplified HTML reports generated successfully")
             return True
@@ -313,14 +350,13 @@ class HTMLGenerator:
             return False
     
     def generate_overview(self, results: List[BenchmarkResult]) -> str:
-        """Generate overview dashboard showing summary statistics"""
+        """Generate overview dashboard showing performance-focused statistics"""
         
         self.logger.info("Generating overview dashboard...")
         
         # Get summary statistics
         summary = self.result_processor.get_summary_statistics(results)
-        solver_comparison = self.result_processor.get_solver_comparison(results)
-        solver_comparison_by_type = self.result_processor.get_solver_comparison_by_problem_type(results)
+        problem_counts = self.result_processor.get_problem_count_by_library_and_type(results)
         
         # Analyze multiple environments and commit hashes
         env_analysis = self._analyze_multiple_environments(results)
@@ -595,7 +631,7 @@ class HTMLGenerator:
     <header>
         <h1>🔬 Optimization Solver Benchmark</h1>
         <p>Overview Dashboard - Latest Results</p>
-        <p><small>Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}</small></p>
+        <p><small>Generated: {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%S UTC')}</small></p>
     </header>
     
     <nav>
@@ -612,10 +648,6 @@ class HTMLGenerator:
 
         <div class="stats-grid">
             <div class="stat-card">
-                <h3>Total Results</h3>
-                <span class="stat-value">{summary['total_results']}</span>
-            </div>
-            <div class="stat-card">
                 <h3>Solvers Tested</h3>
                 <span class="stat-value">{summary['total_solvers']}</span>
             </div>
@@ -624,160 +656,86 @@ class HTMLGenerator:
                 <span class="stat-value">{summary['total_problems']}</span>
             </div>
             <div class="stat-card">
-                <h3>Success Rate</h3>
-                <span class="stat-value">{summary['success_rate']:.1%}</span>
+                <h3>Libraries</h3>
+                <span class="stat-value">{len(summary['library_distribution'])}</span>
+            </div>
+            <div class="stat-card">
+                <h3>Problem Types</h3>
+                <span class="stat-value">{len(summary['problem_type_distribution'])}</span>
             </div>
         </div>
         
-        <!-- Status Distribution Section -->
+        <!-- Solvers Tested Section -->
         <div class="section">
-            <h2>📊 Status Distribution</h2>
+            <h2>🔧 Solvers Tested</h2>
             <div class="section-content">
-                <div class="status-distribution">"""
+                <p><strong>Total Solvers:</strong> {summary['total_solvers']}</p>
+                <div style="margin-top: 1rem;">
+                    <strong>Solver Names:</strong>
+                    <ul style="column-count: 2; column-gap: 2rem; margin: 1rem 0; padding-left: 1.5rem;">"""
         
-        # Add status distribution cards
-        status_dist = summary.get('status_distribution', {})
-        for status, count in sorted(status_dist.items()):
-            percentage = (count / summary['total_results'] * 100) if summary['total_results'] > 0 else 0
-            status_lower = status.lower()
-            
-            # Determine CSS class for status
-            if status_lower == 'optimal':
-                status_class = 'status-optimal'
-            elif status_lower == 'optimal (inaccurate)':
-                status_class = 'status-optimal-inaccurate'
-            elif status_lower == 'unsupported':
-                status_class = 'status-unsupported'
-            elif status_lower == 'error':
-                status_class = 'status-error'
-            elif status_lower in ['infeasible', 'unbounded']:
-                status_class = 'status-infeasible'
-            else:
-                status_class = 'status-unknown'
-            
-            html_content += f"""
-                    <div class="status-card">
-                        <span class="{status_class}">{status}</span>
-                        <div class="status-stats">
-                            <span class="status-count">{count}</span>
-                            <span class="status-percentage">({percentage:.1f}%)</span>
-                        </div>
-                    </div>"""
+        for solver_name in sorted(summary['solver_names']):
+            html_content += f"<li>{solver_name}</li>"
         
         html_content += """
+                    </ul>
                 </div>
             </div>
         </div>
 
+        <!-- Problems Tested Section -->
         <div class="section">
-            <h2>🏆 Solver Comparison by Problem Type</h2>
-            <div class="section-content">"""
-        
-        # Generate comparison tables for each problem type
-        for problem_type, type_solvers in solver_comparison_by_type.items():
-            html_content += f"""
-                <h3>{problem_type} Problems</h3>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Solver</th>
-                            <th>Problems Attempted</th>
-                            <th>Problems Solved</th>
-                            <th>Success Rate</th>
-                            <th>Avg Solve Time</th>
-                        </tr>
-                    </thead>
-                    <tbody>"""
-            
-            for solver in type_solvers:
-                # Format avg_solve_time safely
-                if solver['avg_solve_time'] is not None:
-                    try:
-                        avg_time = float(solver['avg_solve_time'])
-                        avg_time_str = f"{avg_time:.4f}s"
-                    except (ValueError, TypeError):
-                        avg_time_str = f"{solver['avg_solve_time']}s"
-                else:
-                    avg_time_str = "—"
-                
-                html_content += f"""
-                <tr>
-                    <td><strong>{solver['solver_name']}</strong></td>
-                    <td>{solver['problems_attempted']}</td>
-                    <td>{solver['problems_solved']}</td>
-                    <td class="success-rate">{solver['success_rate']:.1%}</td>
-                    <td class="solve-time">{avg_time_str}</td>
-                </tr>"""
-            
-            html_content += f"""
-                    </tbody>
-                </table>
-                <br>"""
-        
-        html_content += f"""
-            </div>
-        </div>
-
-        <div class="section">
-            <h2>📊 Problem Type Distribution</h2>
-            <div class="section-content">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Problem Type</th>
-                            <th>Count</th>
-                            <th>Percentage</th>
-                        </tr>
-                    </thead>
-                    <tbody>"""
-        
-        total_problems = summary['total_results']
-        for ptype, count in summary['problem_type_distribution'].items():
-            percentage = (count / total_problems) * 100 if total_problems > 0 else 0
-            html_content += f"""
-            <tr>
-                <td><strong>{ptype}</strong></td>
-                <td>{count}</td>
-                <td>{percentage:.1f}%</td>
-            </tr>"""
-        
-        html_content += f"""
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-        <div class="section">
-            <h2>📚 Library Distribution</h2>
+            <h2>📚 Problems Tested by Library and Type</h2>
             <div class="section-content">
                 <table>
                     <thead>
                         <tr>
                             <th>Library</th>
+                            <th>Problem Type</th>
                             <th>Count</th>
-                            <th>Percentage</th>
                         </tr>
                     </thead>
                     <tbody>"""
         
-        for library, count in summary['library_distribution'].items():
-            percentage = (count / total_problems) * 100 if total_problems > 0 else 0
-            html_content += f"""
-            <tr>
-                <td><strong>{library}</strong></td>
-                <td>{count}</td>
-                <td>{percentage:.1f}%</td>
-            </tr>"""
+        # Generate problem count table
+        for library in sorted(problem_counts.keys()):
+            for problem_type in sorted(problem_counts[library].keys()):
+                count = problem_counts[library][problem_type]
+                html_content += f"""
+                        <tr>
+                            <td><strong>{library}</strong></td>
+                            <td>{problem_type}</td>
+                            <td>{count}</td>
+                        </tr>"""
         
-        html_content += f"""
+        html_content += """
                     </tbody>
                 </table>
             </div>
         </div>
 
+        <!-- Performance Analysis Section -->
+        <div class="section">
+            <h2>📊 Performance Analysis</h2>
+            <div class="section-content">
+                <div style="text-align: center; padding: 2rem; color: #7f8c8d;">
+                    <h3 style="color: #95a5a6; margin-bottom: 1rem;">🚧 To Be Determined</h3>
+                    <p style="font-size: 1.1rem; line-height: 1.6;">
+                        Performance ranking methodology is currently under development.<br>
+                        Evaluation criteria for determining "best performers" are being established<br>
+                        to ensure fair and meaningful comparisons across different solver types.
+                    </p>
+                    <p style="margin-top: 1rem; font-style: italic;">
+                        Please refer to the <a href="results_matrix.html" style="color: #3498db;">Results Matrix</a> 
+                        for detailed performance data in the meantime.
+                    </p>
+                </div>
+            </div>
+        </div>
+
         <div class="metadata">
             <h3>🔧 Environment Information</h3>
-            {self._generate_environment_section(env_analysis, env_info)}
+            """ + self._generate_environment_section(env_analysis, env_info) + """
         </div>
     </main>
 
@@ -1077,7 +1035,7 @@ class HTMLGenerator:
     <header>
         <h1>🔬 Optimization Solver Benchmark</h1>
         <p>Results Matrix - Problems × Solvers</p>
-        <p><small>Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}</small></p>
+        <p><small>Generated: {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%S UTC')}</small></p>
     </header>
     
     <nav>
@@ -1616,7 +1574,7 @@ class HTMLGenerator:
     <header>
         <h1>🔬 Optimization Solver Benchmark</h1>
         <p>Raw Data - Detailed Results Table</p>
-        <p><small>Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')} | Total Results: {len(results)}</small></p>
+        <p><small>Generated: {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%S UTC')} | Total Results: {len(results)}</small></p>
     </header>
     
     <nav>
@@ -1755,6 +1713,242 @@ class HTMLGenerator:
             f.write(html_content)
         
         self.logger.info(f"Raw data report saved to {output_file}")
+        return html_content
+    
+    def generate_data_index(self) -> str:
+        """Generate index.html for data directory with links to data files"""
+        
+        self.logger.info("Generating data index page...")
+        
+        html_content = f"""<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Optimization Solver Benchmark - Data Exports</title>
+    <style>
+        * {{
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }}
+        
+        body {{
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f8f9fa;
+        }}
+        
+        header {{
+            background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+            color: white;
+            text-align: center;
+            padding: 2rem 1rem;
+            margin-bottom: 2rem;
+        }}
+        
+        header h1 {{
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }}
+        
+        header p {{
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }}
+        
+        nav {{
+            background: white;
+            padding: 1rem;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }}
+        
+        nav a {{
+            color: #2c3e50;
+            text-decoration: none;
+            margin: 0 1rem;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            transition: background-color 0.2s;
+        }}
+        
+        nav a:hover {{
+            background-color: #ecf0f1;
+        }}
+        
+        nav a.active {{
+            background-color: #3498db;
+            color: white;
+        }}
+        
+        main {{
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 0 1rem;
+        }}
+        
+        .section {{
+            background: white;
+            margin: 2rem 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }}
+        
+        .section h2 {{
+            background: linear-gradient(135deg, #34495e 0%, #2c3e50 100%);
+            color: white;
+            padding: 1rem 1.5rem;
+            margin: 0;
+            border-radius: 8px 8px 0 0;
+            font-size: 1.5rem;
+        }}
+        
+        .section-content {{
+            padding: 1.5rem;
+        }}
+        
+        .data-file {{
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 6px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            transition: box-shadow 0.2s;
+        }}
+        
+        .data-file:hover {{
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }}
+        
+        .data-file h3 {{
+            color: #2c3e50;
+            margin-bottom: 0.5rem;
+        }}
+        
+        .data-file p {{
+            color: #7f8c8d;
+            margin-bottom: 1rem;
+        }}
+        
+        .download-btn {{
+            display: inline-block;
+            background: #3498db;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            text-decoration: none;
+            border-radius: 4px;
+            font-weight: 600;
+            transition: background-color 0.2s;
+        }}
+        
+        .download-btn:hover {{
+            background: #2980b9;
+        }}
+        
+        .file-size {{
+            font-size: 0.9rem;
+            color: #95a5a6;
+            margin-left: 1rem;
+        }}
+        
+        footer {{
+            text-align: center;
+            padding: 2rem;
+            color: #7f8c8d;
+            border-top: 1px solid #ecf0f1;
+            margin-top: 3rem;
+        }}
+        
+        footer a {{
+            color: #3498db;
+            text-decoration: none;
+            margin: 0 1rem;
+        }}
+        
+        footer a:hover {{
+            text-decoration: underline;
+        }}
+    </style>
+</head>
+<body>
+    <header>
+        <h1>🔬 Optimization Solver Benchmark</h1>
+        <p>Data Exports - Download Benchmark Results</p>
+        <p><small>Generated: {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%S UTC')}</small></p>
+    </header>
+    
+    <nav>
+        <a href="../index.html">Overview</a>
+        <a href="../results_matrix.html">Results Matrix</a>
+        <a href="../raw_data.html">Raw Data</a>
+        <a href="index.html" class="active">Data Exports</a>
+    </nav>
+    
+    <main>
+        <div class="section">
+            <h2>📁 Available Data Files</h2>
+            <div class="section-content">
+                <p style="margin-bottom: 2rem; color: #7f8c8d;">
+                    Download complete benchmark results in various formats for further analysis and research.
+                </p>
+                
+                <div class="data-file">
+                    <h3>📊 Complete Results (JSON)</h3>
+                    <p>Full benchmark results with all metadata in JSON format. Includes solver information, problem details, execution environment, and detailed performance metrics.</p>
+                    <a href="benchmark_results.json" class="download-btn">📥 Download JSON</a>
+                    <span class="file-size">Structured data format</span>
+                </div>
+                
+                <div class="data-file">
+                    <h3>📈 Complete Results (CSV)</h3>
+                    <p>Full benchmark results in CSV format for spreadsheet analysis. Contains the same data as JSON but in tabular format for easy import into analysis tools.</p>
+                    <a href="benchmark_results.csv" class="download-btn">📥 Download CSV</a>
+                    <span class="file-size">Spreadsheet compatible</span>
+                </div>
+                
+            </div>
+        </div>
+        
+        <div class="section">
+            <h2>📖 Data Format Documentation</h2>
+            <div class="section-content">
+                <h3>JSON Structure</h3>
+                <ul style="margin: 1rem 0; color: #34495e; padding-left: 1.5rem;">
+                    <li><strong>benchmark_results.json</strong>: Array of result objects with complete solver execution data</li>
+                </ul>
+                
+                <h3>CSV Format</h3>
+                <ul style="margin: 1rem 0; color: #34495e; padding-left: 1.5rem;">
+                    <li><strong>benchmark_results.csv</strong>: Flattened tabular format with one row per solver-problem combination</li>
+                    <li>Headers include: solver_name, problem_name, problem_type, solve_time, status, objective_value, etc.</li>
+                </ul>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <p>
+            <a href="../index.html">Overview</a> |
+            <a href="../results_matrix.html">Results Matrix</a> |
+            <a href="../raw_data.html">Raw Data</a>
+        </p>
+        <p><small>Generated by Optimization Solver Benchmark System</small></p>
+    </footer>
+</body>
+</html>"""
+        
+        # Save to data directory
+        data_dir = self.output_dir / "data"
+        data_dir.mkdir(parents=True, exist_ok=True)
+        output_file = data_dir / "index.html"
+        
+        with open(output_file, 'w') as f:
+            f.write(html_content)
+        
+        self.logger.info(f"Data index page saved to {output_file}")
         return html_content
 
 

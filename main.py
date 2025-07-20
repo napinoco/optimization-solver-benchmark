@@ -301,9 +301,8 @@ def generate_reports() -> bool:
         
         data_exporter = DataExporter(output_dir="docs/pages/data")
         data_success = data_exporter.export_latest_results()
-        summary_success = data_exporter.export_summary_only()
         
-        if not (data_success and summary_success):
+        if not data_success:
             logger.error("Failed to export data files")
             return False
         
@@ -317,7 +316,6 @@ def generate_reports() -> bool:
         logger.info("  • docs/pages/raw_data.html (Raw Data Table)")
         logger.info("  • docs/pages/data/benchmark_results.json (Full Results JSON)")
         logger.info("  • docs/pages/data/benchmark_results.csv (Full Results CSV)")
-        logger.info("  • docs/pages/data/summary.json (Summary Statistics)")
         
         return True
         

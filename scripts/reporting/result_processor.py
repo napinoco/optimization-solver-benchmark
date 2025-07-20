@@ -420,6 +420,92 @@ class ResultProcessor:
         
         return comparison_by_type
     
+    def get_problem_count_by_library_and_type(self, results: List[BenchmarkResult]) -> Dict[str, Dict[str, int]]:
+        """Get problem count grouped by library and problem type"""
+        
+        # Use unique problem names to avoid double counting
+        unique_problems = {}
+        for result in results:
+            key = (result.problem_name, result.problem_library, result.problem_type)
+            if key not in unique_problems:
+                unique_problems[key] = {
+                    'problem_name': result.problem_name,
+                    'library': result.problem_library or 'unknown',
+                    'type': result.problem_type or 'UNKNOWN'
+                }
+        
+        # Count by library and type
+        library_type_counts = {}
+        for problem_data in unique_problems.values():
+            library = problem_data['library']
+            problem_type = problem_data['type']
+            
+            if library not in library_type_counts:
+                library_type_counts[library] = {}
+            if problem_type not in library_type_counts[library]:
+                library_type_counts[library][problem_type] = 0
+            
+            library_type_counts[library][problem_type] += 1
+        
+        return library_type_counts
+    
+    def get_best_performers_by_library_and_type(self, results: List[BenchmarkResult]) -> Dict[str, Dict[str, Dict[str, Any]]]:
+        """Get best performing solver by library and problem type based on solve time"""
+        
+        # Group results by library and problem type
+        by_library_type = {}
+        for result in results:
+            library = result.problem_library or 'unknown'
+            problem_type = result.problem_type or 'UNKNOWN'
+            
+            key = (library, problem_type)
+            if key not in by_library_type:
+                by_library_type[key] = []
+            by_library_type[key].append(result)
+        
+        # Find best performer for each library-type combination
+        best_performers = {}
+        for (library, problem_type), type_results in by_library_type.items():
+            # Calculate average solve time for each solver in this library-type
+            solver_times = {}
+            for result in type_results:
+                if result.solve_time is not None and result.solve_time > 0:
+                    solver = result.solver_name
+                    if solver not in solver_times:
+                        solver_times[solver] = []
+                    solver_times[solver].append(result.solve_time)
+            
+            # Calculate averages and find best
+            solver_averages = {}
+            for solver, times in solver_times.items():
+                if times:
+                    solver_averages[solver] = {
+                        'avg_time': sum(times) / len(times),
+                        'min_time': min(times),
+                        'max_time': max(times),
+                        'count': len(times)
+                    }
+            
+            # Find best performer (lowest average time with reasonable sample size)
+            best_solver = None
+            best_time = float('inf')
+            for solver, stats in solver_averages.items():
+                # Only consider solvers that solved at least 1 problem
+                if stats['count'] >= 1 and stats['avg_time'] < best_time:
+                    best_time = stats['avg_time']
+                    best_solver = solver
+            
+            if library not in best_performers:
+                best_performers[library] = {}
+            
+            best_performers[library][problem_type] = {
+                'best_solver': best_solver,
+                'avg_time': best_time if best_solver else None,
+                'solver_stats': solver_averages
+            }
+        
+        return best_performers
+    
     def get_results_matrix(self, results: List[BenchmarkResult]) -> Dict[str, Any]:
         """Generate problems × solvers matrix data with enhanced metadata and sorting"""
         
