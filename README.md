@@ -1,327 +1,118 @@
 # Optimization Solver Benchmark System
 
-A comprehensive open-source platform for benchmarking optimization solvers across multiple problem types (LP, QP, SOCP, SDP). Automated execution via GitHub Actions with interactive HTML reports published to GitHub Pages.
+A research tool for benchmarking optimization solvers across LP, QP, SOCP, and SDP problems using external problem libraries (DIMACS, SDPLIB) with automated execution and HTML report generation.
 
-**Project Vision**: Create the leading open-source platform for benchmarking optimization solvers across multiple problem types, providing researchers and practitioners with comprehensive performance insights through automated execution, transparent reporting, and fair baseline comparisons.
+Benchmark results are continuously published at: https://napinoco.github.io/optimization-solver-benchmark/
 
-**Core Mission**: "Regularly benchmark publicly available solvers and publish the results as data"
+> **⚠️ Development Status**: This system is currently under active development. Some solvers and problem classes have not yet been properly measured, and comprehensive benchmarking coverage across all problem types is still being completed.
 
-## External Problem Libraries
+## Overview
 
-This benchmark system uses the following external problem libraries:
+**Purpose**: Compare optimization solver performance using standardized problem sets and minimal solver configuration for unbiased evaluation.
 
-### DIMACS Library
-- **Repository**: [https://github.com/vsdp/DIMACS.git](https://github.com/vsdp/DIMACS.git)
-- **Current Commit**: `a1a14d1` - FILTER/filtinf1.mat.gz: Fix problem vector 'c'.
-- **Problems**: 47 optimization challenge problems in SeDuMi .mat format
+**Problem Libraries**:
+- **DIMACS**: 47 problems in SeDuMi .mat format
+- **SDPLIB**: 92+ problems in SDPA .dat-s format  
+- **Total**: 139+ optimization problems
 
-### SDPLIB Library  
-- **Repository**: [https://github.com/vsdp/SDPLIB.git](https://github.com/vsdp/SDPLIB.git)
-- **Current Commit**: `2e568e1` - README.md: Remove dead link.
-- **Problems**: 92+ semidefinite programming problems in SDPA .dat-s format
+**Supported Solvers**:
+- **Python (9)**: SciPy, CVXPY backends (CLARABEL, SCS, ECOS, OSQP, CVXOPT, SDPA, SCIP, HIGHS)
+- **MATLAB/Octave (2)**: SeDuMi, SDPT3
 
-Both libraries are included as fixed snapshots (committed on June 25, 2025) for reproducibility and automatically loaded by the benchmark system. This ensures consistent benchmarking results over time.
-
-## 🎯 Current Status: Production Ready
-
-- ✅ **Complete External Library Integration**: 139+ problems (DIMACS + SDPLIB)
-- ✅ **Multi-Language Solver Support**: 11 solvers (9 Python + 2 MATLAB solvers)
-- ✅ **Python Solvers**: SciPy, CLARABEL, SCS, ECOS, OSQP, CVXOPT, SDPA, SCIP, HiGHS via CVXPY
-- ✅ **MATLAB/Octave Solvers**: SeDuMi, SDPT3 with unified interface architecture
-- ✅ **Unified ProblemData Architecture**: SeDuMi-like format for all problem types
-- ✅ **Professional Reporting**: Interactive HTML dashboards with problem structure analysis
-- ✅ **GitHub Actions CI/CD**: Automated benchmarking and report publishing
-
-## 🚀 Quick Start
-
-### Prerequisites
-- Python 3.12+
-- Git and GitHub account
-- Virtual environment recommended
+## Quick Start
 
 ### Installation
 ```bash
 git clone --recursive https://github.com/napinoco/optimization-solver-benchmark.git
 cd optimization-solver-benchmark
 python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
+source venv/bin/activate  # Windows: venv\Scripts\activate
 pip install -r requirements.txt
 
-# For MATLAB/Octave solver support (optional)
-# Install Octave (MATLAB-compatible environment)
+# For MATLAB/Octave solvers (optional)
 # Ubuntu/Debian: sudo apt-get install octave
 # macOS: brew install octave
-# Windows: Download from https://octave.org/download
+
+# Setup MATLAB solvers - compiles MEX files for SeDuMi and SDPT3
+matlab -batch "setup_matlab_solvers"  # or use octave --eval "setup_matlab_solvers"
 ```
 
-### Run Benchmarks
+### Usage
 ```bash
-# Validate environment and external libraries
+# Validate environment
 python main.py --validate
 
-# Complete benchmark with all libraries
+# Run all benchmarks
 python main.py --all
 
-# Benchmark specific libraries
+# Specific libraries
 python main.py --benchmark --problem-set dimacs
 python main.py --benchmark --problem-set sdplib
 
-# Generate reports only  
+# Generate reports only
 python main.py --report
 
-# Dry-run mode for testing
-python main.py --benchmark --problems nb --dry-run
-
-# Test MATLAB/Octave solvers specifically
-python main.py --benchmark --problems nb --solvers matlab_sedumi,matlab_sdpt3
+# Test mode (no database changes)
+python main.py --benchmark --dry-run
 ```
 
-## 🎯 Design Philosophy: Fair Baseline Benchmarking
+## Design Philosophy
 
-This system prioritizes **unbiased solver comparison** through minimal configuration:
+**Fair Baseline Benchmarking**: Uses solver default parameters to avoid optimization bias and provide genuine "out of the box" performance comparison.
 
-- **Solver Defaults**: Uses each solver's default parameters to avoid optimization bias
-- **Baseline Performance**: Establishes genuine "out of the box" capabilities
-- **Transparent Comparison**: Prevents inadvertent parameter tuning favoring specific solvers
-- **Reproducible Results**: Standardized environments ensure consistent benchmarking
-- **Open Data**: Results published as accessible JSON/CSV for research use
+**Reproducible Results**: Problem libraries are pinned to specific commit hashes via git submodules, and solver versions are fixed in requirements.txt to ensure identical benchmarking environments across all executions.
 
-## 📊 Current System Capabilities
+**Complete Version Tracking**: All benchmark results are stored in a SQLite database with complete version information (solver versions, Git commit hashes, environment details) to enable historical analysis and ensure full reproducibility of any reported result.
 
-### Supported Solvers ✅
-#### Python Solvers (9 total)
-- **SciPy**: Linear programming solver
-- **CVXPY Multi-Backend**: 
-  - CLARABEL (modern Rust-based solver)
-  - SCS (Splitting Conic Solver)
-  - ECOS (Embedded Conic Solver)
-  - OSQP (Operator Splitting QP)
-  - CVXOPT (Convex optimization)
-  - SDPA (Semidefinite programming)
-  - SCIP (Mixed-integer programming)
-  - HiGHS (Linear/mixed-integer programming)
-
-#### MATLAB/Octave Solvers (2 total)
-- **SeDuMi**: Interior-point method for conic optimization
-- **SDPT3**: Semidefinite-quadratic-linear programming solver
-
-### Problem Type Coverage ✅
-- **LP**: Linear Programming (12+ results, 100% success rate)
-- **QP**: Quadratic Programming (6+ results, 100% success rate)
-- **SOCP**: Second-Order Cone Programming (31+ results, ~43% success rate)
-- **SDP**: Semidefinite Programming (38+ results, ~29% success rate)
-
-### Multi-Language Architecture ✅
-- **Unified Interface Design**: Symmetrical Python/MATLAB solver interfaces
-- **Seamless Integration**: Python-MATLAB bridge via JSON data exchange
-- **Fair Comparison**: Standardized metrics calculation across all solvers
-- **Dynamic Solver Selection**: Runtime solver selection via configuration
-
-### Key Features ✅
-- **External Library Integration**: DIMACS (47 problems) + SDPLIB (92+ problems)
-- **Unified Problem Format**: SeDuMi-like architecture for all problem types
-- **Comprehensive Version Tracking**: Solver backend versions and Git commit recording
-- **Interactive Reports**: Bootstrap 5 dashboards with Chart.js visualizations
-- **Problem Structure Analysis**: Automatic variable/constraint counting and classification
-- **GitHub Pages Deployment**: Automatic report publishing with data exports
-- **Validation Framework**: Data quality checks and error detection
-- **Dry-Run Mode**: Testing without database pollution
-
-## 📁 Project Structure
+## Project Structure
 
 ```
-optimization-solver-benchmark/
-├── 📋 Documentation
-│   ├── README.md                    # This file
-│   ├── CLAUDE.md                   # AI development context
-│   └── docs/
-│       ├── guides/                 # Setup and usage guides
-│       └── development/            # Development documentation
-│
-├── ⚙️ Configuration
-│   └── config/
-│       ├── site_config.yaml        # Site and overview settings
-│       ├── solver_registry.yaml    # Solver display names
-│       └── problem_registry.yaml   # Problem metadata
-│
-├── 🧪 Core System
-│   ├── main.py                     # Main entry point
-│   └── scripts/
-│       ├── benchmark/              # Benchmark execution engine
-│       ├── solvers/
-│       │   ├── python/             # Python solver implementations
-│       │   └── matlab_octave/      # MATLAB/Octave solver integration
-│       ├── data_loaders/           # Problem loading (MAT/DAT)
-│       │   ├── problem_loader.py   # Unified ProblemData class
-│       │   ├── python/             # Python format loaders
-│       │   └── matlab_octave/      # MATLAB format loaders
-│       ├── external/               # External library loaders
-│       ├── utils/                  # Problem structure analysis
-│       ├── database/               # SQLite data models
-│       └── reporting/              # HTML report generation
-│
-├── 📊 Problems & Results
-│   ├── problems/
-│   │   ├── DIMACS/                 # External DIMACS library (47 problems)
-│   │   ├── SDPLIB/                 # External SDPLIB library (92+ problems)
-│   ├── database/                   # SQLite results with version tracking
-│   └── docs/                       # Generated reports and data exports
-│
-├── 🔧 Dependencies
-│   └── requirements.txt
-│
-└── 🚀 CI/CD
-    └── .github/
-        └── workflows/              # GitHub Actions and documentation
+├── main.py                     # Entry point
+├── config/                     # YAML configuration files
+├── scripts/
+│   ├── benchmark/              # Execution engine
+│   ├── solvers/                # Python/MATLAB solver interfaces
+│   ├── data_loaders/           # Problem format loaders (MAT/DAT)
+│   ├── database/               # SQLite storage
+│   └── reporting/              # HTML generation
+├── problems/
+│   ├── DIMACS/                 # External library (git submodule)
+│   └── SDPLIB/                 # External library (git submodule)
+├── database/                   # SQLite database files
+│   └── results.db              # Benchmark results storage
+└── docs/                       # Generated reports and documentation
 ```
 
-## 📈 Performance Results
+## Architecture
 
-### Current Success Rates
-```
-Problem Type | Total Results | Success Rate | Top Performers
-LP           | 12 results   | 100%        | SciPy + CLARABEL + SCS + ECOS + OSQP
-QP           | 6 results    | 100%        | SciPy + CLARABEL + SCS + ECOS + OSQP  
-SOCP         | 31 results   | ~43%        | CLARABEL + SCS + ECOS + SeDuMi + SDPT3
-SDP          | 38 results   | ~29%        | CLARABEL + SCS + SeDuMi + SDPT3
-```
+**Modular Design**:
+- **Loaders**: Convert problem files → standardized ProblemData
+- **Runners**: Execute solvers on ProblemData → SolverResult  
+- **Interfaces**: Coordinate problem loading and solver execution
 
-### External Library Performance
-```
-Library  | Problems | Format        | Success Rate | Notes
-DIMACS   | 47       | SeDuMi .mat   | Variable     | Mixed problem types
-SDPLIB   | 92+      | SDPA .dat-s   | ~30%         | Challenging SDP problems
-Total    | 139+     | Mixed         | ~37%         | System average
-```
+**Multi-Language Support**: Unified Python/MATLAB integration via JSON data exchange and standardized result format.
 
-## 🔧 GitHub Actions Integration
+## Adding Components
 
-### Automatic Execution
-- **Push to main**: Triggers comprehensive benchmarking
-- **Pull requests**: Validation and testing
-- **Manual triggers**: Custom solver/problem selection
+### New Solvers
+**Python**: Add configuration to `PYTHON_SOLVER_CONFIGS` in `python_interface.py`  
+**MATLAB**: Create `{solver}_runner.m` and add to `MATLAB_SOLVER_CONFIGS` in `matlab_interface.py`
 
-### Manual Trigger Options
-Access via GitHub Actions tab → "Run workflow":
-- **Problem Set**: Choose from external, dimacs, or sdplib
-- **Solvers**: Select specific solvers to benchmark
-- **Library Names**: Filter by library (DIMACS, SDPLIB)
-- **Dry Run**: Test without database updates
+### New Problems
+Add external libraries as git submodules in `problems/` and extend loaders in `scripts/data_loaders/`
 
-## 🛠️ Configuration
+## Documentation
 
-### Core Configuration Files
-- **`config/site_config.yaml`**: Site metadata and overview content
-- **`config/solver_registry.yaml`**: Solver display names for reports
-- **`config/problem_registry.yaml`**: Problem metadata and classification
+- **[CLAUDE.md](CLAUDE.md)**: Development context and instructions
+- **[docs/development/](docs/development/)**: Technical design and implementation details
 
-### Main Entry Point Options
-```bash
-# Validation
-python main.py --validate                    # Verify environment and libraries
+## License
 
-# Benchmarking
-python main.py --all                         # Complete benchmark
-python main.py --benchmark --problem-set external  # External libraries only
-python main.py --benchmark --library_names DIMACS  # DIMACS problems only
-python main.py --benchmark --problems nb,arch0     # Specific problems
+MIT License - see [LICENSE](LICENSE) file.
 
-# Reporting
-python main.py --report                      # Generate HTML reports
-
-# Testing
-python main.py --benchmark --dry-run         # Test without database changes
-```
-
-## 🧪 Development
-
-### Architecture Highlights
-- **Unified ProblemData**: SeDuMi-like format with first-class cone structure support
-- **Multi-Language Support**: Symmetrical Python/MATLAB solver interfaces with unified result format
-- **Modular Component Design**:
-  - **Loaders**: Convert problem_name → ProblemData (format-specific parsing)
-  - **Runners**: Convert ProblemData → SolverResult (solver-specific execution)
-  - **Interfaces**: Orchestrate problem_name → SolverResult (loader + runner coordination)
-- **CVXPY Integration**: Unified solver interface supporting multiple backends
-- **Version Tracking**: Complete solver backend and Git commit recording
-- **Error Resilience**: Continues benchmarking despite individual solver failures
-
-### Adding New Solvers
-#### Python Solvers
-1. Extend the CVXPY runner with new backend
-2. Add solver configuration to `config/solver_registry.yaml`
-3. Test with validation framework
-4. Update documentation
-
-#### MATLAB/Octave Solvers
-1. Create solver-specific runner: `{solver}_runner.m` (ProblemData → SolverResult)
-2. Add solver configuration to MATLAB_SOLVER_CONFIGS in `matlab_interface.py`
-3. Test with validation framework
-4. Update documentation
-
-### Adding New Problems
-1. **External Libraries**: Add as Git submodules in `problems/`
-2. **Format Support**: Extend loaders in `scripts/data_loaders/python/`
-3. **Validation**: Test with `python main.py --validate`
-
-## 📊 System Achievements
-
-### Technical Accomplishments ✅
-- **Unified Architecture**: Single ProblemData format for all optimization types
-- **Multi-Language Integration**: 11 solvers (9 Python + 2 MATLAB) with symmetrical interfaces
-- **External Library Integration**: Professional-grade problem sets (DIMACS + SDPLIB)
-- **Production-Ready Reporting**: Interactive dashboards suitable for research publication
-- **Fair Baseline Benchmarking**: Minimal configuration for unbiased comparison
-
-### Real-World Impact
-- **Research-Ready Data**: Complete JSON/CSV exports for external analysis
-- **Reproducible Results**: Version tracking and standardized environments
-- **Open Science**: Public reporting with comprehensive problem attribution
-- **Community Resource**: Accessible benchmarking platform for optimization research
-
-## 📚 Documentation
-
-### User Guides
-- **[CLAUDE.md](CLAUDE.md)**: AI development context and project instructions
-- **[docs/guides/](docs/guides/)**: Setup, usage, and integration guides
-
-### Development Documentation
-- **[docs/development/basic_design.md](docs/development/basic_design.md)**: Project vision and architecture
-- **[docs/development/detail_design.md](docs/development/detail_design.md)**: Technical implementation details
-- **[docs/development/conventions.md](docs/development/conventions.md)**: Development standards and protocols
-- **[docs/development/tasks.md](docs/development/tasks.md)**: Current development tasks
-- **[docs/development/history.md](docs/development/history.md)**: Complete development history
-
-## 🏆 Production Ready Status
-
-### System Completeness ✅
-- **139+ External Problems**: Real-world optimization challenges
-- **11 Major Solvers**: Multi-language coverage (9 Python + 2 MATLAB) across optimization types
-- **Professional Reporting**: Publication-ready HTML dashboards
-- **CI/CD Integration**: Automated benchmarking and deployment
-- **Fair Benchmarking Philosophy**: Unbiased solver comparison using defaults
-
-### Quality Assurance
-- **Validation Framework**: Data quality checks and error detection
-- **Version Tracking**: Complete reproducibility with Git commit recording
-- **Testing Infrastructure**: Dry-run mode and comprehensive validation
-- **Documentation**: Complete development history and usage guides
-
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 🙏 Acknowledgments
+## Acknowledgments
 
 - **External Problem Libraries**: VSDP team for DIMACS and SDPLIB repositories
-- **Open-Source Solvers**: SciPy, CVXPY, CLARABEL, SCS, ECOS, OSQP, CVXOPT, SDPA, SCIP, HiGHS, SeDuMi, SDPT3
-- **Web Technologies**: Bootstrap 5, Chart.js for interactive visualizations
-- **CI/CD Platform**: GitHub Actions for automated benchmarking and deployment
-
----
-
-**Status**: Production Ready ✅ | Fair Baseline Benchmarking System Complete ✅  
-**Last Updated**: June 2025  
-**Achievement**: Comprehensive optimization solver benchmarking platform with unified architecture
-
-For questions, issues, or contributions, please visit our [GitHub repository](https://github.com/napinoco/optimization-solver-benchmark) or check the documentation links above.
+- **MATLAB Solvers**: SQLP team for maintaining Git repositories of SeDuMi and SDPT3 solvers  
+- **Open-Source Solvers**: SciPy, CVXPY, CLARABEL, SCS, ECOS, OSQP, CVXOPT, SDPA, SCIP, HIGHS communities
+- **Development Support**: Claude Code for coding assistance and development guidance
