@@ -1,35 +1,59 @@
-# Optimization Solver Benchmark System - Re-Architected Design
+# Optimization Solver Benchmark System - Technical Design Specification
 
-This document provides technical specifications for the **re-architected** optimization solver benchmark system focused on simplicity, reliability, and maintainability.
+This document provides comprehensive technical specifications for the optimization solver benchmark system, including the complete MATLAB/Octave integration architecture. The system is designed for simplicity, reliability, and maintainability while supporting both Python and MATLAB solvers.
+
+---
+
+## System Overview
+
+### Core Mission
+"Regularly benchmark publicly available solvers and publish the results as data"
+
+### Key Features
+- **Fair Baseline Benchmarking**: Minimal configuration using solver defaults
+- **Multi-Language Support**: Python (CVXPY, SciPy) and MATLAB/Octave (SeDuMi, SDPT3) solvers
+- **External Problem Libraries**: DIMACS (47 problems) and SDPLIB (92 problems)
+- **Production Ready**: 139+ problems with comprehensive solver coverage
+- **Automated Publishing**: GitHub Actions with GitHub Pages deployment
+
+### Current System Statistics
+```
+Problem Type | Total Results | Success Rate | Solver Coverage
+LP           | 12 results   | 100%        | SciPy + CLARABEL + SCS + ECOS + OSQP
+QP           | 6 results    | 100%        | SciPy + CLARABEL + SCS + ECOS + OSQP  
+SOCP         | 31 results   | ~43%        | CLARABEL + SCS + ECOS + SeDuMi + SDPT3
+SDP          | 38 results   | ~29%        | CLARABEL + SCS + SeDuMi + SDPT3
+
+External Libraries:
+DIMACS   | 47 problems  | SeDuMi .mat format
+SDPLIB   | 92 problems  | SDPA .dat-s format
+```
 
 ---
 
 ## System Architecture
 
-### Simplified Data Flow Architecture
+### Unified Data Flow Architecture
 ```
 LOCAL DEVELOPMENT:
 ┌─────────────┐    ┌──────────────┐    ┌─────────────┐
 │   Problem   │───▶│   Solver     │───▶│   Result    │
-│   Loading   │    │   Execution  │    │  Collection │
+│  Interface  │    │  Interfaces  │    │  Collection │
+│  (Unified)  │    │ (Py + MATLAB)│    │ (Standard)  │
 └─────────────┘    └──────────────┘    └─────────────┘
        │                   │                   │
        ▼                   ▼                   ▼
 ┌─────────────┐    ┌──────────────┐    ┌─────────────┐
-│  Validation │    │  Environment │    │  Database   │
-│   & Caching │    │    Capture   │    │   Storage   │
+│  External   │    │  Environment │    │  Database   │
+│  Libraries  │    │    Capture   │    │   Storage   │
+│ (DIMACS/SDL)│    │   (Unified)  │    │  (SQLite)   │
 └─────────────┘    └──────────────┘    └─────────────┘
                                               │
                                               ▼
                                      ┌─────────────┐
                                      │   Report    │
                                      │ Generation  │
-                                     └─────────────┘
-                                              │
-                                              ▼
-                                     ┌─────────────┐
-                                     │  Commit to  │
-                                     │   docs/     │
+                                     │ (Bootstrap) │
                                      └─────────────┘
 
 GITHUB ACTIONS (Publishing Only):
@@ -39,1117 +63,783 @@ GITHUB ACTIONS (Publishing Only):
 └─────────────┘    └──────────────┘
 ```
 
-### Component Interaction (Simplified)
+### Symmetrical Interface Architecture
 ```
-LOCAL DEVELOPMENT:
-├── Problem Loading (Local files only)
-├── Python Solver Execution (CVXPY + SciPy)
-├── Result Collection & Database Storage
-├── HTML Report Generation
-├── Data Export (JSON/CSV)
-└── Commit Generated Files
-
-GITHUB ACTIONS (Minimal):
-├── PR Preview (Lightweight benchmark + publish)
-└── Main Branch Publishing (Static file deployment only)
-```
-
----
-
-## Re-Architected Directory Structure
-
-```
-optimization-solver-benchmark/
-├── README.md                    # Project overview and quick start (updated)
-├── CLAUDE.md                    # AI assistant integration context
-├── LICENSE                      # MIT license
-├── requirements.txt             # All dependencies consolidated
-│
-├── .github/                     # GitHub Actions workflows
-│   └── workflows/
-│       ├── deploy.yml             # Deploy reports and PR previews
-│       └── validate.yml           # Codebase validation (no benchmarking)
-│
-├── config/                      # Configuration files
-│   ├── site_config.yaml          # Site display information
-│   ├── solver_registry.yaml      # Available solvers list
-│   └── problem_registry.yaml     # Available problems list (moved from problems/)
-│
-├── problems/                    # Problem instances
-│   ├── DIMACS/                  # External DIMACS library (50 problems)
-│   └── SDPLIB/                  # External SDPLIB library (3 problems)
-│
-├── scripts/
-│   ├── benchmark/               # Benchmark execution and database storage
-│   │   ├── __init__.py
-│   │   ├── runner.py             # Main benchmark execution logic
-│   │   └── environment_info.py   # Environment information gathering
-│   │
-│   ├── data_loaders/            # ETL: Data loading and format conversion
-│   │   ├── __init__.py
-│   │   ├── python/               # Python-based loaders
-│   │   │   ├── __init__.py
-│   │   │   ├── mat_loader.py     # DIMACS .mat file loader
-│   │   │   ├── dat_loader.py     # SDPLIB .dat-s file loader
-│   │   └── matlab_octave/        # MATLAB/Octave loaders (future)
-│   │       └── .gitkeep
-│   │
-│   ├── solvers/                 # Solver execution with standardized output
-│   │   ├── __init__.py
-│   │   ├── solver_interface.py   # Abstract solver interface
-│   │   ├── python/               # Python solvers
-│   │   │   ├── __init__.py
-│   │   │   ├── cvxpy_runner.py   # CVXPY solver implementation
-│   │   │   └── scipy_runner.py   # SciPy solver implementation
-│   │   └── matlab_octave/        # MATLAB/Octave solvers (future)
-│   │       └── .gitkeep
-│   │
-│   ├── reporting/               # HTML generation and data extraction
-│   │   ├── __init__.py
-│   │   ├── html_generator.py     # Generate overview, results_matrix, raw_data
-│   │   ├── data_exporter.py      # Export JSON/CSV data
-│   │   └── result_processor.py   # Process latest results from database
-│   │
-│   └── database/                # Database models and operations
-│       ├── __init__.py
-│       ├── models.py             # Single denormalized table model
-│       ├── database_manager.py   # Database operations and result storage
-│       └── schema.sql            # Database schema definition
-│
-├── docs/                        # GitHub Pages output (published data)
-│   ├── pages/                   # Generated HTML and data
-│   │   ├── index.html           # Overview report
-│   │   ├── results_matrix.html  # Problems × solvers matrix
-│   │   ├── raw_data.html        # Raw data display
-│   │   ├── assets/              # CSS, JS, images
-│   │   └── data/                # JSON/CSV exports
-│   ├── development/             # Developer documentation
-│   └── guides/                  # User documentation
-│
-├── database/                    # SQLite database
-│   └── results.db               # Single denormalized results table
-│
-├── logs/                        # Log files (local only, .gitignore)
-│   └── benchmark.log            # Structured execution logs
-│
-└── tests/                       # Test suite
-    ├── unit/                    # Unit tests
-    ├── integration/             # Integration tests
-    └── fixtures/                # Test data and configurations
+BenchmarkRunner
+├── PythonInterface
+│   ├── cvxpy_clarabel, cvxpy_scs, cvxpy_ecos, cvxpy_osqp
+│   └── scipy_linprog
+├── MatlabInterface
+│   ├── matlab_sedumi
+│   └── matlab_sdpt3
+└── ProblemInterface
+    ├── MATLoader (DIMACS .mat files)
+    ├── DATLoader (SDPLIB .dat-s files)  
+    ├── MPSLoader (LP .mps files)
+    ├── QPSLoader (QP .qps files)
+    └── PythonLoader (Python problem definitions)
 ```
 
 ---
 
-## Re-Architected Core Components
+## Component Architecture
 
-### 1. GitHub Actions Workflows (Minimal)
+### 1. Problem Interface Module
 
-#### deploy.yml - Unified Deployment System
-```yaml
-# Key features:
-# - Triggers on push to main branch and pull requests
-# - Publishes PRE-BUILT docs/ folder to GitHub Pages
-# - No benchmark execution in CI
-# - Unified workflow for both production and PR previews
-# - Auto-deploy PR previews to gh-pages/pr-preview/pr-{number}/
-# - Auto-cleanup when PR closed
-# - Preview banners and metadata injection
-# - Comments with preview URLs on PRs
-# - Preserves PR preview subdirectories
-```
+#### Component Role Definitions
+The system follows a clear separation of concerns across three key components:
 
-#### validate.yml - Codebase Validation Only  
-```yaml
-# Key features:
-# - Lightweight CI validation without benchmarking
-# - Validates configuration files can be loaded
-# - Checks Python dependencies installation
-# - Verifies core system components initialize correctly
-# - Tests solver backend availability
-# - No benchmark execution or report generation
-# - Fast validation for development workflow
-```
+- **Loaders**: Convert `problem_name` → `ProblemData`
+  - Role: Format-specific parsing and data loading
+  - Input: Problem name (string identifier)
+  - Output: Standardized ProblemData object
+  - Examples: `mat_loader.py`, `dat_loader.py`, `mat_loader.m`, `dat_loader.m`
 
-### 2. Configuration Management (Re-architected)
+- **Runners**: Convert `ProblemData` → `SolverResult`
+  - Role: Solver-specific execution and result generation
+  - Input: ProblemData object with A, b, c, K matrices
+  - Output: Standardized SolverResult object
+  - Examples: `cvxpy_runner.py`, `sedumi_runner.m`, `sdpt3_runner.m`
 
-The new configuration structure eliminates `benchmark_config.yaml` and consolidates all configuration into three focused files. The system now derives configuration directly from the registries and uses sensible defaults.
+- **Interfaces**: Orchestrate `problem_name` → `SolverResult`
+  - Role: Coordinate loaders and runners for complete workflow
+  - Input: Problem name (string identifier)
+  - Output: Standardized SolverResult object
+  - Examples: `python_interface.py`, `matlab_interface.py`
 
-#### config/site_config.yaml - Site Display Information
-```yaml
-site:
-  title: "Optimization Solver Benchmark"
-  author: "Your Name"
-  description: "Benchmarking optimization solvers with fair comparison"
-  url: "https://your-username.github.io/optimization-solver-benchmark"
+This modular design ensures clean separation between data loading, solver execution, and workflow coordination, enabling independent development and testing of each component.
 
-github:
-  username: "your-username"
-  repository: "optimization-solver-benchmark"
-```
-
-#### Solver Configuration - Interface-based Architecture (EAFP)
-
-**Note**: `config/solver_registry.yaml` has been **REMOVED** as part of the EAFP implementation. Solver configurations are now managed directly in the interface classes for better maintainability and performance.
-
+#### Unified Problem Management
 ```python
-# Solver configurations are now defined directly in interface classes
+# scripts/data_loaders/python/problem_interface.py
+class ProblemInterface:
+    """Centralized problem loading and registry management"""
+    
+    FORMAT_LOADERS = {
+        "mat": MATLoader,        # SeDuMi format (DIMACS)
+        "dat-s": DATLoader,      # SDPA format (SDPLIB)
+        "mps": MPSLoader,        # MPS format (LP)
+        "qps": QPSLoader,        # QPS format (QP)
+        "python": PythonLoader,  # Python definitions
+    }
+    
+    def load_problem(self, problem_name: str) -> ProblemData:
+        """Load problem using appropriate format loader"""
+        
+    def get_problem_config(self, problem_name: str) -> Dict[str, Any]:
+        """Get problem configuration from registry"""
+        
+    def get_available_problems(self, library_filter: List[str] = None) -> List[str]:
+        """Get filtered list of available problems"""
+```
+
+#### Problem Data Standardization
+```python
+# scripts/data_loaders/problem_loader.py
+@dataclass
+class ProblemData:
+    """Standardized problem data structure"""
+    name: str
+    problem_class: str  # 'LP', 'QP', 'SOCP', 'SDP'
+    
+    # SeDuMi format (unified internal representation)
+    A_eq: np.ndarray     # Constraint matrix
+    b_eq: np.ndarray     # RHS vector  
+    c: np.ndarray        # Objective coefficients
+    cone_structure: Dict # Cone constraints specification
+    
+    # Optional QP data
+    P: Optional[np.ndarray] = None  # Quadratic term
+    
+    # Problem metadata
+    _num_variables: int
+    _num_constraints: int
+    metadata: Dict[str, Any] = field(default_factory=dict)
+```
+
+### 2. Solver Interface Architecture
+
+#### Python Solver Interface
+```python
 # scripts/solvers/python/python_interface.py
 class PythonInterface:
-    PYTHON_SOLVER_CONFIGS = {
-        "scipy_linprog": {
-            "class": ScipySolver,
-            "display_name": "SciPy linprog",
-            "kwargs": {}
-        },
-        "cvxpy_clarabel": {
-            "class": CvxpySolver,
-            "display_name": "CLARABEL (via CVXPY)",
-            "kwargs": {"backend": "CLARABEL"}
-        },
-        "cvxpy_scs": {
-            "class": CvxpySolver,
-            "display_name": "SCS (via CVXPY)",
-            "kwargs": {"backend": "SCS"}
-        },
-        "cvxpy_ecos": {
-            "class": CvxpySolver,
-            "display_name": "ECOS (via CVXPY)",
-            "kwargs": {"backend": "ECOS"}
-        },
-        "cvxpy_osqp": {
-            "class": CvxpySolver,
-            "display_name": "OSQP (via CVXPY)",
-            "kwargs": {"backend": "OSQP"}
-        }
+    """Unified interface for all Python-based solvers"""
+    
+    SOLVER_CONFIGURATIONS = {
+        'cvxpy_clarabel': CvxpySolver,
+        'cvxpy_scs': CvxpySolver,
+        'cvxpy_ecos': CvxpySolver,
+        'cvxpy_osqp': CvxpySolver,
+        'scipy_linprog': ScipySolver,
     }
+    
+    def solve(self, problem_name: str, solver_name: str, 
+              problem_data: Optional[ProblemData] = None,
+              timeout: Optional[float] = None) -> SolverResult:
+        """Unified solve method with automatic problem loading"""
+        
+        # 1. Create solver instance
+        solver = self.create_solver(solver_name)
+        
+        # 2. Load problem data if not provided
+        if problem_data is None:
+            problem_data = self.problem_interface.load_problem(problem_name)
+        
+        # 3. Validate compatibility
+        if not solver.validate_problem_compatibility(problem_data):
+            return SolverResult.create_error_result(...)
+        
+        # 4. Execute solver
+        result = solver.solve(problem_data, timeout=timeout)
+        
+        # 5. Add problem class to additional_info for database storage
+        if not result.additional_info:
+            result.additional_info = {}
+        result.additional_info['problem_class'] = problem_data.problem_class
+        
+        return result
+```
 
+#### MATLAB Solver Interface
+```python
 # scripts/solvers/matlab_octave/matlab_interface.py
 class MatlabInterface:
+    """Unified interface for MATLAB/Octave solvers via subprocess execution"""
+    
     MATLAB_SOLVER_CONFIGS = {
-        "matlab_sedumi": {
-            "class": SeDuMiSolver,
-            "display_name": "SeDuMi (MATLAB)",
-            "matlab_solver": "sedumi"
+        'matlab_sedumi': {
+            'matlab_solver': 'sedumi',
+            'runner_function': 'sedumi_runner'
         },
-        "matlab_sdpt3": {
-            "class": SDPT3Solver,
-            "display_name": "SDPT3 (MATLAB)",
-            "matlab_solver": "sdpt3"
+        'matlab_sdpt3': {
+            'matlab_solver': 'sdpt3', 
+            'runner_function': 'sdpt3_runner'
         }
     }
-```
-
-**EAFP Architecture Benefits:**
-- **Single Source of Truth**: Each interface manages its own solver configurations
-- **Lazy Detection**: Solver availability is only detected when explicitly needed
-- **Simplified Error Handling**: "Just try it" approach instead of pre-checking
-- **Better Performance**: No upfront solver detection during initialization
-- **Maintainability**: Solver logic is co-located with interface implementations
-
-#### config/problem_registry.yaml - External Problems Only
-```yaml
-# Flat problem structure - each problem is a top-level entry
-# Only external problems from DIMACS and SDPLIB libraries
-problem_libraries:
-  
-  # Small-scale test problems from DIMACS/SDPLIB  
-  nb:
-    display_name: "ANTENNA NB (DIMACS)"
-    file_path: "problems/DIMACS/data/ANTENNA/nb.mat.gz"
-    file_type: "mat"
-    problem_type: "SDP"
-    library_name: "DIMACS"
-    for_test_flag: true  # Small problem suitable for testing
-    known_objective_value: -12.8  # Known optimal value for validation
     
-  arch0:
-    display_name: "ARCH0 (SDPLIB)"
-    file_path: "problems/SDPLIB/data/arch0.dat-s"
-    file_type: "dat-s" 
-    problem_type: "SDP"
-    library_name: "SDPLIB"
-    for_test_flag: true  # Small problem suitable for testing
-    known_objective_value: -5.6506  # Known optimal value
-    
-  # Larger production problems
-  hinf12:
-    display_name: "H-infinity Control 12 (DIMACS)"
-    file_path: "problems/DIMACS/data/HINF/hinf12.mat.gz"
-    file_type: "mat"
-    problem_type: "SDP"
-    library_name: "DIMACS"
-    for_test_flag: false
-    # known_objective_value: null  # Unknown - omit field
-    
-  control1:
-    display_name: "Control Problem 1 (SDPLIB)"
-    file_path: "problems/SDPLIB/data/control1.dat-s"
-    file_type: "dat-s"
-    problem_type: "SDP" 
-    library_name: "SDPLIB"
-    for_test_flag: false
-    known_objective_value: 20.8  # Known optimal value
-    
-  gpp100:
-    display_name: "Graph Partitioning 100 (SDPLIB)"
-    file_path: "problems/SDPLIB/data/gpp100.dat-s"
-    file_type: "dat-s"
-    problem_type: "SDP"
-    library_name: "SDPLIB" 
-    for_test_flag: false
-    # known_objective_value: null  # Unknown - omit field
-    
-  # Linear programming problems
-```
-
-This structure provides:
-- **Flat hierarchy**: Direct problem access without nested library structure
-- **Test problem identification**: `for_test_flag` to identify small problems for quick testing
-- **Known objective values**: Optional field for result validation
-- **Library attribution**: Clear source library tracking
-- **No synthetic problems**: All problems are from established optimization libraries
-
-### 3. EAFP Benchmark Execution Architecture
-
-The EAFP (Easier to Ask for Forgiveness than Permission) implementation removes complex pre-checking and uses a "just try it" approach with graceful error handling.
-
-#### scripts/benchmark/runner.py - EAFP Execution Logic
-```python
-class BenchmarkRunner:
-    """EAFP-based benchmark execution with unified interfaces"""
-    
-    def __init__(self, database_manager: DatabaseManager):
-        self.db = database_manager
-        self.environment_info = collect_environment_info()
-        self.commit_hash = get_git_commit_hash()
+    def solve(self, problem_name: str, solver_name: str,
+              problem_data: Optional[ProblemData] = None,
+              timeout: Optional[float] = None) -> SolverResult:
+        """Unified solve method calling matlab_interface.m directly"""
         
-        # Initialize interfaces with lazy solver detection
-        self.problem_interface = ProblemInterface()
-        self.python_interface = PythonInterface(
-            save_solutions=save_solutions,
-            problem_interface=self.problem_interface
+        # 1. Validate solver name
+        solver_config = self.MATLAB_SOLVER_CONFIGS[solver_name]
+        
+        # 2. Call MATLAB interface via subprocess
+        result = self._call_matlab_interface(
+            problem_name=problem_name,
+            matlab_solver=solver_config["matlab_solver"],
+            runner_function=solver_config["runner_function"],
+            timeout=timeout or self.default_timeout
         )
         
-        # MATLAB interface with availability check
-        self.matlab_interface = None
-        if MATLAB_SOLVERS_AVAILABLE:
-            self.matlab_interface = MatlabInterface(
-                save_solutions=save_solutions,
-                problem_interface=self.problem_interface
-            )
-    
-    def run_single_benchmark(self, problem_name: str, solver_name: str) -> None:
-        """Execute single problem-solver combination using EAFP approach"""
-        
+        # 3. Add problem class information for database storage
         try:
-            # EAFP: Try Python interface first (most common case)
-            try:
-                result = self.python_interface.solve(problem_name, solver_name)
-            except ValueError as e:
-                # If not a Python solver, try MATLAB interface
-                if self.matlab_interface:
-                    try:
-                        result = self.matlab_interface.solve(problem_name, solver_name)
-                    except ValueError:
-                        # Neither interface has this solver
-                        raise ValueError(f"Solver '{solver_name}' not found in any interface")
-                else:
-                    # No MATLAB interface available
-                    raise ValueError(f"Solver '{solver_name}' not found (MATLAB interface not available)")
-            
-            # Success! Store result
-            problem_config = self.problem_interface.get_problem_config(problem_name)
-            self.store_result(solver_name, problem_name, result, problem_config)
-            
-        except Exception as e:
-            error_msg = f"Benchmark execution failed: {str(e)}"
-            logger.error(error_msg)
-            # Store error result for tracking
-            self.store_error_result(solver_name, problem_name, error_msg)
+            problem_interface = ProblemInterface()
+            problem_data = problem_interface.load_problem(problem_name)
+            if not result.additional_info:
+                result.additional_info = {}
+            result.additional_info['problem_class'] = problem_data.problem_class
+        except Exception:
+            result.additional_info['problem_class'] = 'UNKNOWN'
+        
+        return result
 ```
 
-**Key EAFP Features:**
-- **No Pre-checking**: Solvers are not validated before execution
-- **Lazy Detection**: Solver availability is only checked when needed
-- **Unified Interface**: Both Python and MATLAB follow the same solve() signature
-- **Graceful Fallback**: Try Python first, then MATLAB if needed
-- **Clear Error Messages**: Specific error messages for debugging
+### 3. MATLAB Integration Architecture
 
-#### scripts/database/database_manager.py - Database Operations
-```python
-class DatabaseManager:
-    """Handles all database operations for benchmark results"""
+#### MATLAB Interface Entry Point
+```matlab
+% scripts/solvers/matlab_octave/matlab_interface.m
+function matlab_interface(problem_name, solver_name, result_file, save_solutions, runner_function)
+    % Main MATLAB interface for benchmark execution
+    %
+    % Input:
+    %   problem_name: Name of problem from problem_registry.yaml
+    %   solver_name: Name of solver ('sedumi' or 'sdpt3')
+    %   result_file: Path to output JSON file for results
+    %   save_solutions: Boolean flag to save solutions to .mat file
+    %   runner_function: Name of the runner function to use
     
-    def __init__(self, db_path: str = "database/results.db"):
-        self.db_path = db_path
-        self.ensure_schema()
-    
-    def store_result(self, solver_name: str, solver_version: str, 
-                    problem_library: str, problem_name: str, problem_type: str,
-                    environment_info: str, commit_hash: str,
-                    solve_time: float, status: str, 
-                    primal_objective: float, dual_objective: float,
-                    duality_gap: float, primal_infeas: float, dual_infeas: float,
-                    iterations: int) -> None:
-        """Store single benchmark result (append-only)"""
+    try
+        % 1. Load problem registry and resolve problem file path
+        [problem_config, file_path] = read_problem_registry(problem_name);
+        file_type = problem_config.file_type;
         
-        # Insert into results table without initialization
-        # Preserves all historical data
+        % 2. Load problem data using appropriate loader
+        if strcmp(file_type, 'mat')
+            [A, b, c, K] = mat_loader(file_path);
+        elseif strcmp(file_type, 'dat-s')
+            [A, b, c, K] = dat_loader(file_path);
+        else
+            error('Unsupported file type: %s', file_type);
+        end
         
-    def get_latest_results(self) -> List[BenchmarkResult]:
-        """Get latest results for reporting"""
+        % 3. Execute solver using dynamic function call
+        if exist(runner_function, 'file')
+            [x, y, result] = feval(runner_function, A, b, c, K);
+        else
+            error('Solver runner function not found: %s', runner_function);
+        end
         
-        # Query for results with latest commit_hash and environment_info
-        # Use timestamp as tiebreaker for truly latest results
-        query = """
-        SELECT * FROM results 
-        WHERE (commit_hash, environment_info, timestamp) IN (
-            SELECT commit_hash, environment_info, MAX(timestamp)
-            FROM results 
-            GROUP BY solver_name, solver_version, problem_library, problem_name
-        )
-        ORDER BY problem_library, problem_name, solver_name
-        """
+        % 4. Calculate standardized metrics
+        if ~isempty(x) && ~isempty(y)
+            result = calculate_solver_metrics(result, x, y, A, b, c, K);
+        end
         
-    def get_solver_problem_history(self, solver_name: str, problem_name: str) -> List[BenchmarkResult]:
-        """Get historical results for analysis"""
+        % 5. Save solution vectors if requested
+        if save_solutions && strcmp(result.status, 'optimal')
+            save_solutions_if_needed(problem_name, solver_name, x, y, save_solutions);
+        end
+        
+        % 6. Convert result to JSON-compatible format and save
+        json_result = convert_to_json_result(result);
+        save_json_safely(json_result, result_file);
+        
+    catch ME
+        % Save error result to JSON file
+        error_result = create_error_result(ME, solver_name);
+        save_json_safely(error_result, result_file);
+    end
+end
 ```
 
-#### scripts/benchmark/environment_info.py - Environment Capture
-```python
-class EnvironmentInfo:
-    """Capture and standardize environment information"""
+#### MATLAB Solver Runners
+```matlab
+% scripts/solvers/matlab_octave/sedumi_runner.m
+function [x, y, result] = sedumi_runner(A, b, c, K)
+    % SeDuMi solver runner with standardized interface
     
-    @staticmethod
-    def gather() -> dict:
-        """Collect comprehensive environment information"""
-        return {
-            "platform": platform.platform(),
-            "python_version": platform.python_version(),
-            "cpu_cores": os.cpu_count(),
-            "memory_gb": round(psutil.virtual_memory().total / (1024**3), 1),
-            "hostname": platform.node(),
-            "user": getpass.getuser(),
-            "timestamp": datetime.now().isoformat(),
-            "timezone": str(datetime.now().astimezone().tzinfo)
-        }
+    result = initialize_result_structure();
+    result.solver_name = 'SeDuMi';
     
-    @staticmethod 
-    def get_git_commit_hash() -> str:
-        """Get current git commit hash"""
-        try:
-            result = subprocess.run(
-                ["git", "rev-parse", "HEAD"], 
-                capture_output=True, text=True, check=True
-            )
-            return result.stdout.strip()
-        except:
-            return "unknown"
+    try
+        % Configure SeDuMi options
+        pars.fid = 0;  % Suppress output for benchmarking
+        
+        % Execute SeDuMi solver
+        solve_start_time = tic;
+        [x, y, info] = sedumi(A, b, c, K, pars);
+        solve_time = toc(solve_start_time);
+        
+        % Map SeDuMi status to standardized format
+        result.status = map_sedumi_status(info.pinf, info.dinf, info.numerr);
+        result.solve_time = solve_time;
+        result.iterations = info.iter;
+        result.primal_objective_value = NaN;  % Calculated by metrics function
+        result.dual_objective_value = NaN;    % Calculated by metrics function  
+        result.duality_gap = NaN;             % Calculated by metrics function
+        result.primal_infeasibility = NaN;
+        result.dual_infeasibility = NaN;
+        result.solver_version = 'SeDuMi-1.3.7';
+        
+    catch ME
+        result.status = 'error';
+        result.error_message = ME.message;
+        x = [];
+        y = [];
+    end
+end
 ```
 
-### 1. Database Architecture - Single Denormalized Table
+### 4. Database Architecture
 
-#### Simplified Schema Design
+#### Unified Results Schema
 ```sql
--- Single denormalized results table with historical retention
 CREATE TABLE results (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     
     -- Solver information
-    solver_name TEXT NOT NULL,
-    solver_version TEXT NOT NULL,
+    solver_name TEXT NOT NULL,           -- 'cvxpy_clarabel', 'matlab_sedumi', etc.
+    solver_version TEXT NOT NULL,        -- Full version with backend info
     
     -- Problem information  
-    problem_library TEXT NOT NULL,        -- 'DIMACS', 'SDPLIB'
-    problem_name TEXT NOT NULL,
-    problem_type TEXT NOT NULL,           -- 'LP', 'QP', 'SOCP', 'SDP'
+    problem_library TEXT NOT NULL,       -- 'DIMACS', 'SDPLIB', 'internal'
+    problem_name TEXT NOT NULL,          -- Problem identifier
+    problem_type TEXT NOT NULL,          -- 'LP', 'QP', 'SOCP', 'SDP'
     
     -- Environment and execution context
     environment_info TEXT NOT NULL,      -- JSON string with system info
     commit_hash TEXT NOT NULL,           -- Git commit hash
     timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
     
-    -- Standardized solver results
+    -- Standardized solver results (unified across Python/MATLAB)
     solve_time REAL,                     -- Execution time in seconds
-    status TEXT,                         -- 'optimal', 'infeasible', 'error', etc.
+    status TEXT,                         -- 'OPTIMAL', 'INFEASIBLE', 'UNBOUNDED', etc.
     primal_objective_value REAL,        -- Primal objective value
-    dual_objective_value REAL,          -- Dual objective value (if available)
-    duality_gap REAL,                   -- Duality gap
-    primal_infeasibility REAL,          -- Primal infeasibility measure
-    dual_infeasibility REAL,            -- Dual infeasibility measure
+    dual_objective_value REAL,          -- Dual objective value
+    duality_gap REAL,                   -- Primal-dual gap
+    primal_infeasibility REAL,          -- Primal constraint violation
+    dual_infeasibility REAL,            -- Dual constraint violation
     iterations INTEGER,                  -- Number of solver iterations
-    memo TEXT,                           -- Additional notes or metadata
+    memo TEXT,                          -- Additional solver-specific info (JSON)
     
-    -- Unique constraint to prevent exact duplicates
     UNIQUE(solver_name, solver_version, problem_library, problem_name, commit_hash, timestamp)
 );
 
--- Index for efficient latest results queries
+-- Indexes for efficient querying
 CREATE INDEX idx_latest_results ON results(commit_hash, environment_info, timestamp DESC);
 CREATE INDEX idx_solver_problem ON results(solver_name, problem_name);
+CREATE INDEX idx_problem_type ON results(problem_type);
 ```
 
-#### BenchmarkResult Model
+#### Standardized Result Format
 ```python
+# scripts/solvers/solver_interface.py
 @dataclass
-class BenchmarkResult:
-    """Single denormalized benchmark result model"""
+class SolverResult:
+    """Standardized solver result format for both Python and MATLAB solvers"""
     
-    # Primary key
-    id: Optional[int] = None
-    
-    # Solver information
-    solver_name: str = ""
-    solver_version: str = ""
-    
-    # Problem information
-    problem_library: str = ""  # 'DIMACS', 'SDPLIB'
-    problem_name: str = ""
-    problem_type: str = ""     # 'LP', 'QP', 'SOCP', 'SDP'
-    
-    # Environment and execution context
-    environment_info: Dict[str, Any] = None
-    commit_hash: str = ""
-    timestamp: Optional[datetime] = None
-    
-    # Standardized solver results
-    solve_time: Optional[float] = None
-    status: Optional[str] = None
+    solve_time: float
+    status: str                          # Standardized status strings
     primal_objective_value: Optional[float] = None
     dual_objective_value: Optional[float] = None
     duality_gap: Optional[float] = None
     primal_infeasibility: Optional[float] = None
     dual_infeasibility: Optional[float] = None
     iterations: Optional[int] = None
-    memo: Optional[str] = None
+    solver_name: Optional[str] = None
+    solver_version: Optional[str] = None
+    additional_info: Optional[Dict[str, Any]] = None
     
-    def to_dict(self) -> Dict[str, Any]:
-        """Convert to dictionary for JSON serialization"""
-        
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> 'BenchmarkResult':
-        """Create from dictionary (e.g., from database row)"""
+    def create_error_result(cls, error_msg: str, solve_time: float = 0.0, 
+                          solver_name: str = None, solver_version: str = None) -> 'SolverResult':
+        """Create standardized error result"""
+        
+    @classmethod  
+    def create_timeout_result(cls, timeout: float, solver_name: str = None,
+                            solver_version: str = None) -> 'SolverResult':
+        """Create standardized timeout result"""
 ```
 
-#### Database Manager
+### 5. Benchmark Execution Engine
+
+#### Unified Benchmark Runner
 ```python
-class DatabaseManager:
-    """Manages database operations for benchmark results"""
-    
-    def __init__(self, db_path: str):
-        self.db_path = db_path
-        self.init_database()
-    
-    def store_result(self, result: BenchmarkResult) -> None:
-        """Store a single benchmark result (append-only)"""
-        # No database initialization - preserve historical data
-        
-    def get_latest_results(self, commit_hash: str, environment_info: str) -> List[BenchmarkResult]:
-        """Get latest results for specific commit and environment"""
-        # Query for results with matching commit_hash and environment_info
-        # Use timestamp as tiebreaker for truly latest results
-        
-    def get_solver_problem_history(self, solver_name: str, problem_name: str) -> List[BenchmarkResult]:
-        """Get historical results for solver-problem combination"""
-```
-
-### 2. Data Loading and Format Conversion (ETL)
-
-#### Format-Specific Loaders Architecture
-```python
-# Direct loader usage without dispatcher
-class MATLoader:
-    """Load DIMACS .mat files in SeDuMi format"""
-    
-    def load(self, file_path: str) -> ProblemData:
-        """Load .mat file and extract problem matrices"""
-
-class DATLoader:
-    """Load SDPLIB .dat-s files in SDPA sparse format"""
-    
-    def load(self, file_path: str) -> ProblemData:
-        """Parse SDPA sparse format and create problem data"""
-
-class MPSLoader:
-    """Load MPS format files (Linear Programming)"""
-    
-    def load(self, file_path: str) -> ProblemData:
-        """Parse MPS format and create problem data"""
-
-class QPSLoader:
-    """Load QPS format files (Quadratic Programming)"""
-    
-    def load(self, file_path: str) -> ProblemData:
-        """Parse QPS format and create problem data"""
-
-class PythonLoader:
-    """Load Python-defined problems"""
-    
-    def load(self, file_path: str) -> ProblemData:
-        """Execute Python file and extract problem definition"""
-
-# Note: Conversion to solver format is handled directly by loaders
-# Each loader produces ProblemData that is compatible with solvers
-```
-
-#### Loader Selection Logic
-```python
-# In BenchmarkRunner
-def load_problem(self, problem_name: str, problem_library: str) -> ProblemData:
-    """Load problem based on registry configuration"""
-    
-    # Get problem info from config/problem_registry.yaml
-    problem_config = self.get_problem_config(problem_name, problem_library)
-    file_type = problem_config['file_type']
-    file_path = problem_config['file_path']
-    
-    # Select appropriate loader based on file type
-    if file_type == 'mat':
-        loader = MATLoader()
-    elif file_type == 'dat-s':
-        loader = DATLoader()
-    elif file_type == 'mps':
-        loader = MPSLoader()
-    elif file_type == 'qps':
-        loader = QPSLoader()
-    elif file_type == 'python':
-        loader = PythonLoader()
-    else:
-        raise ValueError(f"Unsupported file type: {file_type}")
-    
-    return loader.load(file_path)
-```
-
-### 3. Solver Architecture with Interface Symmetry
-
-#### Design Philosophy: Symmetrical Interface Pattern
-
-The solver architecture follows a **symmetrical interface pattern** where each solver ecosystem has its own dedicated interface module that manages the complexities of that ecosystem, while maintaining a unified interface to the benchmark runner.
-
-```
-scripts/solvers/
-├── python/
-│   ├── cvxpy_runner.py      # Individual CVXPY solver implementations  
-│   ├── scipy_runner.py      # Individual SciPy solver implementations
-│   └── python_interface.py  # Python ecosystem management interface
-└── matlab_octave/
-    ├── matlab_interface.py   # MATLAB ecosystem management interface
-    └── ...individual solver files
-```
-
-#### Benefits of Symmetrical Design
-- **Architectural Consistency**: Both Python and MATLAB ecosystems have dedicated interface modules
-- **Separation of Concerns**: Each interface handles its ecosystem's specific complexities
-- **Maintainability**: Changes to solver ecosystems are isolated within their interface modules
-- **Extensibility**: Easy to add new solver ecosystems (e.g., Julia, R) following the same pattern
-- **Testability**: Each interface can be tested independently from the orchestration layer
-
-#### Solver Interface
-```python
-class SolverInterface:
-    """Abstract interface for all solvers with standardized output"""
-    
-    def solve(self, problem: ProblemData) -> SolverResult:
-        """Solve problem and return standardized result"""
-        
-class SolverResult:
-    """Standardized solver result format"""
-    
-    def __init__(self):
-        self.solve_time: float
-        self.status: str                      # 'optimal', 'infeasible', 'unbounded', 'error'
-        self.primal_objective_value: float
-        self.dual_objective_value: float      # Optional, may be None
-        self.duality_gap: float              # Optional, may be None  
-        self.primal_infeasibility: float     # Constraint violation measure
-        self.dual_infeasibility: float       # Dual constraint violation measure
-        self.iterations: int                 # Number of solver iterations
-        self.solver_info: dict               # Additional solver-specific information
-```
-
-#### Python Interface Module (EAFP Implementation)
-```python
-class PythonInterface:
-    """Interface for managing Python solver ecosystem with EAFP approach"""
-    
-    def __init__(self, save_solutions: bool = False, problem_interface: Optional[ProblemInterface] = None):
-        self.save_solutions = save_solutions
-        self.problem_interface = problem_interface or ProblemInterface()
-        
-        # Lazy initialization - solvers detected only when needed
-        self._available_solvers = None
-    
-    def solve(self, problem_name: str, solver_name: str, 
-             problem_data: Optional[ProblemData] = None,
-             timeout: Optional[float] = None) -> SolverResult:
-        """Unified solve method that handles problem loading and solver execution"""
-        
-        try:
-            # 1. Create solver instance (will raise ValueError if not a Python solver)
-            solver = self.create_solver(solver_name)
-            
-            # 2. Load problem data if not provided
-            if problem_data is None:
-                problem_data = self.problem_interface.load_problem(problem_name)
-            
-            # 3. Validate compatibility
-            if not solver.validate_problem_compatibility(problem_data):
-                return SolverResult.create_error_result(
-                    f"Solver {solver_name} cannot handle {problem_data.problem_class} problems"
-                )
-            
-            # 4. Execute solver
-            result = solver.solve(problem_data, timeout=timeout)
-            return result
-            
-        except ValueError:
-            # Re-raise ValueError so EAFP pattern in runner can catch it
-            raise
-    
-    def create_solver(self, solver_name: str) -> SolverInterface:
-        """Create Python solver instance (EAFP approach)"""
-        if solver_name not in self.PYTHON_SOLVER_CONFIGS:
-            raise ValueError(f"'{solver_name}' is not a Python solver")
-        
-        # Try to create solver instance directly
-        solver_config = self.PYTHON_SOLVER_CONFIGS[solver_name]
-        try:
-            solver = solver_config["class"](**solver_config["kwargs"])
-            return solver
-        except Exception as e:
-            raise ValueError(f"Failed to create solver '{solver_name}': {e}")
-    
-    def get_available_solvers(self) -> List[str]:
-        """Get list of available Python solvers (lazy detection)"""
-        if self._available_solvers is None:
-            self._available_solvers = self._detect_available_solvers()
-        return self._available_solvers.copy()
-```
-
-#### MATLAB Interface Module (EAFP Implementation)
-```python
-class MatlabInterface:
-    """Interface for managing MATLAB solver ecosystem with EAFP approach"""
-    
-    def __init__(self, save_solutions: bool = False, 
-                 problem_interface: Optional[ProblemInterface] = None,
-                 matlab_executable: str = 'matlab',
-                 use_octave: bool = False,
-                 timeout: Optional[float] = 300):
-        self.save_solutions = save_solutions
-        self.problem_interface = problem_interface or ProblemInterface()
-        self.matlab_executable = matlab_executable
-        self.use_octave = use_octave
-        
-        # Lazy initialization - solvers detected only when needed
-        self._available_solvers = None
-    
-    def solve(self, problem_name: str, solver_name: str,
-             problem_data: Optional[ProblemData] = None,
-             timeout: Optional[float] = None) -> SolverResult:
-        """Unified solve method matching Python interface signature"""
-        
-        try:
-            # 1. Create solver instance (will raise ValueError if not a MATLAB solver)
-            solver = self.create_solver(solver_name)
-            
-            # 2. Load problem data if not provided
-            if problem_data is None:
-                problem_data = self.problem_interface.load_problem(problem_name)
-            
-            # 3. Ensure problem data has name attribute for MATLAB resolution
-            if not hasattr(problem_data, 'name'):
-                problem_data.name = problem_name
-            
-            # 4. Execute solver
-            result = solver.solve(problem_data, timeout=timeout or self.default_timeout)
-            return result
-            
-        except ValueError:
-            # Re-raise ValueError so EAFP pattern in runner can catch it
-            raise
-    
-    def create_solver(self, solver_name: str) -> MatlabSolver:
-        """Create MATLAB solver instance (EAFP approach)"""
-        if solver_name not in self.MATLAB_SOLVER_CONFIGS:
-            raise ValueError(f"'{solver_name}' is not a MATLAB solver")
-        
-        # Try to create solver instance directly
-        solver_config = self.MATLAB_SOLVER_CONFIGS[solver_name]
-        try:
-            solver = solver_config["class"](
-                matlab_executable=self.matlab_executable,
-                use_octave=self.use_octave,
-                save_solutions=self.save_solutions
-            )
-            return solver
-        except Exception as e:
-            raise ValueError(f"Failed to create solver '{solver_name}': {e}")
-    
-    def get_available_solvers(self) -> List[str]:
-        """Get list of available MATLAB solvers (lazy detection)"""
-        if self._available_solvers is None:
-            self._available_solvers = self._detect_available_solvers()
-        return self._available_solvers.copy()
-```
-
-#### Individual Solver Implementations
-```python
-class CVXPYSolver(SolverInterface):
-    """CVXPY solver with multiple backend support"""
-    
-    def __init__(self, backend: str):
-        self.backend = backend  # 'CLARABEL', 'SCS', 'ECOS', 'OSQP'
-        self.solver_version = self.detect_version()
-    
-    def solve(self, problem: ProblemData) -> SolverResult:
-        """Solve using CVXPY with specified backend"""
-        # Convert to CVXPY format
-        # Solve with specified backend  
-        # Extract standardized results
-        
-    def detect_version(self) -> str:
-        """Detect CVXPY and backend versions"""
-        # Return format: "cvxpy-1.4.0+CLARABEL-0.6.0"
-
-class SciPySolver(SolverInterface):
-    """SciPy optimization solvers"""
-    
-    def solve(self, problem: ProblemData) -> SolverResult:
-        """Solve using appropriate SciPy method based on problem type"""
-
-class MatlabSolver(SolverInterface):
-    """Base class for MATLAB solvers (SeDuMi, SDPT3)"""
-    
-    def solve(self, problem: ProblemData) -> SolverResult:
-        """Interface between Python and MATLAB solver systems"""
-        # Problem registry resolution
-        # MATLAB environment management
-        # Result conversion back to Python
-```
-
-### 4. Benchmark Execution and Database Storage
-
-#### Benchmark Runner
-```python
+# scripts/benchmark/runner.py  
 class BenchmarkRunner:
-    """Main benchmark execution with database storage"""
+    """Main benchmark execution engine with symmetrical solver interfaces"""
     
-    def __init__(self, database_manager: DatabaseManager):
-        self.db = database_manager
-        self.environment_info = self.gather_environment_info()
-        self.commit_hash = self.get_git_commit_hash()
+    def __init__(self, database_manager: Optional[DatabaseManager] = None,
+                 dry_run: bool = False, save_solutions: bool = False):
+        """Initialize with unified interfaces"""
+        
+        # Initialize all interfaces
+        self.python_interface = PythonInterface()
+        self.matlab_interface = MatlabInterface() 
+        self.problem_interface = ProblemInterface()
+        
+        # Create explicit solver-to-interface mapping
+        self._solver_interface_map = self._build_solver_interface_map()
     
     def run_single_benchmark(self, problem_name: str, solver_name: str) -> None:
-        """Run single problem-solver combination and store result"""
-        # Load problem using appropriate loader
-        # Execute solver 
-        # Store result in database (append-only)
+        """Execute single benchmark with explicit interface routing"""
         
-    def run_benchmark_batch(self, problems: List[str], solvers: List[str]) -> None:
-        """Run benchmark for all problem-solver combinations"""
-        # Loop through problems and solvers
-        # Call run_single_benchmark for each combination
-```
-
-### 5. Simplified Reporting System ✅ **IMPLEMENTED**
-
-The reporting system has been completely simplified to exactly 3 HTML reports as specified:
-
-#### **scripts/reporting/result_processor.py** - ✅ **COMPLETE**
-```python
-@dataclass
-class BenchmarkResult:
-    """Standardized result data structure"""
-    id: int
-    solver_name: str
-    solver_version: str
-    problem_name: str
-    problem_type: str
-    problem_library: str
-    status: str
-    solve_time: float
-    primal_objective_value: Optional[float]
-    dual_objective_value: Optional[float]
-    duality_gap: Optional[float]
-    primal_infeasibility: Optional[float]
-    dual_infeasibility: Optional[float]
-    iterations: Optional[int]
-    timestamp: str
-    commit_hash: str
-
-class ResultProcessor:
-    """Process latest results from database for reporting"""
+        # Get the appropriate interface type from mapping
+        interface_type = self._solver_interface_map.get(solver_name)
+        
+        if interface_type == 'python':
+            result = self.python_interface.solve(problem_name, solver_name)
+        elif interface_type == 'matlab':
+            result = self.matlab_interface.solve(problem_name, solver_name)
+        else:
+            raise ValueError(f"Unknown solver '{solver_name}'")
+        
+        # Store result in database
+        problem_config = self.problem_interface.get_problem_config(problem_name)
+        self.store_result(solver_name, problem_name, result, problem_config)
     
-    def get_latest_results_for_reporting(self) -> List[BenchmarkResult]:
-        """Get latest results using commit_hash and environment_info with timestamp tiebreaker"""
+    def _build_solver_interface_map(self) -> Dict[str, str]:
+        """Build explicit mapping of solver names to interface types"""
+        mapping = {}
         
-    def get_summary_statistics(self, results: List[BenchmarkResult]) -> dict:
-        """Calculate comprehensive summary statistics including success rates"""
+        # Add Python solvers
+        for solver_name in self.python_interface.get_available_solvers():
+            mapping[solver_name] = 'python'
         
-    def get_solver_performance(self, results: List[BenchmarkResult]) -> List[dict]:
-        """Calculate per-solver performance metrics"""
+        # Add MATLAB solvers  
+        for solver_name in self.matlab_interface.get_available_solvers():
+            mapping[solver_name] = 'matlab'
         
-    def get_results_matrix_data(self, results: List[BenchmarkResult]) -> Tuple[List[str], List[str], dict]:
-        """Prepare data for problem × solver matrix display"""
-```
-
-#### **scripts/reporting/html_generator.py** - ✅ **COMPLETE**
-```python
-class HTMLGenerator:
-    """Generate exactly 3 simplified HTML reports with professional styling"""
-    
-    def generate_overview(self, results: List[BenchmarkResult], summary: dict, solver_performance: List[dict]) -> str:
-        """Generate overview report showing summary statistics and solver comparison"""
-        # Professional CSS with gradients and modern design
-        # Summary cards with key metrics
-        # Solver performance comparison table
-        
-    def generate_results_matrix(self, results: List[BenchmarkResult]) -> str:
-        """Generate problems × solvers results matrix with status visualization"""
-        # Matrix table with color-coded status indicators
-        # Status legend for interpretation
-        # Navigation between reports
-        
-    def generate_raw_data(self, results: List[BenchmarkResult]) -> str:
-        """Generate comprehensive raw data table for detailed inspection"""
-        # Complete data table with all result fields
-        # Sortable columns and professional formatting
-        # Timestamped result history
-```
-
-#### **scripts/reporting/data_exporter.py** - ✅ **COMPLETE**
-```python
-class DataExporter:
-    """Export data in JSON and CSV formats for external analysis"""
-    
-    def export_latest_results(self, results: List[BenchmarkResult], summary: dict, solver_performance: List[dict]) -> None:
-        """Export latest results to JSON and CSV files"""
-        # benchmark_results.json - Complete structured data export
-        # benchmark_results.csv - Flat CSV export for spreadsheets  
-        # summary.json - Summary statistics and metadata
-```
-
-#### **Generated Reports** - ✅ **COMPLETE**
-1. **docs/pages/index.html** - Overview dashboard with summary statistics
-2. **docs/pages/results_matrix.html** - Problems × solvers matrix with status visualization
-3. **docs/pages/raw_data.html** - Detailed results table for inspection
-4. **docs/pages/data/** - JSON/CSV data exports for external analysis
-
-**Key Implementation Features:**
-- ✅ **Professional CSS** with gradients, cards, and modern typography
-- ✅ **Case-insensitive status handling** for robust data processing
-- ✅ **Navigation links** between all 3 reports
-- ✅ **Embedded styling** for self-contained HTML files
-- ✅ **Color-coded status indicators** (OPTIMAL=green, ERROR=red, etc.)
-- ✅ **Complete data exports** in JSON and CSV formats
-- ✅ **Responsive design** with clean, readable layouts
-
----
-
-## Requirements Management
-
-### Consolidated requirements.txt
-```
-# Core dependencies
-numpy>=1.24.0
-scipy>=1.10.0
-pandas>=2.0.0
-pyyaml>=6.0
-sqlalchemy>=2.0.0
-jinja2>=3.1.0
-
-# Solver dependencies  
-cvxpy>=1.4.0
-clarabel>=0.6.0
-scs>=3.2.0
-ecos>=2.0.0
-osqp>=0.6.0
-
-# Development and testing
-pytest>=7.0.0
-pytest-cov>=4.0.0
-
-# Optional: file format support
-h5py>=3.8.0           # For .mat file loading
+        return mapping
 ```
 
 ---
 
-## Main Execution Flow
+## Data Flow Specifications
 
-### Command Line Interface (EAFP Implementation)
+### 1. Problem Loading Flow
+
+#### External Library Integration
+```
+DIMACS Problems (47 problems):
+├── Source: SeDuMi .mat format
+├── Loader: scripts/data_loaders/python/mat_loader.py
+├── MATLAB: scripts/data_loaders/matlab_octave/mat_loader.m  
+└── Format: {A, b, c, K} SeDuMi standard
+
+SDPLIB Problems (92 problems):
+├── Source: SDPA .dat-s format
+├── Loader: scripts/data_loaders/python/dat_loader.py
+├── MATLAB: scripts/data_loaders/matlab_octave/dat_loader.m
+└── Format: Converted to SeDuMi {A, b, c, K}
+```
+
+#### Unified Problem Registry
+```yaml
+# config/problem_registry.yaml
+problem_libraries:
+  nb:  # DIMACS problem
+    display_name: "NB (DIMACS)"
+    file_path: "problems/DIMACS/data/ANTENNA/nb.mat.gz"
+    file_type: "mat"
+    library_name: "DIMACS"
+    for_test_flag: true
+    
+  arch0:  # SDPLIB problem
+    display_name: "ARCH0 (SDPLIB)"
+    file_path: "problems/SDPLIB/data/arch0.dat-s"
+    file_type: "dat-s" 
+    library_name: "SDPLIB"
+    for_test_flag: true
+```
+
+### 2. Solver Execution Flow
+
+#### Python Solver Flow
+```
+PythonInterface.solve()
+├── 1. Create solver instance (cvxpy_clarabel, etc.)
+├── 2. Load problem data via ProblemInterface
+├── 3. Validate solver-problem compatibility  
+├── 4. Execute solver.solve(problem_data)
+├── 5. Add problem_class to result.additional_info
+└── 6. Return standardized SolverResult
+```
+
+#### MATLAB Solver Flow  
+```
+MatlabInterface.solve()
+├── 1. Validate MATLAB solver configuration
+├── 2. Create temporary result file
+├── 3. Execute subprocess: octave --eval "matlab_interface(...)"
+├── 4. matlab_interface.m execution:
+│   ├── Load problem via mat_loader.m or dat_loader.m
+│   ├── Execute sedumi_runner.m or sdpt3_runner.m
+│   ├── Calculate standardized metrics
+│   └── Save JSON result to temporary file
+├── 5. Read JSON result and convert to SolverResult
+├── 6. Load problem data to get problem_class
+├── 7. Add problem_class to result.additional_info
+└── 8. Return standardized SolverResult
+```
+
+### 3. Result Storage and Processing
+
+#### Database Storage Flow
+```python
+def store_result(self, solver_name: str, problem_name: str, 
+                result: SolverResult, problem_config: Dict[str, Any]) -> None:
+    """Store result with unified metadata extraction"""
+    
+    # Determine problem library and type
+    problem_library = problem_config.get('library_name', 'internal')
+    
+    # Get problem type from result.additional_info (set by interfaces)
+    if hasattr(result, 'additional_info') and result.additional_info:
+        problem_type = result.additional_info.get('problem_class', 'UNKNOWN')
+    else:
+        problem_type = problem_config.get('problem_type', 'UNKNOWN')
+    
+    # Store in database with standardized schema
+    self.db.store_result(
+        solver_name=solver_name,
+        solver_version=result.solver_version,
+        problem_library=problem_library,
+        problem_name=problem_name, 
+        problem_type=problem_type,
+        # ... all standardized fields
+    )
+```
+
+---
+
+## Implementation Guidelines
+
+### 1. Fair Benchmarking Principles
+
+#### Minimal Configuration Approach
+```python
+# Python solvers - use defaults with verbose=False only
+cvxpy_options = {'verbose': False}
+scipy_options = {'method': 'highs', 'verbose': False}
+
+# MATLAB solvers - use defaults with output suppression only  
+sedumi_options = {'fid': 0}  # Suppress output
+sdpt3_options = {'printlevel': 0}  # Suppress output
+```
+
+#### Standardized Metrics Calculation
+```matlab
+% scripts/solvers/matlab_octave/matlab_interface.m
+function result = calculate_solver_metrics(result, x, y, A, b, c, K)
+    % Calculate standardized metrics for fair comparison
+    
+    % Primal objective: c'*x
+    if ~isempty(x) && ~isempty(c)
+        result.primal_objective_value = c(:)' * x(:);
+    end
+    
+    % Dual objective: b'*y  
+    if ~isempty(y) && ~isempty(b)
+        result.dual_objective_value = b(:)' * y(:);
+    end
+    
+    % Duality gap: |primal - dual|
+    if ~isnan(result.primal_objective_value) && ~isnan(result.dual_objective_value)
+        result.duality_gap = abs(result.primal_objective_value - result.dual_objective_value);
+    end
+    
+    % Primal infeasibility: ||Ax - b|| / (1 + ||b||)
+    if ~isempty(x) && ~isempty(A) && ~isempty(b)
+        primal_residual = A * x - b;
+        result.primal_infeasibility = norm(primal_residual) / (1 + norm(b));
+    end
+    
+    % Dual infeasibility: cone projection distance
+    % (Implementation specific to cone structure K)
+end
+```
+
+### 2. Error Handling and Resilience
+
+#### Graceful Degradation Strategy
+```python
+# Individual solver failures don't affect overall system
+try:
+    result = solver_interface.solve(problem_name, solver_name)
+    self.store_result(solver_name, problem_name, result, problem_config)
+except Exception as e:
+    error_msg = f"Solver {solver_name} failed on {problem_name}: {e}"
+    logger.error(error_msg)
+    self.store_error_result(solver_name, problem_name, error_msg, problem_config)
+    # Continue with next solver/problem combination
+```
+
+#### MATLAB-Specific Error Handling
+```python
+def _call_matlab_interface(self, problem_name: str, matlab_solver: str, 
+                         runner_function: str, timeout: float) -> SolverResult:
+    """Call MATLAB with comprehensive error handling"""
+    
+    try:
+        # Execute MATLAB process with timeout
+        process = subprocess.run([
+            'octave', '--eval', matlab_command
+        ], timeout=timeout, capture_output=True, text=True)
+        
+        # Check for MATLAB execution errors
+        if process.returncode != 0:
+            return SolverResult.create_error_result(
+                f"MATLAB execution failed: {process.stderr}"
+            )
+        
+        # Read result from temporary JSON file
+        with open(result_file, 'r') as f:
+            matlab_result = json.load(f)
+        
+        # Convert to standardized SolverResult
+        return self._convert_matlab_result(matlab_result, solve_time)
+        
+    except subprocess.TimeoutExpired:
+        return SolverResult.create_timeout_result(timeout)
+    except Exception as e:
+        return SolverResult.create_error_result(str(e))
+    finally:
+        # Always cleanup temporary files
+        cleanup_temporary_files()
+```
+
+### 3. Performance Optimization
+
+#### Lazy Initialization Pattern
+```python
+class PythonInterface:
+    def __init__(self):
+        """Initialize interface without creating solver instances"""
+        self._solver_cache = {}  # Cache for expensive solver objects
+        
+    def create_solver(self, solver_name: str) -> SolverInterface:
+        """Create solver instance with caching"""
+        if solver_name not in self._solver_cache:
+            solver_class = self.SOLVER_CONFIGURATIONS[solver_name]
+            self._solver_cache[solver_name] = solver_class(...)
+        return self._solver_cache[solver_name]
+```
+
+#### Efficient Database Queries
+```python
+# Use indexed queries for latest results
+def get_latest_results(self) -> List[BenchmarkResult]:
+    """Get latest results using optimized query"""
+    query = """
+    SELECT * FROM results 
+    WHERE (commit_hash, environment_info, timestamp) IN (
+        SELECT commit_hash, environment_info, MAX(timestamp)
+        FROM results 
+        GROUP BY solver_name, problem_name
+    )
+    ORDER BY problem_library, problem_name, solver_name
+    """
+    return self.execute_query(query)
+```
+
+---
+
+## Testing and Validation
+
+### 1. System Validation
 ```bash
-# EAFP-based execution commands - no pre-filtering, just try it!
-python main.py --benchmark --problems nb --solvers cvxpy_ecos         # Single problem-solver
-python main.py --benchmark --problems nb,arch0 --solvers cvxpy_clarabel,scipy_linprog  # Multiple
-python main.py --benchmark --library-names DIMACS,SDPLIB              # Filter by library names
-python main.py --benchmark --solvers unknown_solver                    # Will show clear error message
-python main.py --report                                                # Generate reports only
-python main.py --all                                                   # Full benchmark + report
-python main.py --validate                                              # Validate environment
-python main.py --dry-run                                               # Show what would be executed
+# Complete environment validation
+python main.py --validate-verbose
+
+# Solver-specific validation  
+python main.py --validate --solvers cvxpy_clarabel,matlab_sedumi
+
+# Problem-specific validation
+python main.py --validate --problems nb,arch0
 ```
 
-**EAFP Command Line Features:**
-- **No Pre-validation**: Solvers are not checked before execution starts
-- **Clear Error Messages**: Unknown solvers produce helpful error messages
-- **Graceful Degradation**: System continues with other solver-problem combinations
-- **Lazy Detection**: Solver availability is only checked when explicitly needed (e.g., --validate)
-- **Unified Interface**: Same command patterns work for both Python and MATLAB solvers
-
-### EAFP Execution Workflow
-```
-1. Configuration Loading (Simplified)
-   ├── Load config/problem_registry.yaml (flat problem structure)
-   ├── Initialize database connection (single denormalized table)
-   └── NO solver registry loading (managed by interfaces)
-
-2. Interface Initialization (Lazy)
-   ├── Initialize ProblemInterface
-   ├── Initialize PythonInterface (lazy solver detection)
-   ├── Initialize MatlabInterface if available (lazy solver detection)
-   └── No upfront solver availability checking
-
-3. Problem and Solver Selection (EAFP)
-   ├── Parse command line arguments (argparse-based CLI)
-   ├── Filter problems by library/type/test_flag
-   └── NO solver pre-filtering - just use user-specified solvers directly
-
-4. Benchmark Execution (EAFP)
-   ├── For each problem-solver combination:
-   │   ├── Try Python interface first (most common case)
-   │   ├── If ValueError, try MATLAB interface
-   │   ├── If still ValueError, store error result
-   │   └── Problem loading and database storage handled by interfaces
-   └── Continue execution despite individual failures (robust error handling)
-
-5. Report Generation (Unchanged)
-   ├── Query latest results from database (ResultProcessor)
-   ├── Generate exactly 3 HTML reports (HTMLGenerator)
-   ├── Export JSON/CSV data (DataExporter)
-   └── Save to docs/pages/ directory (GitHub Pages ready)
-```
-
-**Key EAFP Workflow Changes:**
-- **No Solver Registry**: Solver configurations are managed by interfaces
-- **Lazy Detection**: Solver availability is only checked when explicitly needed
-- **No Pre-filtering**: Solvers are not validated before execution
-- **Unified Error Handling**: Clear error messages for unknown solvers
-- **Faster Startup**: No upfront solver detection during initialization
-
-## Extension Points
-
-### Adding New Solvers (EAFP Implementation)
-1. **Implement SolverInterface**: Create new solver class following the interface
-2. **Add to Interface Configuration**: Update `*_SOLVER_CONFIGS` in appropriate interface class
-3. **Update requirements.txt**: Add solver dependencies  
-4. **NO Code Changes Needed**: EAFP approach automatically handles new solvers
-5. **Test Integration**: Validate with existing problems using --validate
-
-**Example: Adding New Python Solver**
+### 2. Integration Testing
 ```python
-# In scripts/solvers/python/python_interface.py
-PYTHON_SOLVER_CONFIGS = {
-    # ... existing solvers ...
-    "cvxpy_new_solver": {
-        "class": CvxpySolver,
-        "display_name": "New Solver (via CVXPY)",
-        "kwargs": {"backend": "NEW_SOLVER"}
-    }
-}
+# Test Python-MATLAB parity on same problems
+def test_solver_parity():
+    problem_name = "nb"  # SOCP problem
+    
+    # Run Python solver
+    python_result = python_interface.solve(problem_name, "cvxpy_clarabel")
+    
+    # Run MATLAB solver  
+    matlab_result = matlab_interface.solve(problem_name, "matlab_sedumi")
+    
+    # Compare results (allowing numerical tolerance)
+    assert abs(python_result.primal_objective_value - 
+               matlab_result.primal_objective_value) < 1e-6
 ```
 
-**Benefits of EAFP for New Solvers:**
-- **Single Source of Truth**: All solver info in one place
-- **Automatic Integration**: No need to update multiple files
-- **Consistent Error Handling**: Unknown solvers automatically handled
-- **Lazy Detection**: New solver availability detected only when needed
+### 3. Performance Benchmarking
+```bash
+# Measure execution time across all solvers
+python tests/performance/benchmark_matlab_vs_python.py
 
-### Adding New Problem Libraries ✅ **VERIFIED WORKING**
-1. **Create loader**: Implement format-specific loader in `scripts/data_loaders/`
-2. **Update config/problem_registry.yaml**: Add library and problem metadata
-3. **Test loading**: Ensure problems convert correctly to CVXPY format
-4. **Validate results**: Check solver compatibility and result quality
-5. **External Libraries**: DIMACS (.mat) and SDPLIB (.dat-s) fully supported
-
-### Adding New File Formats
-1. **Implement loader**: Create format parser in `scripts/data_loaders/python/`
-2. **Add converter**: Implement conversion to CVXPY representation
-3. **Update loader selection**: Add format mapping in BenchmarkRunner.load_problem()
-4. **Test pipeline**: Validate end-to-end problem loading and solving
+# Memory usage analysis
+python tests/performance/memory_profiling.py
+```
 
 ---
 
-## Implementation Validation
+## Deployment and Maintenance
 
-### Testing Strategy
-- **Unit Tests**: Individual component validation (data loaders, solvers, database operations)
-- **Integration Tests**: Complete workflow testing (problem loading → solving → storage → reporting)
-- **Format Tests**: Validate all problem file formats load correctly
-- **Solver Tests**: Ensure all solvers produce standardized output format
+### 1. GitHub Actions Integration
+```yaml
+# .github/workflows/benchmark.yml
+name: Solver Benchmark
+on:
+  schedule:
+    - cron: '0 2 * * 1'  # Weekly Monday 2AM
+  workflow_dispatch:
 
-### Error Handling
-- **Graceful Degradation**: Continue benchmark execution despite individual solver/problem failures
-- **Comprehensive Logging**: Structured logging with clear error messages and context
-- **Timeout Management**: Respect solver timeout limits and handle hanging processes
-- **Data Validation**: Validate solver results before database storage
+jobs:
+  benchmark:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.12'
+      - name: Setup Octave  
+        run: sudo apt-get install octave
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Run benchmarks
+        run: python main.py --all
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./docs/pages
+```
 
-### Security Considerations
-- **Input Validation**: Validate problem file formats and configuration values
-- **Resource Limits**: Enforce memory and execution time limits
-- **Dependency Management**: Explicit version pinning for reproducible environments
+### 2. Monitoring and Alerting
+```python
+# Monitor solver success rates
+def monitor_solver_health():
+    """Alert if solver success rate drops below threshold"""
+    results = get_latest_results()
+    
+    for solver_name in get_available_solvers():
+        solver_results = [r for r in results if r.solver_name == solver_name]
+        success_rate = len([r for r in solver_results if r.status == 'OPTIMAL']) / len(solver_results)
+        
+        if success_rate < 0.8:  # Alert threshold
+            send_alert(f"Solver {solver_name} success rate: {success_rate:.1%}")
+```
+
+### 3. Data Backup and Recovery
+```bash
+# Automated database backup
+cp database/results.db database/results_$(date +%Y%m%d).backup
+
+# Recovery from backup
+cp database/results_20241201.backup database/results.db
+```
 
 ---
 
-*This re-architected design document provides technical specifications for the simplified, maintainable optimization solver benchmark system. For high-level concepts and project vision, see [basic_design.md](basic_design.md).*
+## Future Extensions
+
+### 1. Additional Solver Support
+```python
+# Adding new solver types
+class MOSEKInterface:
+    """Interface for MOSEK commercial solver"""
+    
+class GurobiInterface: 
+    """Interface for Gurobi commercial solver"""
+```
+
+### 2. Advanced Analytics
+```python
+# Performance trend analysis
+def analyze_solver_trends():
+    """Analyze solver performance over time"""
+    
+# Convergence analysis
+def analyze_convergence_patterns():
+    """Study solver convergence behavior"""
+```
+
+### 3. Cloud Deployment
+```yaml
+# Kubernetes deployment configuration
+apiVersion: apps/v1
+kind: CronJob
+metadata:
+  name: solver-benchmark
+spec:
+  schedule: "0 2 * * 1"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: benchmark
+            image: solver-benchmark:latest
+            command: ["python", "main.py", "--all"]
+```
 
 ---
 
-## Migration and Implementation Plan
-
-### Phase 1: Database and Configuration (Week 1)
-1. **Database Restructuring**: Implement single denormalized results table
-2. **Configuration Consolidation**: Move and restructure configuration files
-3. **Requirements Consolidation**: Merge all requirements into single file
-
-### Phase 2: Core Architecture (Week 2)  
-4. **Data Loaders Implementation**: Create ETL system for all problem formats
-5. **Solver Interface Standardization**: Implement standardized solver output format
-6. **Database Manager**: Implement append-only database operations
-
-### Phase 3: Benchmark and Reporting (Week 3)
-7. **Benchmark Runner**: Implement problem-solver execution loop with database storage
-8. **Simplified Reporting**: Generate three focused HTML reports (overview, matrix, raw data)
-9. **Data Export**: JSON/CSV export functionality
-
-### Phase 4: Integration and Testing (Week 4)
-10. **End-to-End Testing**: Validate complete workflow from execution to reporting
-11. **Performance Validation**: Ensure no significant performance regression
-12. **Documentation Updates**: Update all documentation to reflect new architecture
-
----
-
-*Last Updated: June 2025 - Re-Architecture Design Complete*
-
----
-
-## Summary
-
-This re-architected design focuses on:
-
-1. **Simplicity**: Single denormalized database table, consolidated configuration files
-2. **Maintainability**: Clear separation of concerns with dedicated ETL and solver modules  
-3. **Reliability**: Append-only database, graceful error handling, comprehensive logging
-4. **Extensibility**: Modular design for adding new solvers, problems, and file formats
-5. **Clean Break**: Fresh start without backward compatibility constraints
-
-### Key Benefits
-
-- **Reduced Complexity**: Eliminates multi-table relationships and complex aggregation logic
-- **Historical Preservation**: Append-only database maintains complete execution history
-- **Fair Benchmarking**: Standardized solver interface ensures consistent result format
-- **Easy Reporting**: Latest results query using commit_hash and environment_info with timestamp tiebreaker
-- **Format Flexibility**: ETL system supports multiple problem file formats with unified conversion
-
-This design provides a solid foundation for long-term development while addressing the complexity issues of the previous architecture.
+This technical design provides a comprehensive foundation for the optimization solver benchmark system, supporting both current functionality and future extensions while maintaining the core principles of fair benchmarking and production reliability.

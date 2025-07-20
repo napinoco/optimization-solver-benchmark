@@ -201,12 +201,16 @@ class PythonInterface:
             # 3. Validate compatibility
             if not solver.validate_problem_compatibility(problem_data):
                 problem_type = problem_data.problem_class
-                return SolverResult.create_error_result(
-                    f"Solver {solver_name} cannot handle {problem_type} problems",
-                    solve_time=0.0,
+                result = SolverResult.create_unsupported_result(
+                    problem_type=problem_type,
                     solver_name=solver_name,
                     solver_version=solver.get_version()
                 )
+                # Add problem class information to additional_info for database storage
+                if not result.additional_info:
+                    result.additional_info = {}
+                result.additional_info['problem_class'] = problem_data.problem_class
+                return result
             
             # 4. Execute solver
             result = solver.solve(problem_data, timeout=timeout)

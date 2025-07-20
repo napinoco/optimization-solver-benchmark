@@ -270,7 +270,8 @@ class BenchmarkRunner:
             logger.error(f"Failed to store result for {solver_name} on {problem_name}: {e}")
     
     def store_error_result(self, solver_name: str, problem_name: str, 
-                          error_message: str, problem_config: Dict[str, Any]) -> None:
+                          error_message: str, problem_config: Dict[str, Any],
+                          problem_data=None) -> None:
         """
         Store error result in database.
         
@@ -279,6 +280,7 @@ class BenchmarkRunner:
             problem_name: Name of the problem
             error_message: Error description
             problem_config: Problem configuration for metadata
+            problem_data: Optional problem data for type detection
         """
         # Skip database operations in dry-run mode
         if self.dry_run:
@@ -292,7 +294,13 @@ class BenchmarkRunner:
             solver_version="unknown"
         )
         
-        self.store_result(solver_name, problem_name, error_result, problem_config)
+        # Add problem class to additional_info if available
+        if problem_data and hasattr(problem_data, 'problem_class'):
+            if not error_result.additional_info:
+                error_result.additional_info = {}
+            error_result.additional_info['problem_class'] = problem_data.problem_class
+        
+        self.store_result(solver_name, problem_name, error_result, problem_config, problem_data)
     
     def run_single_benchmark(self, problem_name: str, solver_name: str) -> None:
         """
@@ -326,10 +334,14 @@ class BenchmarkRunner:
             self.store_result(solver_name, problem_name, result, problem_config)
             
             # Enhanced logging with computation time and optimal value
-            if result.primal_objective_value is not None:
+            if result.status == "UNSUPPORTED":
+                logger.info(f"Completed {solver_name} on {problem_name}: {result.status} (problem type not supported)")
+            elif result.solve_time is not None and result.primal_objective_value is not None:
                 logger.info(f"Completed {solver_name} on {problem_name}: {result.status} in {result.solve_time:.3f}s, objective: {result.primal_objective_value:.6e}")
-            else:
+            elif result.solve_time is not None:
                 logger.info(f"Completed {solver_name} on {problem_name}: {result.status} in {result.solve_time:.3f}s")
+            else:
+                logger.info(f"Completed {solver_name} on {problem_name}: {result.status}")
                 
         except Exception as e:
             error_msg = f"Benchmark execution failed: {str(e)}"

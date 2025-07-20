@@ -181,6 +181,16 @@ class ResultProcessor:
             self.logger.warning(f"Failed to load problem registry: {e}")
             return {'problem_libraries': {}}
     
+    def _load_site_config(self) -> Dict[str, Any]:
+        """Load site configuration from config/site_config.yaml"""
+        try:
+            config_path = project_root / "config" / "site_config.yaml"
+            with open(config_path, 'r') as f:
+                return yaml.safe_load(f)
+        except Exception as e:
+            self.logger.warning(f"Failed to load site config: {e}")
+            return {}
+    
     def get_latest_results_for_reporting(self) -> List[BenchmarkResult]:
         """
         Get latest results using commit_hash and environment_info with timestamp tiebreaker.
@@ -244,9 +254,11 @@ class ResultProcessor:
         solvers = set(r.solver_name for r in results)
         problems = set(r.problem_name for r in results)
         
-        # Success rate calculation
+        # Success rate calculation (exclude UNSUPPORTED from failure count)
         successful_results = [r for r in results if r.status and r.status.upper() == 'OPTIMAL']
-        success_rate = len(successful_results) / total_results if total_results > 0 else 0.0
+        unsupported_results = [r for r in results if r.status and r.status.upper() == 'UNSUPPORTED']
+        applicable_results = total_results - len(unsupported_results)  # Results where solver could attempt
+        success_rate = len(successful_results) / applicable_results if applicable_results > 0 else 0.0
         
         # Average solve time calculation
         valid_times = [r.solve_time for r in results if r.solve_time is not None and r.solve_time > 0]
@@ -268,14 +280,26 @@ class ResultProcessor:
                 libraries[lib] = 0
             libraries[lib] += 1
         
+        # Status distribution
+        status_distribution = {}
+        for result in results:
+            status = result.status or 'UNKNOWN'
+            if status not in status_distribution:
+                status_distribution[status] = 0
+            status_distribution[status] += 1
+        
         return {
             'total_results': total_results,
             'total_solvers': len(solvers),
             'total_problems': len(problems),
             'success_rate': success_rate,
             'avg_solve_time': avg_solve_time,
+            'successful_results': len(successful_results),
+            'unsupported_results': len(unsupported_results),
+            'applicable_results': applicable_results,
             'problem_type_distribution': problem_types,
             'library_distribution': libraries,
+            'status_distribution': status_distribution,
             'solver_names': sorted(list(solvers)),
             'problem_names': sorted(list(problems))
         }
@@ -291,14 +315,20 @@ class ResultProcessor:
                 solver_stats[solver] = {
                     'solver_name': solver,
                     'problems_attempted': 0,
+                    'problems_applicable': 0,  # Excludes UNSUPPORTED
                     'problems_solved': 0,
+                    'problems_unsupported': 0,
                     'solve_times': []
                 }
             
             solver_stats[solver]['problems_attempted'] += 1
             
-            if result.status and result.status.upper() == 'OPTIMAL':
-                solver_stats[solver]['problems_solved'] += 1
+            if result.status and result.status.upper() == 'UNSUPPORTED':
+                solver_stats[solver]['problems_unsupported'] += 1
+            else:
+                solver_stats[solver]['problems_applicable'] += 1
+                if result.status and result.status.upper() == 'OPTIMAL':
+                    solver_stats[solver]['problems_solved'] += 1
             
             if result.solve_time is not None and result.solve_time > 0:
                 solver_stats[solver]['solve_times'].append(result.solve_time)
@@ -311,8 +341,10 @@ class ResultProcessor:
             comparison_data.append({
                 'solver_name': solver_name,
                 'problems_attempted': stats['problems_attempted'],
+                'problems_applicable': stats['problems_applicable'],
                 'problems_solved': stats['problems_solved'],
-                'success_rate': stats['problems_solved'] / stats['problems_attempted'] if stats['problems_attempted'] > 0 else 0.0,
+                'problems_unsupported': stats['problems_unsupported'],
+                'success_rate': stats['problems_solved'] / stats['problems_applicable'] if stats['problems_applicable'] > 0 else 0.0,
                 'avg_solve_time': sum(times) / len(times) if times else 0.0,
                 'min_solve_time': min(times) if times else 0.0,
                 'max_solve_time': max(times) if times else 0.0
@@ -346,14 +378,20 @@ class ResultProcessor:
                         'solver_name': solver,
                         'problem_type': problem_type,
                         'problems_attempted': 0,
+                        'problems_applicable': 0,
                         'problems_solved': 0,
+                        'problems_unsupported': 0,
                         'solve_times': []
                     }
                 
                 solver_stats[solver]['problems_attempted'] += 1
                 
-                if result.status and result.status.upper() == 'OPTIMAL':
-                    solver_stats[solver]['problems_solved'] += 1
+                if result.status and result.status.upper() == 'UNSUPPORTED':
+                    solver_stats[solver]['problems_unsupported'] += 1
+                else:
+                    solver_stats[solver]['problems_applicable'] += 1
+                    if result.status and result.status.upper() == 'OPTIMAL':
+                        solver_stats[solver]['problems_solved'] += 1
                 
                 if result.solve_time is not None and result.solve_time > 0:
                     solver_stats[solver]['solve_times'].append(result.solve_time)
@@ -367,8 +405,10 @@ class ResultProcessor:
                     'solver_name': solver_name,
                     'problem_type': problem_type,
                     'problems_attempted': stats['problems_attempted'],
+                    'problems_applicable': stats['problems_applicable'],
                     'problems_solved': stats['problems_solved'],
-                    'success_rate': stats['problems_solved'] / stats['problems_attempted'] if stats['problems_attempted'] > 0 else 0.0,
+                    'problems_unsupported': stats['problems_unsupported'],
+                    'success_rate': stats['problems_solved'] / stats['problems_applicable'] if stats['problems_applicable'] > 0 else 0.0,
                     'avg_solve_time': sum(times) / len(times) if times else 0.0,
                     'min_solve_time': min(times) if times else 0.0,
                     'max_solve_time': max(times) if times else 0.0
@@ -385,7 +425,21 @@ class ResultProcessor:
         
         # Get unique problems and solvers
         unique_problems = set(r.problem_name for r in results)
-        solvers = sorted(set(r.solver_name for r in results))
+        available_solvers = set(r.solver_name for r in results)
+        
+        # Load site config to get solver display order
+        site_config = self._load_site_config()
+        display_order = site_config.get('solvers', {}).get('display_order', [])
+        
+        # Sort solvers according to display_order, with undefined solvers at the end
+        solvers = []
+        for solver in display_order:
+            if solver in available_solvers:
+                solvers.append(solver)
+                available_solvers.remove(solver)
+        
+        # Add any remaining solvers in alphabetical order
+        solvers.extend(sorted(available_solvers))
         
         # Load problem registry to get known objective values
         problem_registry = self._load_problem_registry()
@@ -423,8 +477,16 @@ class ResultProcessor:
             for solver in solvers:
                 matrix[problem][solver] = None
         
-        # Fill matrix with results
+        # Fill matrix with results - ensure we only keep the latest result for each (problem, solver) pair
+        # Group results by (problem, solver) and keep only the latest timestamp
+        latest_results = {}
         for result in results:
+            key = (result.problem_name, result.solver_name)
+            if key not in latest_results or result.timestamp > latest_results[key].timestamp:
+                latest_results[key] = result
+        
+        # Fill matrix with latest results only
+        for result in latest_results.values():
             problem = result.problem_name
             solver = result.solver_name
             

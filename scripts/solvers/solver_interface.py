@@ -42,8 +42,8 @@ class SolverResult:
     All 8 fields are required for database insertion and result analysis.
     """
     
-    # Required timing information
-    solve_time: float  # Time taken to solve the problem (seconds)
+    # Required timing information (may be None if not applicable)
+    solve_time: Optional[float]  # Time taken to solve the problem (seconds)
     
     # Required solution status
     status: str  # Solution status (e.g., "OPTIMAL", "INFEASIBLE", "UNBOUNDED", "ERROR")
@@ -76,11 +76,12 @@ class SolverResult:
         Raises:
             ValueError: If any required field is missing or has invalid type
         """
-        # Validate solve_time
-        if not isinstance(self.solve_time, (int, float)):
-            raise ValueError(f"solve_time must be numeric, got {type(self.solve_time)}")
-        if self.solve_time < 0:
-            raise ValueError(f"solve_time must be non-negative, got {self.solve_time}")
+        # Validate solve_time (can be None)
+        if self.solve_time is not None:
+            if not isinstance(self.solve_time, (int, float)):
+                raise ValueError(f"solve_time must be numeric or None, got {type(self.solve_time)}")
+            if self.solve_time < 0:
+                raise ValueError(f"solve_time must be non-negative, got {self.solve_time}")
         
         # Validate status
         if not isinstance(self.status, str):
@@ -181,6 +182,37 @@ class SolverResult:
             solver_name=solver_name,
             solver_version=solver_version,
             additional_info={"timeout_duration": timeout_duration}
+        )
+    
+    @classmethod
+    def create_unsupported_result(cls, problem_type: str, solver_name: str = "unknown",
+                                solver_version: str = "unknown") -> 'SolverResult':
+        """
+        Create a standardized result for unsupported problem types.
+        
+        Args:
+            problem_type: Type of problem that is not supported (LP, QP, SOCP, SDP)
+            solver_name: Name of the solver
+            solver_version: Version of the solver
+            
+        Returns:
+            SolverResult indicating unsupported problem type
+        """
+        return cls(
+            solve_time=None,
+            status="UNSUPPORTED",
+            primal_objective_value=None,
+            dual_objective_value=None,
+            duality_gap=None,
+            primal_infeasibility=None,
+            dual_infeasibility=None,
+            iterations=None,
+            solver_name=solver_name,
+            solver_version=solver_version,
+            additional_info={
+                "reason": f"Solver does not support {problem_type} problems",
+                "problem_type": problem_type
+            }
         )
 
 
