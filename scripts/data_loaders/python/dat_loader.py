@@ -113,9 +113,19 @@ class DATLoader:
             if len(block_sizes) != nblocks:
                 raise ValueError(f"Block sizes count ({len(block_sizes)}) doesn't match nblocks ({nblocks})")
             
-            # Parse objective vector
+            # Parse objective vector (handle both standard and array formats)
             c_line = data_lines[3]
-            c = np.array([float(x) for x in c_line.split()])
+            
+            # Check if it's array format with curly braces
+            if c_line.strip().startswith('{') and c_line.strip().endswith('}'):
+                # Array format: {+0.0,+1.0,+1.0,...} (e.g., gpp100.dat-s uses this format)
+                # Remove braces and split by comma
+                c_values_str = c_line.strip()[1:-1]  # Remove { and }
+                c_values = [float(x.strip()) for x in c_values_str.split(',')]
+                c = np.array(c_values)
+            else:
+                # Standard space-separated format (e.g., arch0.dat-s uses this format)
+                c = np.array([float(x) for x in c_line.split()])
             
             if len(c) != m:
                 raise ValueError(f"Objective vector length ({len(c)}) doesn't match m ({m})")
