@@ -175,7 +175,10 @@ function [A, b, c, K] = mat_loader(file_path)
             
             % Linear inequality variables (x >= 0)
             if isfield(K, 'l')
-                if ~isscalar(K.l) || K.l < 0 || K.l ~= round(K.l)
+                % Handle empty array case (convert [] to 0)
+                if isempty(K.l)
+                    K.l = 0;
+                elseif ~isscalar(K.l) || K.l < 0 || K.l ~= round(K.l)
                     error('mat_loader:InvalidFormat', 'K.l (linear variables) must be a non-negative integer');
                 end
                 total_vars = total_vars + K.l;
@@ -185,7 +188,8 @@ function [A, b, c, K] = mat_loader(file_path)
             
             % Second-order cone variables
             if isfield(K, 'q')
-                if ~isnumeric(K.q) || any(K.q < 0) || any(K.q ~= round(K.q))
+                % Handle empty array case (keep as empty for no SOCP cones)
+                if ~isempty(K.q) && (~isnumeric(K.q) || any(K.q < 0) || any(K.q ~= round(K.q)))
                     error('mat_loader:InvalidFormat', 'K.q (SOCP cone sizes) must be non-negative integers');
                 end
                 total_vars = total_vars + sum(K.q);
