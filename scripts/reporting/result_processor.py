@@ -54,6 +54,7 @@ class BenchmarkResult:
     primal_infeasibility: Optional[float] = None
     dual_infeasibility: Optional[float] = None
     iterations: Optional[int] = None
+    memo: Optional[str] = None
     
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary for JSON serialization"""
@@ -64,7 +65,7 @@ class BenchmarkResult:
             'problem_library': self.problem_library,
             'problem_name': self.problem_name,
             'problem_type': self.problem_type,
-            'environment_info': self._sanitize_environment_info(self.environment_info),
+            'environment_info': self.get_sanitized_environment_info(),
             'commit_hash': self.commit_hash,
             'timestamp': self.timestamp.isoformat() if self.timestamp else None,
             'solve_time': self.solve_time,
@@ -74,8 +75,15 @@ class BenchmarkResult:
             'duality_gap': self.duality_gap,
             'primal_infeasibility': self.primal_infeasibility,
             'dual_infeasibility': self.dual_infeasibility,
-            'iterations': self.iterations
+            'iterations': self.iterations,
+            'memo': self.memo
         }
+    
+    def get_sanitized_environment_info(self, env_info: Dict[str, Any] = None) -> Dict[str, Any]:
+        """Get sanitized environment info to remove sensitive information - public method"""
+        if env_info is None:
+            env_info = self.environment_info
+        return self._sanitize_environment_info(env_info)
     
     def _sanitize_environment_info(self, env_info: Dict[str, Any]) -> Dict[str, Any]:
         """Sanitize environment info to remove sensitive information - matches database sanitization"""
@@ -122,14 +130,15 @@ class BenchmarkResult:
             }
             # Remove: executable (contains user paths)
         
-        # Git info - keep commit hash only (remove branch and dirty status)
+        # Git info - keep commit hash (essential for result tracking and table restoration)
         if 'git' in env_info:
             git = env_info['git']
-            if git.get('available') and git.get('commit_hash'):
+            if git.get('commit_hash'):
                 sanitized['git'] = {
                     'commit_hash': git.get('commit_hash')
                 }
             # Remove: available, branch, is_dirty (privacy/security sensitive)
+            # Keep: commit_hash (not sensitive and essential for data integrity)
         
         # Timezone - UTC ONLY (remove all location-specific timezone info)
         # Replace all timezone info with UTC standard to prevent location identification
@@ -154,7 +163,15 @@ class BenchmarkResult:
                 if key == 'timestamp' and value:
                     result.timestamp = datetime.fromisoformat(value.replace('Z', '+00:00'))
                 elif key == 'environment_info' and isinstance(value, str):
-                    result.environment_info = json.loads(value) if value else {}
+                    try:
+                        result.environment_info = json.loads(value) if value and value.strip() else {}
+                    except json.JSONDecodeError:
+                        result.environment_info = {}  # Default to empty dict if not valid JSON
+                elif key == 'memo' and isinstance(value, str):
+                    try:
+                        result.memo = json.loads(value) if value and value.strip() else None
+                    except json.JSONDecodeError:
+                        result.memo = value  # Keep as string if not valid JSON
                 else:
                     setattr(result, key, value)
         return result
@@ -214,7 +231,7 @@ class ResultProcessor:
                         ORDER BY timestamp DESC
                         LIMIT 1000  -- Reasonable limit for latest batch
                     )
-                    ORDER BY problem_library, problem_name, solver_name
+                    ORDER BY problem_library, problem_name, solver_name, id DESC
                 """
                 
                 cursor = conn.cursor()
@@ -235,6 +252,44 @@ class ResultProcessor:
                 
         except Exception as e:
             self.logger.error(f"Failed to get latest results: {e}")
+            return []
+    
+    def get_all_results_for_export(self) -> List[BenchmarkResult]:
+        """
+        Get all results from database for complete export/backup.
+        
+        Returns:
+            List of all BenchmarkResult objects in the database
+        """
+        
+        self.logger.info("Extracting all results for export...")
+        
+        try:
+            with sqlite3.connect(self.db_path) as conn:
+                # Query for all results ordered by id for database restoration
+                query = """
+                    SELECT * FROM results 
+                    ORDER BY id ASC
+                """
+                
+                cursor = conn.cursor()
+                cursor.execute(query)
+                
+                # Get column names
+                columns = [description[0] for description in cursor.description]
+                
+                # Convert rows to BenchmarkResult objects
+                results = []
+                for row in cursor.fetchall():
+                    row_dict = dict(zip(columns, row))
+                    result = BenchmarkResult.from_dict(row_dict)
+                    results.append(result)
+                
+                self.logger.info(f"Retrieved {len(results)} total results for export")
+                return results
+                
+        except Exception as e:
+            self.logger.error(f"Failed to get all results: {e}")
             return []
     
     def get_summary_statistics(self, results: List[BenchmarkResult]) -> Dict[str, Any]:

@@ -200,6 +200,9 @@ database/*_backup
 
 # Note: Database files are now sanitized and safe for public sharing
 
+# Generated report files (prevent accidental generation from test functions)
+docs/pages/data/summary.json
+
 # macOS
 .DS_Store
 .AppleDouble

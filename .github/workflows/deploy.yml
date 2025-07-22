@@ -155,12 +155,8 @@ jobs:
           
           ### Available Reports
           - [📊 Dashboard](${previewUrl}) - Main benchmark overview
-          - [⚡ Solver Comparison](${previewUrl}solver_comparison.html) - Performance comparison
-          - [📋 Problem Analysis](${previewUrl}problem_analysis.html) - Problem insights
           - [📈 Results Matrix](${previewUrl}results_matrix.html) - Problems × Solvers matrix
-          - [📊 Statistical Analysis](${previewUrl}statistical_analysis.html) - Advanced analytics
-          - [⚡ Performance Profiling](${previewUrl}performance_profiling.html) - Performance metrics
-          - [🖥️ Environment Info](${previewUrl}environment_info.html) - System specifications
+          - [📋 Raw Data](${previewUrl}raw_data.html) - Detailed benchmark data
           
           ### Notes
           - Preview uses the pre-built reports from your branch

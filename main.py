@@ -300,7 +300,7 @@ def generate_reports() -> bool:
         logger.info("Exporting data files...")
         
         data_exporter = DataExporter(output_dir="docs/pages/data")
-        data_success = data_exporter.export_latest_results()
+        data_success = data_exporter.export_both_versions()
         
         if not data_success:
             logger.error("Failed to export data files")
@@ -314,8 +314,10 @@ def generate_reports() -> bool:
         logger.info("  • docs/pages/index.html (Overview Dashboard)")
         logger.info("  • docs/pages/results_matrix.html (Results Matrix)")
         logger.info("  • docs/pages/raw_data.html (Raw Data Table)")
-        logger.info("  • docs/pages/data/benchmark_results.json (Full Results JSON)")
-        logger.info("  • docs/pages/data/benchmark_results.csv (Full Results CSV)")
+        logger.info("  • docs/pages/data/benchmark_results_latest.json (Latest Results JSON)")
+        logger.info("  • docs/pages/data/benchmark_results_latest.csv (Latest Results CSV)")
+        logger.info("  • docs/pages/data/benchmark_results_all.json (All Results JSON)")
+        logger.info("  • docs/pages/data/benchmark_results_all.csv (All Results CSV)")
         
         return True
         

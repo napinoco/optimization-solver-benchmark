@@ -4,13 +4,10 @@ site:
   description: "Benchmarking optimization solvers with fair comparison"
   url: "https://napinoco.github.io/optimization-solver-benchmark"
   overview: |
-    <strong>Project Vision</strong>
-    Create the leading open-source platform for benchmarking optimization solvers across multiple problem types, providing researchers and practitioners with comprehensive performance insights through automated execution, transparent reporting, and fair baseline comparisons.
+    A reproducible benchmarking framework for optimization solvers across LP, QP, SOCP, and SDP problems using standardized libraries (DIMACS, SDPLIB). The system conducts systematic performance evaluation establishing "out of the box" performance baselines rather than optimized configurations, and publishes transparent results for research community use.
     
-    <strong>Core Mission</strong>
-    "Regularly benchmark publicly available solvers and publish the results as data"
-    
-    This system prioritizes unbiased solver comparison through minimal configuration, establishing "out of the box" performance baselines rather than optimized configurations.
+    <strong>Source Code</strong>
+    The benchmarking code is available at <a href="https://github.com/napinoco/optimization-solver-benchmark">https://github.com/napinoco/optimization-solver-benchmark</a>
   results_matrix_note: |
     ⚠️ CLARABEL has SIGKILL issue due to excessive memory consumption on large SDP problems, e.g. bm1.
 
