@@ -347,7 +347,12 @@ class BenchmarkRunner:
             error_msg = f"Benchmark execution failed: {str(e)}"
             logger.error(error_msg)
             
-            # Store error result
+            # Skip storing result if solver doesn't exist
+            if "Unknown solver" in str(e):
+                logger.warning(f"Skipping database storage for unknown solver: {solver_name}")
+                return
+            
+            # Store error result for other types of errors
             try:
                 problem_config = self.problem_interface.get_problem_config(problem_name)
                 self.store_error_result(solver_name, problem_name, error_msg, problem_config)
