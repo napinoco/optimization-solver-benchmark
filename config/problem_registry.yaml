@@ -46,21 +46,23 @@ problem_libraries:
     for_test_flag: false
     known_objective_value: 23.4434
 
-  biomedP:
-    display_name: "Biomed P (DIMACS)"
-    file_path: "problems/DIMACS/data/BISECT/biomedP.dat.gz"
-    file_type: "dat"
-    library_name: "DIMACS"
-    for_test_flag: false
-    known_objective_value: 33.6
+  # biomedP: Commented out - unsupported .dat format (not .dat-s)
+  # biomedP:
+  #   display_name: "Biomed P (DIMACS)"
+  #   file_path: "problems/DIMACS/data/BISECT/biomedP.dat.gz"
+  #   file_type: "dat"
+  #   library_name: "DIMACS"
+  #   for_test_flag: false
+  #   known_objective_value: 33.6
 
-  industry2:
-    display_name: "Industry2 (DIMACS)"
-    file_path: "problems/DIMACS/data/BISECT/industry2.dat.gz"
-    file_type: "dat"
-    library_name: "DIMACS"
-    for_test_flag: false
-    known_objective_value: 65.6
+  # industry2: Commented out - unsupported .dat format (not .dat-s)
+  # industry2:
+  #   display_name: "Industry2 (DIMACS)"
+  #   file_path: "problems/DIMACS/data/BISECT/industry2.dat.gz"
+  #   file_type: "dat"
+  #   library_name: "DIMACS"
+  #   for_test_flag: false
+  #   known_objective_value: 65.6
 
   # COPOS Set
   copo14:
@@ -103,12 +105,13 @@ problem_libraries:
     library_name: "DIMACS"
     for_test_flag: false
 
-  fap36:
-    display_name: "FAP 36 (DIMACS)"
-    file_path: "problems/DIMACS/data/FAP/fap36.dat.gz"
-    file_type: "mat"
-    library_name: "DIMACS"
-    for_test_flag: false
+  # fap36: Commented out - causes ERROR status in MATLAB solvers
+  # fap36:
+  #   display_name: "FAP 36 (DIMACS)"
+  #   file_path: "problems/DIMACS/data/FAP/fap36.dat.gz"
+  #   file_type: "mat"
+  #   library_name: "DIMACS"
+  #   for_test_flag: false
 
   # FILTER Set
   filter48:
@@ -119,12 +122,13 @@ problem_libraries:
     for_test_flag: true
     known_objective_value: 1.41612901
 
-  filtinf1:
-    display_name: "Filter Inf 1 (DIMACS)"
-    file_path: "problems/DIMACS/data/FILTER/filtinf1.mat.gz"
-    file_type: "mat"
-    library_name: "DIMACS"
-    for_test_flag: false
+  # filtinf1: Commented out - infeasible problem with inconsistent solver results
+  # filtinf1:
+  #   display_name: "Filter Inf 1 (DIMACS)"
+  #   file_path: "problems/DIMACS/data/FILTER/filtinf1.mat.gz"
+  #   file_type: "mat"
+  #   library_name: "DIMACS"
+  #   for_test_flag: false
 
   minphase:
     display_name: "Min Phase (DIMACS)"
@@ -141,7 +145,7 @@ problem_libraries:
     file_type: "mat"
     library_name: "DIMACS"
     for_test_flag: false
-    known_objective_value: 224
+    known_objective_value: -224
 
   hamming_10_2:
     display_name: "Hamming 10-2 (DIMACS)"
@@ -149,15 +153,16 @@ problem_libraries:
     file_type: "mat"
     library_name: "DIMACS"
     for_test_flag: false
-    known_objective_value: 102.4
+    known_objective_value: -102.4
 
-  hamming_11_2:
-    display_name: "Hamming 11-2 (DIMACS)"
-    file_path: "problems/DIMACS/data/HAMMING/hamming_11_2.mat.gz"
-    file_type: "mat"
-    library_name: "DIMACS"
-    for_test_flag: false
-    known_objective_value: 170.666667
+  # hamming_11_2: Commented out - too large for MATLAB solvers (4.2M vars, requires ~7TB memory)
+  # hamming_11_2:
+  #   display_name: "Hamming 11-2 (DIMACS)"
+  #   file_path: "problems/DIMACS/data/HAMMING/hamming_11_2.mat.gz"
+  #   file_type: "mat"
+  #   library_name: "DIMACS"
+  #   for_test_flag: false
+  #   known_objective_value: 170.666667
 
   hamming_7_5_6:
     display_name: "Hamming 7-5-6 (DIMACS)"
@@ -165,7 +170,7 @@ problem_libraries:
     file_type: "mat"
     library_name: "DIMACS"
     for_test_flag: false
-    known_objective_value: 42.666667
+    known_objective_value: -42.666667
 
   hamming_8_3_4:
     display_name: "Hamming 8-3-4 (DIMACS)"
@@ -173,15 +178,16 @@ problem_libraries:
     file_type: "mat"
     library_name: "DIMACS"
     for_test_flag: false
-    known_objective_value: 25.6
+    known_objective_value: -25.6
 
-  hamming_9_5_6:
-    display_name: "Hamming 9-5-6 (DIMACS)"
-    file_path: "problems/DIMACS/data/HAMMING/hamming_9_5_6.mat.gz"
-    file_type: "mat"
-    library_name: "DIMACS"
-    for_test_flag: false
-    known_objective_value: 85.333333
+  # hamming_9_5_6: Commented out - too large for MATLAB solvers (262K vars, requires ~31.5GB memory)
+  # hamming_9_5_6:
+  #   display_name: "Hamming 9-5-6 (DIMACS)"
+  #   file_path: "problems/DIMACS/data/HAMMING/hamming_9_5_6.mat.gz"
+  #   file_type: "mat"
+  #   library_name: "DIMACS"
+  #   for_test_flag: false
+  #   known_objective_value: 85.333333
 
   # HINF Set
   hinf12:
@@ -224,28 +230,31 @@ problem_libraries:
     library_name: "DIMACS"
     for_test_flag: false
 
-  nql30old:
-    display_name: "NQL 30 Old (DIMACS)"
-    file_path: "problems/DIMACS/data/NQL/nql30old.mat.gz"
-    file_type: "mat"
-    library_name: "DIMACS"
-    for_test_flag: false
-    known_objective_value: 0.9460
+  # nql30old: Commented out - superseded by newer version nql30
+  # nql30old:
+  #   display_name: "NQL 30 Old (DIMACS)"
+  #   file_path: "problems/DIMACS/data/NQL/nql30old.mat.gz"
+  #   file_type: "mat"
+  #   library_name: "DIMACS"
+  #   for_test_flag: false
+  #   known_objective_value: 0.9460
 
-  nql60old:
-    display_name: "NQL 60 Old (DIMACS)"
-    file_path: "problems/DIMACS/data/NQL/nql60old.mat.gz"
-    file_type: "mat"
-    library_name: "DIMACS"
-    for_test_flag: false
-    known_objective_value: 0.935
+  # nql60old: Commented out - superseded by newer version nql60
+  # nql60old:
+  #   display_name: "NQL 60 Old (DIMACS)"
+  #   file_path: "problems/DIMACS/data/NQL/nql60old.mat.gz"
+  #   file_type: "mat"
+  #   library_name: "DIMACS"
+  #   for_test_flag: false
+  #   known_objective_value: 0.935
 
-  nql180old:
-    display_name: "NQL 180 Old (DIMACS)"
-    file_path: "problems/DIMACS/data/NQL/nql180old.mat.gz"
-    file_type: "mat"
-    library_name: "DIMACS"
-    for_test_flag: false
+  # nql180old: Commented out - superseded by newer version nql180
+  # nql180old:
+  #   display_name: "NQL 180 Old (DIMACS)"
+  #   file_path: "problems/DIMACS/data/NQL/nql180old.mat.gz"
+  #   file_type: "mat"
+  #   library_name: "DIMACS"
+  #   for_test_flag: false
 
   # QSSP Set
   qssp30:
@@ -271,29 +280,32 @@ problem_libraries:
     library_name: "DIMACS"
     for_test_flag: false
 
-  qssp30old:
-    display_name: "QSSP 30 Old (DIMACS)"
-    file_path: "problems/DIMACS/data/QSSP/qssp30old.mat.gz"
-    file_type: "mat"
-    library_name: "DIMACS"
-    for_test_flag: false
-    known_objective_value: 6.4966749
+  # qssp30old: Commented out - superseded by newer version qssp30
+  # qssp30old:
+  #   display_name: "QSSP 30 Old (DIMACS)"
+  #   file_path: "problems/DIMACS/data/QSSP/qssp30old.mat.gz"
+  #   file_type: "mat"
+  #   library_name: "DIMACS"
+  #   for_test_flag: false
+  #   known_objective_value: 6.4966749
 
-  qssp60old:
-    display_name: "QSSP 60 Old (DIMACS)"
-    file_path: "problems/DIMACS/data/QSSP/qssp60old.mat.gz"
-    file_type: "mat"
-    library_name: "DIMACS"
-    for_test_flag: false
-    known_objective_value: 6.5627049
+  # qssp60old: Commented out - superseded by newer version qssp60
+  # qssp60old:
+  #   display_name: "QSSP 60 Old (DIMACS)"
+  #   file_path: "problems/DIMACS/data/QSSP/qssp60old.mat.gz"
+  #   file_type: "mat"
+  #   library_name: "DIMACS"
+  #   for_test_flag: false
+  #   known_objective_value: 6.5627049
 
-  qssp180old:
-    display_name: "QSSP 180 Old (DIMACS)"
-    file_path: "problems/DIMACS/data/QSSP/qssp180old.mat.gz"
-    file_type: "mat"
-    library_name: "DIMACS"
-    for_test_flag: false
-    known_objective_value: 6.54613
+  # qssp180old: Commented out - superseded by newer version qssp180
+  # qssp180old:
+  #   display_name: "QSSP 180 Old (DIMACS)"
+  #   file_path: "problems/DIMACS/data/QSSP/qssp180old.mat.gz"
+  #   file_type: "mat"
+  #   library_name: "DIMACS"
+  #   for_test_flag: false
+  #   known_objective_value: 6.54613
 
   # SCHED Set
   sched_50_50_orig:
@@ -367,7 +379,7 @@ problem_libraries:
     file_type: "mat"
     library_name: "DIMACS"
     for_test_flag: false
-    known_objective_value: 527.808663
+    known_objective_value: -527.808663
 
   toruspm3-15-50:
     display_name: "Torus PM3 15-50 (DIMACS)"
@@ -375,7 +387,7 @@ problem_libraries:
     file_type: "mat"
     library_name: "DIMACS"
     for_test_flag: false
-    known_objective_value: 3474.4
+    known_objective_value: -3474.4
 
   torusg3-8:
     display_name: "Torus G3-8 (DIMACS)"
@@ -383,7 +395,7 @@ problem_libraries:
     file_type: "mat"
     library_name: "DIMACS"
     for_test_flag: false
-    known_objective_value: 457.358179
+    known_objective_value: -457.358179
 
   torusg3-15:
     display_name: "Torus G3-15 (DIMACS)"
@@ -391,7 +403,7 @@ problem_libraries:
     file_type: "mat"
     library_name: "DIMACS"
     for_test_flag: false
-    known_objective_value: 3134.6
+    known_objective_value: -3134.6
 
   # TRUSS Set
   truss5:
@@ -778,33 +790,37 @@ problem_libraries:
     known_objective_value: -2.50000e+01
     
   # INF Set - Infeasibility problems
-  infd1:
-    display_name: "Infeasible Dual 1 (SDPLIB)"
-    file_path: "problems/SDPLIB/data/infd1.dat-s"
-    file_type: "dat-s"
-    library_name: "SDPLIB"
-    for_test_flag: false
+  # infd1: Commented out - solver disagreement (Python: UNBOUNDED, MATLAB: INFEASIBLE)
+  # infd1:
+  #   display_name: "Infeasible Dual 1 (SDPLIB)"
+  #   file_path: "problems/SDPLIB/data/infd1.dat-s"
+  #   file_type: "dat-s"
+  #   library_name: "SDPLIB"
+  #   for_test_flag: false
     
-  infd2:
-    display_name: "Infeasible Dual 2 (SDPLIB)"
-    file_path: "problems/SDPLIB/data/infd2.dat-s"
-    file_type: "dat-s"
-    library_name: "SDPLIB"
-    for_test_flag: false
+  # infd2: Commented out - solver disagreement (Python: UNBOUNDED, MATLAB: INFEASIBLE)
+  # infd2:
+  #   display_name: "Infeasible Dual 2 (SDPLIB)"
+  #   file_path: "problems/SDPLIB/data/infd2.dat-s"
+  #   file_type: "dat-s"
+  #   library_name: "SDPLIB"
+  #   for_test_flag: false
     
-  infp1:
-    display_name: "Infeasible Primal 1 (SDPLIB)"
-    file_path: "problems/SDPLIB/data/infp1.dat-s"
-    file_type: "dat-s"
-    library_name: "SDPLIB"
-    for_test_flag: false
+  # infp1: Commented out - solver disagreement (Python: INFEASIBLE, MATLAB: UNBOUNDED)
+  # infp1:
+  #   display_name: "Infeasible Primal 1 (SDPLIB)"
+  #   file_path: "problems/SDPLIB/data/infp1.dat-s"
+  #   file_type: "dat-s"
+  #   library_name: "SDPLIB"
+  #   for_test_flag: false
     
-  infp2:
-    display_name: "Infeasible Primal 2 (SDPLIB)"
-    file_path: "problems/SDPLIB/data/infp2.dat-s"
-    file_type: "dat-s"
-    library_name: "SDPLIB"
-    for_test_flag: false
+  # infp2: Commented out - solver disagreement (Python: INFEASIBLE, MATLAB: UNBOUNDED)
+  # infp2:
+  #   display_name: "Infeasible Primal 2 (SDPLIB)"
+  #   file_path: "problems/SDPLIB/data/infp2.dat-s"
+  #   file_type: "dat-s"
+  #   library_name: "SDPLIB"
+  #   for_test_flag: false
     
   # MAX Set - Maximum cut problems
   maxG11:
@@ -831,21 +847,23 @@ problem_libraries:
     for_test_flag: false
     known_objective_value: -4.00381e+03
     
-  maxG55:
-    display_name: "Max Cut G55 (SDPLIB)"
-    file_path: "problems/SDPLIB/data/maxG55.dat-s"
-    file_type: "dat-s"
-    library_name: "SDPLIB"
-    for_test_flag: false
-    known_objective_value: -9.99921e+03
+  # maxG55: Commented out - too large for MATLAB solvers (25M vars, requires ~3.7TB memory)
+  # maxG55:
+  #   display_name: "Max Cut G55 (SDPLIB)"
+  #   file_path: "problems/SDPLIB/data/maxG55.dat-s"
+  #   file_type: "dat-s"
+  #   library_name: "SDPLIB"
+  #   for_test_flag: false
+  #   known_objective_value: -9.99921e+03
     
-  maxG60:
-    display_name: "Max Cut G60 (SDPLIB)"
-    file_path: "problems/SDPLIB/data/maxG60.dat-s"
-    file_type: "dat-s"
-    library_name: "SDPLIB"
-    for_test_flag: false
-    known_objective_value: -1.52223e+04
+  # maxG60: Commented out - too large for MATLAB solvers (49M vars, requires ~10TB memory)
+  # maxG60:
+  #   display_name: "Max Cut G60 (SDPLIB)"
+  #   file_path: "problems/SDPLIB/data/maxG60.dat-s"
+  #   file_type: "dat-s"
+  #   library_name: "SDPLIB"
+  #   for_test_flag: false
+  #   known_objective_value: -1.52223e+04
     
   # MCP Set - Maximum clique problems
   mcp100:

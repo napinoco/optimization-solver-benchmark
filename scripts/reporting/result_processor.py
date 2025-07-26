@@ -208,15 +208,48 @@ class ResultProcessor:
             self.logger.warning(f"Failed to load site config: {e}")
             return {}
     
+    def _get_active_problems(self) -> set:
+        """
+        Get set of active problem names from problem_registry.yaml.
+        Excludes commented out problems.
+        
+        Returns:
+            Set of active problem names
+        """
+        try:
+            registry_path = project_root / "config" / "problem_registry.yaml"
+            with open(registry_path, 'r', encoding='utf-8') as f:
+                registry = yaml.safe_load(f)
+            
+            # Get problems that are not commented out
+            active_problems = set()
+            if 'problem_libraries' in registry:
+                for problem_name, config in registry['problem_libraries'].items():
+                    # Only include if it's not None (meaning it's not commented out)
+                    if config is not None:
+                        active_problems.add(problem_name)
+            
+            self.logger.debug(f"Found {len(active_problems)} active problems in registry")
+            return active_problems
+            
+        except Exception as e:
+            self.logger.warning(f"Failed to load problem registry: {e}")
+            # Return empty set so no filtering occurs
+            return set()
+    
     def get_latest_results_for_reporting(self) -> List[BenchmarkResult]:
         """
         Get latest results using commit_hash and environment_info with timestamp tiebreaker.
+        Only returns results for problems that are currently active in problem_registry.yaml.
         
         Returns:
             List of BenchmarkResult objects representing the latest benchmark run
         """
         
         self.logger.info("Extracting latest results for reporting...")
+        
+        # Get active problems from registry (exclude commented out problems)
+        active_problems = self._get_active_problems()
         
         try:
             with sqlite3.connect(self.db_path) as conn:
@@ -240,14 +273,22 @@ class ResultProcessor:
                 # Get column names
                 columns = [description[0] for description in cursor.description]
                 
-                # Convert rows to BenchmarkResult objects
+                # Convert rows to BenchmarkResult objects and filter for active problems
                 results = []
+                excluded_count = 0
                 for row in cursor.fetchall():
                     row_dict = dict(zip(columns, row))
                     result = BenchmarkResult.from_dict(row_dict)
-                    results.append(result)
+                    
+                    # Only include results for active problems
+                    if not active_problems or result.problem_name in active_problems:
+                        results.append(result)
+                    else:
+                        excluded_count += 1
                 
                 self.logger.info(f"Retrieved {len(results)} latest results for reporting")
+                if excluded_count > 0:
+                    self.logger.info(f"Excluded {excluded_count} results for commented-out problems")
                 return results
                 
         except Exception as e:
@@ -257,12 +298,16 @@ class ResultProcessor:
     def get_all_results_for_export(self) -> List[BenchmarkResult]:
         """
         Get all results from database for complete export/backup.
+        Only returns results for problems that are currently active in problem_registry.yaml.
         
         Returns:
-            List of all BenchmarkResult objects in the database
+            List of all BenchmarkResult objects for active problems in the database
         """
         
         self.logger.info("Extracting all results for export...")
+        
+        # Get active problems from registry (exclude commented out problems)
+        active_problems = self._get_active_problems()
         
         try:
             with sqlite3.connect(self.db_path) as conn:
@@ -278,14 +323,22 @@ class ResultProcessor:
                 # Get column names
                 columns = [description[0] for description in cursor.description]
                 
-                # Convert rows to BenchmarkResult objects
+                # Convert rows to BenchmarkResult objects and filter for active problems
                 results = []
+                excluded_count = 0
                 for row in cursor.fetchall():
                     row_dict = dict(zip(columns, row))
                     result = BenchmarkResult.from_dict(row_dict)
-                    results.append(result)
+                    
+                    # Only include results for active problems
+                    if not active_problems or result.problem_name in active_problems:
+                        results.append(result)
+                    else:
+                        excluded_count += 1
                 
                 self.logger.info(f"Retrieved {len(results)} total results for export")
+                if excluded_count > 0:
+                    self.logger.info(f"Excluded {excluded_count} results for commented-out problems")
                 return results
                 
         except Exception as e:

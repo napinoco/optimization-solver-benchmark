@@ -155,7 +155,7 @@
     <header>
         <h1>🔬 Optimization Solver Benchmark</h1>
         <p>Data Exports - Download Benchmark Results</p>
-        <p><small>Generated: 2025-07-20 14:46:32 UTC</small></p>
+        <p><small>Generated: 2025-07-26 03:34:59 UTC</small></p>
     </header>
     
     <nav>
@@ -174,17 +174,31 @@
                 </p>
                 
                 <div class="data-file">
-                    <h3>📊 Complete Results (JSON)</h3>
-                    <p>Full benchmark results with all metadata in JSON format. Includes solver information, problem details, execution environment, and detailed performance metrics.</p>
-                    <a href="benchmark_results.json" class="download-btn">📥 Download JSON</a>
-                    <span class="file-size">Structured data format</span>
+                    <h3>📊 Latest Results (JSON)</h3>
+                    <p>Most recent benchmark results with solver information, problem details, and performance metrics. Best for analyzing current solver performance.</p>
+                    <a href="benchmark_results_latest.json" class="download-btn">📥 Download Latest JSON</a>
+                    <span class="file-size">Latest run only</span>
                 </div>
                 
                 <div class="data-file">
-                    <h3>📈 Complete Results (CSV)</h3>
-                    <p>Full benchmark results in CSV format for spreadsheet analysis. Contains the same data as JSON but in tabular format for easy import into analysis tools.</p>
-                    <a href="benchmark_results.csv" class="download-btn">📥 Download CSV</a>
-                    <span class="file-size">Spreadsheet compatible</span>
+                    <h3>📈 Latest Results (CSV)</h3>
+                    <p>Most recent benchmark results in CSV format for spreadsheet analysis. Contains the latest solver-problem combinations.</p>
+                    <a href="benchmark_results_latest.csv" class="download-btn">📥 Download Latest CSV</a>
+                    <span class="file-size">Latest run only</span>
+                </div>
+                
+                <div class="data-file">
+                    <h3>🗄️ All Results (JSON)</h3>
+                    <p>Complete historical benchmark results including all runs. Sorted by ID for database restoration. Ideal for comprehensive analysis and backup.</p>
+                    <a href="benchmark_results_all.json" class="download-btn">📥 Download All JSON</a>
+                    <span class="file-size">Full database export</span>
+                </div>
+                
+                <div class="data-file">
+                    <h3>📑 All Results (CSV)</h3>
+                    <p>Complete historical benchmark results in CSV format. Sorted by ID for database restoration. Perfect for time-series analysis and research.</p>
+                    <a href="benchmark_results_all.csv" class="download-btn">📥 Download All CSV</a>
+                    <span class="file-size">Full database export</span>
                 </div>
                 
             </div>
@@ -195,13 +209,16 @@
             <div class="section-content">
                 <h3>JSON Structure</h3>
                 <ul style="margin: 1rem 0; color: #34495e; padding-left: 1.5rem;">
-                    <li><strong>benchmark_results.json</strong>: Array of result objects with complete solver execution data</li>
+                    <li><strong>benchmark_results_latest.json</strong>: Latest benchmark run with metadata, summary statistics, and results array</li>
+                    <li><strong>benchmark_results_all.json</strong>: Complete database export sorted by ID for restoration purposes</li>
+                    <li>Each contains: metadata, summary statistics, solver comparison, and detailed results</li>
                 </ul>
                 
                 <h3>CSV Format</h3>
                 <ul style="margin: 1rem 0; color: #34495e; padding-left: 1.5rem;">
-                    <li><strong>benchmark_results.csv</strong>: Flattened tabular format with one row per solver-problem combination</li>
-                    <li>Headers include: solver_name, problem_name, problem_type, solve_time, status, objective_value, etc.</li>
+                    <li><strong>benchmark_results_latest.csv</strong>: Latest run in tabular format, sorted by problem and solver</li>
+                    <li><strong>benchmark_results_all.csv</strong>: All historical data sorted by ID (ascending) for database restoration</li>
+                    <li>Headers include: id, solver_name, solver_version, problem_library, problem_name, problem_type, solve_time, status, etc.</li>
                 </ul>
             </div>
         </div>

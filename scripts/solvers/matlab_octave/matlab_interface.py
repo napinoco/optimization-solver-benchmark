@@ -202,6 +202,7 @@ class MatlabInterface:
                 if self.use_octave:
                     cmd = [self.matlab_executable, '--eval', matlab_command]
                 else:
+                    # Use minimal options, rely on environment variables for Java/X11 control
                     cmd = [self.matlab_executable, '-batch', matlab_command]
                 
                 logger.debug(f"Executing MATLAB command: {' '.join(cmd)}")
@@ -211,12 +212,19 @@ class MatlabInterface:
                     # Add startup buffer to timeout for MATLAB initialization
                     adjusted_timeout = timeout + 15  # Extra 15s for MATLAB startup
                     
+                    # Set environment variables to suppress Java warnings and X11 issues
+                    env = os.environ.copy()
+                    env['DISPLAY'] = ''  # Disable X11
+                    env['_JAVA_OPTIONS'] = '-Djava.awt.headless=true'  # Headless Java mode
+                    env['MATLAB_LOG_DIR'] = '/dev/null'  # Suppress MATLAB logs
+                    
                     result = subprocess.run(
                         cmd,
                         capture_output=True,
                         text=True,
                         timeout=adjusted_timeout,
-                        cwd=project_root
+                        cwd=project_root,
+                        env=env
                     )
                     
                     # Check execution success
