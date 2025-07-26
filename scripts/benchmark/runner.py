@@ -51,7 +51,8 @@ class BenchmarkRunner:
     
     def __init__(self, database_manager: Optional[DatabaseManager] = None, 
                  dry_run: bool = False,
-                 save_solutions: bool = False):
+                 save_solutions: bool = False,
+                 default_timeout: float = 120.0):
         """
         Initialize benchmark runner with symmetrical solver interfaces.
         
@@ -59,10 +60,12 @@ class BenchmarkRunner:
             database_manager: Optional database manager (creates default if None)
             dry_run: If True, skip database operations (for testing)
             save_solutions: If True, save optimal solutions to disk
+            default_timeout: Default timeout in seconds for solver execution
         """
         self.db = database_manager or DatabaseManager()
         self.dry_run = dry_run
         self.save_solutions = save_solutions
+        self.default_timeout = default_timeout
         
         # Initialize problem interface only (essential for all operations)
         self.problem_interface = ProblemInterface()
@@ -85,6 +88,7 @@ class BenchmarkRunner:
         logger.info("Benchmark runner initialized with unified interfaces")
         logger.info(f"Git commit: {self.commit_hash}")
         logger.info(f"Environment: {self.environment_info['os']['system']} {self.environment_info['python']['version']}")
+        logger.info(f"Default timeout: {self.default_timeout}s")
         
         python_configured = len(PythonInterface.PYTHON_SOLVER_CONFIGS)
         matlab_configured = len(MatlabInterface.MATLAB_SOLVER_CONFIGS)
@@ -321,10 +325,10 @@ class BenchmarkRunner:
             
             if interface_type == 'python':
                 # Route directly to Python interface
-                result = self.python_interface.solve(problem_name, solver_name)
+                result = self.python_interface.solve(problem_name, solver_name, timeout=self.default_timeout)
                 
             elif interface_type == 'matlab':
-                result = self.matlab_interface.solve(problem_name, solver_name)
+                result = self.matlab_interface.solve(problem_name, solver_name, timeout=self.default_timeout)
 
             else:
                 raise ValueError(f"Unknown solver '{solver_name}'. Available solvers: {list(self._solver_interface_map.keys())}")
