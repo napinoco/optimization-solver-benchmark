@@ -60,7 +60,10 @@ class BenchmarkRunner:
             database_manager: Optional database manager (creates default if None)
             dry_run: If True, skip database operations (for testing)
             save_solutions: If True, save optimal solutions to disk
-            default_timeout: Default timeout in seconds for solver execution
+            default_timeout: Default timeout in seconds for solver execution. Solvers 
+                            exceeding this limit will be terminated and marked as TIMEOUT.
+                            Default: 120.0 seconds. Use larger values (300-1800) for 
+                            computationally intensive problems like large SDP instances.
         """
         self.db = database_manager or DatabaseManager()
         self.dry_run = dry_run

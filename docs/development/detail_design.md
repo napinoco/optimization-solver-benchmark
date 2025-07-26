@@ -322,7 +322,67 @@ class PythonInterface:
         return result
 ```
 
-### 3. MATLAB Solver Integration
+### 3. Timeout Implementation
+
+#### Timeout Architecture
+The system implements configurable timeout control at multiple levels to prevent hanging on computationally challenging problems:
+
+1. **Command-line Interface**: `--timeout` parameter (default: 120.0 seconds)
+2. **BenchmarkRunner**: `default_timeout` parameter passed to all solver interfaces
+3. **Solver Interfaces**: Native timeout support varies by solver backend
+4. **Result Handling**: Standardized TIMEOUT status in SolverResult
+
+#### Timeout Implementation Details
+```python
+# main.py - Command-line timeout configuration
+def run_benchmark(timeout: float = 120.0) -> bool:
+    runner = BenchmarkRunner(default_timeout=timeout)
+
+# scripts/benchmark/runner.py - Timeout propagation
+class BenchmarkRunner:
+    def __init__(self, default_timeout: float = 120.0):
+        self.default_timeout = default_timeout
+    
+    def run_single_benchmark(self, problem_name: str, solver_name: str):
+        if interface_type == 'python':
+            result = self.python_interface.solve(
+                problem_name, solver_name, timeout=self.default_timeout
+            )
+        elif interface_type == 'matlab':
+            result = self.matlab_interface.solve(
+                problem_name, solver_name, timeout=self.default_timeout
+            )
+```
+
+#### Solver-Specific Timeout Handling
+**Python Solvers (CVXPY)**:
+- **Native Support**: HIGHS (`time_limit`), SCS (`max_iters` approximation)
+- **Manual Detection**: CLARABEL, ECOS (rely on solve time comparison)
+- **Timeout Result**: Automatic TIMEOUT status generation when time limit exceeded
+
+**Python Solvers (SciPy)**:
+- **Approximation**: `maxiter` parameter conversion for rough timeout control
+
+**MATLAB Solvers**:
+- **Subprocess Timeout**: Python subprocess timeout for external MATLAB execution
+- **Java Suppression**: Environment variables to prevent Java initialization timeouts
+
+```python
+# Example: CVXPY timeout handling
+def solve(self, problem_data: ProblemData, timeout: Optional[float] = None) -> SolverResult:
+    solver_options = self._get_solver_options(timeout)
+    solve_start_time = time.time()
+    
+    # Solve with timeout-aware options
+    cvx_problem.solve(solver=self.backend, **solver_options)
+    solve_time = time.time() - solve_start_time
+    
+    # Manual timeout detection for solvers without native support
+    if timeout is not None and solve_time > (timeout + 1.0):
+        return SolverResult.create_timeout_result(timeout, self.solver_name, self.get_version())
+```
+
+### 4. MATLAB Solver Integration
 
 #### MATLAB Configuration
 ```python

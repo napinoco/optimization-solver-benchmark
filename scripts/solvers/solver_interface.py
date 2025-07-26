@@ -243,7 +243,11 @@ class SolverInterface(ABC):
         
         Args:
             problem_data: Problem data in unified format
-            timeout: Optional timeout in seconds
+            timeout: Optional timeout in seconds. If specified, solver execution will be 
+                    terminated after this duration and a TIMEOUT result will be returned.
+                    Different solver backends may handle timeout differently - some support 
+                    native timeout parameters while others use manual detection. If None,
+                    solver will run without time limit (not recommended for automated systems).
             
         Returns:
             SolverResult with standardized fields

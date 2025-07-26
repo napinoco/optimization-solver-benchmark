@@ -188,6 +188,7 @@ def run_benchmark(library_names: Optional[List[str]] = None,
         solvers: List of solver names to run
         dry_run: If True, skip database operations (for testing)
         save_solutions: If True, save optimal solutions to disk
+        timeout: Timeout in seconds for solver execution (default: 120.0)
     """
     
     logger = get_logger("benchmark")
@@ -347,9 +348,13 @@ Examples:
   python main.py --benchmark --solvers cvxpy_clarabel,scipy_linprog  # Run specific solvers
   python main.py --all --problems nb --solvers cvxpy_clarabel    # Run one problem with one solver
   python main.py --benchmark --library_names DIMACS --solvers cvxpy_scip  # Run DIMACS with SCIP
-  python main.py --benchmark --problems nb --dry-run  # Test nb problem without DB storage
-  python main.py --benchmark --timeout 60                        # Set 60-second timeout
+  python main.py --benchmark --problems nb --dry-run             # Test nb problem without DB storage
+  
+  # Timeout configuration examples:
+  python main.py --benchmark --timeout 60                        # Set 60-second timeout for quick tests
   python main.py --all --timeout 300                             # Run all with 5-minute timeout
+  python main.py --benchmark --library_names SDPLIB --timeout 600  # Use 10-minute timeout for large SDP problems
+  python main.py --benchmark --problems difficult_problem --timeout 1800  # 30-minute timeout for challenging problems
         """
     )
     
@@ -416,7 +421,7 @@ Examples:
         '--timeout', '-t',
         type=float,
         default=120.0,
-        help='Solver timeout in seconds (default: 120.0)'
+        help='Solver timeout in seconds. Solvers exceeding this limit will be terminated and marked as TIMEOUT. Default: 120.0 (2 minutes). Use larger values (300-1800) for difficult problems.'
     )
     
     # Logging options

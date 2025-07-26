@@ -54,6 +54,11 @@ python main.py --report
 
 # Test mode (no database changes)
 python main.py --benchmark --dry-run
+
+# Timeout configuration
+python main.py --all --timeout 300                    # 5-minute timeout
+python main.py --benchmark --timeout 60               # Quick tests with 1-minute limit
+python main.py --benchmark --library_names SDPLIB --timeout 1800  # 30-minute timeout for difficult SDP problems
 ```
 
 ## Design Philosophy

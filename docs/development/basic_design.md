@@ -27,7 +27,8 @@ This system prioritizes unbiased solver comparison through minimal configuration
 2. **Modular Design**: Independent addition of solvers and problems
 3. **Result Standardization**: Common data format across solver environments
 4. **Error Resilience**: System continues despite individual solver failures
-5. **Automated Operation**: GitHub Actions enables hands-off execution
+5. **Timeout Management**: Configurable time limits prevent hanging on difficult problems
+6. **Automated Operation**: GitHub Actions enables hands-off execution
 
 ---
 
@@ -154,8 +155,11 @@ git clone --recursive <repository-url>
 # Validate environment
 python main.py --validate
 
-# Run benchmarks
+# Run benchmarks with default timeout (120s)
 python main.py --all
+
+# Run benchmarks with custom timeout for difficult problems
+python main.py --all --timeout 600  # 10-minute timeout for large SDP problems
 ```
 
 ---
@@ -167,6 +171,7 @@ python main.py --all
 - **Problem Validation**: File format and data integrity verification  
 - **Solver Validation**: Execution capability testing
 - **Result Validation**: Output consistency verification
+- **Timeout Handling**: Configurable solver execution time limits with graceful termination
 
 ### Reproducibility Measures
 - **Fixed Dependencies**: Pinned solver versions in requirements.txt
