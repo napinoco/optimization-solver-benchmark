@@ -178,7 +178,8 @@ def run_benchmark(library_names: Optional[List[str]] = None,
                  problems: Optional[List[str]] = None,
                  solvers: Optional[List[str]] = None,
                  dry_run: bool = False,
-                 save_solutions: bool = False) -> bool:
+                 save_solutions: bool = False,
+                 timeout: float = 120.0) -> bool:
     """Run the benchmark suite with simplified registry-based approach.
     
     Args:
@@ -195,7 +196,7 @@ def run_benchmark(library_names: Optional[List[str]] = None,
         logger.info("Starting benchmark execution...")
         
         # Create benchmark runner (db_manager created internally by default)
-        runner = BenchmarkRunner(dry_run=dry_run, save_solutions=save_solutions)
+        runner = BenchmarkRunner(dry_run=dry_run, save_solutions=save_solutions, default_timeout=timeout)
 
         # Load problem registry only (solver configs now in interfaces)
         problem_registry = load_problem_registry()
@@ -347,6 +348,8 @@ Examples:
   python main.py --all --problems nb --solvers cvxpy_clarabel    # Run one problem with one solver
   python main.py --benchmark --library_names DIMACS --solvers cvxpy_scip  # Run DIMACS with SCIP
   python main.py --benchmark --problems nb --dry-run  # Test nb problem without DB storage
+  python main.py --benchmark --timeout 60                        # Set 60-second timeout
+  python main.py --all --timeout 300                             # Run all with 5-minute timeout
         """
     )
     
@@ -409,6 +412,13 @@ Examples:
         help='Save optimal solutions to disk for verification and analysis'
     )
     
+    parser.add_argument(
+        '--timeout', '-t',
+        type=float,
+        default=120.0,
+        help='Solver timeout in seconds (default: 120.0)'
+    )
+    
     # Logging options
     parser.add_argument(
         '--verbose', '-v',
@@ -467,7 +477,8 @@ Examples:
                 problems=problems,
                 solvers=solvers,
                 dry_run=args.dry_run,
-                save_solutions=args.save_solutions
+                save_solutions=args.save_solutions,
+                timeout=args.timeout
             )
             
         elif args.report:
@@ -480,7 +491,8 @@ Examples:
                 problems=problems,
                 solvers=solvers,
                 dry_run=args.dry_run,
-                save_solutions=args.save_solutions
+                save_solutions=args.save_solutions,
+                timeout=args.timeout
             )
             
             if benchmark_success:
