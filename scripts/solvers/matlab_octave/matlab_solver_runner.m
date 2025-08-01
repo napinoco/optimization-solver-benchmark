@@ -1,5 +1,5 @@
-function matlab_interface(problem_name, solver_name, result_file, save_solutions, runner_function)
-    % Main MATLAB interface for benchmark execution with integrated utilities
+function matlab_solver_runner(problem_name, solver_name, result_file, save_solutions, runner_function)
+    % Main MATLAB solver runner for subprocess execution with integrated utilities
     %
     % Input:
     %   problem_name: Name of problem from problem_registry.yaml
@@ -33,7 +33,7 @@ function matlab_interface(problem_name, solver_name, result_file, save_solutions
         % Add necessary paths for solvers and loaders
         addpath(genpath('scripts/'));
         
-        fprintf('MATLAB Interface: Starting %s with %s\n', problem_name, solver_name);
+        fprintf('MATLAB Solver Runner: Starting %s with %s\n', problem_name, solver_name);
         
         % Load problem registry configuration using integrated YAML reader
         [problem_config, file_path] = read_problem_registry(problem_name);

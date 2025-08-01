@@ -37,8 +37,8 @@ from scripts.utils.logger import get_logger
 
 # Interface imports (symmetrical design)
 from scripts.solvers.solver_interface import SolverInterface, SolverResult
-from scripts.solvers.python.python_interface import PythonInterface
-from scripts.solvers.matlab_octave.matlab_interface import MatlabInterface
+from scripts.solvers.python.python_process_interface import PythonProcessInterface
+from scripts.solvers.matlab_octave.matlab_process_interface import MatlabProcessInterface
 from scripts.data_loaders.python.problem_interface import ProblemInterface
 
 logger = get_logger("benchmark_runner")
@@ -93,8 +93,8 @@ class BenchmarkRunner:
         logger.info(f"Environment: {self.environment_info['os']['system']} {self.environment_info['python']['version']}")
         logger.info(f"Default timeout: {self.default_timeout}s")
         
-        python_configured = len(PythonInterface.PYTHON_SOLVER_CONFIGS)
-        matlab_configured = len(MatlabInterface.MATLAB_SOLVER_CONFIGS)
+        python_configured = len(PythonProcessInterface.PYTHON_SOLVER_CONFIGS)
+        matlab_configured = len(MatlabProcessInterface.MATLAB_SOLVER_CONFIGS)
         problem_stats = self.problem_interface.get_problem_statistics()
         
         logger.info(f"Python interface: {python_configured} solvers configured (lazy detection)")
@@ -102,24 +102,24 @@ class BenchmarkRunner:
         logger.info(f"Problem interface: {problem_stats['total_problems']} problems from {len(problem_stats['libraries'])} libraries")
     
     @property
-    def python_interface(self) -> PythonInterface:
+    def python_interface(self) -> PythonProcessInterface:
         """Lazy initialization of Python interface."""
         if self._python_interface is None:
             logger.debug("Initializing Python interface on first access")
-            self._python_interface = PythonInterface(
+            self._python_interface = PythonProcessInterface(
                 save_solutions=self.save_solutions,
                 problem_interface=self.problem_interface
             )
         return self._python_interface
     
     @property
-    def matlab_interface(self) -> Optional[MatlabInterface]:
+    def matlab_interface(self) -> Optional[MatlabProcessInterface]:
         """Lazy initialization of MATLAB interface."""
         if self._matlab_interface is None and not self._matlab_interface_attempted:
             self._matlab_interface_attempted = True
             try:
                 logger.debug("Initializing MATLAB interface on first access")
-                self._matlab_interface = MatlabInterface(
+                self._matlab_interface = MatlabProcessInterface(
                     save_solutions=self.save_solutions,
                     problem_interface=self.problem_interface
                 )
@@ -138,11 +138,11 @@ class BenchmarkRunner:
         mapping = {}
         
         # Add Python solvers
-        for solver_name in PythonInterface.PYTHON_SOLVER_CONFIGS.keys():
+        for solver_name in PythonProcessInterface.PYTHON_SOLVER_CONFIGS.keys():
             mapping[solver_name] = 'python'
         
         # Add MATLAB solvers
-        for solver_name in MatlabInterface.MATLAB_SOLVER_CONFIGS.keys():
+        for solver_name in MatlabProcessInterface.MATLAB_SOLVER_CONFIGS.keys():
             mapping[solver_name] = 'matlab'
         
         logger.debug(f"Built solver interface mapping: {len(mapping)} solvers")

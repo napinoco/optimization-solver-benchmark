@@ -185,6 +185,78 @@ class SolverResult:
         )
     
     @classmethod
+    def create_subprocess_error_result(cls, returncode: int, error_message: str, solve_time: float = 0.0,
+                                     solver_name: str = "unknown", solver_version: str = "unknown") -> 'SolverResult':
+        """
+        Create a standardized result for subprocess execution errors.
+        
+        Args:
+            returncode: Process return code
+            error_message: Error message from subprocess
+            solve_time: Time spent before error occurred
+            solver_name: Name of the solver that failed
+            solver_version: Version of the solver that failed
+            
+        Returns:
+            SolverResult indicating subprocess error
+        """
+        return cls(
+            solve_time=solve_time,
+            status="SUBPROCESS_ERROR",
+            primal_objective_value=None,
+            dual_objective_value=None,
+            duality_gap=None,
+            primal_infeasibility=None,
+            dual_infeasibility=None,
+            iterations=None,
+            solver_name=solver_name,
+            solver_version=solver_version,
+            additional_info={
+                'returncode': returncode,
+                'error_type': 'SUBPROCESS_ERROR',
+                'error_message': error_message
+            }
+        )
+    
+    @classmethod
+    def create_sigkill_result(cls, memory_limit_gb: Optional[float] = None, solve_time: float = 0.0,
+                            solver_name: str = "unknown", solver_version: str = "unknown",
+                            error_details: str = "") -> 'SolverResult':
+        """
+        Create a standardized SIGKILL result (process was forcibly terminated).
+        
+        Args:
+            memory_limit_gb: Memory limit if known (may be None if killed for other reasons)
+            solve_time: Time spent before SIGKILL occurred
+            solver_name: Name of the solver that was killed
+            solver_version: Version of the solver that was killed
+            error_details: Additional error details
+            
+        Returns:
+            SolverResult indicating SIGKILL status
+        """
+        additional_info = {
+            'error_type': 'SIGKILL',
+            'error_details': error_details
+        }
+        if memory_limit_gb is not None:
+            additional_info['memory_limit_gb'] = memory_limit_gb
+            
+        return cls(
+            solve_time=solve_time,
+            status="SIGKILL",
+            primal_objective_value=None,
+            dual_objective_value=None,
+            duality_gap=None,
+            primal_infeasibility=None,
+            dual_infeasibility=None,
+            iterations=None,
+            solver_name=solver_name,
+            solver_version=solver_version,
+            additional_info=additional_info
+        )
+    
+    @classmethod
     def create_unsupported_result(cls, problem_type: str, solver_name: str = "unknown",
                                 solver_version: str = "unknown") -> 'SolverResult':
         """

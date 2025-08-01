@@ -36,19 +36,20 @@ optimization-solver-benchmark/
 │   │   └── runner.py           # Main BenchmarkRunner class
 │   ├── solvers/                # Solver interface implementations
 │   │   ├── __init__.py
-│   │   ├── solver_interface.py # Abstract base classes
-│   │   ├── python/             # Python solver implementations
+│   │   ├── solver_interface.py # Abstract base classes and SolverResult
+│   │   ├── python/             # Python solver implementations (subprocess)
 │   │   │   ├── __init__.py
-│   │   │   ├── python_interface.py   # Python solver coordinator
-│   │   │   ├── cvxpy_runner.py       # CVXPY backend handler
-│   │   │   └── scipy_runner.py       # SciPy linprog handler
-│   │   └── matlab_octave/      # MATLAB/Octave integration
+│   │   │   ├── python_process_interface.py  # Python subprocess coordinator
+│   │   │   ├── python_solver_runner.py      # Subprocess entry point + solver manager
+│   │   │   ├── cvxpy_runner.py              # CVXPY backend handler
+│   │   │   └── scipy_runner.py              # SciPy linprog handler
+│   │   └── matlab_octave/      # MATLAB/Octave integration (subprocess)
 │   │       ├── __init__.py
-│   │       ├── matlab_interface.py   # Python-MATLAB bridge
-│   │       ├── matlab_interface.m    # MATLAB entry point
-│   │       ├── sedumi_runner.m       # SeDuMi solver wrapper
-│   │       ├── sdpt3_runner.m        # SDPT3 solver wrapper
-│   │       ├── setup_matlab_solvers.m # MEX compilation script
+│   │       ├── matlab_process_interface.py  # Python-MATLAB subprocess bridge
+│   │       ├── matlab_solver_runner.m       # MATLAB subprocess entry point
+│   │       ├── sedumi_runner.m              # SeDuMi solver wrapper
+│   │       ├── sdpt3_runner.m               # SDPT3 solver wrapper
+│   │       ├── setup_matlab_solvers.m       # MEX compilation script
 │   │       ├── sedumi/         # SeDuMi solver (git submodule)
 │   │       └── sdpt3/          # SDPT3 solver (git submodule)
 │   ├── data_loaders/           # Problem format loaders
@@ -77,6 +78,7 @@ optimization-solver-benchmark/
 │       ├── environment_info.py # System information capture
 │       ├── git_utils.py        # Git operations
 │       ├── logger.py           # Logging configuration
+│       ├── resource_limits.py  # Memory/CPU limitation utilities
 │       └── temp_file_manager.py # Temporary file handling
 ├── problems/                   # Problem library files
 │   ├── DIMACS/                 # External DIMACS library (git submodule)
@@ -101,27 +103,158 @@ optimization-solver-benchmark/
 ## Component Architecture
 
 ### System Data Flow
-```
-Problem Files → Loaders → ProblemData → Solver Interfaces → SolverResult → Database → Reports
-     ↓              ↓           ↓              ↓              ↓           ↓         ↓
-DIMACS (.mat)   MATLoader   Unified      Python/MATLAB   Standardized SQLite  HTML/CSV
-SDPLIB (.dat-s) DATLoader   Format       Execution       Results     Storage   Export
+
+#### High-Level Process Flow with Sequential Steps
+
+```mermaid
+graph TB
+    %% Parent Process Components
+    subgraph "Parent Process Environment"
+        BR["🚀 BenchmarkRunner<br/>ENTRY POINT<br/>System Orchestrator"]
+        PI["Process Interface<br/>PythonProcessInterface<br/>MatlabProcessInterface"]
+        DB[("Database<br/>SQLite")]
+        RPT["Report Generator<br/>HTML/CSV/JSON"]
+    end
+    
+    %% Isolated Subprocess
+    subgraph SUB ["Isolated Subprocess Environment"]
+        subgraph "Problem Loading"
+            PL["Problem Loaders<br/>MATLoader for .mat<br/>DATLoader for .dat-s"]
+            PD("ProblemData<br/>Unified Format")
+        end
+        
+        subgraph "Solver Execution"
+            SR["Solver Runner<br/>python_solver_runner.py OR<br/>matlab_solver_runner.m"]
+            SOL["Actual Solvers<br/>CVXPY backends<br/>SciPy<br/>SeDuMi/SDPT3"]
+        end
+        
+        subgraph "Result Generation"
+            RES("SolverResult<br/>Data Structure")
+        end
+    end
+    
+    %% File System Storage
+    subgraph "File System"
+        PF[["Problem Libraries<br/>DIMACS .mat.gz<br/>SDPLIB .dat-s"]]
+        TJ[["Temp JSON Files<br/>/tmp/result_xxx.json"]]
+        DBF[("Database Files<br/>results.db")]
+        HTML[["Generated Reports<br/>docs/pages/"]]
+    end
+    
+    %% Sequential Execution Flow with Numbers
+    BR -.->|"(1) solve(problem, solver)"| PI
+    PI -.->|"(2) subprocess.run<br/>ulimit + timeout"| SUB
+    
+    PF --> PL
+    PL --> PD
+    PD --> SR
+    SR --> SOL
+    SOL --> RES
+    RES --> TJ
+    
+    TJ -.->|"(3) return SolverResult<br/>(JSON IPC)"| PI
+    PI -.->|"(4) return SolverResult"| BR
+    BR -->|"(5) insert DB"| DB
+    DB --> DBF
+    DB --> RPT
+    RPT --> HTML
+    
+    %% Styling
+    classDef entryPoint fill:#ffcccc,stroke:#cc0000,stroke-width:4px,font-weight:bold
+    classDef processBox fill:#e1f5fe,stroke:#01579b,stroke-width:2px
+    classDef subprocessBox fill:#f3e5f5,stroke:#4a148c,stroke-width:2px
+    classDef internalDataBox fill:#fff9c4,stroke:#f57f17,stroke-width:2px
+    classDef databaseBox fill:#e8f5e8,stroke:#1b5e20,stroke-width:2px
+    classDef fileBox fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px
+    classDef isolationBox fill:#fff3e0,stroke:#e65100,stroke-width:3px
+    
+    class BR entryPoint
+    class PI,RPT processBox
+    class PL,SR,SOL subprocessBox
+    class PD,RES internalDataBox
+    class DB,DBF databaseBox
+    class PF,TJ,HTML fileBox
+    class SUB isolationBox
 ```
 
-### Component Hierarchy
+#### Node Legend and Execution Flow
+- **🔴 Entry Point** `[]` (Red): **BenchmarkRunner** - Main system orchestrator and entry point
+- **🔵 Processes** `[]` (Blue): Active execution components - Process Interface, Report Generator, Solvers
+- **🟡 Internal Data** `()` (Yellow): Temporary in-memory data structures - ProblemData, SolverResult  
+- **🟢 Database Storage** `[()]` (Green): Persistent structured data - SQLite Database, Database Files
+- **🟣 Document Files** `[[]]` (Purple): File-based documents - Problem Libraries, JSON Files, Generated Reports
+
+#### Sequential Execution Steps
+1. **(1) solve(problem, solver)**: BenchmarkRunner calls Process Interface with problem and solver names
+2. **(2) subprocess.run**: Process Interface launches isolated subprocess with ulimit + timeout controls
+3. **(3) return SolverResult (JSON IPC)**: Subprocess writes JSON result file, Process Interface reads and converts
+4. **(4) return SolverResult**: Process Interface returns standardized SolverResult object to BenchmarkRunner
+5. **(5) insert DB**: BenchmarkRunner stores result with complete metadata in SQLite database
+
+
+#### Error Detection and Status Flow
 ```
-BenchmarkRunner (scripts/benchmark/runner.py)
-├── ProblemInterface (scripts/data_loaders/python/problem_interface.py)
-│   ├── MATLoader (scripts/data_loaders/python/mat_loader.py)
-│   └── DATLoader (scripts/data_loaders/python/dat_loader.py)
-├── PythonInterface (scripts/solvers/python/python_interface.py)
-│   ├── CvxpyRunner (scripts/solvers/python/cvxpy_runner.py)
-│   └── ScipyRunner (scripts/solvers/python/scipy_runner.py)
-├── MatlabInterface (scripts/solvers/matlab_octave/matlab_interface.py)
-│   ├── matlab_interface.m → sedumi_runner.m
-│   └── matlab_interface.m → sdpt3_runner.m
-└── DatabaseManager (scripts/database/database_manager.py)
+SUBPROCESS EXECUTION RESULTS:
+┌─────────────────────┐    ┌─────────────────────┐    ┌─────────────────────┐
+│ Return Code 0       │───▶│ Read JSON Result    │───▶│ Normal SolverResult │
+│ (Success)           │    │ File                │    │ (OPTIMAL, etc.)     │
+└─────────────────────┘    └─────────────────────┘    └─────────────────────┘
+
+┌─────────────────────┐    ┌─────────────────────┐    ┌─────────────────────┐
+│ Return Code -9/137  │───▶│ No JSON needed      │───▶│ SIGKILL Result      │
+│ (SIGKILL)           │    │ (Process killed)    │    │ + Memory Limit Info │
+└─────────────────────┘    └─────────────────────┘    └─────────────────────┘
+
+┌─────────────────────┐    ┌─────────────────────┐    ┌─────────────────────┐
+│ Timeout Expired     │───▶│ No JSON needed      │───▶│ TIMEOUT Result      │
+│ (Process killed)    │    │ (Process killed)    │    │ + Timeout Duration  │
+└─────────────────────┘    └─────────────────────┘    └─────────────────────┘
+
+┌─────────────────────┐    ┌─────────────────────┐    ┌─────────────────────┐
+│ Return Code ≠ 0     │───▶│ Parse stderr/stdout │───▶│ SUBPROCESS_ERROR    │
+│ (Other errors)      │    │ for error details   │    │ + Error Message     │
+└─────────────────────┘    └─────────────────────┘    └─────────────────────┘
+```
+
+### Component Hierarchy - BenchmarkRunner as System Entry Point
+
+```
+🚀 BenchmarkRunner (scripts/benchmark/runner.py) ← MAIN ENTRY POINT
+│
+├── (1) Problem Loading (called by BenchmarkRunner)
+│   └── ProblemInterface (scripts/data_loaders/python/problem_interface.py)
+│       ├── MATLoader (scripts/data_loaders/python/mat_loader.py)
+│       └── DATLoader (scripts/data_loaders/python/dat_loader.py)
+│
+├── (2) Solver Execution (delegated to Process Interfaces)
+│   ├── PythonProcessInterface (scripts/solvers/python/python_process_interface.py)
+│   │   └── subprocess isolation → python_solver_runner.py
+│   │       ├── PythonSolverManager (internal solver management)
+│   │       ├── CvxpyRunner (scripts/solvers/python/cvxpy_runner.py)
+│   │       └── ScipyRunner (scripts/solvers/python/scipy_runner.py)
+│   └── MatlabProcessInterface (scripts/solvers/matlab_octave/matlab_process_interface.py)
+│       └── subprocess isolation → matlab_solver_runner.m
+│           ├── sedumi_runner.m
+│           └── sdpt3_runner.m
+│
+├── (3) Resource Control (applied during subprocess execution)
+│   └── ResourceLimits (scripts/utils/resource_limits.py)
+│       └── ulimit-based memory/CPU control
+│
+├── (4) Result Storage (controlled by BenchmarkRunner)
+│   └── DatabaseManager (scripts/database/database_manager.py)
+│       └── SQLite database operations
+│
+└── (5) Report Generation (initiated by BenchmarkRunner)
     └── ResultProcessor (scripts/reporting/result_processor.py)
+        └── HTML/CSV/JSON report generation
+
+Key Architecture Principles:
+• BenchmarkRunner orchestrates the entire execution flow
+• Process Interfaces provide subprocess isolation for crash protection
+• All database operations are controlled by BenchmarkRunner
+• Resource limits applied consistently across Python and MATLAB solvers
+• Symmetric architecture between Python and MATLAB execution paths
 ```
 
 ---
@@ -152,14 +285,14 @@ class ProblemData:
         self.metadata = {}        # Additional problem information
 ```
 
-### Solver Result Structure
+### Solver Result Structure (Enhanced Error Detection)
 ```python
 # scripts/solvers/solver_interface.py
 @dataclass
 class SolverResult:
-    """Standardized result format for all solvers"""
+    """Standardized result format for all solvers with comprehensive error detection"""
     solve_time: float                        # Execution time in seconds
-    status: str                              # 'optimal', 'infeasible', 'unbounded', 'error'
+    status: str                              # Status codes (see below)
     primal_objective_value: Optional[float] = None
     dual_objective_value: Optional[float] = None
     duality_gap: Optional[float] = None
@@ -170,11 +303,54 @@ class SolverResult:
     solver_version: Optional[str] = None
     additional_info: Optional[Dict[str, Any]] = None
     
+    # Status codes with clear error distinction:
+    # OPTIMAL         - Solver found optimal solution
+    # ERROR           - Solver-level error (convergence failure, numerical issues)
+    # UNSUPPORTED     - Problem type not supported by solver
+    # TIMEOUT         - Execution time limit exceeded
+    # SIGKILL         - Process forcibly terminated (OOM, manual kill, resource limits)
+    # SUBPROCESS_ERROR - Subprocess execution error (Python crash, library issues)
+    
     @classmethod
-    def create_error_result(cls, error_msg: str, solve_time: float = 0.0) -> 'SolverResult':
-        """Create standardized error result"""
-        return cls(solve_time=solve_time, status='error', 
+    def create_error_result(cls, error_msg: str, solve_time: float = 0.0,
+                          solver_name: str = "unknown", solver_version: str = "unknown") -> 'SolverResult':
+        """Create standardized solver-level error result"""
+        return cls(solve_time=solve_time, status='ERROR', 
+                  solver_name=solver_name, solver_version=solver_version,
                   additional_info={'error_message': error_msg})
+    
+    @classmethod
+    def create_timeout_result(cls, timeout_duration: float, solver_name: str = "unknown",
+                            solver_version: str = "unknown") -> 'SolverResult':
+        """Create standardized timeout result"""
+        return cls(solve_time=timeout_duration, status='TIMEOUT',
+                  solver_name=solver_name, solver_version=solver_version,
+                  additional_info={'timeout_duration': timeout_duration})
+    
+    @classmethod
+    def create_sigkill_result(cls, memory_limit_gb: Optional[float] = None, 
+                            solve_time: float = 0.0, solver_name: str = "unknown",
+                            solver_version: str = "unknown", error_details: str = "") -> 'SolverResult':
+        """Create standardized SIGKILL result (process forcibly terminated)"""
+        additional_info = {'error_type': 'SIGKILL', 'error_details': error_details}
+        if memory_limit_gb is not None:
+            additional_info['memory_limit_gb'] = memory_limit_gb
+        return cls(solve_time=solve_time, status='SIGKILL',
+                  solver_name=solver_name, solver_version=solver_version,
+                  additional_info=additional_info)
+    
+    @classmethod
+    def create_subprocess_error_result(cls, returncode: int, error_message: str,
+                                     solve_time: float = 0.0, solver_name: str = "unknown",
+                                     solver_version: str = "unknown") -> 'SolverResult':
+        """Create standardized subprocess execution error result"""
+        return cls(solve_time=solve_time, status='SUBPROCESS_ERROR',
+                  solver_name=solver_name, solver_version=solver_version,
+                  additional_info={
+                      'returncode': returncode,
+                      'error_type': 'SUBPROCESS_ERROR',
+                      'error_message': error_message
+                  })
 ```
 
 ---
@@ -234,146 +410,324 @@ class ProblemInterface:
         # Filter by library name if specified
 ```
 
-### 2. Python Solver Integration
+### 2. Python Solver Integration (Subprocess Architecture)
 
-#### Solver Configuration
+#### Resource Limits Utility
 ```python
-# scripts/solvers/python/python_interface.py
-PYTHON_SOLVER_CONFIGS = {
-    'cvxpy_clarabel': {
-        'solver_backend': 'CLARABEL',
-        'runner_class': 'CvxpyRunner',
-        'problem_types': ['LP', 'QP', 'SOCP', 'SDP']
-    },
-    'cvxpy_scs': {
-        'solver_backend': 'SCS',
-        'runner_class': 'CvxpyRunner', 
-        'problem_types': ['LP', 'QP', 'SOCP', 'SDP']
-    },
-    'cvxpy_ecos': {
-        'solver_backend': 'ECOS',
-        'runner_class': 'CvxpyRunner',
-        'problem_types': ['LP', 'QP', 'SOCP']
-    },
-    'cvxpy_osqp': {
-        'solver_backend': 'OSQP',
-        'runner_class': 'CvxpyRunner',
-        'problem_types': ['QP']
-    },
-    'cvxpy_cvxopt': {
-        'solver_backend': 'CVXOPT',
-        'runner_class': 'CvxpyRunner',
-        'problem_types': ['LP', 'QP', 'SOCP', 'SDP']
-    },
-    'cvxpy_sdpa': {
-        'solver_backend': 'SDPA',
-        'runner_class': 'CvxpyRunner',
-        'problem_types': ['SDP']
-    },
-    'cvxpy_scip': {
-        'solver_backend': 'SCIP',
-        'runner_class': 'CvxpyRunner',
-        'problem_types': ['LP', 'QP']
-    },
-    'cvxpy_highs': {
-        'solver_backend': 'HIGHS',
-        'runner_class': 'CvxpyRunner',
-        'problem_types': ['LP']
-    },
-    'scipy_linprog': {
-        'method': 'highs',
-        'runner_class': 'ScipyRunner',
-        'problem_types': ['LP']
-    },
-}
-```
-
-#### Python Execution Flow
-```python
-# scripts/solvers/python/python_interface.py
-class PythonInterface:
-    def solve(self, problem_name: str, solver_name: str, 
-              problem_data: Optional[ProblemData] = None,
-              timeout: Optional[float] = None) -> SolverResult:
-        """Execute Python solver with unified interface"""
-        
-        # 1. Load problem data if not provided
-        if problem_data is None:
-            problem_data = self.problem_interface.load_problem(problem_name)
-        
-        # 2. Get solver configuration
-        solver_config = self.PYTHON_SOLVER_CONFIGS[solver_name]
-        runner_class_name = solver_config['runner_class']
-        
-        # 3. Create appropriate runner
-        if runner_class_name == 'CvxpyRunner':
-            runner = CvxpyRunner(solver_config['solver_backend'])
-        elif runner_class_name == 'ScipyRunner':
-            runner = ScipyRunner(solver_config['method'])
-        
-        # 4. Execute solver
-        result = runner.solve(problem_data, timeout=timeout)
-        
-        # 5. Add problem class information for database storage
-        if not result.additional_info:
-            result.additional_info = {}
-        result.additional_info['problem_class'] = problem_data.problem_class
-        
-        return result
-```
-
-### 3. Timeout Implementation
-
-#### Timeout Architecture
-The system implements configurable timeout control at multiple levels to prevent hanging on computationally challenging problems:
-
-1. **Command-line Interface**: `--timeout` parameter (default: 120.0 seconds)
-2. **BenchmarkRunner**: `default_timeout` parameter passed to all solver interfaces
-3. **Solver Interfaces**: Native timeout support varies by solver backend
-4. **Result Handling**: Standardized TIMEOUT status in SolverResult
-
-#### Timeout Implementation Details
-```python
-# main.py - Command-line timeout configuration
-def run_benchmark(timeout: float = 120.0) -> bool:
-    runner = BenchmarkRunner(default_timeout=timeout)
-
-# scripts/benchmark/runner.py - Timeout propagation
-class BenchmarkRunner:
-    def __init__(self, default_timeout: float = 120.0):
-        self.default_timeout = default_timeout
+# scripts/utils/resource_limits.py
+def build_resource_limited_command(cmd: List[str], 
+                                 memory_limit_gb: Optional[float] = None) -> List[str]:
+    """Build command with ulimit-based resource limitations"""
+    if platform.system() == 'Windows' or memory_limit_gb is None:
+        return cmd
     
-    def run_single_benchmark(self, problem_name: str, solver_name: str):
-        if interface_type == 'python':
-            result = self.python_interface.solve(
-                problem_name, solver_name, timeout=self.default_timeout
-            )
-        elif interface_type == 'matlab':
-            result = self.matlab_interface.solve(
-                problem_name, solver_name, timeout=self.default_timeout
-            )
+    memory_limit_kb = int(memory_limit_gb * 1024 * 1024)
+    quoted_cmd = ' '.join(shlex.quote(arg) for arg in cmd)
+    ulimit_cmd = f'ulimit -v {memory_limit_kb}; {quoted_cmd}'
+    
+    return ['bash', '-c', ulimit_cmd]
 ```
 
-#### Solver-Specific Timeout Handling
-**Python Solvers (CVXPY)**:
-- **Native Support**: HIGHS (`time_limit`), SCS (`max_iters` approximation)
-- **Manual Detection**: CLARABEL, ECOS (rely on solve time comparison)
-- **Timeout Result**: Automatic TIMEOUT status generation when time limit exceeded
+#### Subprocess Interface Configuration
+```python
+# scripts/solvers/python/python_process_interface.py
+class PythonProcessInterface:
+    PYTHON_SOLVER_CONFIGS = {
+        'cvxpy_clarabel': {'display_name': 'CLARABEL (CVXPY)'},
+        'cvxpy_scs': {'display_name': 'SCS (CVXPY)'},
+        'cvxpy_ecos': {'display_name': 'ECOS (CVXPY)'},
+        'cvxpy_osqp': {'display_name': 'OSQP (CVXPY)'},
+        'cvxpy_cvxopt': {'display_name': 'CVXOPT (CVXPY)'},
+        'cvxpy_sdpa': {'display_name': 'SDPA (CVXPY)'},
+        'cvxpy_scip': {'display_name': 'SCIP (CVXPY)'},
+        'cvxpy_highs': {'display_name': 'HIGHS (CVXPY)'},
+        'scipy_linprog': {'display_name': 'LINPROG (SciPy)'},
+    }
+```
 
-**Python Solvers (SciPy)**:
-- **Approximation**: `maxiter` parameter conversion for rough timeout control
+#### Python Subprocess Execution Flow
+```python
+# scripts/solvers/python/python_process_interface.py
+class PythonProcessInterface:
+    def solve(self, problem_name: str, solver_name: str,
+              timeout: Optional[float] = None,
+              memory_limit_gb: Optional[float] = None) -> SolverResult:
+        """Execute Python solver in isolated subprocess"""
+        
+        # 1. Validate solver name
+        if solver_name not in self.PYTHON_SOLVER_CONFIGS:
+            raise ValueError(f"'{solver_name}' is not a Python solver")
+        
+        # 2. Use provided limits or defaults
+        actual_timeout = timeout or self.default_timeout
+        actual_memory_limit = memory_limit_gb or self.default_memory_limit
+        
+        # 3. Execute solver in subprocess with resource limits
+        return self._call_python_solver(problem_name, solver_name, 
+                                      actual_timeout, actual_memory_limit)
+    
+    def _call_python_solver(self, problem_name: str, solver_name: str,
+                           timeout: float, memory_limit_gb: float) -> SolverResult:
+        """Execute Python solver subprocess with error detection"""
+        
+        with temp_file_context(".json") as result_file:
+            # Build subprocess command
+            cmd = [
+                self.python_executable,
+                'scripts/solvers/python/python_solver_runner.py',
+                '--problem', problem_name,
+                '--solver', solver_name,
+                '--result-file', result_file
+            ]
+            
+            # Apply resource limits (ulimit-based)
+            cmd = build_resource_limited_command(cmd, memory_limit_gb)
+            
+            # Execute with comprehensive error detection
+            result = subprocess.run(cmd, timeout=timeout, capture_output=True, text=True)
+            
+            # Comprehensive error detection
+            if result.returncode == -9 or result.returncode == 137:
+                # SIGKILL detection
+                return SolverResult.create_sigkill_result(
+                    memory_limit_gb=memory_limit_gb, error_details=f"returncode {result.returncode}")
+            elif result.returncode != 0:
+                # Other subprocess errors
+                return SolverResult.create_subprocess_error_result(
+                    returncode=result.returncode, error_message=result.stderr)
+            
+            # Read and parse JSON result
+            with open(result_file, 'r') as f:
+                return self._dict_to_solver_result(json.load(f), solver_name)
+```
 
-**MATLAB Solvers**:
-- **Subprocess Timeout**: Python subprocess timeout for external MATLAB execution
-- **Java Suppression**: Environment variables to prevent Java initialization timeouts
+#### Python Solver Runner (Subprocess Entry Point)
+```python
+# scripts/solvers/python/python_solver_runner.py
+class PythonSolverManager:
+    """Internal solver management (renamed from PythonInterface)"""
+    PYTHON_SOLVER_CONFIGS = {
+        # Same configuration as before but used within subprocess
+        "scipy_linprog": {"class": ScipySolver, "kwargs": {}},
+        "cvxpy_clarabel": {"class": CvxpySolver, "kwargs": {"backend": "CLARABEL"}},
+        # ... other solvers
+    }
+    
+    def solve(self, problem_name: str, solver_name: str) -> SolverResult:
+        """Execute solver within subprocess (internal implementation)"""
+        # This is the same logic as the old PythonInterface.solve()
+        # but runs within an isolated subprocess
+        
+def main():
+    """Subprocess entry point"""
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--problem', required=True)
+    parser.add_argument('--solver', required=True)
+    parser.add_argument('--result-file', required=True)
+    parser.add_argument('--memory-limit', type=float, help='Memory limit in GB')
+    args = parser.parse_args()
+    
+    # Apply memory limit using resource module (additional protection)
+    if args.memory_limit and platform.system() != 'Windows':
+        memory_bytes = int(args.memory_limit * 1024 * 1024 * 1024)
+        resource.setrlimit(resource.RLIMIT_AS, (memory_bytes, memory_bytes))
+    
+    # Execute solver using internal manager
+    manager = PythonSolverManager()
+    result = manager.solve(args.problem, args.solver)
+    
+    # Serialize result to JSON for parent process
+    with open(args.result_file, 'w') as f:
+        json.dump(result.to_dict(), f, indent=2, default=str)
+
+if __name__ == "__main__":
+    main()
+```
+
+### 3. MATLAB Solver Integration (Subprocess Architecture)
+
+#### MATLAB Process Interface Configuration
+```python
+# scripts/solvers/matlab_octave/matlab_process_interface.py
+class MatlabProcessInterface:
+    MATLAB_SOLVER_CONFIGS = {
+        "matlab_sedumi": {
+            "display_name": "SeDuMi (MATLAB)",
+            "matlab_solver": "sedumi",
+            "runner_function": "sedumi_runner"
+        },
+        "matlab_sdpt3": {
+            "display_name": "SDPT3 (MATLAB)",
+            "matlab_solver": "sdpt3",
+            "runner_function": "sdpt3_runner"
+        }
+    }
+    
+    def __init__(self, memory_limit_gb: float = 16.0, timeout: Optional[float] = 300, 
+                 use_octave: bool = False, **kwargs):
+        """Initialize with resource limits (symmetrical with Python)"""
+        self.default_memory_limit = memory_limit_gb
+        self.default_timeout = timeout
+        self.use_octave = use_octave
+```
+
+#### MATLAB Subprocess Execution Flow
+```python
+# scripts/solvers/matlab_octave/matlab_process_interface.py
+class MatlabProcessInterface:
+    def solve(self, problem_name: str, solver_name: str,
+              timeout: Optional[float] = None,
+              memory_limit_gb: Optional[float] = None) -> SolverResult:
+        """Execute MATLAB solver in isolated subprocess"""
+        
+        # Use provided limits or defaults
+        actual_timeout = timeout or self.default_timeout
+        actual_memory_limit = memory_limit_gb or self.default_memory_limit
+        
+        return self._call_matlab_interface(problem_name, solver_name, 
+                                         actual_timeout, actual_memory_limit)
+    
+    def _call_matlab_interface(self, problem_name: str, matlab_solver: str,
+                             timeout: float, memory_limit_gb: float) -> SolverResult:
+        """Execute MATLAB solver subprocess with error detection"""
+        
+        with temp_file_context(".json") as result_file:
+            # Build MATLAB command
+            matlab_command = (
+                f"addpath('{matlab_script_dir}'); "
+                f"matlab_solver_runner('{problem_name}', '{matlab_solver}', "
+                f"'{result_file}', {str(self.save_solutions).lower()}, '{runner_function}')"
+            )
+            
+            # Build subprocess command
+            if self.use_octave:
+                cmd = [self.matlab_executable, '--eval', matlab_command]
+            else:
+                cmd = [self.matlab_executable, '-batch', matlab_command]
+            
+            # Apply resource limits (ulimit-based, same as Python)
+            cmd = build_resource_limited_command(cmd, memory_limit_gb)
+            
+            # Execute with comprehensive error detection
+            result = subprocess.run(cmd, timeout=timeout, capture_output=True, text=True)
+            
+            # Comprehensive error detection (same as Python)
+            if result.returncode == -9 or result.returncode == 137:
+                # SIGKILL detection
+                return SolverResult.create_sigkill_result(
+                    memory_limit_gb=memory_limit_gb, 
+                    error_details=f"Process terminated (returncode {result.returncode})")
+            elif result.returncode != 0:
+                # Other subprocess errors
+                return SolverResult.create_subprocess_error_result(
+                    returncode=result.returncode, error_message=result.stderr)
+            
+            # Read and parse JSON result
+            with open(result_file, 'r') as f:
+                return self._convert_matlab_result(json.load(f), matlab_solver)
+```
+
+#### MATLAB Solver Runner (Subprocess Entry Point)
+```matlab
+% scripts/solvers/matlab_octave/matlab_solver_runner.m
+function matlab_solver_runner(problem_name, solver_name, result_file, save_solutions, runner_function)
+    % Main MATLAB solver runner for subprocess execution
+    
+    try
+        % Load problem registry and resolve file path
+        [problem_config, file_path] = read_problem_registry(problem_name);
+        file_type = problem_config.file_type;
+        
+        % Load problem data using appropriate loader
+        if strcmp(file_type, 'mat')
+            [A, b, c, K] = mat_loader(file_path);
+        elseif strcmp(file_type, 'dat-s')
+            [A, b, c, K] = dat_loader(file_path);
+        end
+        
+        % Execute solver using dynamic function call
+        [x, y, result] = feval(runner_function, A, b, c, K);
+        
+        % Calculate standardized metrics and convert to JSON
+        result = calculate_solver_metrics(result, x, y, A, b, c, K);
+        json_result = convert_to_json_result(result);
+        save_json_safely(json_result, result_file);
+        
+    catch ME
+        % Create error result for subprocess communication
+        error_result = create_error_result(ME, solver_name);
+        save_json_safely(error_result, result_file);
+    end
+end
+```
+
+### 4. Unified Resource Management and Error Detection
+
+#### Resource Management Architecture
+The system implements comprehensive resource control to prevent system crashes and enable safe execution of large-scale optimization problems:
+
+1. **Memory Limits**: ulimit-based virtual memory control (default: 8GB Python, 16GB MATLAB)
+2. **Timeout Control**: subprocess.run() timeout parameter (default: 120.0 seconds)
+3. **Process Isolation**: All solver execution in separate subprocesses
+4. **Error Detection**: Comprehensive status codes with detailed error information
+
+#### Resource Limits Implementation
+```python
+# scripts/utils/resource_limits.py - Unified resource control
+def build_resource_limited_command(cmd: List[str], 
+                                 memory_limit_gb: Optional[float] = None) -> List[str]:
+    """Apply ulimit-based memory limits to any subprocess command"""
+    if platform.system() == 'Windows' or memory_limit_gb is None:
+        return cmd
+    
+    memory_limit_kb = int(memory_limit_gb * 1024 * 1024)
+    quoted_cmd = ' '.join(shlex.quote(arg) for arg in cmd)
+    ulimit_cmd = f'ulimit -v {memory_limit_kb}; {quoted_cmd}'
+    
+    return ['bash', '-c', ulimit_cmd]
+
+# Both Python and MATLAB interfaces use the same resource control
+python_cmd = build_resource_limited_command(python_cmd, memory_limit_gb=8.0)
+matlab_cmd = build_resource_limited_command(matlab_cmd, memory_limit_gb=16.0)
+```
+
+#### Comprehensive Error Detection
+The subprocess architecture enables detailed error classification:
 
 ```python
-# Example: CVXPY timeout handling
-def solve(self, problem_data: ProblemData, timeout: Optional[float] = None) -> SolverResult:
-    solver_options = self._get_solver_options(timeout)
-    solve_start_time = time.time()
+# Both Python and MATLAB interfaces implement identical error detection
+def _execute_with_error_detection(self, cmd, timeout, memory_limit_gb):
+    result = subprocess.run(cmd, timeout=timeout, capture_output=True, text=True)
     
-    # Solve with timeout-aware options
+    # SIGKILL detection (OOM, manual kill, resource limits)
+    if result.returncode == -9 or result.returncode == 137:
+        return SolverResult.create_sigkill_result(
+            memory_limit_gb=memory_limit_gb,
+            error_details=f"Process terminated (returncode {result.returncode})"
+        )
+    
+    # Other subprocess errors (Python crashes, MATLAB errors, etc.)
+    elif result.returncode != 0:
+        return SolverResult.create_subprocess_error_result(
+            returncode=result.returncode,
+            error_message=result.stderr
+        )
+    
+    # Success - parse JSON result from subprocess
+    return self._parse_subprocess_result(result_file)
+```
+
+#### Error Status Classification
+| Status | Description | Detection Method | Database Usage |
+|--------|-------------|------------------|----------------|
+| `OPTIMAL` | Solver found solution | Normal execution | Success analysis |
+| `ERROR` | Solver-level error | returncode=0, solver reports error | Solver robustness |
+| `UNSUPPORTED` | Problem type not supported | returncode=0, compatibility check | Solver coverage |
+| `TIMEOUT` | Time limit exceeded | subprocess.TimeoutExpired | Performance analysis |
+| `SIGKILL` | Process forcibly terminated | returncode=-9/137 | **System protection analysis** |
+| `SUBPROCESS_ERROR` | Execution environment error | returncode!=0 (other) | Infrastructure issues |
+
+---
     cvx_problem.solve(solver=self.backend, **solver_options)
     solve_time = time.time() - solve_start_time
     
@@ -632,6 +986,109 @@ class EnvironmentCollector:
             'timestamp': datetime.now().isoformat(),
             'hostname': socket.gethostname()
         }
+```
+
+---
+
+## Command-Line Interface and Usage
+
+### Timeout Configuration
+
+The system provides comprehensive timeout control at multiple levels to handle computationally intensive optimization problems:
+
+#### Default Timeout Values
+- **Default**: 120.0 seconds (2 minutes) - suitable for most problems
+- **Quick testing**: 60 seconds - for rapid validation
+- **Medium problems**: 300 seconds (5 minutes) - for moderately difficult problems  
+- **Large SDP problems**: 600-1800 seconds (10-30 minutes) - for computationally intensive problems
+
+#### Command-Line Usage Examples
+
+```bash
+# Basic benchmark execution with default timeout (120s)
+python main.py --benchmark --problems nb arch0
+
+# Quick testing with reduced timeout
+python main.py --benchmark --problems nb --timeout 60
+
+# Medium timeout for moderate problems
+python main.py --all --timeout 300
+
+# Extended timeout for challenging SDP problems  
+python main.py --benchmark --library_names SDPLIB --timeout 600
+
+# Maximum timeout for very difficult problems
+python main.py --benchmark --problems maxG55 --timeout 1800
+
+# Dry run testing with custom timeout
+python main.py --benchmark --problems nb --timeout 30 --dry-run
+```
+
+#### Timeout Behavior
+
+**Process Termination**: When timeout is exceeded, the subprocess is forcibly terminated and marked with `TIMEOUT` status in the database.
+
+**Resource Management**: Timeout works in conjunction with memory limits (ulimit) to provide comprehensive resource control.
+
+**Error Detection**: The system distinguishes between:
+- `TIMEOUT`: Process exceeded time limit
+- `SIGKILL`: Process killed by system (memory limit, manual termination)
+- `SUBPROCESS_ERROR`: Process failed with non-zero exit code
+- `ERROR`: Solver-level error within successful subprocess
+
+#### Integration with BenchmarkRunner
+
+```python
+# Timeout propagation through system layers
+main.py --timeout 300
+  ↓
+BenchmarkRunner(default_timeout=300.0)
+  ↓  
+ProcessInterface.solve(timeout=300.0)
+  ↓
+subprocess.run(timeout=300.0)
+```
+
+#### Solver-Specific Timeout Handling
+
+**Python Solvers**:
+- Native timeout support: HIGHS, SCS (via solver parameters)
+- Manual detection: Other solvers (time comparison after solve)
+- All solvers: Subprocess-level timeout as backup
+
+**MATLAB Solvers**:
+- Subprocess timeout: Primary timeout mechanism
+- MATLAB startup buffer: +15 seconds added to account for initialization
+- Environment isolation: Java/X11 suppression to prevent startup delays
+
+### Command-Line Arguments Reference
+
+```bash
+# Core benchmark execution
+python main.py --benchmark [OPTIONS]
+python main.py --all [OPTIONS]
+
+# Problem selection
+--problems P1 P2 P3          # Specific problems
+--library_names DIMACS SDPLIB  # Entire libraries
+--test-problems              # Problems marked for testing only
+
+# Solver selection  
+--solvers S1 S2 S3          # Specific solvers
+# (default: all available solvers)
+
+# Resource control
+--timeout SECONDS           # Solver execution timeout (default: 120.0)
+
+# Output control
+--dry-run                   # Skip database operations (testing)
+--save-solutions           # Save optimal solutions to disk
+--verbose, -v              # Detailed logging
+--quiet, -q                # Minimal output
+
+# System operations
+--validate                 # Test environment setup
+--report                   # Generate reports only
 ```
 
 ---
