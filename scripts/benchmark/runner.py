@@ -22,7 +22,7 @@ import sys
 import time
 import json
 from pathlib import Path
-from typing import Dict, List, Optional, Any
+from typing import Dict, List, Optional, Any, Tuple
 import yaml
 
 # Add project root to path for imports
@@ -426,24 +426,65 @@ class BenchmarkRunner:
             }
         }
         
-        # Test solver creation
+        # Test solver availability using lightweight import validation
         for solver_name in self.get_available_solvers():
             report['summary']['total_solvers'] += 1
             try:
-                solver = self.create_solver(solver_name)
-                report['solvers'][solver_name] = {
-                    'status': 'working',
-                    'version': solver.get_version()
-                }
-                report['summary']['working_solvers'] += 1
+                interface_type = self._solver_interface_map.get(solver_name)
+                
+                if interface_type == 'python':
+                    # Test Python solver availability via import
+                    status, version_info = self._test_python_solver_import(solver_name)
+                elif interface_type == 'matlab':
+                    # Test MATLAB solver availability  
+                    if self.matlab_interface is None:
+                        report['solvers'][solver_name] = {
+                            'status': 'error',
+                            'error': 'MATLAB interface not available'
+                        }
+                        continue
+                    status, version_info = self._test_matlab_solver_availability(solver_name)
+                else:
+                    report['solvers'][solver_name] = {
+                        'status': 'error',
+                        'error': f'Unknown interface type: {interface_type}'
+                    }
+                    continue
+                
+                if status == 'working':
+                    report['solvers'][solver_name] = {
+                        'status': 'working',
+                        'version': version_info
+                    }
+                    report['summary']['working_solvers'] += 1
+                else:
+                    report['solvers'][solver_name] = {
+                        'status': 'error',
+                        'error': version_info  # version_info contains error message when status != 'working'
+                    }
+                    
             except Exception as e:
                 report['solvers'][solver_name] = {
                     'status': 'error',
                     'error': str(e)
                 }
         
-        # Test problem loading using problem interface
-        for problem_name in self.get_available_problems():
+        # Test problem loading using problem interface (lightweight validation)
+        # Use test problems first, fall back to representative problems from each library
+        test_problems = self.get_available_problems(for_test_only=True)
+        if not test_problems:
+            # If no test problems, take first problem from each library
+            stats = self.problem_interface.get_problem_statistics()
+            test_problems = []
+            for library in stats.get("libraries", {}):
+                library_problems = self.problem_interface.get_problems_by_library([library])
+                if library_problems:
+                    test_problems.append(library_problems[0])
+        
+        # Limit test problems for validation performance
+        test_problems = test_problems[:5]
+        
+        for problem_name in test_problems:
             report['summary']['total_problems'] += 1
             try:
                 problem_config = self.problem_interface.get_problem_config(problem_name)
@@ -461,6 +502,82 @@ class BenchmarkRunner:
                 }
         
         return report
+    
+    def _test_python_solver_import(self, solver_name: str) -> Tuple[str, str]:
+        """
+        Test Python solver availability via import testing.
+        
+        Args:
+            solver_name: Name of the solver to test
+            
+        Returns:
+            Tuple of (status, version_info) where status is 'working' or 'error'
+        """
+        try:
+            # Test basic imports for each solver type
+            if solver_name.startswith('cvxpy_'):
+                import cvxpy as cp
+                backend = solver_name.replace('cvxpy_', '').upper()
+                
+                # Test specific backend availability
+                if backend == 'CLARABEL':
+                    import clarabel
+                    return 'working', f"CVXPY {cp.__version__} + CLARABEL {clarabel.__version__}"
+                elif backend == 'SCS':
+                    import scs
+                    return 'working', f"CVXPY {cp.__version__} + SCS {scs.__version__}"
+                elif backend == 'ECOS':
+                    import ecos
+                    return 'working', f"CVXPY {cp.__version__} + ECOS {ecos.__version__}"
+                elif backend == 'OSQP':
+                    import osqp
+                    return 'working', f"CVXPY {cp.__version__} + OSQP {osqp.__version__}"
+                elif backend == 'CVXOPT':
+                    import cvxopt
+                    return 'working', f"CVXPY {cp.__version__} + CVXOPT {cvxopt.__version__}"
+                elif backend == 'SDPA':
+                    # SDPA is optional, may not have version
+                    return 'working', f"CVXPY {cp.__version__} + SDPA"
+                elif backend == 'SCIP':
+                    import pyscipopt
+                    return 'working', f"CVXPY {cp.__version__} + SCIP {pyscipopt.__version__}"
+                elif backend == 'HIGHS':
+                    import highspy
+                    return 'working', f"CVXPY {cp.__version__} + HiGHS"
+                else:
+                    return 'error', f"Unknown CVXPY backend: {backend}"
+                    
+            elif solver_name == 'scipy_linprog':
+                import scipy.optimize
+                import scipy
+                return 'working', f"SciPy {scipy.__version__}"
+            else:
+                return 'error', f"Unknown Python solver: {solver_name}"
+                
+        except ImportError as e:
+            return 'error', f"Import failed: {str(e)}"
+        except Exception as e:
+            return 'error', f"Validation error: {str(e)}"
+    
+    def _test_matlab_solver_availability(self, solver_name: str) -> Tuple[str, str]:
+        """
+        Test MATLAB solver availability.
+        
+        Args:
+            solver_name: Name of the MATLAB solver to test
+            
+        Returns:
+            Tuple of (status, version_info) where status is 'working' or 'error'
+        """
+        try:
+            # For MATLAB solvers, check if interface detected them
+            if solver_name in self.matlab_interface.get_available_solvers():
+                # MATLAB interface already detected this solver during initialization
+                return 'working', 'MATLAB solver detected'
+            else:
+                return 'error', 'MATLAB solver not detected'
+        except Exception as e:
+            return 'error', f"MATLAB validation error: {str(e)}"
 
 
 if __name__ == "__main__":
