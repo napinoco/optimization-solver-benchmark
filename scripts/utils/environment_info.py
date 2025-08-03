@@ -74,7 +74,7 @@ def get_cpu_info() -> Dict[str, Any]:
 def get_memory_info() -> Dict[str, Any]:
     """Get memory information."""
     memory = psutil.virtual_memory()
-    return {
+    result = {
         "total": memory.total,
         "available": memory.available,
         "percent": memory.percent,
@@ -83,6 +83,27 @@ def get_memory_info() -> Dict[str, Any]:
         "total_gb": round(memory.total / (1024**3), 2),
         "available_gb": round(memory.available / (1024**3), 2)
     }
+    
+    # In containers, use cgroup memory limit if available and more accurate
+    if os.path.exists('/.dockerenv'):
+        container_info = get_container_info()
+        if container_info.get('memory_limit'):
+            cgroup_total = container_info['memory_limit']
+            # Use cgroup limit as total (container memory limit is authoritative)
+            if cgroup_total != memory.total:
+                result["total"] = cgroup_total
+                result["total_gb"] = round(cgroup_total / (1024**3), 2)
+                # Recalculate available memory proportionally
+                proportion_available = memory.available / memory.total
+                result["available"] = int(cgroup_total * proportion_available)
+                result["available_gb"] = round(result["available"] / (1024**3), 2)
+                # Recalculate other values
+                result["used"] = cgroup_total - result["available"]
+                result["free"] = result["available"]
+                result["percent"] = round((result["used"] / cgroup_total) * 100, 2)
+                logger.debug(f"Using container memory limit: {result['total_gb']}GB (from cgroup)")
+    
+    return result
 
 def get_python_info() -> Dict[str, str]:
     """Get Python environment information."""
@@ -104,6 +125,168 @@ def get_disk_info() -> Dict[str, Any]:
         "total_gb": round(disk_usage.total / (1024**3), 2),
         "free_gb": round(disk_usage.free / (1024**3), 2)
     }
+
+def get_container_info() -> Dict[str, Any]:
+    """Get container environment information."""
+    container_info = {
+        'is_container': False,
+        'container_type': None,
+        'memory_limit': None,
+        'memory_limit_gb': None,
+        'cpu_limit': None,
+        'container_id': None,
+        'container_name': None
+    }
+    
+    try:
+        # Check for Docker container
+        if os.path.exists('/.dockerenv'):
+            container_info['is_container'] = True
+            container_info['container_type'] = 'docker'
+            logger.debug("Docker container detected via /.dockerenv")
+            
+            # Try to get container ID from cgroup
+            try:
+                with open('/proc/self/cgroup', 'r') as f:
+                    cgroup_content = f.read()
+                    # Look for Docker container ID pattern
+                    import re
+                    docker_id_match = re.search(r'/docker/([a-f0-9]{64})', cgroup_content)
+                    if docker_id_match:
+                        container_info['container_id'] = docker_id_match.group(1)[:12]  # Short ID
+                        logger.debug(f"Container ID: {container_info['container_id']}")
+            except (IOError, OSError):
+                logger.debug("Could not read container ID from cgroup")
+            
+            # Get memory limit (cgroup v1 and v2)
+            memory_limit_files = [
+                '/sys/fs/cgroup/memory/memory.limit_in_bytes',  # cgroup v1
+                '/sys/fs/cgroup/memory.max'  # cgroup v2
+            ]
+            
+            for limit_file in memory_limit_files:
+                try:
+                    if os.path.exists(limit_file):
+                        with open(limit_file, 'r') as f:
+                            limit = int(f.read().strip())
+                            # Check if it's a real limit (not the huge default value)
+                            if limit < 9223372036854775807:  # Max int64 value
+                                container_info['memory_limit'] = limit
+                                container_info['memory_limit_gb'] = round(limit / (1024**3), 2)
+                                logger.debug(f"Memory limit detected: {container_info['memory_limit_gb']}GB")
+                                break
+                except (IOError, OSError, ValueError) as e:
+                    logger.debug(f"Could not read memory limit from {limit_file}: {e}")
+            
+            # Get CPU limit information with comprehensive cgroup v1/v2 support
+            def _detect_cpu_limit():
+                """Comprehensive CPU limit detection for various cgroup configurations."""
+                import glob
+                
+                # cgroup v1 patterns
+                cgroup_v1_patterns = [
+                    '/sys/fs/cgroup/cpu/cpu.cfs_quota_us',
+                    '/sys/fs/cgroup/cpu/docker/*/cpu.cfs_quota_us',
+                    '/sys/fs/cgroup/cpu/system.slice/docker-*.scope/cpu.cfs_quota_us'
+                ]
+                
+                # cgroup v2 patterns  
+                cgroup_v2_patterns = [
+                    '/sys/fs/cgroup/cpu.max',
+                    '/sys/fs/cgroup/system.slice/docker-*.scope/cpu.max',
+                    '/sys/fs/cgroup/user.slice/*/docker-*.scope/cpu.max'
+                ]
+                
+                # Try cgroup v1 detection
+                for pattern in cgroup_v1_patterns:
+                    quota_files = glob.glob(pattern) if '*' in pattern else ([pattern] if os.path.exists(pattern) else [])
+                    for quota_file in quota_files:
+                        try:
+                            with open(quota_file, 'r') as f:
+                                quota_content = f.read().strip()
+                                if quota_content != '-1' and quota_content.isdigit():
+                                    # Get corresponding period file
+                                    period_file = quota_file.replace('cpu.cfs_quota_us', 'cpu.cfs_period_us')
+                                    if os.path.exists(period_file):
+                                        with open(period_file, 'r') as pf:
+                                            period_content = pf.read().strip()
+                                            if period_content.isdigit():
+                                                quota = int(quota_content)
+                                                period = int(period_content)
+                                                if quota > 0 and period > 0:
+                                                    cpu_limit = quota / period
+                                                    logger.debug(f"CPU limit detected (cgroup v1): {cpu_limit} cores from {quota_file}")
+                                                    return round(cpu_limit, 2)
+                        except (IOError, OSError, ValueError) as e:
+                            logger.debug(f"Could not read cgroup v1 CPU limit from {quota_file}: {e}")
+                
+                # Try cgroup v2 detection
+                for pattern in cgroup_v2_patterns:
+                    cpu_max_files = glob.glob(pattern) if '*' in pattern else ([pattern] if os.path.exists(pattern) else [])
+                    for cpu_max_file in cpu_max_files:
+                        try:
+                            with open(cpu_max_file, 'r') as f:
+                                cpu_max_content = f.read().strip()
+                                if cpu_max_content != 'max' and ' ' in cpu_max_content:
+                                    # Format: "quota period" (e.g., "400000 100000")
+                                    parts = cpu_max_content.split()
+                                    if len(parts) == 2 and parts[0].isdigit() and parts[1].isdigit():
+                                        quota = int(parts[0])
+                                        period = int(parts[1])
+                                        if quota > 0 and period > 0:
+                                            cpu_limit = quota / period
+                                            logger.debug(f"CPU limit detected (cgroup v2): {cpu_limit} cores from {cpu_max_file}")
+                                            return round(cpu_limit, 2)
+                        except (IOError, OSError, ValueError) as e:
+                            logger.debug(f"Could not read cgroup v2 CPU limit from {cpu_max_file}: {e}")
+                
+                return None
+            
+            container_info['cpu_limit'] = _detect_cpu_limit()
+            
+            # Try to get container hostname (often the container name or ID)
+            try:
+                container_info['container_name'] = platform.node()
+                logger.debug(f"Container hostname: {container_info['container_name']}")
+            except Exception:
+                pass
+        
+        # Check for other container types (Kubernetes, LXC, etc.)
+        elif os.path.exists('/proc/1/cgroup'):
+            try:
+                with open('/proc/1/cgroup', 'r') as f:
+                    cgroup_content = f.read()
+                    if 'kubepods' in cgroup_content:
+                        container_info['is_container'] = True
+                        container_info['container_type'] = 'kubernetes'
+                        logger.debug("Kubernetes pod detected")
+                    elif 'lxc' in cgroup_content:
+                        container_info['is_container'] = True
+                        container_info['container_type'] = 'lxc'
+                        logger.debug("LXC container detected")
+            except (IOError, OSError):
+                pass
+        
+        # Additional container detection methods
+        if not container_info['is_container']:
+            # Check environment variables that indicate containerization
+            container_env_vars = [
+                'CONTAINER_ENV',
+                'DOCKER_CONTAINER',
+                'KUBERNETES_SERVICE_HOST'
+            ]
+            
+            for env_var in container_env_vars:
+                if os.environ.get(env_var):
+                    container_info['is_container'] = True
+                    container_info['container_type'] = 'detected_via_env'
+                    logger.debug(f"Container detected via environment variable: {env_var}")
+                    break
+    
+    except Exception as e:
+        logger.debug(f"Error detecting container information: {e}")
+    
+    return container_info
 
 def get_timezone_info() -> Dict[str, Any]:
     """Get timezone and time information."""
@@ -175,6 +358,7 @@ def collect_environment_info() -> Dict[str, Any]:
         "python": get_python_info(),
         "disk": get_disk_info(),
         "timezone": get_timezone_info(),
+        "container": get_container_info(),  # Add container information
         "git": get_git_info()  # Add Git repository information
     }
     
@@ -239,6 +423,18 @@ def _sanitize_environment_info(env_info: Dict[str, Any]) -> Dict[str, Any]:
                 'commit_hash': git.get('commit_hash')
             }
         # Remove: available, branch, is_dirty (privacy/security sensitive)
+    
+    # Container info - keep execution environment details (important for reproducibility)
+    if 'container' in env_info:
+        container = env_info['container']
+        sanitized['container'] = {
+            'is_container': container.get('is_container', False),
+            'container_type': container.get('container_type'),
+            'memory_limit_gb': container.get('memory_limit_gb'),
+            'cpu_limit': container.get('cpu_limit')
+        }
+        # Remove: container_id, container_name (potentially identifying)
+        # Keep: memory/CPU limits for performance analysis
     
     # Timezone - UTC ONLY (remove all location-specific timezone info)
     # Replace all timezone info with UTC standard to prevent location identification

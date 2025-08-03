@@ -1,0 +1,163 @@
+# Optimization Solver Benchmark System - Docker Build Exclusions
+# Exclude unnecessary files from Docker build context for faster builds
+
+# Version control
+.git
+.gitignore
+.gitmodules
+.github
+
+# IDE and editor files
+.vscode
+.idea
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# Python cache and virtual environments
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.Python
+build
+develop-eggs
+dist
+downloads
+eggs
+.eggs
+lib
+lib64
+parts
+sdist
+var
+wheels
+*.egg-info
+.installed.cfg
+*.egg
+MANIFEST
+.venv
+venv
+ENV
+env
+.env
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# pyenv
+.python-version
+
+# pytest
+.pytest_cache
+.coverage
+htmlcov
+.tox
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+.hypothesis
+
+# Documentation build
+docs/_build
+docs/build
+
+# Database files (will be mounted as volumes)
+database/*.db
+database/*.db-*
+
+# Generated reports and results (will be mounted as volumes)
+docs/pages/*.html
+docs/pages/data/*.json
+docs/pages/data/*.csv
+
+# Temporary and log files
+*.log
+*.tmp
+*.temp
+tmp/
+temp/
+logs/
+.logs
+
+# MATLAB/Octave temporary files
+*.m~
+*.asv
+octave-workspace
+
+# OS and system files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Docker files (except Dockerfile)
+docker-compose.override.yml
+.dockerignore
+
+# CI/CD and deployment
+.travis.yml
+.circleci
+.github/workflows/*.yml
+!.github/workflows/deploy.yml
+!.github/workflows/validate.yml
+
+# Large data files and archives
+*.tar.gz
+*.zip
+*.7z
+*.rar
+
+# Backup files
+*.bak
+*.backup
+*.old
+
+# MATLAB license files (will be mounted as volumes)
+.matlab/
+*.lic
+
+# Local development overrides
+docker-compose.local.yml
+.env.local
+
+# Problem libraries source (git submodules - will be mounted)
+problems/DIMACS/.git
+problems/SDPLIB/.git
+
+# Node.js (if any)
+node_modules
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Configuration overrides
+config/local_*.yaml
+config/dev_*.yaml
+
+# Include required files for build
+!requirements.txt
+!requirements-no-scip.txt
+
+# Performance profiling
+*.prof
+*.profile
+
+# Memory dumps
+*.dmp
+core.*
+
+# Large result datasets
+results_archive/
+*.results
+
+# Exclude this .dockerignore itself from copies
+.dockerignore

@@ -1,0 +1,121 @@
+# Optimization Solver Benchmark System - Docker Compose Configuration
+# Development and production-ready container orchestration
+
+version: '3.8'
+
+services:
+  benchmark:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+      args:
+        USER_ID: "${USER_ID:-1000}"
+        GROUP_ID: "${GROUP_ID:-1000}"
+    container_name: solver-benchmark
+    hostname: benchmark-container
+    
+    # Resource limitations (configurable via environment)
+    deploy:
+      resources:
+        limits:
+          memory: "${MEMORY_LIMIT:-16g}"
+          cpus: "${CPU_LIMIT:-4.0}"
+        reservations:
+          memory: "${MEMORY_RESERVATION:-4g}"
+          cpus: "${CPU_RESERVATION:-1.0}"
+    
+    # Volume mounts for development and data persistence
+    volumes:
+      # Source code (development override)
+      - ..:/app:rw
+      
+      # MATLAB license files (read-only)
+      - ${HOME}/.matlab:/home/solver/.matlab:ro
+      
+      # Problem libraries (read-only, via git submodules)
+      - ../problems:/app/problems:ro
+      
+      # Database and results (persistent)
+      - ../database:/app/database:rw
+      - ../docs:/app/docs:rw
+      
+      # Configuration (read-only)
+      - ../config:/app/config:ro
+      
+      # Cache and temporary files
+      - solver-cache:/tmp
+      - solver-logs:/var/log
+    
+    # Environment variables
+    environment:
+      # Python configuration
+      - PYTHONPATH=/app
+      - PYTHONUNBUFFERED=1
+      - PYTHONDONTWRITEBYTECODE=1
+      
+      # MATLAB/Octave configuration
+      - DISPLAY=
+      - _JAVA_OPTIONS=-Djava.awt.headless=true
+      - MATLAB_LOG_DIR=/tmp
+      - MLM_LICENSE_FILE=/home/solver/.matlab/R2023b_licenses/license.lic
+      
+      # Container identification
+      - CONTAINER_ENV=development
+      - BENCHMARK_TIMEOUT=${BENCHMARK_TIMEOUT:-120}
+      
+      # Timezone (override as needed)
+      - TZ=${TZ:-UTC}
+    
+    # Network configuration
+    networks:
+      - benchmark-network
+    
+    # Security options
+    security_opt:
+      - no-new-privileges:true
+    
+    # Resource monitoring
+    ulimits:
+      # Set reasonable limits (will be overridden by Docker memory limits)
+      memlock: -1
+      stack: 67108864
+    
+    # Working directory
+    working_dir: /app
+    
+    # Default command (can be overridden)
+    command: ["/usr/local/bin/entrypoint.sh", "python", "main.py", "--help"]
+    
+    # Health check
+    healthcheck:
+      test: ["CMD", "python", "-c", "import sys; print('Container healthy'); sys.exit(0)"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  # Optional: Development shell service
+  shell:
+    extends:
+      service: benchmark
+    container_name: solver-shell
+    command: ["/bin/bash"]
+    stdin_open: true
+    tty: true
+    profiles:
+      - dev
+
+# Named volumes for data persistence
+volumes:
+  solver-cache:
+    driver: local
+  solver-logs:
+    driver: local
+
+# Network configuration
+networks:
+  benchmark-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
