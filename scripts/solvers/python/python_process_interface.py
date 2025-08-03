@@ -29,8 +29,6 @@ from scripts.solvers.solver_interface import SolverResult
 from scripts.data_loaders.problem_loader import ProblemData
 from scripts.data_loaders.python.problem_interface import ProblemInterface
 from scripts.utils.temp_file_manager import temp_file_context
-from scripts.utils.resource_limits import build_resource_limited_command, format_memory_limit_display
-from scripts.utils.environment_info import get_memory_info
 from scripts.utils.logger import get_logger
 
 logger = get_logger("python_process_interface")
@@ -61,7 +59,6 @@ class PythonProcessInterface:
     def __init__(self, save_solutions: bool = False,
                  problem_interface: Optional[ProblemInterface] = None,
                  python_executable: str = sys.executable,
-                 memory_limit_gb: Optional[float] = None,
                  timeout: Optional[float] = 300,
                  **kwargs):
         """
@@ -71,27 +68,11 @@ class PythonProcessInterface:
             save_solutions: Whether to save optimal solutions to disk
             problem_interface: Optional problem interface for loading problems
             python_executable: Path to Python executable
-            memory_limit_gb: Memory limit for solver processes in GB (None for auto-detection based on system memory)
             timeout: Default timeout for solver execution
             **kwargs: Additional configuration parameters
         """
         self.save_solutions = save_solutions
         self.python_executable = python_executable
-        
-        # Set memory limit: use provided value or auto-detect based on system memory
-        if memory_limit_gb is None:
-            try:
-                memory_info = get_memory_info()
-                system_memory_gb = memory_info['total_gb']
-                self.default_memory_limit = system_memory_gb * 0.95  # Use 95% of system memory
-                logger.info(f"Auto-detected Python memory limit: {format_memory_limit_display(self.default_memory_limit)} (95% of {system_memory_gb:.1f}GB system memory)")
-            except Exception as e:
-                self.default_memory_limit = 8.0  # Fallback
-                logger.warning(f"Failed to detect system memory, using fallback: {format_memory_limit_display(self.default_memory_limit)} - {e}")
-        else:
-            self.default_memory_limit = memory_limit_gb
-            logger.info(f"Using provided Python memory limit: {format_memory_limit_display(self.default_memory_limit)}")
-        
         self.default_timeout = timeout
         self.config = kwargs
         
@@ -103,12 +84,10 @@ class PythonProcessInterface:
         
         logger.info(f"Initialized Python process interface (subprocess isolation)")
         logger.debug(f"Python executable: {python_executable}")
-        logger.debug(f"Default memory limit: {format_memory_limit_display(memory_limit_gb)}")
     
     def solve(self, problem_name: str, solver_name: str,
               problem_data: Optional[ProblemData] = None,
-              timeout: Optional[float] = None,
-              memory_limit_gb: Optional[float] = None) -> SolverResult:
+              timeout: Optional[float] = None) -> SolverResult:
         """
         Solve optimization problem using subprocess isolation.
         
@@ -117,7 +96,6 @@ class PythonProcessInterface:
             solver_name: Name of the solver to use (e.g., 'cvxpy_clarabel')
             problem_data: Optional pre-loaded problem data (ignored - subprocess loads directly)
             timeout: Optional timeout for solver execution
-            memory_limit_gb: Optional memory limit override
             
         Returns:
             SolverResult with standardized fields
@@ -132,16 +110,14 @@ class PythonProcessInterface:
             if solver_name not in self.PYTHON_SOLVER_CONFIGS:
                 raise ValueError(f"'{solver_name}' is not a Python solver")
             
-            # 2. Use provided limits or defaults
+            # 2. Use provided timeout or default
             actual_timeout = timeout or self.default_timeout
-            actual_memory_limit = memory_limit_gb or self.default_memory_limit
             
             # 3. Execute solver in subprocess
             result = self._call_python_solver(
                 problem_name=problem_name,
                 solver_name=solver_name,
-                timeout=actual_timeout,
-                memory_limit_gb=actual_memory_limit
+                timeout=actual_timeout
             )
             
             # 4. Ensure solver metadata is set
@@ -178,15 +154,14 @@ class PythonProcessInterface:
             )
     
     def _call_python_solver(self, problem_name: str, solver_name: str,
-                           timeout: float, memory_limit_gb: float) -> SolverResult:
+                           timeout: float) -> SolverResult:
         """
-        Execute Python solver in subprocess with resource limits.
+        Execute Python solver in subprocess.
         
         Args:
             problem_name: Name of the problem
             solver_name: Python solver name
             timeout: Timeout in seconds
-            memory_limit_gb: Memory limit in GB
             
         Returns:
             SolverResult from solver execution
@@ -212,11 +187,7 @@ class PythonProcessInterface:
                 if self.save_solutions:
                     cmd.append('--save-solutions')
                 
-                # Apply resource limits using utility
-                cmd = build_resource_limited_command(cmd, memory_limit_gb)
-                
                 logger.debug(f"Executing Python solver command: {' '.join(cmd)}")
-                logger.debug(f"Memory limit: {format_memory_limit_display(memory_limit_gb)}")
                 
                 # Execute with timeout
                 try:
@@ -236,31 +207,18 @@ class PythonProcessInterface:
                         # Check for SIGKILL (process forcibly terminated)
                         if result.returncode == -9 or result.returncode == 137:
                             logger.error(f"Process killed by SIGKILL, returncode: {result.returncode}")
-                            # Include memory limit info since we set ulimit
                             return SolverResult.create_sigkill_result(
-                                memory_limit_gb=memory_limit_gb,
+                                memory_limit_gb=None,
                                 solve_time=solve_time,
                                 solver_name=solver_name,
                                 solver_version="unknown",
                                 error_details=f"Process terminated (returncode {result.returncode}). {error_msg}"
-                            )
-                        # Check for Python MemoryError (caught by Python, not SIGKILL)
-                        elif "MemoryError" in error_msg or "cannot allocate memory" in error_msg:
-                            logger.error(f"Python MemoryError detected")
-                            # Still a subprocess error but with memory-related details
-                            return SolverResult.create_subprocess_error_result(
-                                returncode=result.returncode,
-                                error_message=f"Python memory allocation failed: {error_msg}",
-                                solve_time=solve_time,
-                                solver_name=solver_name,
-                                solver_version="unknown"
                             )
                         # Other subprocess errors
                         else:
                             full_error = f"Python subprocess failed (code {result.returncode}): {error_msg}"
                             logger.error(full_error)
                             
-                            # Use subprocess error result
                             return SolverResult.create_subprocess_error_result(
                                 returncode=result.returncode,
                                 error_message=error_msg,
