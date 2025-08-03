@@ -52,7 +52,7 @@ This is an automated benchmark system for optimization solvers (LP, QP, SOCP, SD
 
 ### Core Architecture
 - **Platform**: GitHub Actions CI/CD with GitHub Pages deployment
-- **Languages**: Python 3.12+, Octave (MATLAB-compatible)
+- **Languages**: Python 3.12+, MATLAB R2024+
 - **Storage**: SQLite database with structured schema
 - **Reporting**: Bootstrap 5 + Chart.js interactive dashboards
 
@@ -131,6 +131,13 @@ matlab -batch "setup_matlab_solvers"  # or octave --eval "setup_matlab_solvers"
 - **Test-Driven Validation**: Each task includes specific test criteria  
 - **Documentation-First**: Update docs for all features
 - **User Review**: Stop and wait for approval after each task
+
+### MVP Development Principles
+- **Minimal Viable Product**: Always implement the simplest solution that meets the requirement
+- **No Extra Features**: Do not add functionality beyond what is explicitly requested
+- **User Confirmation Required**: Before implementing any feature that seems necessary but wasn't explicitly requested, ask the user for confirmation
+- **YAGNI Principle**: "You Aren't Gonna Need It" - implement only what is needed right now
+- **Incremental Development**: Build the core functionality first, then iterate based on user feedback
 
 ---
 
