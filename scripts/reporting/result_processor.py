@@ -253,17 +253,17 @@ class ResultProcessor:
         
         try:
             with sqlite3.connect(self.db_path) as conn:
-                # Query for latest results using commit_hash and environment_info
-                # Use timestamp as tiebreaker for truly latest results
+                # Query for latest results using latest-per-group approach
+                # This ensures we get the latest result for EVERY (solver, problem) combination
                 query = """
-                    SELECT * FROM results 
-                    WHERE (commit_hash, environment_info, timestamp) IN (
-                        SELECT commit_hash, environment_info, MAX(timestamp)
-                        FROM results 
+                    SELECT r1.* FROM results r1
+                    INNER JOIN (
+                        SELECT solver_name, problem_name, MAX(timestamp) as max_timestamp
+                        FROM results
                         GROUP BY solver_name, problem_name
-                        ORDER BY timestamp DESC
-                        LIMIT 1000  -- Reasonable limit for latest batch
-                    )
+                    ) r2 ON r1.solver_name = r2.solver_name 
+                        AND r1.problem_name = r2.problem_name 
+                        AND r1.timestamp = r2.max_timestamp
                     ORDER BY problem_library, problem_name, solver_name, id DESC
                 """
                 
@@ -312,6 +312,7 @@ class ResultProcessor:
         try:
             with sqlite3.connect(self.db_path) as conn:
                 # Query for all results ordered by id for database restoration
+                # Note: This method returns ALL results, not just latest per group
                 query = """
                     SELECT * FROM results 
                     ORDER BY id ASC

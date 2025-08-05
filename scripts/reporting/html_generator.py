@@ -911,6 +911,29 @@ class HTMLGenerator:
             border-top: 3px solid #34495e !important;
         }
         
+        /* Gray styling for non-solution statuses */
+        .status-timeout,
+        .status-sigkill,
+        .status-subprocess-error,
+        .status-unsupported {
+            color: #999 !important;
+        }
+        
+        .status-timeout .cell-status,
+        .status-timeout .cell-solve-time,
+        .status-timeout .cell-objective,
+        .status-sigkill .cell-status,
+        .status-sigkill .cell-solve-time,
+        .status-sigkill .cell-objective,
+        .status-subprocess-error .cell-status,
+        .status-subprocess-error .cell-solve-time,
+        .status-subprocess-error .cell-objective,
+        .status-unsupported .cell-status,
+        .status-unsupported .cell-solve-time,
+        .status-unsupported .cell-objective {
+            color: #999 !important;
+        }
+        
         /* Cell layout for fixed 3-row structure */
         .cell-content {
             display: flex;
@@ -1186,6 +1209,12 @@ class HTMLGenerator:
                         css_class = 'status-optimal-inaccurate'
                     elif status_lower == 'unsupported':
                         css_class = 'status-unsupported'
+                    elif status_lower == 'timeout':
+                        css_class = 'status-timeout'
+                    elif status_lower == 'sigkill':
+                        css_class = 'status-sigkill'
+                    elif status_lower == 'subprocess_error':
+                        css_class = 'status-subprocess-error'
                     elif status_lower == 'error':
                         css_class = 'status-error'
                     elif status_lower in ['infeasible', 'unbounded']:
@@ -1260,11 +1289,20 @@ class HTMLGenerator:
 
         <div class="legend">
             <h3>📋 Status Legend</h3>
-            <p><span class="status-optimal" style="padding: 5px 10px; border-radius: 3px;">OPTIMAL</span> - Successfully solved to optimality</p>
-            <p><span class="status-unsupported" style="padding: 5px 10px; border-radius: 3px;">UNSUPPORTED</span> - Solver does not support this problem type</p>
-            <p><span class="status-error" style="padding: 5px 10px; border-radius: 3px;">ERROR</span> - Solver encountered an error</p>
-            <p><span class="status-infeasible" style="padding: 5px 10px; border-radius: 3px;">INFEASIBLE/UNBOUNDED</span> - Problem has no feasible solution</p>
-            <p><span class="status-unknown" style="padding: 5px 10px; border-radius: 3px;">—</span> - No result available</p>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 0.5rem;">
+                <div>
+                    <p><span class="status-optimal" style="padding: 5px 10px; border-radius: 3px;">OPTIMAL</span> - Successfully solved to optimality</p>
+                    <p><span class="status-error" style="padding: 5px 10px; border-radius: 3px;">ERROR</span> - Solver encountered an error</p>
+                    <p><span class="status-infeasible" style="padding: 5px 10px; border-radius: 3px;">INFEASIBLE/UNBOUNDED</span> - Problem has no feasible solution</p>
+                </div>
+                <div>
+                    <p><span class="status-unsupported" style="padding: 5px 10px; border-radius: 3px; color: #999;">UNSUPPORTED</span> - Solver does not support this problem type</p>
+                    <p><span class="status-timeout" style="padding: 5px 10px; border-radius: 3px; color: #999;">TIMEOUT</span> - Execution time limit exceeded</p>
+                    <p><span class="status-sigkill" style="padding: 5px 10px; border-radius: 3px; color: #999;">SIGKILL</span> - Process forcibly terminated (memory limits)</p>
+                    <p><span class="status-subprocess-error" style="padding: 5px 10px; border-radius: 3px; color: #999;">SUBPROCESS_ERROR</span> - Subprocess execution error</p>
+                    <p><span class="status-unknown" style="padding: 5px 10px; border-radius: 3px;">—</span> - No result available</p>
+                </div>
+            </div>
         </div>
     </main>
 

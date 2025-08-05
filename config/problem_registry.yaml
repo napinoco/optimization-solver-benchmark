@@ -81,13 +81,13 @@ problem_libraries:
     for_test_flag: false
     known_objective_value: 0
 
-  copo68:
-    display_name: "Copo 68 (DIMACS)"
-    file_path: "problems/DIMACS/data/COPOS/copo68.mat.gz"
-    file_type: "mat"
-    library_name: "DIMACS"
-    for_test_flag: false
-    known_objective_value: 0
+  # copo68:
+  #   display_name: "Copo 68 (DIMACS)"
+  #   file_path: "problems/DIMACS/data/COPOS/copo68.mat.gz"
+  #   file_type: "mat"
+  #   library_name: "DIMACS"
+  #   for_test_flag: false
+  #   known_objective_value: 0
 
   # FAP Set
   fap09:
