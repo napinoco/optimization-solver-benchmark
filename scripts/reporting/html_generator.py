@@ -60,14 +60,21 @@ class HTMLGenerator:
         
         site_info = self.site_config.get('site', {})
         overview = site_info.get('overview', '').strip()
+        author = site_info.get('author', '').strip()
         
         if not overview:
             return ""
         
+        # Add author information after source code section for more natural flow
+        author_html = f'<p style="margin-top: 2rem; padding-top: 1rem; border-top: 1px solid #e9ecef; color: #6c757d;"><strong>👤 Author:</strong> {author}</p>' if author else ""
+        
+        # Add author info at the end for a more natural flow
+        overview_with_author = overview + author_html
+        
         return f"""
         <div class="overview-section">
             <h2>📋 Project Overview</h2>
-            <div class="overview-content">{overview}</div>
+            <div class="overview-content">{overview_with_author}</div>
         </div>
         """
     
