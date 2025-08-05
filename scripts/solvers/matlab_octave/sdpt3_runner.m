@@ -63,8 +63,8 @@ function [x, y, result] = sdpt3_runner(A, b, c, K, options)
         % Convert SDPT3 solution back to SeDuMi format
         if ~isempty(X) && iscell(X)
             try
-                % Use SDPT3's built-in conversion function
-                [x, ~, ~] = SDPT3soln_SEDUMIsoln(blk, X, y, Z, perm);
+                % Use custom conversion function with compatibility fixes
+                [x, ~, ~] = custom_SDPT3soln_SEDUMIsoln(blk, X, y, Z, perm);
             catch
                 x = [];
             end
