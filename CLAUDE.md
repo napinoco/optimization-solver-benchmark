@@ -28,7 +28,6 @@ This is an automated benchmark system for optimization solvers (LP, QP, SOCP, SD
 2. **[🏗️ Detailed Design](docs/development/detail_design.md)** - Complete technical architecture, implementation specifications, and code examples
 3. **[📝 Development Conventions](docs/development/conventions.md)** - Coding standards, git protocols, and engineering guidelines
 4. **[✅ Current Tasks](docs/development/tasks.md)** - Active development tasks for current phase
-5. **[📚 Development History](docs/development/history.md)** - Complete record of completed development phases
 
 ### **Quick Reference**:
 - **[🚀 Setup Guides](docs/guides/)** - Installation and configuration guides
