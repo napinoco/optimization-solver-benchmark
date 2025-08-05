@@ -109,9 +109,10 @@ graph TB
     subgraph "Parent Process Environment"
         BR["🚀 BenchmarkRunner<br/>ENTRY POINT<br/>System Orchestrator"]
         PI["Process Interface<br/>PythonProcessInterface<br/>MatlabProcessInterface"]
-        DB[("Database<br/>SQLite")]
-        RPT["Report Generator<br/>HTML/CSV/JSON"]
     end
+    
+    %% Report Generator (separate from parent process)
+    RPT["Report Generator<br/>HTML/CSV/JSON"]
     
     %% Isolated Subprocess
     subgraph SUB ["Isolated Subprocess Environment"]
@@ -151,9 +152,8 @@ graph TB
     
     TJ -.->|"(3) return SolverResult<br/>(JSON IPC)"| PI
     PI -.->|"(4) return SolverResult"| BR
-    BR -->|"(5) insert DB"| DB
-    DB --> DBF
-    DB --> RPT
+    BR -->|"(5) insert DB"| DBF
+    DBF --> RPT
     RPT --> HTML
     HTML -.->|"restore DB<br/>(table_restorer.py)"| DBF
     
@@ -170,7 +170,7 @@ graph TB
     class PI,RPT processBox
     class PL,SR,SOL subprocessBox
     class PD,RES internalDataBox
-    class DB,DBF databaseBox
+    class DBF databaseBox
     class PF,TJ,HTML fileBox
     class SUB isolationBox
 ```
@@ -179,7 +179,7 @@ graph TB
 - **🔴 Entry Point** `[]` (Red): **BenchmarkRunner** - Main system orchestrator and entry point
 - **🔵 Processes** `[]` (Blue): Active execution components - Process Interface, Report Generator, Solvers
 - **🟡 Internal Data** `()` (Yellow): Temporary in-memory data structures - ProblemData, SolverResult  
-- **🟢 Database Storage** `[()]` (Green): Persistent structured data - SQLite Database, Database Files
+- **🟢 Database Storage** `[()]` (Green): Persistent database file - results.db
 - **🟣 Document Files** `[[]]` (Purple): File-based documents - Problem Libraries, JSON Files, Generated Reports
 
 #### Sequential Execution Steps
@@ -187,7 +187,7 @@ graph TB
 2. **(2) subprocess.run**: Process Interface launches isolated subprocess with ulimit + timeout controls
 3. **(3) return SolverResult (JSON IPC)**: Subprocess writes JSON result file, Process Interface reads and converts
 4. **(4) return SolverResult**: Process Interface returns standardized SolverResult object to BenchmarkRunner
-5. **(5) insert DB**: BenchmarkRunner stores result with complete metadata in SQLite database
+5. **(5) insert DB**: BenchmarkRunner stores result with complete metadata directly in results.db file
 
 
 #### Error Detection and Status Flow
