@@ -17,7 +17,7 @@ Benchmark results are continuously published at: https://napinoco.github.io/opti
 
 **Supported Solvers**:
 - **Python (9)**: SciPy, CVXPY backends (CLARABEL, SCS, ECOS, OSQP, CVXOPT, SDPA, SCIP, HIGHS)
-- **MATLAB/Octave (2)**: SeDuMi, SDPT3
+- **MATLAB (2)**: SeDuMi, SDPT3
 
 ## Quick Start
 
@@ -29,12 +29,11 @@ python -m venv venv
 source venv/bin/activate  # Windows: venv\Scripts\activate
 pip install -r requirements.txt
 
-# For MATLAB/Octave solvers (optional)
-# Ubuntu/Debian: sudo apt-get install octave
-# macOS: brew install octave
+# For MATLAB solvers (optional)
+# Install MATLAB R2020a or later
 
 # Setup MATLAB solvers - compiles MEX files for SeDuMi and SDPT3
-matlab -batch "setup_matlab_solvers"  # or use octave --eval "setup_matlab_solvers"
+matlab -batch "setup_matlab_solvers"
 ```
 
 ### Usage

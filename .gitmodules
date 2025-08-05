@@ -4,9 +4,9 @@
 [submodule "problems/SDPLIB"]
 	path = problems/SDPLIB
 	url = https://github.com/vsdp/SDPLIB.git
-[submodule "scripts/solvers/matlab_octave/sedumi"]
-	path = scripts/solvers/matlab_octave/sedumi
+[submodule "scripts/solvers/matlab/sedumi"]
+	path = scripts/solvers/matlab/sedumi
 	url = https://github.com/sqlp/sedumi
-[submodule "scripts/solvers/matlab_octave/sdpt3"]
-	path = scripts/solvers/matlab_octave/sdpt3
+[submodule "scripts/solvers/matlab/sdpt3"]
+	path = scripts/solvers/matlab/sdpt3
 	url = https://github.com/sqlp/sdpt3

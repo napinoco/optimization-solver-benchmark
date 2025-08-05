@@ -38,7 +38,7 @@ from scripts.utils.logger import get_logger
 # Interface imports (symmetrical design)
 from scripts.solvers.solver_interface import SolverInterface, SolverResult
 from scripts.solvers.python.python_process_interface import PythonProcessInterface
-from scripts.solvers.matlab_octave.matlab_process_interface import MatlabProcessInterface
+from scripts.solvers.matlab.matlab_process_interface import MatlabProcessInterface
 from scripts.data_loaders.python.problem_interface import ProblemInterface
 
 logger = get_logger("benchmark_runner")

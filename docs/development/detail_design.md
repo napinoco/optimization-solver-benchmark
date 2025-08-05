@@ -1,6 +1,6 @@
 # Optimization Solver Benchmark System - Technical Design
 
-Detailed technical specifications for the optimization solver benchmark system supporting Python and MATLAB/Octave solvers across LP, QP, SOCP, and SDP problems.
+Detailed technical specifications for the optimization solver benchmark system supporting Python and MATLAB solvers across LP, QP, SOCP, and SDP problems.
 
 ---
 
@@ -40,7 +40,7 @@ optimization-solver-benchmark/
 │   │   │   ├── python_solver_runner.py      # Subprocess entry point + solver manager
 │   │   │   ├── cvxpy_runner.py              # CVXPY backend handler
 │   │   │   └── scipy_runner.py              # SciPy linprog handler
-│   │   └── matlab_octave/      # MATLAB/Octave integration (subprocess)
+│   │   └── matlab/      # MATLAB integration (subprocess)
 │   │       ├── __init__.py
 │   │       ├── matlab_process_interface.py  # Python-MATLAB subprocess bridge
 │   │       ├── matlab_solver_runner.m       # MATLAB subprocess entry point
@@ -57,7 +57,7 @@ optimization-solver-benchmark/
 │   │   │   ├── problem_interface.py  # Problem loading coordinator
 │   │   │   ├── mat_loader.py         # DIMACS .mat loader
 │   │   │   └── dat_loader.py         # SDPLIB .dat-s loader
-│   │   └── matlab_octave/      # MATLAB format loaders
+│   │   └── matlab/      # MATLAB format loaders
 │   │       ├── mat_loader.m    # MATLAB .mat loader
 │   │       └── dat_loader.m    # MATLAB .dat-s loader
 │   ├── database/               # Database management
@@ -485,7 +485,7 @@ CREATE INDEX idx_problem_type ON results(problem_type);
 4. **Test with validation framework**
 
 ### Adding New Problem Formats
-1. **Create loader classes** in both `python/` and `matlab_octave/` directories
+1. **Create loader classes** in both `python/` and `matlab/` directories
 2. **Add format mapping** to `FORMAT_LOADERS` in `problem_interface.py`
 3. **Update problem registry** to include new format problems
 4. **Implement format conversion** to unified SeDuMi format

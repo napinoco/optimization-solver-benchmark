@@ -63,10 +63,10 @@ This is an automated benchmark system for optimization solvers (LP, QP, SOCP, SD
 │   ├── benchmark/   # Benchmark execution engine
 │   ├── solvers/     # Solver implementations
 │   │   ├── python/  # Python solver interfaces
-│   │   └── matlab_octave/ # MATLAB/Octave interfaces
+│   │   └── matlab/ # MATLAB interfaces
 │   ├── data_loaders/ # Problem format loaders
 │   │   ├── python/  # Python loaders (MAT/DAT)
-│   │   └── matlab_octave/ # MATLAB loaders
+│   │   └── matlab/ # MATLAB loaders
 │   ├── utils/       # Problem structure analysis, version detection
 │   ├── database/    # Data models and storage
 │   └── reporting/   # HTML generation and data publishing
@@ -112,7 +112,7 @@ python main.py --report
 pip install -r requirements.txt
 
 # Setup MATLAB solvers (optional)
-matlab -batch "setup_matlab_solvers"  # or octave --eval "setup_matlab_solvers"
+matlab -batch "setup_matlab_solvers"
 ```
 
 ---

@@ -69,7 +69,7 @@ GITHUB ACTIONS (Publishing Only):
 
 **Solver Support**:
 - **Python (9)**: SciPy, CVXPY backends (CLARABEL, SCS, ECOS, OSQP, CVXOPT, SDPA, SCIP, HIGHS)
-- **MATLAB/Octave (2)**: SeDuMi, SDPT3 (optional)
+- **MATLAB (2)**: SeDuMi, SDPT3 (optional)
 
 **Problem Types**:
 - **LP**: Linear Programming
@@ -86,7 +86,7 @@ GITHUB ACTIONS (Publishing Only):
 
 **Git Submodule Integration**: Pin problem libraries to specific commits for reproducibility while enabling updates when needed.
 
-**Multi-Language Support**: Unified interface supporting both Python and MATLAB/Octave solvers with standardized result format.
+**Multi-Language Support**: Unified interface supporting both Python and MATLAB solvers with standardized result format.
 
 ### Data Management
 **Database Storage**: SQLite with complete version tracking (solver versions, Git commits, environment details) for historical analysis.
@@ -145,7 +145,7 @@ SDP         | 5 solvers        | ~20-40%
 ### Runtime Dependencies
 - **Python 3.12+**: Core execution environment
 - **Git**: Repository and submodule management
-- **Optional MATLAB/Octave**: For MATLAB solver support
+- **Optional MATLAB**: For MATLAB solver support
 
 ### Problem Library Setup
 ```bash
