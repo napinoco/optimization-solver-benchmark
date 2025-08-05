@@ -14,6 +14,7 @@ from pathlib import Path
 from typing import List, Dict, Any, Optional
 from datetime import datetime
 import sys
+import argparse
 
 # Add project root to path for imports
 project_root = Path(__file__).parent.parent.parent
@@ -393,8 +394,116 @@ class TableRestorer:
             return {'success': False, 'error': str(e)}
 
 
-def main():
-    """Test table restoration functionality"""
+def restore_database_cli():
+    """Command-line interface for database restoration"""
+    parser = argparse.ArgumentParser(
+        description="Restore SQLite database from exported JSON/CSV files",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+Examples:
+  # Restore database from default JSON file
+  python table_restorer.py
+
+  # Restore from specific JSON file to specific database
+  python table_restorer.py --input-json /path/to/data.json --output-db /path/to/output.db
+
+  # Restore from CSV file
+  python table_restorer.py --input-json /path/to/data.csv --output-db /path/to/output.db
+
+  # Run tests
+  python table_restorer.py --test
+        """
+    )
+    
+    parser.add_argument(
+        '--input-json', '--input',
+        default=str(project_root / "docs" / "pages" / "data" / "benchmark_results_all.json"),
+        help='Path to input JSON or CSV file (default: docs/pages/data/benchmark_results_all.json)'
+    )
+    
+    parser.add_argument(
+        '--output-db', '--output',
+        default=str(project_root / "database" / "results.db"),
+        help='Path to output database file (default: database/results.db)'
+    )
+    
+    parser.add_argument(
+        '--test',
+        action='store_true',
+        help='Run comprehensive test suite instead of restoration'
+    )
+    
+    parser.add_argument(
+        '--compare-with',
+        help='Compare restored database with specified original database file'
+    )
+    
+    args = parser.parse_args()
+    
+    if args.test:
+        run_test_suite()
+        return
+    
+    # Validate input file
+    input_path = Path(args.input_json)
+    if not input_path.exists():
+        print(f"❌ Error: Input file not found: {input_path}")
+        sys.exit(1)
+    
+    # Determine file type
+    file_extension = input_path.suffix.lower()
+    if file_extension not in ['.json', '.csv']:
+        print(f"❌ Error: Unsupported file type: {file_extension}. Supported: .json, .csv")
+        sys.exit(1)
+    
+    # Create output directory if needed
+    output_path = Path(args.output_db)
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    
+    print(f"🔄 Restoring database from {file_extension.upper()} file...")
+    print(f"  Input:  {input_path}")
+    print(f"  Output: {output_path}")
+    
+    # Perform restoration
+    restorer = TableRestorer(target_db_path=str(output_path))
+    
+    try:
+        if file_extension == '.json':
+            success = restorer.restore_from_json(str(input_path))
+        else:  # .csv
+            success = restorer.restore_from_csv(str(input_path))
+        
+        if success:
+            print("✅ Database restoration completed successfully!")
+            
+            # Optional comparison
+            if args.compare_with:
+                comparison_path = Path(args.compare_with)
+                if comparison_path.exists():
+                    print(f"\n🔍 Comparing with original database: {comparison_path}")
+                    comparison = restorer.compare_databases(str(comparison_path))
+                    
+                    print(f"📊 Comparison Results:")
+                    print(f"  Original rows: {comparison.get('original_count', 'N/A')}")
+                    print(f"  Restored rows: {comparison.get('restored_count', 'N/A')}")
+                    print(f"  Row count match: {'✅' if comparison.get('row_count_match') else '❌'}")
+                    print(f"  Schema match: {'✅' if comparison.get('schema_match') else '❌'}")
+                    print(f"  Sample data match: {'✅' if comparison.get('sample_match') else '❌'}")
+                    print(f"  Overall success: {'✅' if comparison.get('success') else '❌'}")
+                else:
+                    print(f"⚠️  Warning: Comparison database not found: {comparison_path}")
+            
+        else:
+            print("❌ Database restoration failed!")
+            sys.exit(1)
+            
+    except Exception as e:
+        print(f"❌ Error during restoration: {e}")
+        sys.exit(1)
+
+
+def run_test_suite():
+    """Run comprehensive test suite for table restoration functionality"""
     print("🔄 Testing Database Table Restoration...")
     
     # Test JSON restoration
@@ -465,7 +574,7 @@ def main():
         else:
             print("  ❌ CSV restoration test FAILED!")
     
-    # Summary
+    # Summary  
     print("\n5. Test Summary:")
     json_comparison = restorer_json.compare_databases(str(original_db)) if json_success else {'success': False}
     csv_comparison = restorer_csv.compare_databases(str(original_db)) if csv_success else {'success': False}
@@ -490,6 +599,11 @@ def main():
         print(f"  CSV restored DB: {restorer_csv.target_db_path}")
     
     print("\n📋 Table restoration test completed!")
+
+
+def main():
+    """Main entry point - delegates to CLI interface"""
+    restore_database_cli()
 
 
 if __name__ == "__main__":

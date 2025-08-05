@@ -198,6 +198,9 @@ database/*.backup
 database/*.db.backup
 database/*_backup
 
+# Database files - results.db is large binary file, manage via JSON exports instead
+database/results.db
+
 # Note: Database files are now sanitized and safe for public sharing
 
 # Generated report files (prevent accidental generation from test functions)

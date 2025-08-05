@@ -60,6 +60,31 @@ python main.py --benchmark --timeout 60               # Quick tests with 1-minut
 python main.py --benchmark --library_names SDPLIB --timeout 1800  # 30-minute timeout for difficult SDP problems
 ```
 
+## Database Management
+
+### Database Restoration
+The system maintains results in both SQLite database format and JSON/CSV exports. The database can be restored from JSON exports using the table restoration tool:
+
+```bash
+# Restore database from default JSON export
+python scripts/database/table_restorer.py
+
+# Restore from specific JSON file
+python scripts/database/table_restorer.py --input-json /path/to/data.json --output-db database/results.db
+
+# Run restoration tests
+python scripts/database/table_restorer.py --test
+
+# Compare restored database with original
+python scripts/database/table_restorer.py --compare-with database/original_results.db
+```
+
+**Why JSON-based Management?**
+- **Repository Size**: Binary database files (results.db ~5MB) are excluded from git tracking to keep repository lightweight
+- **Version Control**: JSON/CSV exports provide meaningful diffs and change tracking
+- **Data Portability**: Published JSON data can recreate the complete database for analysis
+- **Recovery**: Simple restoration process from published benchmark results
+
 ## Design Philosophy
 
 **Fair Baseline Benchmarking**: Uses solver default parameters to avoid optimization bias and provide genuine "out of the box" performance comparison.

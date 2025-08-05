@@ -155,6 +155,7 @@ graph TB
     DB --> DBF
     DB --> RPT
     RPT --> HTML
+    HTML -.->|"restore DB<br/>(table_restorer.py)"| DBF
     
     %% Styling
     classDef entryPoint fill:#ffcccc,stroke:#cc0000,stroke-width:4px,font-weight:bold
