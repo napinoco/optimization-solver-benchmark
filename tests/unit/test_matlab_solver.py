@@ -40,7 +40,7 @@ class TestMatlabSolverInterface(unittest.TestCase):
     def setUp(self):
         """Set up test fixtures."""
         # Mock MATLAB availability to avoid requiring actual MATLAB installation
-        self.matlab_patcher = patch('scripts.solvers.matlab_octave.matlab_interface.subprocess.run')
+        self.matlab_patcher = patch('scripts.solvers.matlab.matlab_interface.subprocess.run')
         self.mock_subprocess = self.matlab_patcher.start()
         
         # Mock successful MATLAB verification
@@ -51,7 +51,7 @@ class TestMatlabSolverInterface(unittest.TestCase):
         self.mock_subprocess.return_value = mock_result
         
         # Mock problem registry
-        self.registry_patcher = patch('scripts.solvers.matlab_octave.matlab_interface.load_problem_registry')
+        self.registry_patcher = patch('scripts.solvers.matlab.matlab_interface.load_problem_registry')
         self.mock_registry = self.registry_patcher.start()
         self.mock_registry.return_value = {
             'problem_libraries': {
@@ -112,9 +112,8 @@ class TestMatlabSolverInterface(unittest.TestCase):
         self.assertEqual(sdpt3.solver_name, 'matlab_sdpt3')
         
         # Test with custom parameters
-        sedumi_custom = SeDuMiSolver(timeout=300, use_octave=True)
+        sedumi_custom = SeDuMiSolver(timeout=300)
         self.assertEqual(sedumi_custom.timeout, 300)
-        self.assertTrue(sedumi_custom.use_octave)
     
     def test_version_detection(self):
         """Test version detection and caching."""
@@ -136,7 +135,7 @@ class TestProblemRegistryIntegration(unittest.TestCase):
     def setUp(self):
         """Set up test fixtures."""
         # Mock MATLAB to avoid requiring installation
-        self.matlab_patcher = patch('scripts.solvers.matlab_octave.matlab_interface.subprocess.run')
+        self.matlab_patcher = patch('scripts.solvers.matlab.matlab_interface.subprocess.run')
         self.mock_subprocess = self.matlab_patcher.start()
         
         mock_result = MagicMock()
@@ -145,7 +144,7 @@ class TestProblemRegistryIntegration(unittest.TestCase):
         self.mock_subprocess.return_value = mock_result
         
         # Set up test registry
-        self.registry_patcher = patch('scripts.solvers.matlab_octave.matlab_interface.load_problem_registry')
+        self.registry_patcher = patch('scripts.solvers.matlab.matlab_interface.load_problem_registry')
         self.mock_registry = self.registry_patcher.start()
         self.mock_registry.return_value = {
             'problem_libraries': {
@@ -239,7 +238,7 @@ class TestSolverExecution(unittest.TestCase):
     def setUp(self):
         """Set up test fixtures."""
         # Mock MATLAB subprocess for verification and execution
-        self.matlab_patcher = patch('scripts.solvers.matlab_octave.matlab_interface.subprocess.run')
+        self.matlab_patcher = patch('scripts.solvers.matlab.matlab_interface.subprocess.run')
         self.mock_subprocess = self.matlab_patcher.start()
         
         # Set up proper mock result for MATLAB verification
@@ -250,7 +249,7 @@ class TestSolverExecution(unittest.TestCase):
         self.mock_subprocess.return_value = verification_result
         
         # Mock registry
-        self.registry_patcher = patch('scripts.solvers.matlab_octave.matlab_interface.load_problem_registry')
+        self.registry_patcher = patch('scripts.solvers.matlab.matlab_interface.load_problem_registry')
         self.mock_registry = self.registry_patcher.start()
         self.mock_registry.return_value = {
             'problem_libraries': {
@@ -263,7 +262,7 @@ class TestSolverExecution(unittest.TestCase):
         }
         
         # Mock temp file operations
-        self.temp_patcher = patch('scripts.solvers.matlab_octave.matlab_interface.temp_file_context')
+        self.temp_patcher = patch('scripts.solvers.matlab.matlab_interface.temp_file_context')
         self.mock_temp = self.temp_patcher.start()
         self.mock_temp.return_value.__enter__.return_value = '/tmp/test_result.json'
         self.mock_temp.return_value.__exit__.return_value = None
@@ -374,13 +373,13 @@ class TestCommandConstruction(unittest.TestCase):
     def setUp(self):
         """Set up test fixtures."""
         # Mock MATLAB to avoid requiring installation
-        with patch('scripts.solvers.matlab_octave.matlab_interface.subprocess.run') as mock_subprocess:
+        with patch('scripts.solvers.matlab.matlab_interface.subprocess.run') as mock_subprocess:
             mock_result = MagicMock()
             mock_result.returncode = 0
             mock_result.stdout = "MATLAB_OK"
             mock_subprocess.return_value = mock_result
             
-            with patch('scripts.solvers.matlab_octave.matlab_interface.load_problem_registry') as mock_registry:
+            with patch('scripts.solvers.matlab.matlab_interface.load_problem_registry') as mock_registry:
                 mock_registry.return_value = {'problem_libraries': {}}
                 self.solver = MatlabSolver('sedumi')
     
@@ -396,21 +395,6 @@ class TestCommandConstruction(unittest.TestCase):
         self.assertIn('sedumi', cmd[2])
         self.assertIn('/tmp/result.json', cmd[2])
     
-    def test_octave_command_construction(self):
-        """Test Octave command construction."""
-        with patch('scripts.solvers.matlab_octave.matlab_interface.subprocess.run') as mock_subprocess:
-            mock_result = MagicMock()
-            mock_result.returncode = 0
-            mock_result.stdout = "Octave_OK"
-            mock_subprocess.return_value = mock_result
-            
-            with patch('scripts.solvers.matlab_octave.matlab_interface.load_problem_registry') as mock_registry:
-                mock_registry.return_value = {'problem_libraries': {}}
-                octave_solver = MatlabSolver('sedumi', use_octave=True)
-                
-                cmd = octave_solver._construct_matlab_command('test_problem', '/tmp/result.json')
-                
-                self.assertEqual(cmd[1], '--eval')
     
     def test_command_argument_escaping(self):
         """Test proper escaping of arguments with special characters."""
@@ -437,13 +421,13 @@ class TestErrorHandling(unittest.TestCase):
     
     def setUp(self):
         """Set up test fixtures."""
-        with patch('scripts.solvers.matlab_octave.matlab_interface.subprocess.run') as mock_subprocess:
+        with patch('scripts.solvers.matlab.matlab_interface.subprocess.run') as mock_subprocess:
             mock_result = MagicMock()
             mock_result.returncode = 0
             mock_result.stdout = "MATLAB_OK"
             mock_subprocess.return_value = mock_result
             
-            with patch('scripts.solvers.matlab_octave.matlab_interface.load_problem_registry') as mock_registry:
+            with patch('scripts.solvers.matlab.matlab_interface.load_problem_registry') as mock_registry:
                 mock_registry.return_value = {'problem_libraries': {}}
                 self.solver = MatlabSolver('sedumi')
     
@@ -485,13 +469,13 @@ class TestTempFileManagement(unittest.TestCase):
     
     def setUp(self):
         """Set up test fixtures."""
-        with patch('scripts.solvers.matlab_octave.matlab_interface.subprocess.run') as mock_subprocess:
+        with patch('scripts.solvers.matlab.matlab_interface.subprocess.run') as mock_subprocess:
             mock_result = MagicMock()
             mock_result.returncode = 0
             mock_result.stdout = "MATLAB_OK"
             mock_subprocess.return_value = mock_result
             
-            with patch('scripts.solvers.matlab_octave.matlab_interface.load_problem_registry') as mock_registry:
+            with patch('scripts.solvers.matlab.matlab_interface.load_problem_registry') as mock_registry:
                 mock_registry.return_value = {'problem_libraries': {}}
                 self.solver = MatlabSolver('sedumi')
     

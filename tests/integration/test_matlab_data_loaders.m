@@ -22,7 +22,7 @@ test_results.errors = {};
 
 % Add paths for all required functions
 addpath(fullfile(pwd, 'scripts/utils/'));
-addpath(fullfile(pwd, 'scripts/data_loaders/matlab_octave/'));
+addpath(fullfile(pwd, 'scripts/data_loaders/matlab/'));
 
 try
     % Test 1: YAML Reader Basic Functionality

@@ -10,7 +10,7 @@
 %%        [xx,yy,zz]   = custom_SDPT3soln_SEDUMIsoln(blk,X,y,Z,perm);
 %%
 %% This is a custom version with initialization fixes for better 
-%% compatibility with MATLAB/Octave in the benchmark system.
+%% compatibility with MATLAB in the benchmark system.
 %%
 %% Based on SDPT3: version 3.1
 %% Copyright (c) 1997 by K.C. Toh, M.J. Todd, R.H. Tutuncu

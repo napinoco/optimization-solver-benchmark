@@ -20,8 +20,8 @@ fprintf('Platform: %s\n', computer);
 fprintf('================================================================\n\n');
 
 % Add required paths
-addpath(genpath('scripts/data_loaders/matlab_octave'));
-addpath(genpath('scripts/solvers/matlab_octave'));
+addpath(genpath('scripts/data_loaders/matlab'));
+addpath(genpath('scripts/solvers/matlab'));
 addpath(genpath('scripts/utils'));
 
 % Initialize test results

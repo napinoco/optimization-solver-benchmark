@@ -112,21 +112,6 @@ matlab -batch "help sedumi"
 matlab -batch "help sdpt3"
 ```
 
-#### 4. Alternative: Octave Support
-
-The system also supports GNU Octave as a MATLAB alternative:
-
-```bash
-# Install Octave (Ubuntu/Debian)
-sudo apt-get install octave
-
-# Install Octave (macOS with Homebrew)
-brew install octave
-
-# Test Octave execution
-octave --eval "disp('Hello from Octave')"
-```
-
 ### Configuration Integration
 
 #### Solver Availability Detection
@@ -261,7 +246,7 @@ import logging
 logging.basicConfig(level=logging.DEBUG)
 
 # Test MATLAB solver
-from scripts.solvers.matlab_octave.matlab_interface import SeDuMiSolver
+from scripts.solvers.matlab.matlab_interface import SeDuMiSolver
 solver = SeDuMiSolver()
 print(f"Solver initialized: {solver.solver_name}")
 ```

@@ -171,8 +171,8 @@ class HTMLGenerator:
         else:
             memory_display = "<p><strong>Memory:</strong> Unknown</p>"
         
-        # Note about MATLAB/Octave (since we can't easily detect versions from environment)
-        matlab_note = "<p><strong>MATLAB/Octave:</strong> Available (version detection via solver results)</p>"
+        # Note about MATLAB (since we can't easily detect versions from environment)
+        matlab_note = "<p><strong>MATLAB:</strong> Available (version detection via solver results)</p>"
         
         return commit_display + env_display + python_display + os_display + cpu_display + memory_display + matlab_note
     

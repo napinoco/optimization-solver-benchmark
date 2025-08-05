@@ -8,7 +8,7 @@ fprintf('=== MATLAB Data Loader Performance Benchmark ===\n\n');
 
 % Add required paths
 addpath(fullfile(pwd, 'scripts/utils/'));
-addpath(fullfile(pwd, 'scripts/data_loaders/matlab_octave/'));
+addpath(fullfile(pwd, 'scripts/data_loaders/matlab/'));
 
 % Performance test cases: [problem_name, expected_type]
 performance_cases = {

@@ -31,8 +31,8 @@ All problems will be tested with these 11 solvers:
 - `cvxpy_scip` - SCIP solver via CVXPY
 - `cvxpy_scs` - SCS solver via CVXPY
 - `cvxpy_sdpa` - SDPA solver via CVXPY
-- `matlab_sdpt3` - SDPT3 solver via MATLAB/Octave
-- `matlab_sedumi` - SeDuMi solver via MATLAB/Octave
+- `matlab_sdpt3` - SDPT3 solver via MATLAB
+- `matlab_sedumi` - SeDuMi solver via MATLAB
 - `scipy_linprog` - SciPy linear programming solver
 
 ---

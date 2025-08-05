@@ -60,7 +60,6 @@ class MatlabProcessInterface:
     def __init__(self, save_solutions: bool = False, 
                  problem_interface: Optional[ProblemInterface] = None,
                  matlab_executable: str = 'matlab',
-                 use_octave: bool = False,
                  timeout: Optional[float] = 300,
                  **kwargs):
         """
@@ -69,14 +68,12 @@ class MatlabProcessInterface:
         Args:
             save_solutions: Whether to save optimal solutions to disk
             problem_interface: Optional problem interface for loading problems
-            matlab_executable: Path to MATLAB/Octave executable
-            use_octave: Use Octave instead of MATLAB
+            matlab_executable: Path to MATLAB executable
             timeout: Default timeout for solver execution
             **kwargs: Additional configuration parameters
         """
         self.save_solutions = save_solutions
         self.matlab_executable = matlab_executable
-        self.use_octave = use_octave
         self.default_timeout = timeout
         self.config = kwargs
         
@@ -87,7 +84,7 @@ class MatlabProcessInterface:
         self._available_solvers = None
         
         logger.info(f"Initialized MATLAB process interface (subprocess isolation)")
-        logger.debug(f"Using {'Octave' if use_octave else 'MATLAB'} at: {matlab_executable}")
+        logger.debug(f"Using MATLAB at: {matlab_executable}")
     
     def solve(self, problem_name: str, solver_name: str,
              problem_data: Optional[ProblemData] = None,
@@ -203,11 +200,8 @@ class MatlabProcessInterface:
                 )
                 
                 # Build command array
-                if self.use_octave:
-                    cmd = [self.matlab_executable, '--eval', matlab_command]
-                else:
-                    # Use minimal options, rely on environment variables for Java/X11 control
-                    cmd = [self.matlab_executable, '-batch', matlab_command]
+                # Use minimal options, rely on environment variables for Java/X11 control
+                cmd = [self.matlab_executable, '-batch', matlab_command]
                 
                 logger.debug(f"Executing MATLAB command: {' '.join(cmd)}")
                 
@@ -366,7 +360,7 @@ class MatlabProcessInterface:
                     'matlab_output': matlab_result,
                     'matlab_version': matlab_version,
                     'solver_backend': matlab_solver,
-                    'execution_environment': 'octave' if self.use_octave else 'matlab'
+                    'execution_environment': 'matlab'
                 }
             )
         except Exception as e:
@@ -461,11 +455,9 @@ class MatlabProcessInterface:
         
         logger.debug("Detecting available MATLAB solvers...")
         
-        # First check if MATLAB/Octave is available at all
+        # First check if MATLAB is available
         try:
             cmd = [self.matlab_executable, '-batch', 'disp("MATLAB_OK")']
-            if self.use_octave:
-                cmd = [self.matlab_executable, '--eval', 'disp("Octave_OK")']
             
             result = subprocess.run(
                 cmd, 
@@ -476,12 +468,12 @@ class MatlabProcessInterface:
             )
             
             if result.returncode != 0:
-                logger.warning(f"MATLAB/Octave not available: {result.stderr}")
+                logger.warning(f"MATLAB not available: {result.stderr}")
                 return []  # No MATLAB solvers available
             
-            logger.debug("MATLAB/Octave environment verified")
+            logger.debug("MATLAB environment verified")
         except Exception as e:
-            logger.warning(f"MATLAB/Octave not available: {e}")
+            logger.warning(f"MATLAB not available: {e}")
             return []  # No MATLAB solvers available
         
         # If MATLAB is available, assume all configured solvers are available

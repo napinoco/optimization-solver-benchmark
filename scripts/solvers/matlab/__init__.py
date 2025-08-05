@@ -1,7 +1,6 @@
 """
-MATLAB/Octave Solver Interface Package.
+MATLAB Solver Interface Package.
 
-This package will contain solver implementations that use MATLAB/Octave
-for optimization problems. Currently this is a placeholder for future
-development.
+This package contains solver implementations that use MATLAB
+for optimization problems including SeDuMi and SDPT3.
 """
