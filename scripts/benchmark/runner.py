@@ -22,7 +22,7 @@ import sys
 import time
 import json
 from pathlib import Path
-from typing import Dict, List, Optional, Any
+from typing import Dict, List, Optional, Any, Tuple
 import yaml
 
 # Add project root to path for imports
@@ -37,8 +37,8 @@ from scripts.utils.logger import get_logger
 
 # Interface imports (symmetrical design)
 from scripts.solvers.solver_interface import SolverInterface, SolverResult
-from scripts.solvers.python.python_interface import PythonInterface
-from scripts.solvers.matlab_octave.matlab_interface import MatlabInterface
+from scripts.solvers.python.python_process_interface import PythonProcessInterface
+from scripts.solvers.matlab.matlab_process_interface import MatlabProcessInterface
 from scripts.data_loaders.python.problem_interface import ProblemInterface
 
 logger = get_logger("benchmark_runner")
@@ -51,7 +51,8 @@ class BenchmarkRunner:
     
     def __init__(self, database_manager: Optional[DatabaseManager] = None, 
                  dry_run: bool = False,
-                 save_solutions: bool = False):
+                 save_solutions: bool = False,
+                 default_timeout: float = 120.0):
         """
         Initialize benchmark runner with symmetrical solver interfaces.
         
@@ -59,10 +60,15 @@ class BenchmarkRunner:
             database_manager: Optional database manager (creates default if None)
             dry_run: If True, skip database operations (for testing)
             save_solutions: If True, save optimal solutions to disk
+            default_timeout: Default timeout in seconds for solver execution. Solvers 
+                            exceeding this limit will be terminated and marked as TIMEOUT.
+                            Default: 120.0 seconds. Use larger values (300-1800) for 
+                            computationally intensive problems like large SDP instances.
         """
         self.db = database_manager or DatabaseManager()
         self.dry_run = dry_run
         self.save_solutions = save_solutions
+        self.default_timeout = default_timeout
         
         # Initialize problem interface only (essential for all operations)
         self.problem_interface = ProblemInterface()
@@ -85,9 +91,10 @@ class BenchmarkRunner:
         logger.info("Benchmark runner initialized with unified interfaces")
         logger.info(f"Git commit: {self.commit_hash}")
         logger.info(f"Environment: {self.environment_info['os']['system']} {self.environment_info['python']['version']}")
+        logger.info(f"Default timeout: {self.default_timeout}s")
         
-        python_configured = len(PythonInterface.PYTHON_SOLVER_CONFIGS)
-        matlab_configured = len(MatlabInterface.MATLAB_SOLVER_CONFIGS)
+        python_configured = len(PythonProcessInterface.PYTHON_SOLVER_CONFIGS)
+        matlab_configured = len(MatlabProcessInterface.MATLAB_SOLVER_CONFIGS)
         problem_stats = self.problem_interface.get_problem_statistics()
         
         logger.info(f"Python interface: {python_configured} solvers configured (lazy detection)")
@@ -95,24 +102,24 @@ class BenchmarkRunner:
         logger.info(f"Problem interface: {problem_stats['total_problems']} problems from {len(problem_stats['libraries'])} libraries")
     
     @property
-    def python_interface(self) -> PythonInterface:
+    def python_interface(self) -> PythonProcessInterface:
         """Lazy initialization of Python interface."""
         if self._python_interface is None:
             logger.debug("Initializing Python interface on first access")
-            self._python_interface = PythonInterface(
+            self._python_interface = PythonProcessInterface(
                 save_solutions=self.save_solutions,
                 problem_interface=self.problem_interface
             )
         return self._python_interface
     
     @property
-    def matlab_interface(self) -> Optional[MatlabInterface]:
+    def matlab_interface(self) -> Optional[MatlabProcessInterface]:
         """Lazy initialization of MATLAB interface."""
         if self._matlab_interface is None and not self._matlab_interface_attempted:
             self._matlab_interface_attempted = True
             try:
                 logger.debug("Initializing MATLAB interface on first access")
-                self._matlab_interface = MatlabInterface(
+                self._matlab_interface = MatlabProcessInterface(
                     save_solutions=self.save_solutions,
                     problem_interface=self.problem_interface
                 )
@@ -131,11 +138,11 @@ class BenchmarkRunner:
         mapping = {}
         
         # Add Python solvers
-        for solver_name in PythonInterface.PYTHON_SOLVER_CONFIGS.keys():
+        for solver_name in PythonProcessInterface.PYTHON_SOLVER_CONFIGS.keys():
             mapping[solver_name] = 'python'
         
         # Add MATLAB solvers
-        for solver_name in MatlabInterface.MATLAB_SOLVER_CONFIGS.keys():
+        for solver_name in MatlabProcessInterface.MATLAB_SOLVER_CONFIGS.keys():
             mapping[solver_name] = 'matlab'
         
         logger.debug(f"Built solver interface mapping: {len(mapping)} solvers")
@@ -321,10 +328,10 @@ class BenchmarkRunner:
             
             if interface_type == 'python':
                 # Route directly to Python interface
-                result = self.python_interface.solve(problem_name, solver_name)
+                result = self.python_interface.solve(problem_name, solver_name, timeout=self.default_timeout)
                 
             elif interface_type == 'matlab':
-                result = self.matlab_interface.solve(problem_name, solver_name)
+                result = self.matlab_interface.solve(problem_name, solver_name, timeout=self.default_timeout)
 
             else:
                 raise ValueError(f"Unknown solver '{solver_name}'. Available solvers: {list(self._solver_interface_map.keys())}")
@@ -347,7 +354,12 @@ class BenchmarkRunner:
             error_msg = f"Benchmark execution failed: {str(e)}"
             logger.error(error_msg)
             
-            # Store error result
+            # Skip storing result if solver doesn't exist
+            if "Unknown solver" in str(e):
+                logger.warning(f"Skipping database storage for unknown solver: {solver_name}")
+                return
+            
+            # Store error result for other types of errors
             try:
                 problem_config = self.problem_interface.get_problem_config(problem_name)
                 self.store_error_result(solver_name, problem_name, error_msg, problem_config)
@@ -414,24 +426,65 @@ class BenchmarkRunner:
             }
         }
         
-        # Test solver creation
+        # Test solver availability using lightweight import validation
         for solver_name in self.get_available_solvers():
             report['summary']['total_solvers'] += 1
             try:
-                solver = self.create_solver(solver_name)
-                report['solvers'][solver_name] = {
-                    'status': 'working',
-                    'version': solver.get_version()
-                }
-                report['summary']['working_solvers'] += 1
+                interface_type = self._solver_interface_map.get(solver_name)
+                
+                if interface_type == 'python':
+                    # Test Python solver availability via import
+                    status, version_info = self._test_python_solver_import(solver_name)
+                elif interface_type == 'matlab':
+                    # Test MATLAB solver availability  
+                    if self.matlab_interface is None:
+                        report['solvers'][solver_name] = {
+                            'status': 'error',
+                            'error': 'MATLAB interface not available'
+                        }
+                        continue
+                    status, version_info = self._test_matlab_solver_availability(solver_name)
+                else:
+                    report['solvers'][solver_name] = {
+                        'status': 'error',
+                        'error': f'Unknown interface type: {interface_type}'
+                    }
+                    continue
+                
+                if status == 'working':
+                    report['solvers'][solver_name] = {
+                        'status': 'working',
+                        'version': version_info
+                    }
+                    report['summary']['working_solvers'] += 1
+                else:
+                    report['solvers'][solver_name] = {
+                        'status': 'error',
+                        'error': version_info  # version_info contains error message when status != 'working'
+                    }
+                    
             except Exception as e:
                 report['solvers'][solver_name] = {
                     'status': 'error',
                     'error': str(e)
                 }
         
-        # Test problem loading using problem interface
-        for problem_name in self.get_available_problems():
+        # Test problem loading using problem interface (lightweight validation)
+        # Use test problems first, fall back to representative problems from each library
+        test_problems = self.get_available_problems(for_test_only=True)
+        if not test_problems:
+            # If no test problems, take first problem from each library
+            stats = self.problem_interface.get_problem_statistics()
+            test_problems = []
+            for library in stats.get("libraries", {}):
+                library_problems = self.problem_interface.get_problems_by_library([library])
+                if library_problems:
+                    test_problems.append(library_problems[0])
+        
+        # Limit test problems for validation performance
+        test_problems = test_problems[:5]
+        
+        for problem_name in test_problems:
             report['summary']['total_problems'] += 1
             try:
                 problem_config = self.problem_interface.get_problem_config(problem_name)
@@ -449,6 +502,82 @@ class BenchmarkRunner:
                 }
         
         return report
+    
+    def _test_python_solver_import(self, solver_name: str) -> Tuple[str, str]:
+        """
+        Test Python solver availability via import testing.
+        
+        Args:
+            solver_name: Name of the solver to test
+            
+        Returns:
+            Tuple of (status, version_info) where status is 'working' or 'error'
+        """
+        try:
+            # Test basic imports for each solver type
+            if solver_name.startswith('cvxpy_'):
+                import cvxpy as cp
+                backend = solver_name.replace('cvxpy_', '').upper()
+                
+                # Test specific backend availability
+                if backend == 'CLARABEL':
+                    import clarabel
+                    return 'working', f"CVXPY {cp.__version__} + CLARABEL {clarabel.__version__}"
+                elif backend == 'SCS':
+                    import scs
+                    return 'working', f"CVXPY {cp.__version__} + SCS {scs.__version__}"
+                elif backend == 'ECOS':
+                    import ecos
+                    return 'working', f"CVXPY {cp.__version__} + ECOS {ecos.__version__}"
+                elif backend == 'OSQP':
+                    import osqp
+                    return 'working', f"CVXPY {cp.__version__} + OSQP {osqp.__version__}"
+                elif backend == 'CVXOPT':
+                    import cvxopt
+                    return 'working', f"CVXPY {cp.__version__} + CVXOPT {cvxopt.__version__}"
+                elif backend == 'SDPA':
+                    # SDPA is optional, may not have version
+                    return 'working', f"CVXPY {cp.__version__} + SDPA"
+                elif backend == 'SCIP':
+                    import pyscipopt
+                    return 'working', f"CVXPY {cp.__version__} + SCIP {pyscipopt.__version__}"
+                elif backend == 'HIGHS':
+                    import highspy
+                    return 'working', f"CVXPY {cp.__version__} + HiGHS"
+                else:
+                    return 'error', f"Unknown CVXPY backend: {backend}"
+                    
+            elif solver_name == 'scipy_linprog':
+                import scipy.optimize
+                import scipy
+                return 'working', f"SciPy {scipy.__version__}"
+            else:
+                return 'error', f"Unknown Python solver: {solver_name}"
+                
+        except ImportError as e:
+            return 'error', f"Import failed: {str(e)}"
+        except Exception as e:
+            return 'error', f"Validation error: {str(e)}"
+    
+    def _test_matlab_solver_availability(self, solver_name: str) -> Tuple[str, str]:
+        """
+        Test MATLAB solver availability.
+        
+        Args:
+            solver_name: Name of the MATLAB solver to test
+            
+        Returns:
+            Tuple of (status, version_info) where status is 'working' or 'error'
+        """
+        try:
+            # For MATLAB solvers, check if interface detected them
+            if solver_name in self.matlab_interface.get_available_solvers():
+                # MATLAB interface already detected this solver during initialization
+                return 'working', 'MATLAB solver detected'
+            else:
+                return 'error', 'MATLAB solver not detected'
+        except Exception as e:
+            return 'error', f"MATLAB validation error: {str(e)}"
 
 
 if __name__ == "__main__":

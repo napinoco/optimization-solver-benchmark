@@ -19,27 +19,31 @@ This is an automated benchmark system for optimization solvers (LP, QP, SOCP, SD
 
 ## 🔗 Essential Documentation Links
 
+> **⚠️ DISPATCH HUB NOTICE:**  
+> **CLAUDE.md serves as a navigation hub. All detailed design content is in dedicated documents below.**
+
 ### **REQUIRED READING** (Read these documents carefully before any development):
 
-1. **[📋 Basic Design](docs/development/basic_design.md)** - High-level concepts, project vision, and development roadmap
-2. **[🏗️ Detailed Design](docs/development/detail_design.md)** - Complete technical architecture and implementation specifications @docs/development/detail_design.md  
-3. **[📝 Development Conventions](docs/development/conventions.md)** - Coding standards, git protocols, and engineering guidelines @docs/development/conventions.md
+1. **[📋 Basic Design](docs/development/basic_design.md)** - Project vision, design philosophy, and system overview
+2. **[🏗️ Detailed Design](docs/development/detail_design.md)** - Complete technical architecture, implementation specifications, and code examples
+3. **[📝 Development Conventions](docs/development/conventions.md)** - Coding standards, git protocols, and engineering guidelines
 4. **[✅ Current Tasks](docs/development/tasks.md)** - Active development tasks for current phase
-5. **[📚 Development History](docs/development/history.md)** - Complete record of completed development phases
 
 ### **Quick Reference**:
 - **[🚀 Setup Guides](docs/guides/)** - Installation and configuration guides
 - **[📊 README.md](README.md)** - Project overview and quick start
 
+> **📖 For system architecture, solver configurations, and implementation details, always refer to the dedicated design documents above rather than this file.**
+
 ---
 
 ## 🎯 Current Development Status
 
-**Phase**: Production Ready ✅ | All Sprints Completed Successfully  
-**Achievement**: Meaningful Public Reporting System Complete  
-**Status**: 139 problems (DIMACS + SDPLIB + Internal) with 5 major solvers
+**Phase**: Research Tool Complete ✅  
+**Achievement**: Comprehensive Benchmark System with External Libraries  
+**Status**: 139 problems (DIMACS + SDPLIB) with 11 solvers (9 Python + 2 MATLAB)
 
-**Key Achievement**: Complete transformation from basic benchmark tool to production-ready public reporting platform with external problem libraries, comprehensive solver version tracking, and professional-grade HTML reports suitable for research publication.
+**Key Achievement**: Comprehensive optimization solver benchmarking platform with external problem libraries, complete version tracking, and research-grade HTML reports with data export capabilities.
 
 ---
 
@@ -47,7 +51,7 @@ This is an automated benchmark system for optimization solvers (LP, QP, SOCP, SD
 
 ### Core Architecture
 - **Platform**: GitHub Actions CI/CD with GitHub Pages deployment
-- **Languages**: Python 3.12+, Octave (MATLAB-compatible)
+- **Languages**: Python 3.12+, MATLAB R2024+
 - **Storage**: SQLite database with structured schema
 - **Reporting**: Bootstrap 5 + Chart.js interactive dashboards
 
@@ -56,34 +60,28 @@ This is an automated benchmark system for optimization solvers (LP, QP, SOCP, SD
 ├── config/          # YAML configuration files
 ├── scripts/         # Core system implementation
 │   ├── benchmark/   # Benchmark execution engine
-│   ├── solvers/     # Solver implementations (Python)
-│   ├── external/    # External library loaders (DIMACS, SDPLIB)
+│   ├── solvers/     # Solver implementations
+│   │   ├── python/  # Python solver interfaces
+│   │   └── matlab/ # MATLAB interfaces
+│   ├── data_loaders/ # Problem format loaders
+│   │   ├── python/  # Python loaders (MAT/DAT)
+│   │   └── matlab/ # MATLAB loaders
 │   ├── utils/       # Problem structure analysis, version detection
 │   ├── database/    # Data models and storage
 │   └── reporting/   # HTML generation and data publishing
 ├── problems/        # Benchmark problem files
 │   ├── DIMACS/     # External DIMACS library (47 problems)
 │   └── SDPLIB/     # External SDPLIB library (92 problems)
+├── database/       # SQLite database files
+│   └── results.db  # Benchmark results storage
 ├── docs/           # Generated reports (GitHub Pages)
 └── requirements.txt # Python dependencies (single file)
 ```
 
-### Current System Capabilities
-```
-Problem Type | Total Results | Success Rate | Solver Coverage
-LP           | 12 results   | 100%        | SciPy + CLARABEL + SCS + ECOS + OSQP
-QP           | 6 results    | 100%        | SciPy + CLARABEL + SCS + ECOS + OSQP  
-SOCP         | 31 results   | ~43%        | CLARABEL + SCS + ECOS
-SDP          | 38 results   | ~29%        | CLARABEL + SCS
-```
+### Current Capabilities
+**System Status**: Research Tool Complete with **11 solvers** (9 Python + 2 MATLAB) across **139 problems** (DIMACS + SDPLIB)
 
-### External Problem Libraries
-```
-Library  | Problems | Format        | Source
-DIMACS   | 47       | SeDuMi .mat   | Optimization challenges
-SDPLIB   | 92       | SDPA .dat-s   | Semidefinite programming
-Total    | 139      | Mixed         | Complete coverage
-```
+**For detailed solver coverage and problem statistics, see [basic_design.md](docs/development/basic_design.md).**
 
 ---
 
@@ -111,6 +109,9 @@ python main.py --report
 
 # Install dependencies
 pip install -r requirements.txt
+
+# Setup MATLAB solvers (optional)
+matlab -batch "setup_matlab_solvers"
 ```
 
 ---
@@ -130,21 +131,20 @@ pip install -r requirements.txt
 - **Documentation-First**: Update docs for all features
 - **User Review**: Stop and wait for approval after each task
 
+### MVP Development Principles
+- **Minimal Viable Product**: Always implement the simplest solution that meets the requirement
+- **No Extra Features**: Do not add functionality beyond what is explicitly requested
+- **User Confirmation Required**: Before implementing any feature that seems necessary but wasn't explicitly requested, ask the user for confirmation
+- **YAGNI Principle**: "You Aren't Gonna Need It" - implement only what is needed right now
+- **Incremental Development**: Build the core functionality first, then iterate based on user feedback
+
 ---
 
 ## 🎯 Design Philosophy
 
-### Fair Baseline Benchmarking
-- **Minimal Configuration**: Use solver defaults to avoid optimization bias
-- **Transparent Comparison**: Prevent parameter tuning favoring specific solvers
-- **Open Data**: Publish results as accessible JSON/CSV for research use
-- **Reproducible Results**: Standardized environments ensure consistency
+**For complete design principles and technical philosophy, see [basic_design.md](docs/development/basic_design.md).**
 
-### Technical Principles
-- **Modular Design**: Independent solver/problem additions
-- **Configuration-Driven**: YAML-based management
-- **Error Resilience**: Continue despite individual failures
-- **Automated Operation**: GitHub Actions enables hands-off execution
+Core principles: Fair baseline benchmarking with minimal configuration, reproducible results, and modular architecture for research applications.
 
 ---
 
@@ -184,31 +184,23 @@ pip install -r requirements.txt
 
 ## 🛠️ Extension Points
 
-### Adding New Solvers
-1. Implement `SolverInterface` abstract base class
-2. Add configuration to `config/solvers.yaml`
-3. Add dependencies to appropriate requirements file
-4. Test with validation framework
+**For complete implementation guidance on adding new solvers and problems, see [detail_design.md](docs/development/detail_design.md).**
 
-### Adding New Problems
-1. **Problem Extension**: Extend existing DIMACS/SDPLIB collections or add new external libraries
-2. **External Libraries**: Add git submodule or extend existing DIMACS/SDPLIB
-3. Update `problems/problem_registry.yaml` with problem metadata
-4. Implement loader in `scripts/external/` if new format required
-5. Validate with `python main.py --validate`
+Quick reference: Python solvers via `python_interface.py`, MATLAB solvers via `{solver}_runner.m`, new problems via `problem_registry.yaml`.
 
 ---
 
 ## 📋 For LLM Agents: Pre-Development Checklist
 
+> **🚨 CRITICAL: CLAUDE.md is a dispatch hub only. All design content is in dedicated documents.**
+
 **BEFORE starting any coding task, confirm you have:**
 
-- [ ] Read [basic_design.md](docs/development/basic_design.md) for project vision and goals
-- [ ] Read [detail_design.md](docs/development/detail_design.md) for technical architecture
-- [ ] Read [conventions.md](docs/development/conventions.md) for coding standards and protocols
+- [ ] Read [@docs/development/basic_design.md](docs/development/basic_design.md) for project vision, design philosophy, and system overview
+- [ ] Read [@docs/development/detail_design.md](docs/development/detail_design.md) for complete technical architecture and implementation details
+- [ ] Read [@docs/development/conventions.md](docs/development/conventions.md) for coding standards and protocols
 - [ ] Reviewed [tasks.md](docs/development/tasks.md) for current development context
-- [ ] Understood the fair benchmarking philosophy and minimal configuration approach
-- [ ] Familiarized yourself with the modular architecture and extension points
+- [ ] Understood that all design decisions and technical details are documented in the linked design files, not in CLAUDE.md
 
 **🚨 CRITICAL CONSTRAINTS CHECKLIST (MUST VERIFY):**
 
@@ -222,18 +214,6 @@ pip install -r requirements.txt
 
 ---
 
-## 🤝 Integration Context
-
-This system prioritizes:
-- **Fair, unbiased solver comparison** through minimal configuration and real-world problems
-- **Meaningful public reporting** suitable for research publication and external evaluation
-- **External library integration** with DIMACS and SDPLIB optimization problem sets
-- **Comprehensive metadata tracking** including solver versions and Git commit recording
-- **Professional-grade reporting** with problem structure analysis and library attribution
-- **Open data publishing** with complete JSON/CSV exports for research community use
-- **Production reliability** with comprehensive testing across 139 problems
-
----
 
 ## 📝 Development Memories
 
@@ -242,4 +222,4 @@ This system prioritizes:
 
 *This dispatch document provides entry point context only. All implementation details, coding standards, and development protocols are documented in the linked files above.*
 
-*Last Updated: June 2025 - Production Ready Implementation Complete*
+*Last Updated: July 2025*

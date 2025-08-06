@@ -173,14 +173,41 @@ class CvxpySolver(SolverInterface):
             # HiGHS supports time_limit parameter
             if timeout is not None:
                 options['time_limit'] = timeout
-        else:
-            # Standard format for other solvers
+        elif self.backend == "SCS":
+            # SCS solver options
             if 'verbose' not in options:
                 options['verbose'] = self.verbose
             
-            # Add timeout if specified
+            # SCS supports max_iters for timeout (approximate)
             if timeout is not None:
-                options['max_time'] = timeout
+                # Use max_iters as rough timeout control (iterations per second estimate)
+                options['max_iters'] = int(timeout * 1000)
+        elif self.backend == "ECOS":
+            # ECOS solver options
+            if 'verbose' not in options:
+                options['verbose'] = self.verbose
+            
+            # ECOS supports feastol_inacc for timeout (no direct time limit)
+            # Skip timeout parameter for ECOS - rely on manual detection
+        elif self.backend == "CLARABEL":
+            # CLARABEL solver options (no direct timeout support)
+            if 'verbose' not in options:
+                options['verbose'] = self.verbose
+            
+            # CLARABEL doesn't support direct timeout - rely on manual detection
+        else:
+            # Standard format for other solvers (CVXOPT, OSQP, SDPA, etc.)
+            if 'verbose' not in options:
+                options['verbose'] = self.verbose
+            
+            # Try max_time parameter for solvers that support it
+            # If solver doesn't recognize it, it will be ignored
+            if timeout is not None:
+                try:
+                    options['max_time'] = timeout
+                except:
+                    # If max_time is not supported, skip timeout parameter
+                    pass
         
         return options
     
@@ -214,14 +241,23 @@ class CvxpySolver(SolverInterface):
             solver_options = self._get_solver_options(timeout)
             
             # Solve the problem
-            start_time = time.time()
+            solve_start_time = time.time()
             cvx_problem.solve(
                 solver=getattr(cp, self.backend),
                 **solver_options
             )
-            solve_time = time.time() - start_time
+            solve_time = time.time() - solve_start_time
             
-            return self._create_result_from_cvxpy(cvx_problem, solve_time, problem_data)
+            # Check if timeout was exceeded (with small tolerance for processing time)
+            if timeout is not None and solve_time > (timeout + 1.0):
+                self.logger.warning(f"Solver exceeded timeout: {solve_time:.3f}s > {timeout}s")
+                return SolverResult.create_timeout_result(
+                    timeout,
+                    solver_name=self.solver_name,
+                    solver_version=self.get_version()
+                )
+            
+            return self._create_result_from_cvxpy(cvx_problem, solve_time, problem_data, timeout)
                 
         except Exception as e:
             solve_time = time.time() - start_time
@@ -312,7 +348,7 @@ class CvxpySolver(SolverInterface):
         
         return cvx_problem
 
-    def _create_result_from_cvxpy(self, cvx_problem: cp.Problem, solve_time: float, problem_data: ProblemData) -> SolverResult:
+    def _create_result_from_cvxpy(self, cvx_problem: cp.Problem, solve_time: float, problem_data: ProblemData, timeout: Optional[float] = None) -> SolverResult:
         """Create standardized result from CVXPY problem with manual duality calculations."""
         
         # Map CVXPY status to standard status
@@ -325,7 +361,27 @@ class CvxpySolver(SolverInterface):
             cp.OPTIMAL_INACCURATE: 'OPTIMAL (INACCURATE)',
         }
         
+        # Detect timeout conditions
+        if (timeout is not None and solve_time >= timeout) or \
+           (cvx_problem.status in [cp.SOLVER_ERROR] and timeout is not None and solve_time >= (timeout * 0.9)):
+            # If solve time is close to or exceeds timeout, consider it a timeout
+            self.logger.info(f"Detected timeout condition: status={cvx_problem.status}, solve_time={solve_time:.3f}s, timeout={timeout}s")
+            return SolverResult.create_timeout_result(
+                timeout,
+                solver_name=self.solver_name,
+                solver_version=self.get_version()
+            )
+        
         status = status_mapping.get(cvx_problem.status, 'UNKNOWN')
+        
+        # Additional timeout detection for unknown status close to timeout
+        if status == 'UNKNOWN' and timeout is not None and solve_time >= (timeout * 0.95):
+            self.logger.info(f"Detected likely timeout with unknown status: solve_time={solve_time:.3f}s, timeout={timeout}s")
+            return SolverResult.create_timeout_result(
+                timeout,
+                solver_name=self.solver_name,
+                solver_version=self.get_version()
+            )
 
         # Manual duality calculations for unified comparison
         primal_objective_value = None

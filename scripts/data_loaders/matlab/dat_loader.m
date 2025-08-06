@@ -162,12 +162,24 @@ function parsed_data = parse_sdpa_file(file_path)
             error('dat_loader:InvalidFormat', 'Block sizes count (%d) doesn''t match nblocks (%d)', valid_count, nblocks);
         end
         
-        % Line 4: objective vector c
-        c_str = strsplit(data_lines{4});
+        % Line 4: objective vector c (handle both standard and array formats)
+        c_line = strtrim(data_lines{4});
+        
+        % Check if it's array format with curly braces
+        if startsWith(c_line, '{') && endsWith(c_line, '}')
+            % Array format: {+0.0,+1.0,+1.0,...} (e.g., gpp100.dat-s uses this format)
+            % Remove braces and split by comma
+            c_values_str = c_line(2:end-1);  % Remove { and }
+            c_str = strsplit(c_values_str, ',');
+        else
+            % Standard space-separated format (e.g., arch0.dat-s uses this format)
+            c_str = strsplit(c_line);
+        end
+        
         c = zeros(m, 1);
         for i = 1:m
             if i <= length(c_str)
-                c(i) = str2double(c_str{i});
+                c(i) = str2double(strtrim(c_str{i}));
                 if isnan(c(i))
                     error('dat_loader:InvalidFormat', 'Invalid objective coefficient: %s', c_str{i});
                 end

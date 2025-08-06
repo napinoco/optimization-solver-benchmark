@@ -69,7 +69,7 @@ function setup_sedumi()
 fprintf('  Configuring SeDuMi...\n');
 
 % Add SeDuMi to path
-sedumi_dir = fullfile('scripts', 'solvers', 'matlab_octave', 'sedumi');
+sedumi_dir = fullfile('scripts', 'solvers', 'matlab', 'sedumi');
 addpath(genpath(sedumi_dir));
 
 % Check if SeDuMi binaries already exist
@@ -138,7 +138,7 @@ function setup_sdpt3()
 fprintf('  Configuring SDPT3...\n');
 
 % Add SDPT3 to path
-sdpt3_dir = fullfile('scripts', 'solvers', 'matlab_octave', 'sdpt3');
+sdpt3_dir = fullfile('scripts', 'solvers', 'matlab', 'sdpt3');
 addpath(genpath(sdpt3_dir));
 
 % Check if SDPT3 binaries already exist
@@ -195,8 +195,8 @@ function verify_installation()
 fprintf('  Final verification of all solvers...\n');
 
 % Add paths
-addpath(genpath(fullfile('scripts', 'solvers', 'matlab_octave', 'sedumi')));
-addpath(genpath(fullfile('scripts', 'solvers', 'matlab_octave', 'sdpt3')));
+addpath(genpath(fullfile('scripts', 'solvers', 'matlab', 'sedumi')));
+addpath(genpath(fullfile('scripts', 'solvers', 'matlab', 'sdpt3')));
 
 % Test SeDuMi
 fprintf('  Testing SeDuMi with LP problem...\n');
@@ -255,7 +255,7 @@ fprintf('  MATLAB: %s\n', version);
 
 % SeDuMi version
 try
-    addpath(genpath(fullfile('scripts', 'solvers', 'matlab_octave', 'sedumi')));
+    addpath(genpath(fullfile('scripts', 'solvers', 'matlab', 'sedumi')));
     % SeDuMi doesn't have a standard version function, so we'll parse from the solver output
     fprintf('  SeDuMi: 1.3.7 (detected from solver output)\n');
 catch
@@ -264,7 +264,7 @@ end
 
 % SDPT3 version
 try
-    addpath(genpath(fullfile('scripts', 'solvers', 'matlab_octave', 'sdpt3')));
+    addpath(genpath(fullfile('scripts', 'solvers', 'matlab', 'sdpt3')));
     fprintf('  SDPT3: 4.0 (standard version)\n');
 catch
     fprintf('  SDPT3: Version detection failed\n');

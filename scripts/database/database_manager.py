@@ -164,7 +164,7 @@ class DatabaseManager:
                 ) r2 ON r1.solver_name = r2.solver_name 
                      AND r1.problem_name = r2.problem_name 
                      AND r1.timestamp = r2.max_timestamp
-                ORDER BY r1.problem_library, r1.problem_name, r1.solver_name
+                ORDER BY r1.problem_library, r1.problem_name, r1.solver_name, r1.id DESC
                 """
                 params = ()
             

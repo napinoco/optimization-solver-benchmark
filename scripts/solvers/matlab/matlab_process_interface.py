@@ -1,16 +1,17 @@
 """
-MATLAB Solver Interface for Benchmark System.
+MATLAB Solver Process Interface for Benchmark System.
 
-This module provides a direct interface to MATLAB solvers that calls matlab_interface.m
-directly, eliminating unnecessary intermediate layers and providing symmetrical 
-architecture with the Python interface.
+This module provides a subprocess-based interface to MATLAB solvers that calls 
+matlab_solver_runner.m, providing symmetrical architecture with the Python 
+process interface.
 
 Key Features:
-- Direct MATLAB interface calls via subprocess
-- Unified solve method matching Python interface signature
+- Direct MATLAB solver execution via subprocess
+- Memory limitation via ulimit (Unix-like systems)
+- Unified solve method matching Python process interface signature
 - Centralized MATLAB solver management
 - Consistent error handling and logging
-- Symmetrical architecture with Python interface
+- Symmetrical architecture with Python process interface
 """
 
 import os
@@ -31,10 +32,10 @@ from scripts.data_loaders.python.problem_interface import ProblemInterface
 from scripts.utils.temp_file_manager import temp_file_context
 from scripts.utils.logger import get_logger
 
-logger = get_logger("matlab_interface")
+logger = get_logger("matlab_process_interface")
 
 
-class MatlabInterface:
+class MatlabProcessInterface:
     """
     Unified interface for managing MATLAB solver ecosystem.
     
@@ -59,23 +60,20 @@ class MatlabInterface:
     def __init__(self, save_solutions: bool = False, 
                  problem_interface: Optional[ProblemInterface] = None,
                  matlab_executable: str = 'matlab',
-                 use_octave: bool = False,
                  timeout: Optional[float] = 300,
                  **kwargs):
         """
-        Initialize MATLAB solver interface.
+        Initialize MATLAB solver process interface.
         
         Args:
             save_solutions: Whether to save optimal solutions to disk
             problem_interface: Optional problem interface for loading problems
-            matlab_executable: Path to MATLAB/Octave executable
-            use_octave: Use Octave instead of MATLAB
+            matlab_executable: Path to MATLAB executable
             timeout: Default timeout for solver execution
             **kwargs: Additional configuration parameters
         """
         self.save_solutions = save_solutions
         self.matlab_executable = matlab_executable
-        self.use_octave = use_octave
         self.default_timeout = timeout
         self.config = kwargs
         
@@ -85,14 +83,14 @@ class MatlabInterface:
         # Lazy initialization - solvers detected only when needed
         self._available_solvers = None
         
-        logger.info(f"Initialized MATLAB interface (direct MATLAB calls)")
-        logger.debug(f"Using {'Octave' if use_octave else 'MATLAB'} at: {matlab_executable}")
+        logger.info(f"Initialized MATLAB process interface (subprocess isolation)")
+        logger.debug(f"Using MATLAB at: {matlab_executable}")
     
     def solve(self, problem_name: str, solver_name: str,
              problem_data: Optional[ProblemData] = None,
              timeout: Optional[float] = None) -> SolverResult:
         """
-        Unified solve method that calls matlab_interface.m directly.
+        Unified solve method that calls matlab_solver_runner.m via subprocess.
         
         Args:
             problem_name: Name of the problem to solve
@@ -118,12 +116,15 @@ class MatlabInterface:
             matlab_solver = solver_config["matlab_solver"]
             runner_function = solver_config["runner_function"]
             
-            # 3. Call MATLAB interface directly
+            # 3. Use provided timeout or default
+            actual_timeout = timeout or self.default_timeout
+            
+            # 4. Call MATLAB solver via subprocess
             result = self._call_matlab_interface(
                 problem_name=problem_name,
                 matlab_solver=matlab_solver,
                 runner_function=runner_function,
-                timeout=timeout or self.default_timeout
+                timeout=actual_timeout
             )
             
             # 4. Ensure solver metadata is set
@@ -164,7 +165,7 @@ class MatlabInterface:
     def _call_matlab_interface(self, problem_name: str, matlab_solver: str, 
                              runner_function: str, timeout: float) -> SolverResult:
         """
-        Call matlab_interface.m directly via subprocess.
+        Call matlab_solver_runner.m via subprocess.
         
         Args:
             problem_name: Name of the problem
@@ -191,18 +192,16 @@ class MatlabInterface:
                 safe_result_file = result_file.replace("'", "''")
                 safe_runner_function = runner_function.replace("'", "''")
                 
-                # Create MATLAB command
+                # Create MATLAB command (updated to call matlab_solver_runner)
                 matlab_command = (
                     f"addpath('{matlab_script_dir}'); "
-                    f"matlab_interface('{safe_problem_name}', '{safe_solver_name}', "
+                    f"matlab_solver_runner('{safe_problem_name}', '{safe_solver_name}', "
                     f"'{safe_result_file}', {str(self.save_solutions).lower()}, '{safe_runner_function}')"
                 )
                 
                 # Build command array
-                if self.use_octave:
-                    cmd = [self.matlab_executable, '--eval', matlab_command]
-                else:
-                    cmd = [self.matlab_executable, '-batch', matlab_command]
+                # Use minimal options, rely on environment variables for Java/X11 control
+                cmd = [self.matlab_executable, '-batch', matlab_command]
                 
                 logger.debug(f"Executing MATLAB command: {' '.join(cmd)}")
                 
@@ -211,26 +210,48 @@ class MatlabInterface:
                     # Add startup buffer to timeout for MATLAB initialization
                     adjusted_timeout = timeout + 15  # Extra 15s for MATLAB startup
                     
+                    # Set environment variables to suppress Java warnings and X11 issues
+                    env = os.environ.copy()
+                    env['DISPLAY'] = ''  # Disable X11
+                    env['_JAVA_OPTIONS'] = '-Djava.awt.headless=true'  # Headless Java mode
+                    env['MATLAB_LOG_DIR'] = '/dev/null'  # Suppress MATLAB logs
+                    
                     result = subprocess.run(
                         cmd,
                         capture_output=True,
                         text=True,
                         timeout=adjusted_timeout,
-                        cwd=project_root
+                        cwd=project_root,
+                        env=env
                     )
                     
                     # Check execution success
                     if result.returncode != 0:
                         error_msg = self._parse_matlab_error(result.stderr, result.stdout)
-                        full_error = f"MATLAB execution failed (code {result.returncode}): {error_msg}"
-                        logger.error(full_error)
+                        solve_time = time.time() - start_time
                         
-                        return SolverResult.create_error_result(
-                            full_error,
-                            solve_time=float('nan'),
-                            solver_name=f"matlab_{matlab_solver}",
-                            solver_version="unknown"
-                        )
+                        # Check for SIGKILL (process forcibly terminated)
+                        if result.returncode == -9 or result.returncode == 137:
+                            logger.error(f"Process killed by SIGKILL, returncode: {result.returncode}")
+                            return SolverResult.create_sigkill_result(
+                                memory_limit_gb=None,
+                                solve_time=solve_time,
+                                solver_name=f"matlab_{matlab_solver}",
+                                solver_version="unknown",
+                                error_details=f"Process terminated (returncode {result.returncode}). {error_msg}"
+                            )
+                        # Other subprocess errors
+                        else:
+                            full_error = f"MATLAB subprocess failed (code {result.returncode}): {error_msg}"
+                            logger.error(full_error)
+                            
+                            return SolverResult.create_subprocess_error_result(
+                                returncode=result.returncode,
+                                error_message=error_msg,
+                                solve_time=solve_time,
+                                solver_name=f"matlab_{matlab_solver}",
+                                solver_version="unknown"
+                            )
                     
                     # Read JSON result file
                     if not os.path.exists(result_file):
@@ -339,7 +360,7 @@ class MatlabInterface:
                     'matlab_output': matlab_result,
                     'matlab_version': matlab_version,
                     'solver_backend': matlab_solver,
-                    'execution_environment': 'octave' if self.use_octave else 'matlab'
+                    'execution_environment': 'matlab'
                 }
             )
         except Exception as e:
@@ -434,11 +455,9 @@ class MatlabInterface:
         
         logger.debug("Detecting available MATLAB solvers...")
         
-        # First check if MATLAB/Octave is available at all
+        # First check if MATLAB is available
         try:
             cmd = [self.matlab_executable, '-batch', 'disp("MATLAB_OK")']
-            if self.use_octave:
-                cmd = [self.matlab_executable, '--eval', 'disp("Octave_OK")']
             
             result = subprocess.run(
                 cmd, 
@@ -449,12 +468,12 @@ class MatlabInterface:
             )
             
             if result.returncode != 0:
-                logger.warning(f"MATLAB/Octave not available: {result.stderr}")
+                logger.warning(f"MATLAB not available: {result.stderr}")
                 return []  # No MATLAB solvers available
             
-            logger.debug("MATLAB/Octave environment verified")
+            logger.debug("MATLAB environment verified")
         except Exception as e:
-            logger.warning(f"MATLAB/Octave not available: {e}")
+            logger.warning(f"MATLAB not available: {e}")
             return []  # No MATLAB solvers available
         
         # If MATLAB is available, assume all configured solvers are available

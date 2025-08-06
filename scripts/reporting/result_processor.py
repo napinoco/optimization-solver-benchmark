@@ -54,6 +54,7 @@ class BenchmarkResult:
     primal_infeasibility: Optional[float] = None
     dual_infeasibility: Optional[float] = None
     iterations: Optional[int] = None
+    memo: Optional[str] = None
     
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary for JSON serialization"""
@@ -64,7 +65,7 @@ class BenchmarkResult:
             'problem_library': self.problem_library,
             'problem_name': self.problem_name,
             'problem_type': self.problem_type,
-            'environment_info': self._sanitize_environment_info(self.environment_info),
+            'environment_info': self.get_sanitized_environment_info(),
             'commit_hash': self.commit_hash,
             'timestamp': self.timestamp.isoformat() if self.timestamp else None,
             'solve_time': self.solve_time,
@@ -74,8 +75,15 @@ class BenchmarkResult:
             'duality_gap': self.duality_gap,
             'primal_infeasibility': self.primal_infeasibility,
             'dual_infeasibility': self.dual_infeasibility,
-            'iterations': self.iterations
+            'iterations': self.iterations,
+            'memo': self.memo
         }
+    
+    def get_sanitized_environment_info(self, env_info: Dict[str, Any] = None) -> Dict[str, Any]:
+        """Get sanitized environment info to remove sensitive information - public method"""
+        if env_info is None:
+            env_info = self.environment_info
+        return self._sanitize_environment_info(env_info)
     
     def _sanitize_environment_info(self, env_info: Dict[str, Any]) -> Dict[str, Any]:
         """Sanitize environment info to remove sensitive information - matches database sanitization"""
@@ -122,14 +130,15 @@ class BenchmarkResult:
             }
             # Remove: executable (contains user paths)
         
-        # Git info - keep commit hash only (remove branch and dirty status)
+        # Git info - keep commit hash (essential for result tracking and table restoration)
         if 'git' in env_info:
             git = env_info['git']
-            if git.get('available') and git.get('commit_hash'):
+            if git.get('commit_hash'):
                 sanitized['git'] = {
                     'commit_hash': git.get('commit_hash')
                 }
             # Remove: available, branch, is_dirty (privacy/security sensitive)
+            # Keep: commit_hash (not sensitive and essential for data integrity)
         
         # Timezone - UTC ONLY (remove all location-specific timezone info)
         # Replace all timezone info with UTC standard to prevent location identification
@@ -154,7 +163,15 @@ class BenchmarkResult:
                 if key == 'timestamp' and value:
                     result.timestamp = datetime.fromisoformat(value.replace('Z', '+00:00'))
                 elif key == 'environment_info' and isinstance(value, str):
-                    result.environment_info = json.loads(value) if value else {}
+                    try:
+                        result.environment_info = json.loads(value) if value and value.strip() else {}
+                    except json.JSONDecodeError:
+                        result.environment_info = {}  # Default to empty dict if not valid JSON
+                elif key == 'memo' and isinstance(value, str):
+                    try:
+                        result.memo = json.loads(value) if value and value.strip() else None
+                    except json.JSONDecodeError:
+                        result.memo = value  # Keep as string if not valid JSON
                 else:
                     setattr(result, key, value)
         return result
@@ -191,9 +208,39 @@ class ResultProcessor:
             self.logger.warning(f"Failed to load site config: {e}")
             return {}
     
+    def _get_active_problems(self) -> set:
+        """
+        Get set of active problem names from problem_registry.yaml.
+        Excludes commented out problems.
+        
+        Returns:
+            Set of active problem names
+        """
+        try:
+            registry_path = project_root / "config" / "problem_registry.yaml"
+            with open(registry_path, 'r', encoding='utf-8') as f:
+                registry = yaml.safe_load(f)
+            
+            # Get problems that are not commented out
+            active_problems = set()
+            if 'problem_libraries' in registry:
+                for problem_name, config in registry['problem_libraries'].items():
+                    # Only include if it's not None (meaning it's not commented out)
+                    if config is not None:
+                        active_problems.add(problem_name)
+            
+            self.logger.debug(f"Found {len(active_problems)} active problems in registry")
+            return active_problems
+            
+        except Exception as e:
+            self.logger.warning(f"Failed to load problem registry: {e}")
+            # Return empty set so no filtering occurs
+            return set()
+    
     def get_latest_results_for_reporting(self) -> List[BenchmarkResult]:
         """
         Get latest results using commit_hash and environment_info with timestamp tiebreaker.
+        Only returns results for problems that are currently active in problem_registry.yaml.
         
         Returns:
             List of BenchmarkResult objects representing the latest benchmark run
@@ -201,20 +248,23 @@ class ResultProcessor:
         
         self.logger.info("Extracting latest results for reporting...")
         
+        # Get active problems from registry (exclude commented out problems)
+        active_problems = self._get_active_problems()
+        
         try:
             with sqlite3.connect(self.db_path) as conn:
-                # Query for latest results using commit_hash and environment_info
-                # Use timestamp as tiebreaker for truly latest results
+                # Query for latest results using latest-per-group approach
+                # This ensures we get the latest result for EVERY (solver, problem) combination
                 query = """
-                    SELECT * FROM results 
-                    WHERE (commit_hash, environment_info, timestamp) IN (
-                        SELECT commit_hash, environment_info, MAX(timestamp)
-                        FROM results 
+                    SELECT r1.* FROM results r1
+                    INNER JOIN (
+                        SELECT solver_name, problem_name, MAX(timestamp) as max_timestamp
+                        FROM results
                         GROUP BY solver_name, problem_name
-                        ORDER BY timestamp DESC
-                        LIMIT 1000  -- Reasonable limit for latest batch
-                    )
-                    ORDER BY problem_library, problem_name, solver_name
+                    ) r2 ON r1.solver_name = r2.solver_name 
+                        AND r1.problem_name = r2.problem_name 
+                        AND r1.timestamp = r2.max_timestamp
+                    ORDER BY problem_library, problem_name, solver_name, id DESC
                 """
                 
                 cursor = conn.cursor()
@@ -223,18 +273,77 @@ class ResultProcessor:
                 # Get column names
                 columns = [description[0] for description in cursor.description]
                 
-                # Convert rows to BenchmarkResult objects
+                # Convert rows to BenchmarkResult objects and filter for active problems
                 results = []
+                excluded_count = 0
                 for row in cursor.fetchall():
                     row_dict = dict(zip(columns, row))
                     result = BenchmarkResult.from_dict(row_dict)
-                    results.append(result)
+                    
+                    # Only include results for active problems
+                    if not active_problems or result.problem_name in active_problems:
+                        results.append(result)
+                    else:
+                        excluded_count += 1
                 
                 self.logger.info(f"Retrieved {len(results)} latest results for reporting")
+                if excluded_count > 0:
+                    self.logger.info(f"Excluded {excluded_count} results for commented-out problems")
                 return results
                 
         except Exception as e:
             self.logger.error(f"Failed to get latest results: {e}")
+            return []
+    
+    def get_all_results_for_export(self) -> List[BenchmarkResult]:
+        """
+        Get all results from database for complete export/backup.
+        Only returns results for problems that are currently active in problem_registry.yaml.
+        
+        Returns:
+            List of all BenchmarkResult objects for active problems in the database
+        """
+        
+        self.logger.info("Extracting all results for export...")
+        
+        # Get active problems from registry (exclude commented out problems)
+        active_problems = self._get_active_problems()
+        
+        try:
+            with sqlite3.connect(self.db_path) as conn:
+                # Query for all results ordered by id for database restoration
+                # Note: This method returns ALL results, not just latest per group
+                query = """
+                    SELECT * FROM results 
+                    ORDER BY id ASC
+                """
+                
+                cursor = conn.cursor()
+                cursor.execute(query)
+                
+                # Get column names
+                columns = [description[0] for description in cursor.description]
+                
+                # Convert rows to BenchmarkResult objects and filter for active problems
+                results = []
+                excluded_count = 0
+                for row in cursor.fetchall():
+                    row_dict = dict(zip(columns, row))
+                    result = BenchmarkResult.from_dict(row_dict)
+                    
+                    # Only include results for active problems
+                    if not active_problems or result.problem_name in active_problems:
+                        results.append(result)
+                    else:
+                        excluded_count += 1
+                
+                self.logger.info(f"Retrieved {len(results)} total results for export")
+                if excluded_count > 0:
+                    self.logger.info(f"Excluded {excluded_count} results for commented-out problems")
+                return results
+                
+        except Exception as e:
+            self.logger.error(f"Failed to get all results: {e}")
             return []
     
     def get_summary_statistics(self, results: List[BenchmarkResult]) -> Dict[str, Any]:
@@ -419,6 +528,92 @@ class ResultProcessor:
             comparison_by_type[problem_type] = type_comparison
         
         return comparison_by_type
+    
+    def get_problem_count_by_library_and_type(self, results: List[BenchmarkResult]) -> Dict[str, Dict[str, int]]:
+        """Get problem count grouped by library and problem type"""
+        
+        # Use unique problem names to avoid double counting
+        unique_problems = {}
+        for result in results:
+            key = (result.problem_name, result.problem_library, result.problem_type)
+            if key not in unique_problems:
+                unique_problems[key] = {
+                    'problem_name': result.problem_name,
+                    'library': result.problem_library or 'unknown',
+                    'type': result.problem_type or 'UNKNOWN'
+                }
+        
+        # Count by library and type
+        library_type_counts = {}
+        for problem_data in unique_problems.values():
+            library = problem_data['library']
+            problem_type = problem_data['type']
+            
+            if library not in library_type_counts:
+                library_type_counts[library] = {}
+            if problem_type not in library_type_counts[library]:
+                library_type_counts[library][problem_type] = 0
+            
+            library_type_counts[library][problem_type] += 1
+        
+        return library_type_counts
+    
+    def get_best_performers_by_library_and_type(self, results: List[BenchmarkResult]) -> Dict[str, Dict[str, Dict[str, Any]]]:
+        """Get best performing solver by library and problem type based on solve time"""
+        
+        # Group results by library and problem type
+        by_library_type = {}
+        for result in results:
+            library = result.problem_library or 'unknown'
+            problem_type = result.problem_type or 'UNKNOWN'
+            
+            key = (library, problem_type)
+            if key not in by_library_type:
+                by_library_type[key] = []
+            by_library_type[key].append(result)
+        
+        # Find best performer for each library-type combination
+        best_performers = {}
+        for (library, problem_type), type_results in by_library_type.items():
+            # Calculate average solve time for each solver in this library-type
+            solver_times = {}
+            for result in type_results:
+                if result.solve_time is not None and result.solve_time > 0:
+                    solver = result.solver_name
+                    if solver not in solver_times:
+                        solver_times[solver] = []
+                    solver_times[solver].append(result.solve_time)
+            
+            # Calculate averages and find best
+            solver_averages = {}
+            for solver, times in solver_times.items():
+                if times:
+                    solver_averages[solver] = {
+                        'avg_time': sum(times) / len(times),
+                        'min_time': min(times),
+                        'max_time': max(times),
+                        'count': len(times)
+                    }
+            
+            # Find best performer (lowest average time with reasonable sample size)
+            best_solver = None
+            best_time = float('inf')
+            for solver, stats in solver_averages.items():
+                # Only consider solvers that solved at least 1 problem
+                if stats['count'] >= 1 and stats['avg_time'] < best_time:
+                    best_time = stats['avg_time']
+                    best_solver = solver
+            
+            if library not in best_performers:
+                best_performers[library] = {}
+            
+            best_performers[library][problem_type] = {
+                'best_solver': best_solver,
+                'avg_time': best_time if best_solver else None,
+                'solver_stats': solver_averages
+            }
+        
+        return best_performers
     
     def get_results_matrix(self, results: List[BenchmarkResult]) -> Dict[str, Any]:
         """Generate problems × solvers matrix data with enhanced metadata and sorting"""

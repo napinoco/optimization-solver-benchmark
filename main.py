@@ -178,7 +178,8 @@ def run_benchmark(library_names: Optional[List[str]] = None,
                  problems: Optional[List[str]] = None,
                  solvers: Optional[List[str]] = None,
                  dry_run: bool = False,
-                 save_solutions: bool = False) -> bool:
+                 save_solutions: bool = False,
+                 timeout: float = 120.0) -> bool:
     """Run the benchmark suite with simplified registry-based approach.
     
     Args:
@@ -187,6 +188,7 @@ def run_benchmark(library_names: Optional[List[str]] = None,
         solvers: List of solver names to run
         dry_run: If True, skip database operations (for testing)
         save_solutions: If True, save optimal solutions to disk
+        timeout: Timeout in seconds for solver execution (default: 120.0)
     """
     
     logger = get_logger("benchmark")
@@ -195,7 +197,7 @@ def run_benchmark(library_names: Optional[List[str]] = None,
         logger.info("Starting benchmark execution...")
         
         # Create benchmark runner (db_manager created internally by default)
-        runner = BenchmarkRunner(dry_run=dry_run, save_solutions=save_solutions)
+        runner = BenchmarkRunner(dry_run=dry_run, save_solutions=save_solutions, default_timeout=timeout)
 
         # Load problem registry only (solver configs now in interfaces)
         problem_registry = load_problem_registry()
@@ -300,10 +302,9 @@ def generate_reports() -> bool:
         logger.info("Exporting data files...")
         
         data_exporter = DataExporter(output_dir="docs/pages/data")
-        data_success = data_exporter.export_latest_results()
-        summary_success = data_exporter.export_summary_only()
+        data_success = data_exporter.export_both_versions()
         
-        if not (data_success and summary_success):
+        if not data_success:
             logger.error("Failed to export data files")
             return False
         
@@ -315,9 +316,10 @@ def generate_reports() -> bool:
         logger.info("  • docs/pages/index.html (Overview Dashboard)")
         logger.info("  • docs/pages/results_matrix.html (Results Matrix)")
         logger.info("  • docs/pages/raw_data.html (Raw Data Table)")
-        logger.info("  • docs/pages/data/benchmark_results.json (Full Results JSON)")
-        logger.info("  • docs/pages/data/benchmark_results.csv (Full Results CSV)")
-        logger.info("  • docs/pages/data/summary.json (Summary Statistics)")
+        logger.info("  • docs/pages/data/benchmark_results_latest.json (Latest Results JSON)")
+        logger.info("  • docs/pages/data/benchmark_results_latest.csv (Latest Results CSV)")
+        logger.info("  • docs/pages/data/benchmark_results_all.json (All Results JSON)")
+        logger.info("  • docs/pages/data/benchmark_results_all.csv (All Results CSV)")
         
         return True
         
@@ -346,7 +348,13 @@ Examples:
   python main.py --benchmark --solvers cvxpy_clarabel,scipy_linprog  # Run specific solvers
   python main.py --all --problems nb --solvers cvxpy_clarabel    # Run one problem with one solver
   python main.py --benchmark --library_names DIMACS --solvers cvxpy_scip  # Run DIMACS with SCIP
-  python main.py --benchmark --problems nb --dry-run  # Test nb problem without DB storage
+  python main.py --benchmark --problems nb --dry-run             # Test nb problem without DB storage
+  
+  # Timeout configuration examples:
+  python main.py --benchmark --timeout 60                        # Set 60-second timeout for quick tests
+  python main.py --all --timeout 300                             # Run all with 5-minute timeout
+  python main.py --benchmark --library_names SDPLIB --timeout 600  # Use 10-minute timeout for large SDP problems
+  python main.py --benchmark --problems difficult_problem --timeout 1800  # 30-minute timeout for challenging problems
         """
     )
     
@@ -409,6 +417,13 @@ Examples:
         help='Save optimal solutions to disk for verification and analysis'
     )
     
+    parser.add_argument(
+        '--timeout', '-t',
+        type=float,
+        default=120.0,
+        help='Solver timeout in seconds. Solvers exceeding this limit will be terminated and marked as TIMEOUT. Default: 120.0 (2 minutes). Use larger values (300-1800) for difficult problems.'
+    )
+    
     # Logging options
     parser.add_argument(
         '--verbose', '-v',
@@ -467,7 +482,8 @@ Examples:
                 problems=problems,
                 solvers=solvers,
                 dry_run=args.dry_run,
-                save_solutions=args.save_solutions
+                save_solutions=args.save_solutions,
+                timeout=args.timeout
             )
             
         elif args.report:
@@ -480,7 +496,8 @@ Examples:
                 problems=problems,
                 solvers=solvers,
                 dry_run=args.dry_run,
-                save_solutions=args.save_solutions
+                save_solutions=args.save_solutions,
+                timeout=args.timeout
             )
             
             if benchmark_success:

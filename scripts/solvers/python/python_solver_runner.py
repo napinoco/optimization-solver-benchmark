@@ -1,20 +1,24 @@
 """
-Python Solver Interface Module for Benchmark System.
+Python Solver Runner Module for Benchmark System.
 
-This module provides a unified interface for managing Python optimization solvers,
-creating symmetry with the MATLAB interface module. It handles Python-specific
-solver creation, backend detection, and compatibility validation.
+This module serves two purposes:
+1. Provides PythonSolverManager for managing Python optimization solvers
+2. Acts as the subprocess entry point for isolated solver execution
+
+When imported, it provides the PythonSolverManager class for solver management.
+When executed directly, it runs as a subprocess to execute solvers in isolation
+with resource limitations.
 
 Key Features:
 - Unified Python solver management (CVXPY backends + SciPy)
 - Dynamic backend availability detection
 - Solver compatibility validation
 - Version detection and tracking
-- Consistent interface with MATLAB solver management
+- Subprocess entry point for isolated execution
 
 Architecture:
-This module extracts Python solver management logic from the benchmark runner
-to create a clean separation between orchestration and solver-specific logic.
+This module combines the solver management logic with subprocess execution capability,
+matching the pattern of matlab_solver_runner.m in the MATLAB ecosystem.
 """
 
 import sys
@@ -32,10 +36,10 @@ from scripts.data_loaders.problem_loader import ProblemData
 from scripts.data_loaders.python.problem_interface import ProblemInterface
 from scripts.utils.logger import get_logger
 
-logger = get_logger("python_interface")
+logger = get_logger("python_solver_runner")
 
 
-class PythonInterface:
+class PythonSolverManager:
     """
     Interface for managing Python solver ecosystem.
     
@@ -306,3 +310,93 @@ class PythonInterface:
         
         return available
     
+
+
+# =============================================================================
+# Subprocess Entry Point
+# =============================================================================
+
+def main():
+    """
+    Main entry point for subprocess execution.
+    
+    This function is called when the module is executed directly as a subprocess
+    by PythonProcessInterface. It handles argument parsing, solver execution,
+    and result serialization.
+    """
+    import argparse
+    import json
+    import resource
+    import platform
+    
+    # Parse command line arguments
+    parser = argparse.ArgumentParser(description='Python Solver Runner for Subprocess Execution')
+    parser.add_argument('--problem', required=True, help='Name of the problem to solve')
+    parser.add_argument('--solver', required=True, help='Name of the solver to use')
+    parser.add_argument('--result-file', required=True, help='Path to write JSON result')
+    parser.add_argument('--save-solutions', action='store_true', help='Save solution vectors')
+    parser.add_argument('--memory-limit', type=float, help='Memory limit in GB (Unix only)')
+    
+    args = parser.parse_args()
+    
+    # Apply memory limit if specified (Unix only)
+    if args.memory_limit and platform.system() != 'Windows':
+        try:
+            memory_bytes = int(args.memory_limit * 1024 * 1024 * 1024)
+            resource.setrlimit(resource.RLIMIT_AS, (memory_bytes, memory_bytes))
+            logger.info(f"Set memory limit to {args.memory_limit}GB")
+        except Exception as e:
+            logger.warning(f"Failed to set memory limit: {e}")
+    
+    # Initialize solver manager
+    manager = PythonSolverManager(save_solutions=args.save_solutions)
+    
+    try:
+        # Execute solver
+        logger.info(f"Subprocess solving {args.problem} with {args.solver}")
+        result = manager.solve(args.problem, args.solver)
+        
+        # Convert result to dictionary for JSON serialization
+        result_dict = {
+            'solve_time': result.solve_time,
+            'status': result.status,
+            'primal_objective_value': result.primal_objective_value,
+            'dual_objective_value': result.dual_objective_value,
+            'duality_gap': result.duality_gap,
+            'primal_infeasibility': result.primal_infeasibility,
+            'dual_infeasibility': result.dual_infeasibility,
+            'iterations': result.iterations,
+            'solver_name': result.solver_name,
+            'solver_version': result.solver_version,
+            'additional_info': result.additional_info or {}
+        }
+        
+        # Write result to JSON file
+        with open(args.result_file, 'w') as f:
+            json.dump(result_dict, f, indent=2, default=str)
+        
+        logger.info(f"Subprocess completed successfully, result written to {args.result_file}")
+        
+    except Exception as e:
+        # Create error result
+        error_result = {
+            'solve_time': 0.0,
+            'status': 'error',
+            'solver_name': args.solver,
+            'solver_version': 'unknown',
+            'additional_info': {
+                'error_message': str(e),
+                'error_type': type(e).__name__
+            }
+        }
+        
+        # Write error result to JSON file
+        with open(args.result_file, 'w') as f:
+            json.dump(error_result, f, indent=2)
+        
+        logger.error(f"Subprocess failed: {e}")
+        sys.exit(1)
+
+
+if __name__ == "__main__":
+    main()
