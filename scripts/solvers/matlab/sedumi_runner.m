@@ -176,6 +176,12 @@ function result = create_sedumi_result(info)
     elseif isfield(info, 'dinf') && info.dinf == 1
         result.status = 'unbounded';  
         result.termination_reason = 'Dual infeasible (primal unbounded)';
+    elseif isfield(info, 'numerr') && info.numerr == 1
+        result.status = 'optimal (inaccurate)';
+        result.termination_reason = 'Numerical problems warning (low accuracy)';
+    elseif isfield(info, 'numerr') && info.numerr == 2
+        result.status = 'num_error';
+        result.termination_reason = 'Complete numerical failure';
     elseif isfield(info, 'numerr') && info.numerr > 0
         result.status = 'num_error';
         result.termination_reason = sprintf('Numerical error (code: %d)', info.numerr);
