@@ -909,6 +909,9 @@ class HTMLGenerator:
         .status-error,
         .status-infeasible,
         .status-unsupported,
+        .status-stalled,
+        .status-max-iter,
+        .status-num-error,
         .status-unknown {
             /* No background colors - focus on accuracy/speed instead */
         }
@@ -1226,6 +1229,12 @@ class HTMLGenerator:
                         css_class = 'status-error'
                     elif status_lower in ['infeasible', 'unbounded']:
                         css_class = 'status-infeasible'
+                    elif status_lower == 'stalled':
+                        css_class = 'status-stalled'
+                    elif status_lower == 'max_iter':
+                        css_class = 'status-max-iter'
+                    elif status_lower == 'num_error':
+                        css_class = 'status-num-error'
                     else:
                         css_class = 'status-unknown'
                     
@@ -1296,18 +1305,23 @@ class HTMLGenerator:
 
         <div class="legend">
             <h3>📋 Status Legend</h3>
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 0.5rem;">
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 0.5rem;">
                 <div>
                     <p><span class="status-optimal" style="padding: 5px 10px; border-radius: 3px;">OPTIMAL</span> - Successfully solved to optimality</p>
-                    <p><span class="status-error" style="padding: 5px 10px; border-radius: 3px;">ERROR</span> - Solver encountered an error</p>
                     <p><span class="status-infeasible" style="padding: 5px 10px; border-radius: 3px;">INFEASIBLE/UNBOUNDED</span> - Problem has no feasible solution</p>
+                    <p><span class="status-stalled" style="padding: 5px 10px; border-radius: 3px;">STALLED</span> - Algorithm progress stagnated</p>
+                    <p><span class="status-max-iter" style="padding: 5px 10px; border-radius: 3px;">MAX_ITER</span> - Maximum iterations reached</p>
                 </div>
                 <div>
-                    <p><span class="status-unsupported" style="padding: 5px 10px; border-radius: 3px; color: #999;">UNSUPPORTED</span> - Solver does not support this problem type</p>
-                    <p><span class="status-timeout" style="padding: 5px 10px; border-radius: 3px; color: #999;">TIMEOUT</span> - Execution time limit exceeded</p>
-                    <p><span class="status-sigkill" style="padding: 5px 10px; border-radius: 3px; color: #999;">SIGKILL</span> - Process forcibly terminated (memory limits)</p>
-                    <p><span class="status-subprocess-error" style="padding: 5px 10px; border-radius: 3px; color: #999;">SUBPROCESS_ERROR</span> - Subprocess execution error</p>
-                    <p><span class="status-unknown" style="padding: 5px 10px; border-radius: 3px;">—</span> - No result available</p>
+                    <p><span class="status-error" style="padding: 5px 10px; border-radius: 3px;">ERROR</span> - Solver encountered an error</p>
+                    <p><span class="status-num-error" style="padding: 5px 10px; border-radius: 3px;">NUM_ERROR</span> - Numerical difficulties encountered</p>
+                    <p><span class="status-unsupported" style="padding: 5px 10px; border-radius: 3px;">UNSUPPORTED</span> - Solver does not support this problem type</p>
+                    <p><span class="status-timeout" style="padding: 5px 10px; border-radius: 3px;">TIMEOUT</span> - Execution time limit exceeded</p>
+                </div>
+                <div>
+                    <p><span class="status-sigkill" style="padding: 5px 10px; border-radius: 3px;">SIGKILL</span> - Process forcibly terminated (memory limits)</p>
+                    <p><span class="status-subprocess-error" style="padding: 5px 10px; border-radius: 3px;">SUBPROCESS_ERROR</span> - Subprocess execution error</p>
+                    <p><span class="status-unknown" style="padding: 5px 10px; border-radius: 3px;">UNKNOWN</span> - Unknown status or no result</p>
                 </div>
             </div>
         </div>
@@ -1497,6 +1511,62 @@ class HTMLGenerator:
         .status-unsupported {
             background-color: #e7f3ff;
             color: #0c5460;
+            font-weight: bold;
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
+        
+        .status-stalled {
+            background-color: #ffe8cc;
+            color: #664d00;
+            font-weight: bold;
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
+        
+        .status-max-iter {
+            background-color: #f0e6ff;
+            color: #5a3d8a;
+            font-weight: bold;
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
+        
+        .status-num-error {
+            background-color: #ffcccc;
+            color: #990000;
+            font-weight: bold;
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
+        
+        .status-timeout {
+            background-color: #e8e8e8;
+            color: #666666;
+            font-weight: bold;
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
+        
+        .status-sigkill {
+            background-color: #d8d8d8;
+            color: #555555;
+            font-weight: bold;
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
+        
+        .status-subprocess-error {
+            background-color: #f0f0f0;
+            color: #777777;
+            font-weight: bold;
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
+        
+        .status-unknown {
+            background-color: #f8f8f8;
+            color: #999999;
             font-weight: bold;
             padding: 4px 8px;
             border-radius: 4px;
@@ -1713,8 +1783,20 @@ class HTMLGenerator:
                 status_class = 'status-error'
             elif status_lower in ['infeasible', 'unbounded']:
                 status_class = 'status-infeasible'
+            elif status_lower == 'stalled':
+                status_class = 'status-stalled'
+            elif status_lower == 'max_iter':
+                status_class = 'status-max-iter'
+            elif status_lower == 'num_error':
+                status_class = 'status-num-error'
+            elif status_lower == 'timeout':
+                status_class = 'status-timeout'
+            elif status_lower == 'sigkill':
+                status_class = 'status-sigkill'
+            elif status_lower == 'subprocess_error':
+                status_class = 'status-subprocess-error'
             else:
-                status_class = ''
+                status_class = 'status-unknown'
             
             html_content += f"""
             <tr>
