@@ -284,11 +284,29 @@ class SolverResult:
     
     # Status codes with clear error distinction:
     # OPTIMAL         - Solver found optimal solution
+    # OPTIMAL (INACCURATE) - Solution found but with numerical warnings
     # ERROR           - Solver-level error (convergence failure, numerical issues)
+    # NUM_ERROR       - Numerical difficulties (matrix singularity, divergence)
+    # STALLED         - Algorithm progress stagnated (can retry with different params)
+    # MAX_ITER        - Maximum iteration limit reached
+    # INFEASIBLE      - Problem has no feasible solution
+    # UNBOUNDED       - Problem is unbounded
     # UNSUPPORTED     - Problem type not supported by solver
     # TIMEOUT         - Execution time limit exceeded
     # SIGKILL         - Process forcibly terminated (OOM, manual kill, resource limits)
     # SUBPROCESS_ERROR - Subprocess execution error (Python crash, library issues)
+    # UNKNOWN         - Unclear solver state
+    
+    # Additional Info Structure:
+    # additional_info['original_status'] - Original solver-specific status information
+    #   For MATLAB solvers (SDPT3/SEDUMI):
+    #     - termcode/pinf/dinf/numerr: Original solver status codes
+    #     - iter: Iteration count from solver
+    #     - full_info: Complete solver info structure
+    #   For Python solvers (CVXPY/SciPy):
+    #     - cvxpy_status/scipy_status: Original solver status
+    #     - solver_stats: Complete backend statistics
+    #     - Backend-specific metrics (solve_time, num_iters, etc.)
     
     @classmethod
     def create_error_result(cls, error_msg: str, solve_time: float = 0.0,

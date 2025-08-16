@@ -178,6 +178,7 @@ python main.py --all --timeout 600  # 10-minute timeout for large SDP problems
 - **Consistent Environments**: Standardized execution via GitHub Actions
 - **Complete Metadata**: Environment info saved with all results
 - **Version Control**: Git commit tracking for all benchmark runs
+- **Original Status Preservation**: Complete solver-specific status codes and statistics preserved for research reproducibility
 
 ---
 
