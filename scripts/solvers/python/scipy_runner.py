@@ -247,6 +247,26 @@ class ScipySolver(SolverInterface):
             "solver_solve_time": solve_time
         }
         
+        # Preserve original SciPy status information for reproducibility
+        original_status = {}
+        original_status["scipy_status"] = int(result.status)
+        original_status["scipy_success"] = bool(result.success)
+        original_status["scipy_message"] = str(result.message)
+        original_status["scipy_fun"] = float(result.fun) if result.fun is not None else None
+        
+        # Include iteration count and other solver stats
+        if hasattr(result, 'nit') and result.nit is not None:
+            original_status["scipy_nit"] = int(result.nit)
+        
+        # Include additional solver-specific information
+        scipy_specific_attrs = ['crossover_nit', 'mip_dual_bound', 'mip_gap', 'mip_node_count']
+        for attr in scipy_specific_attrs:
+            if hasattr(result, attr) and getattr(result, attr) is not None:
+                value = getattr(result, attr)
+                original_status[f"scipy_{attr}"] = value
+        
+        additional_info["original_status"] = original_status
+        
         self.logger.debug(f"LP solve completed: status={status}, "
                          f"objective={primal_objective_value}, time={solve_time:.3f}s")
         
