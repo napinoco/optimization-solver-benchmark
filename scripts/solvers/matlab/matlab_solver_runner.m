@@ -155,6 +155,25 @@ function json_result = convert_to_json_result(result)
 
     json_result.solver_version = result.solver_version;
     json_result.solver_name = result.solver_name;
+    
+    % Include original_status for reproducibility if it exists
+    if isfield(result, 'original_status')
+        json_result.original_status = result.original_status;
+    end
+    
+    % Include other optional fields that may exist
+    if isfield(result, 'termination_reason')
+        json_result.termination_reason = result.termination_reason;
+    end
+    if isfield(result, 'error_message')
+        json_result.error_message = result.error_message;
+    end
+    if isfield(result, 'setup_time')
+        json_result.setup_time = result.setup_time;
+    end
+    if isfield(result, 'solver_options')
+        json_result.solver_options = result.solver_options;
+    end
 end
 
 function error_result = create_error_result(ME, solver_name)
@@ -681,6 +700,11 @@ function standardized_result = create_standardized_result(result)
     % Add additional metadata
     standardized_result.timestamp = datestr(now, 'yyyy-mm-dd HH:MM:SS');
     standardized_result.matlab_version = version;
+    
+    % Preserve original_status for reproducibility if it exists
+    if isfield(result, 'original_status')
+        standardized_result.original_status = result.original_status;
+    end
 
 end
 

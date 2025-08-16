@@ -239,5 +239,16 @@ function result = create_sdpt3_result(info)
     result.primal_infeasibility = NaN;
     result.dual_infeasibility = NaN;
     result.error_message = '';
+    
+    % Store original SDPT3 status information for reproducibility
+    result.original_status = struct();
+    if isfield(info, 'termcode')
+        result.original_status.termcode = info.termcode;
+    end
+    if isfield(info, 'iter')
+        result.original_status.iter = info.iter;
+    end
+    % Store complete info structure for full reproducibility
+    result.original_status.full_info = info;
 end
 
