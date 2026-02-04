@@ -1,60 +1,22 @@
 # Development Conventions and Standards
 
-This document establishes coding standards, development protocols, and engineering guidelines for the optimization solver benchmark system.
+Coding standards and engineering guidelines for the optimization solver benchmark system.
 
 ---
 
-## Development Workflow
-
-### Task-Based Development Protocol
-1. **Sequential Task Execution**: Complete one task at a time following the priority order in [tasks.md](tasks.md)
-2. **Implementation Phase**: Follow task-specific requirements and implementation plans
-3. **Testing Phase**: Validate implementation using provided test criteria
-4. **Review Phase**: Stop and wait for user approval after each task completion
-5. **Commit Phase**: Commit changes only after user confirmation
-6. **Proceed**: Move to next task once approved
-
-### Task Status Management
-- **✅ Completed**: Task finished and tested successfully
-- **🚧 In Progress**: Currently being worked on (limit to ONE task at a time)
-- **⏳ Pending**: Not yet started, waiting for dependencies
-- **❌ Blocked**: Waiting for external dependencies or decisions
-
----
-
-## Git Commit Protocol
-
-### Commit Message Format
-Follow this standardized format for all commits:
+## Git Commit Format
 
 ```
 [Type] Brief description (50 chars max)
 
 - Specific changes made
-- Files modified
-- Impact on system functionality
-- Test results if applicable
 
 🤖 Generated with [Claude Code](https://claude.ai/code)
 
 Co-Authored-By: Claude <noreply@anthropic.com>
 ```
 
-### Commit Types
-- **Complete Task X**: Major task completion with full implementation
-- **Fix**: Bug fixes and error corrections
-- **Add**: New features or capabilities
-- **Update**: Enhancements to existing functionality
-- **Refactor**: Code restructuring without functional changes
-- **Docs**: Documentation-only changes
-- **Test**: Testing-related changes
-
-### Commit Best Practices
-1. **Atomic Commits**: Each commit should represent a single, complete change
-2. **Descriptive Messages**: Clearly explain what was changed and why
-3. **Test Before Commit**: Ensure all functionality works before committing
-4. **Reference Tasks**: Include task numbers when applicable
-5. **Clean History**: Avoid "WIP" or temporary commits in main branch
+**Commit Types**: Fix, Add, Update, Refactor, Docs, Test
 
 ---
 
@@ -491,4 +453,4 @@ pytest tests/unit/test_solver.py::test_specific_function -v -s
 
 *These conventions ensure consistent, maintainable, and high-quality code across the optimization solver benchmark system. All contributors should follow these standards to maintain project coherence.*
 
-*Last Updated: December 2025*
+*Last Updated: February 2026*

@@ -181,4 +181,14 @@ python main.py --all --timeout 600  # 10-minute timeout for large SDP problems
 
 ---
 
+## Future Work
+
+### Potential Enhancements
+- **QP/LP Benchmark Expansion**: Add more LP and QP benchmark problems from standard libraries
+- **Additional Solver Backends**: Include more solver backends for broader comparison
+
+---
+
 *This basic design establishes the conceptual framework and development approach. For implementation details, see [detail_design.md](detail_design.md).*
+
+*Last Updated: February 2026*
