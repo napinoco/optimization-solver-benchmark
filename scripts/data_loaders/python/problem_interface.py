@@ -30,6 +30,7 @@ sys.path.insert(0, str(project_root))
 from scripts.data_loaders.problem_loader import ProblemData
 from scripts.data_loaders.python.dat_loader import DATLoader
 from scripts.data_loaders.python.mat_loader import MATLoader
+from scripts.data_loaders.python.mps_loader import MPSLoader
 from scripts.utils.logger import get_logger
 
 logger = get_logger("problem_interface")
@@ -48,8 +49,8 @@ class ProblemInterface:
     FORMAT_LOADERS = {
         "mat": MATLoader,
         "dat-s": DATLoader,
+        "mps": MPSLoader,
         # Future loaders can be added here
-        # "mps": MPSLoader,
         # "qps": QPSLoader,
         # "python": PythonLoader,
     }
