@@ -22,18 +22,11 @@ This is an automated benchmark system for optimization solvers (LP, QP, SOCP, SD
 > **⚠️ DISPATCH HUB NOTICE:**  
 > **CLAUDE.md serves as a navigation hub. All detailed design content is in dedicated documents below.**
 
-### **REQUIRED READING** (Read these documents carefully before any development):
+### **REQUIRED READING**:
 
-1. **[📋 Basic Design](docs/development/basic_design.md)** - Project vision, design philosophy, and system overview
-2. **[🏗️ Detailed Design](docs/development/detail_design.md)** - Complete technical architecture, implementation specifications, and code examples
-3. **[📝 Development Conventions](docs/development/conventions.md)** - Coding standards, git protocols, and engineering guidelines
-4. **[✅ Current Tasks](docs/development/tasks.md)** - Active development tasks for current phase
-
-### **Quick Reference**:
-- **[🚀 Setup Guides](docs/guides/)** - Installation and configuration guides
-- **[📊 README.md](README.md)** - Project overview and quick start
-
-> **📖 For system architecture, solver configurations, and implementation details, always refer to the dedicated design documents above rather than this file.**
+1. **[📋 Basic Design](docs/development/basic_design.md)** - Project vision, design philosophy, system overview
+2. **[🏗️ Detailed Design](docs/development/detail_design.md)** - Technical architecture, directory structure, implementation specs
+3. **[📝 Development Conventions](docs/development/conventions.md)** - Coding standards and engineering guidelines
 
 ---
 
@@ -47,41 +40,14 @@ This is an automated benchmark system for optimization solvers (LP, QP, SOCP, SD
 
 ---
 
-## 🔧 Development Environment Context
+## 🔧 Development Environment
 
-### Core Architecture
 - **Platform**: GitHub Actions CI/CD with GitHub Pages deployment
-- **Languages**: Python 3.12+, MATLAB R2024+
-- **Storage**: SQLite database with structured schema
-- **Reporting**: Bootstrap 5 + Chart.js interactive dashboards
+- **Languages**: Python 3.12+, MATLAB R2024+ (optional)
+- **Storage**: SQLite database (`database/results.db`)
+- **Reports**: `docs/pages/` (Bootstrap 5 + Chart.js)
 
-### Key Directories
-```
-├── config/          # YAML configuration files
-├── scripts/         # Core system implementation
-│   ├── benchmark/   # Benchmark execution engine
-│   ├── solvers/     # Solver implementations
-│   │   ├── python/  # Python solver interfaces
-│   │   └── matlab/ # MATLAB interfaces
-│   ├── data_loaders/ # Problem format loaders
-│   │   ├── python/  # Python loaders (MAT/DAT)
-│   │   └── matlab/ # MATLAB loaders
-│   ├── utils/       # Problem structure analysis, version detection
-│   ├── database/    # Data models and storage
-│   └── reporting/   # HTML generation and data publishing
-├── problems/        # Benchmark problem files
-│   ├── DIMACS/     # External DIMACS library (47 problems)
-│   └── SDPLIB/     # External SDPLIB library (92 problems)
-├── database/       # SQLite database files
-│   └── results.db  # Benchmark results storage
-├── docs/           # Generated reports (GitHub Pages)
-└── requirements.txt # Python dependencies (single file)
-```
-
-### Current Capabilities
-**System Status**: Research Tool Complete with **11 solvers** (9 Python + 2 MATLAB) across **139 problems** (DIMACS + SDPLIB)
-
-**For detailed solver coverage and problem statistics, see [basic_design.md](docs/development/basic_design.md).**
+**For directory structure and architecture details, see [detail_design.md](docs/development/detail_design.md).**
 
 ---
 
@@ -116,27 +82,12 @@ matlab -batch "setup_matlab_solvers"
 
 ---
 
-## 🔄 Development Workflow
+## 🔄 Development Principles
 
-### **MANDATORY WORKFLOW** (Follow exactly):
-1. **Read Documentation**: Study [basic_design.md](docs/development/basic_design.md), [detail_design.md](docs/development/detail_design.md), and [conventions.md](docs/development/conventions.md)
-2. **Check Current Tasks**: Review [tasks.md](docs/development/tasks.md) for active development tasks
-3. **Follow Task Protocol**: Complete one task at a time following priority order
-4. **Test Implementation**: Validate using task-specific test criteria
-5. **Commit Changes**: Use established git commit protocol after user confirmation
-
-### Task-Based Development
-- **Sequential Execution**: Complete one task at a time
-- **Test-Driven Validation**: Each task includes specific test criteria  
-- **Documentation-First**: Update docs for all features
-- **User Review**: Stop and wait for approval after each task
-
-### MVP Development Principles
-- **Minimal Viable Product**: Always implement the simplest solution that meets the requirement
-- **No Extra Features**: Do not add functionality beyond what is explicitly requested
-- **User Confirmation Required**: Before implementing any feature that seems necessary but wasn't explicitly requested, ask the user for confirmation
-- **YAGNI Principle**: "You Aren't Gonna Need It" - implement only what is needed right now
-- **Incremental Development**: Build the core functionality first, then iterate based on user feedback
+- **MVP First**: Implement the simplest solution that meets the requirement
+- **YAGNI**: Do not add functionality beyond what is explicitly requested
+- **User Confirmation**: Ask before implementing features not explicitly requested
+- **Commit on Request**: Only commit changes when user explicitly asks
 
 ---
 
@@ -190,36 +141,4 @@ Quick reference: Python solvers via `python_interface.py`, MATLAB solvers via `{
 
 ---
 
-## 📋 For LLM Agents: Pre-Development Checklist
-
-> **🚨 CRITICAL: CLAUDE.md is a dispatch hub only. All design content is in dedicated documents.**
-
-**BEFORE starting any coding task, confirm you have:**
-
-- [ ] Read [@docs/development/basic_design.md](docs/development/basic_design.md) for project vision, design philosophy, and system overview
-- [ ] Read [@docs/development/detail_design.md](docs/development/detail_design.md) for complete technical architecture and implementation details
-- [ ] Read [@docs/development/conventions.md](docs/development/conventions.md) for coding standards and protocols
-- [ ] Reviewed [tasks.md](docs/development/tasks.md) for current development context
-- [ ] Understood that all design decisions and technical details are documented in the linked design files, not in CLAUDE.md
-
-**🚨 CRITICAL CONSTRAINTS CHECKLIST (MUST VERIFY):**
-
-- [ ] **Requirements Management**: Confirmed to use ONLY the existing `requirements.txt` (do not create requirements/ directory)
-- [ ] **CI/CD Philosophy**: Understood that CI should fail when problems exist (no graceful degradation)
-- [ ] **File Structure**: Verified existing file locations (docs/pages/, database/, config/) before modification
-- [ ] **GitHub Workflows**: Ensured any workflow changes reference existing `requirements.txt` file
-- [ ] **Solver Dependencies**: Acknowledged that solver installation failures should cause CI to fail
-
-**Failure to read these documents or violating critical constraints will result in implementation that doesn't align with project standards and philosophy.**
-
----
-
-
-## 📝 Development Memories
-
-### Task Management
-- **Reflection Note**: Please reflect the latest situation into task.md after completing each task.
-
-*This dispatch document provides entry point context only. All implementation details, coding standards, and development protocols are documented in the linked files above.*
-
-*Last Updated: July 2025*
+*Last Updated: February 2026*
