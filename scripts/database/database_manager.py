@@ -35,7 +35,7 @@ class DatabaseManager:
     def ensure_schema(self) -> None:
         """Create database schema if it doesn't exist"""
         try:
-            schema_path = Path("scripts/database/schema.sql")
+            schema_path = Path(__file__).parent / "schema.sql"
             
             if not schema_path.exists():
                 raise FileNotFoundError(f"Schema file not found: {schema_path}")

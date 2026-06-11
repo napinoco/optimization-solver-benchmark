@@ -1,0 +1,11 @@
+# Development tooling configuration.
+# Note: pytest and ruff are development tools and intentionally NOT listed in
+# requirements.txt (which defines the reproducible benchmark runtime).
+# Install them separately: pip install pytest ruff
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra"
+markers = [
+    "slow: tests that execute real solvers (excluded from default CI runs)",
+]
