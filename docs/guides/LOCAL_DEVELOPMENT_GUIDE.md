@@ -220,31 +220,11 @@ optimization-solver-benchmark/
 
 ### Adding New Solvers
 
-1. **Create Solver Class** in `scripts/solvers/python/`
-```python
-from scripts.solvers.solver_interface import SolverInterface, SolverResult
+1. **Add an entry** to `scripts/solvers/python/solver_configs.py` (the single source of truth for Python solver configurations). For a new CVXPY backend this is the only code change; otherwise create a runner class following `scripts/solvers/python/cvxpy_runner.py` and register it in `RUNNER_CLASSES` in `python_solver_runner.py`.
 
-class NewSolver(SolverInterface):
-    def solve(self, problem: ProblemData) -> SolverResult:
-        # Implementation here
-        pass
-```
+2. **Add the dependency** to `requirements.txt` (pinned version) and add the solver name to `display_order` in `config/site_config.yaml`.
 
-2. **Add Configuration** in `config/solver_registry.yaml`
-```yaml
-new_solver:
-  name: "New Solver"
-  environment: "python"
-  enabled: true
-  timeout: 300
-```
-
-3. **Add Dependencies** in `requirements/python.txt`
-```
-new-solver-package>=1.0.0
-```
-
-4. **Test Integration**
+3. **Test Integration**
 ```bash
 python main.py --validate
 python main.py --benchmark --solvers new_solver
@@ -267,50 +247,25 @@ problem_libraries:
 
 3. **Test Loading**
 ```bash
-python -c "from scripts.data_loaders.problem_loader import load_problem; print(load_problem('new_problem_name'))"
+python -c "from scripts.data_loaders.python.problem_interface import load_problem; print(load_problem('new_problem_name'))"
 ```
 
 ---
 
 ## Testing
 
-### Test Structure
-```
-tests/
-├── unit/          # Unit tests for individual components
-├── integration/   # Integration tests for workflows  
-├── debug/         # Debug and troubleshooting scripts
-└── fixtures/      # Test data and fixtures
-```
+The test suite uses pytest (`tests/unit/` for component tests, `tests/integration/` for registry integrity checks). Configuration is in `pyproject.toml`.
 
-### Running Tests
-
-**Individual Test Files**
 ```bash
-python tests/integration/test_validation.py
-python tests/debug/debug_integration.py
-```
+# Install dev tools (not part of requirements.txt)
+pip install pytest ruff
 
-**Problem Loading Test**
-```bash
-python scripts/benchmark/problem_loader.py
-```
+# Run the test suite
+pytest tests/
 
-**Solver Interface Test**
-```bash
-python scripts/benchmark/solver_interface.py
-```
-
-### Debug Scripts
-
-**Check Python Integration**
-```bash
-python tests/debug/debug_integration.py
-```
-
-**Test Simple Integration**
-```bash
-python tests/integration/test_simple_integration.py
+# Lint and format checks (same as CI)
+ruff check scripts/ main.py tests/
+ruff format --check scripts/ main.py tests/
 ```
 
 ---

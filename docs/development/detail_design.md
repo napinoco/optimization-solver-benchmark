@@ -36,6 +36,7 @@ optimization-solver-benchmark/
 │   │   ├── solver_interface.py # Abstract base classes and SolverResult
 │   │   ├── python/             # Python solver implementations (subprocess)
 │   │   │   ├── __init__.py
+│   │   │   ├── solver_configs.py            # Solver registry (single source of truth)
 │   │   │   ├── python_process_interface.py  # Python subprocess coordinator
 │   │   │   ├── python_solver_runner.py      # Subprocess entry point + solver manager
 │   │   │   ├── cvxpy_runner.py              # CVXPY backend handler
@@ -67,32 +68,28 @@ optimization-solver-benchmark/
 │   │   └── schema.sql          # Database schema
 │   ├── reporting/              # Report generation
 │   │   ├── __init__.py
-│   │   ├── html_generator.py   # HTML report creation
+│   │   ├── html_generator.py   # HTMLGenerator facade (public API)
+│   │   ├── report_base.py      # Shared base class and HTML/CSS helpers
+│   │   ├── overview_report.py  # Overview dashboard (index.html)
+│   │   ├── results_matrix_report.py # Problems × Solvers matrix
+│   │   ├── raw_data_report.py  # Raw data table
+│   │   ├── data_index_report.py # Data export index page
 │   │   ├── result_processor.py # Result aggregation
 │   │   └── data_exporter.py    # JSON/CSV export
-│   └── utils/                  # Utility modules
-│       ├── __init__.py
-│       ├── environment_info.py # System information capture
-│       ├── git_utils.py        # Git operations
-│       ├── logger.py           # Logging configuration
-│       ├── resource_limits.py  # Memory/CPU limitation utilities
-│       └── temp_file_manager.py # Temporary file handling
+│   └── utils/                  # Utility modules (logging, env info, git, temp files)
+├── tests/                      # pytest test suite
+│   ├── unit/                   # Unit tests (synthetic fixtures, no submodules needed)
+│   └── integration/            # Problem registry integrity checks
 ├── problems/                   # Problem library files
 │   ├── DIMACS/                 # External DIMACS library (git submodule)
 │   └── SDPLIB/                 # External SDPLIB library (git submodule)
-├── database/                   # SQLite database files
-│   └── results.db              # Benchmark results storage
-├── docs/                       # Generated reports and documentation
-│   ├── pages/                  # Generated HTML reports
-│   │   ├── index.html          # Main dashboard
-│   │   ├── results_matrix.html # Problems × Solvers matrix
-│   │   ├── raw_data.html       # Detailed data view
-│   │   └── data/               # Exported data files
-│   │       ├── benchmark_results.json
-│   │       ├── benchmark_results.csv
-│   │       └── summary.json
-│   └── development/            # Development documentation
-└── requirements.txt            # Python dependencies
+├── database/                   # SQLite database files (results.db, gitignored)
+├── docs/
+│   ├── pages/                  # Generated HTML reports and data exports
+│   ├── development/            # Design documents
+│   └── guides/                 # User/setup guides
+├── pyproject.toml              # pytest and ruff configuration
+└── requirements.txt            # Python dependencies (single file, all pinned)
 ```
 
 ---
@@ -474,16 +471,16 @@ CREATE INDEX idx_problem_type ON results(problem_type);
 ## Development Guidelines
 
 ### Adding New Python Solvers
-1. **Add configuration** to `PYTHON_SOLVER_CONFIGS` in `python_interface.py`
-2. **Create runner class** if needed (or extend existing `CvxpyRunner`)
-3. **Update problem type compatibility** in configuration
-4. **Test with validation framework**
+1. **Add an entry** to `scripts/solvers/python/solver_configs.py` (single source of truth; for a new CVXPY backend this is the only code change)
+2. **Create a runner class** only if the solver is not a CVXPY backend (see `cvxpy_runner.py` / `scipy_runner.py`), and register it in `RUNNER_CLASSES` in `python_solver_runner.py`
+3. **Add the dependency** to `requirements.txt` and the solver name to `display_order` in `config/site_config.yaml`
+4. **Verify** with `python main.py --validate`
 
 ### Adding New MATLAB Solvers
 1. **Create solver runner** `{solver}_runner.m` following standard interface
-2. **Add configuration** to `MATLAB_SOLVER_CONFIGS` in `matlab_interface.py`
+2. **Add configuration** to `MATLAB_SOLVER_CONFIGS` in `matlab_process_interface.py`
 3. **Implement MEX compilation** in `setup_matlab_solvers.m`
-4. **Test with validation framework**
+4. **Verify** with `python main.py --validate`
 
 ### Adding New Problem Formats
 1. **Create loader classes** in both `python/` and `matlab/` directories

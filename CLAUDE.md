@@ -63,18 +63,19 @@ python main.py --validate
 # Run complete benchmark with all libraries
 python main.py --all
 
-# Run external library benchmarks
-python main.py --benchmark --problem-set external
-
 # Run specific library benchmarks
-python main.py --benchmark --problem-set dimacs
-python main.py --benchmark --problem-set sdplib
+python main.py --benchmark --library_names DIMACS
+python main.py --benchmark --library_names SDPLIB
 
 # Generate reports only  
 python main.py --report
 
 # Install dependencies
 pip install -r requirements.txt
+
+# Run tests and lint (dev tools: pip install pytest ruff)
+pytest tests/
+ruff check scripts/ main.py tests/
 
 # Setup MATLAB solvers (optional)
 matlab -batch "setup_matlab_solvers"
@@ -137,7 +138,7 @@ Core principles: Fair baseline benchmarking with minimal configuration, reproduc
 
 **For complete implementation guidance on adding new solvers and problems, see [detail_design.md](docs/development/detail_design.md).**
 
-Quick reference: Python solvers via `python_interface.py`, MATLAB solvers via `{solver}_runner.m`, new problems via `problem_registry.yaml`.
+Quick reference: Python solvers via `scripts/solvers/python/solver_configs.py`, MATLAB solvers via `{solver}_runner.m`, new problems via `problem_registry.yaml`.
 
 ---
 

@@ -45,8 +45,8 @@ python main.py --validate
 python main.py --all
 
 # Specific libraries
-python main.py --benchmark --problem-set dimacs
-python main.py --benchmark --problem-set sdplib
+python main.py --benchmark --library_names DIMACS
+python main.py --benchmark --library_names SDPLIB
 
 # Generate reports only
 python main.py --report
@@ -124,8 +124,8 @@ python scripts/database/table_restorer.py --compare-with database/original_resul
 ## Adding Components
 
 ### New Solvers
-**Python**: Add configuration to `PYTHON_SOLVER_CONFIGS` in `python_interface.py`  
-**MATLAB**: Create `{solver}_runner.m` and add to `MATLAB_SOLVER_CONFIGS` in `matlab_interface.py`
+**Python**: Add an entry to `scripts/solvers/python/solver_configs.py`  
+**MATLAB**: Create `{solver}_runner.m` and add to `MATLAB_SOLVER_CONFIGS` in `matlab_process_interface.py`
 
 ### New Problems
 Add external libraries as git submodules in `problems/` and extend loaders in `scripts/data_loaders/`

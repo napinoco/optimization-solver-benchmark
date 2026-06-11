@@ -93,10 +93,10 @@ end
 ### Python Code Standards
 
 #### General Principles
-- **PEP 8 Compliance**: Follow Python's official style guide
+- **Linting/Formatting**: `ruff check` and `ruff format` must pass (enforced in CI; configuration in `pyproject.toml`)
 - **Type Hints**: Use type annotations for all function parameters and return values
 - **Docstrings**: Google-style docstrings for all classes and functions
-- **Error Handling**: Explicit exception handling with meaningful messages
+- **Error Handling**: Explicit exception handling with meaningful messages; bare `except:` is forbidden (ruff E722)
 
 #### Code Structure
 ```python
@@ -210,62 +210,11 @@ solver_backends:
 
 ## Testing Standards
 
-### Testing Framework
-- **pytest**: Primary testing framework for Python code
-- **Coverage**: Maintain >90% code coverage for core functionality
-- **Integration Tests**: Test complete workflows end-to-end
-- **Performance Tests**: Validate benchmark execution performance
-
-### Test Organization
-```python
-# Test file structure
-tests/
-├── unit/                    # Unit tests for individual components
-│   ├── test_solver_interface.py
-│   ├── test_problem_loader.py
-│   └── test_result_collector.py
-├── integration/             # Integration tests for workflows
-│   ├── test_benchmark_workflow.py
-│   └── test_reporting_pipeline.py
-├── performance/             # Performance and regression tests
-│   └── test_execution_time.py
-└── fixtures/               # Test data and configurations
-    ├── sample_problems/
-    └── test_configs/
-```
-
-### Test Standards
-```python
-# Test function naming and structure
-def test_solver_interface_with_valid_problem():
-    """Test that solver interface handles valid problems correctly."""
-    # Arrange
-    solver = MockSolver()
-    problem = create_test_problem()
-    
-    # Act
-    result = solver.solve(problem)
-    
-    # Assert
-    assert result.status == "optimal"
-    assert result.solve_time > 0
-    assert result.objective_value is not None
-
-def test_solver_interface_with_invalid_problem():
-    """Test that solver interface handles invalid problems gracefully."""
-    solver = MockSolver()
-    invalid_problem = None
-    
-    with pytest.raises(ValueError, match="Problem cannot be None"):
-        solver.solve(invalid_problem)
-```
-
-### Manual Testing Protocol
-Each task must include manual testing steps:
-1. **Functionality Testing**: Verify core features work as expected
-2. **Error Testing**: Test error conditions and edge cases
-3. **Integration Testing**: Verify compatibility with existing system
-4. **Performance Testing**: Ensure no significant performance regression
+- **pytest** is the testing framework; configuration lives in `pyproject.toml` (`[tool.pytest.ini_options]`). Run with `pytest tests/` (CI runs this in `validate.yml`).
+- **Layout**: `tests/unit/` holds component tests that generate synthetic fixtures in `tmp_path` (no problem submodules or external solvers required); `tests/integration/` holds problem registry integrity checks. Shared setup is in `tests/conftest.py`.
+- **Dev tools**: pytest and ruff are intentionally not in `requirements.txt`; install with `pip install pytest ruff`.
+- **Slow tests**: tests that execute real solvers must be marked `@pytest.mark.slow` and are excluded from default CI runs.
+- For naming and structure, follow the existing tests under `tests/unit/`.
 
 ---
 
@@ -420,11 +369,11 @@ def load_problem(file_path: str) -> Problem:
 
 #### Configuration Problems
 ```bash
-# Validate configuration syntax
-python -c "import yaml; yaml.safe_load(open('config/benchmark_config.yaml'))"
+# Validate configuration and environment
+python main.py --validate
 
 # Check for missing dependencies
-pip install -r requirements/python.txt
+pip install -r requirements.txt
 ```
 
 #### Testing Issues
