@@ -7,11 +7,11 @@ by DIMACS and other problem libraries.
 
 SeDuMi Format Structure:
 - A: constraint matrix (m x n)
-- b: RHS vector (m x 1) 
+- b: RHS vector (m x 1)
 - c: objective vector (n x 1)
 - K: cone structure describing variable partitions
   - K.f: number of free variables
-  - K.l: number of nonnegative variables  
+  - K.l: number of nonnegative variables
   - K.q: array of second-order cone dimensions
   - K.s: array of semidefinite cone block sizes
 
@@ -46,17 +46,17 @@ class MATLoader:
     def load(self, file_path: str, problem_name: str = None) -> ProblemData:
         """
         Load problem from .mat or .mat.gz file.
-        
+
         Args:
             file_path: Path to the .mat or .mat.gz file
             problem_name: Optional problem name (if not provided, extracted from file path)
-            
+
         Returns:
             ProblemData object
         """
         # Use provided name or extract from file path as fallback
         if problem_name is None:
-            problem_name = Path(file_path).stem.replace('.mat', '')
+            problem_name = Path(file_path).stem.replace(".mat", "")
 
         # Load and parse the file
         mat_data = self.load_sedumi_mat(file_path)
@@ -68,13 +68,13 @@ class MATLoader:
     def load_sedumi_mat(self, file_path: str) -> Dict[str, Any]:
         """
         Load SeDuMi problem from .mat or .mat.gz file.
-        
+
         Args:
             file_path: Path to the .mat or .mat.gz file
-            
+
         Returns:
             Dictionary containing SeDuMi problem data
-            
+
         Raises:
             FileNotFoundError: If file doesn't exist
             ValueError: If file format is invalid
@@ -86,16 +86,16 @@ class MATLoader:
 
         try:
             # Handle both compressed and uncompressed files
-            if file_path.endswith('.gz'):
-                with gzip.open(file_path, 'rb') as f:
+            if file_path.endswith(".gz"):
+                with gzip.open(file_path, "rb") as f:
                     mat_data = scipy.io.loadmat(f, spmatrix=False)  # Load as sparray
             else:
                 mat_data = scipy.io.loadmat(file_path, spmatrix=False)  # Load as sparray
 
             # SeDuMi format validation
-            if 'A' not in mat_data and 'At' not in mat_data:
+            if "A" not in mat_data and "At" not in mat_data:
                 raise ValueError("Missing required SeDuMi field: A or At")
-            for field in ['b', 'c', 'K']:
+            for field in ["b", "c", "K"]:
                 if field not in mat_data:
                     raise ValueError(f"Missing required SeDuMi field: {field}")
 
@@ -109,42 +109,37 @@ class MATLoader:
     def parse_cone_structure(self, K: np.ndarray) -> Dict[str, Any]:
         """
         Parse SeDuMi cone structure K.
-        
+
         Args:
             K: SeDuMi cone structure (structured numpy array)
-            
+
         Returns:
             Parsed cone information
         """
-        cone_info = {
-            'free_vars': 0,
-            'nonneg_vars': 0,
-            'soc_cones': [],
-            'sdp_cones': []
-        }
+        cone_info = {"free_vars": 0, "nonneg_vars": 0, "soc_cones": [], "sdp_cones": []}
 
         # K is a structured array, extract fields from first element
         try:
             # Access the fields using array indexing
-            if K.dtype.names and 'f' in K.dtype.names:
-                f_data = K['f'][0][0]
+            if K.dtype.names and "f" in K.dtype.names:
+                f_data = K["f"][0][0]
                 if f_data.size > 0:
-                    cone_info['free_vars'] = int(f_data.flatten()[0])
+                    cone_info["free_vars"] = int(f_data.flatten()[0])
 
-            if K.dtype.names and 'l' in K.dtype.names:
-                l_data = K['l'][0][0]
+            if K.dtype.names and "l" in K.dtype.names:
+                l_data = K["l"][0][0]
                 if l_data.size > 0:
-                    cone_info['nonneg_vars'] = int(l_data.flatten()[0])
+                    cone_info["nonneg_vars"] = int(l_data.flatten()[0])
 
-            if K.dtype.names and 'q' in K.dtype.names:
-                q_data = K['q'][0][0]
+            if K.dtype.names and "q" in K.dtype.names:
+                q_data = K["q"][0][0]
                 if q_data.size > 0:
-                    cone_info['soc_cones'] = [int(x) for x in q_data.flatten()]
+                    cone_info["soc_cones"] = [int(x) for x in q_data.flatten()]
 
-            if K.dtype.names and 's' in K.dtype.names:
-                s_data = K['s'][0][0]
+            if K.dtype.names and "s" in K.dtype.names:
+                s_data = K["s"][0][0]
                 if s_data.size > 0:
-                    cone_info['sdp_cones'] = [int(x) for x in s_data.flatten()]
+                    cone_info["sdp_cones"] = [int(x) for x in s_data.flatten()]
 
         except (IndexError, KeyError, AttributeError) as e:
             logger.warning(f"Could not parse cone structure: {e}")
@@ -157,86 +152,81 @@ class MATLoader:
         """
         Determine problem class based on cone structure.
         SDP takes priority over mixed problems.
-        
+
         Args:
             cone_info: Parsed cone information
-            
+
         Returns:
             Problem class string ('LP', 'SOCP', 'SDP')
         """
-        has_soc = len(cone_info['soc_cones']) > 0
-        has_sdp = len(cone_info['sdp_cones']) > 0
+        has_soc = len(cone_info["soc_cones"]) > 0
+        has_sdp = len(cone_info["sdp_cones"]) > 0
 
         # SDP takes priority - if it has SDP cones, classify as SDP
         if has_sdp:
-            return 'SDP'
+            return "SDP"
         elif has_soc:
-            return 'SOCP'
+            return "SOCP"
         else:
-            return 'LP'
+            return "LP"
 
-    def convert_to_problem_data(self, mat_data: Dict[str, Any],
-                              problem_name: str) -> ProblemData:
+    def convert_to_problem_data(self, mat_data: Dict[str, Any], problem_name: str) -> ProblemData:
         """
         Convert SeDuMi data to unified ProblemData format.
-        
+
         Args:
             mat_data: Loaded SeDuMi MATLAB data
             problem_name: Name for the problem
-            
+
         Returns:
             ProblemData object
         """
         # Extract basic data - handle both A and At variants
-        if 'A' in mat_data:
-            A = mat_data['A']
+        if "A" in mat_data:
+            A = mat_data["A"]
             logger.debug("Using constraint matrix 'A' from MAT file")
-        elif 'At' in mat_data:
-            A = mat_data['At'].T  # Transpose to get A from At
+        elif "At" in mat_data:
+            A = mat_data["At"].T  # Transpose to get A from At
             logger.debug("Using transposed constraint matrix 'At' from MAT file")
         else:
             raise ValueError("MAT file must contain 'A' or 'At' field for constraint matrix.")
 
         # Handle sparse matrices for b and c
-        b = mat_data['b']
-        if hasattr(b, 'toarray'):
+        b = mat_data["b"]
+        if hasattr(b, "toarray"):
             b = b.toarray().reshape(-1, 1)
         else:
             b = b.reshape(-1, 1)
 
-        c = mat_data['c']
-        if hasattr(c, 'toarray'):
+        c = mat_data["c"]
+        if hasattr(c, "toarray"):
             c = c.toarray().reshape(-1, 1)
         else:
             c = c.reshape(-1, 1)
 
         # Handle cone structure
         cone_info = {}
-        if 'K' in mat_data:
-            cone_info = self.parse_cone_structure(mat_data['K'])
+        if "K" in mat_data:
+            cone_info = self.parse_cone_structure(mat_data["K"])
 
         # Determine problem class
         problem_class = self.determine_problem_class(cone_info)
 
         # Convert sparse matrix to dense if needed
-        if hasattr(A, 'toarray'):
+        if hasattr(A, "toarray"):
             A = A.toarray()
 
         # Create metadata
-        matrix_variant = 'A' if 'A' in mat_data else 'At'
+        matrix_variant = "A" if "A" in mat_data else "At"
         metadata = {
-            'source': 'MAT file',
-            'format': 'SeDuMi .mat/.mat.gz',
-            'matrix_variant': matrix_variant,
-            'cone_structure': cone_info,
-            'original_dimensions': {
-                'variables': A.shape[1],
-                'constraints': A.shape[0]
-            }
+            "source": "MAT file",
+            "format": "SeDuMi .mat/.mat.gz",
+            "matrix_variant": matrix_variant,
+            "cone_structure": cone_info,
+            "original_dimensions": {"variables": A.shape[1], "constraints": A.shape[0]},
         }
 
-        logger.info(f"Converted {problem_name}: {problem_class} problem "
-                   f"({A.shape[1]} vars, {A.shape[0]} constraints)")
+        logger.info(f"Converted {problem_name}: {problem_class} problem ({A.shape[1]} vars, {A.shape[0]} constraints)")
 
         # Create ProblemData object
         # SeDuMi format uses equality constraints: Ax = b
@@ -250,10 +240,8 @@ class MATLoader:
             b_ub=None,
             bounds=None,  # Bounds handled by cone structure
             cone_structure=cone_info,  # NEW: Pass cone_structure directly
-            metadata=metadata
+            metadata=metadata,
         )
-
-
 
 
 if __name__ == "__main__":

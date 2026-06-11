@@ -17,13 +17,14 @@ from scripts.utils.logger import get_logger
 
 logger = get_logger("scipy_solver")
 
+
 class ScipySolver(SolverInterface):
     """SciPy-based solver for LP and QP problems."""
 
     def __init__(self, method: str = "highs", options: Optional[Dict] = None, **kwargs):
         """
         Initialize SciPy solver.
-        
+
         Args:
             method: SciPy optimization method to use
             options: Additional options for the solver
@@ -38,43 +39,35 @@ class ScipySolver(SolverInterface):
     def _convert_sedumi_to_scipy_format(self, problem_data: ProblemData) -> Dict:
         """
         Convert SeDuMi format to SciPy-compatible format.
-        
+
         SeDuMi format: min c^T x subject to A_eq x = b_eq, x ∈ K
         SciPy format: min c^T x subject to A_ub x <= b_ub, A_eq x = b_eq, bounds on x
-        
+
         Args:
             problem_data: ProblemData object (potentially in SeDuMi format)
-            
+
         Returns:
             Dictionary with SciPy-compatible fields: A_ub, b_ub, bounds
         """
         # If already has inequality constraints, use them directly
         if problem_data.A_ub is not None and problem_data.b_ub is not None:
-            return {
-                'A_ub': problem_data.A_ub,
-                'b_ub': problem_data.b_ub,
-                'bounds': problem_data.bounds
-            }
+            return {"A_ub": problem_data.A_ub, "b_ub": problem_data.b_ub, "bounds": problem_data.bounds}
 
         # Convert from cone_structure to SciPy format
-        if hasattr(problem_data, 'cone_structure') and problem_data.cone_structure:
+        if hasattr(problem_data, "cone_structure") and problem_data.cone_structure:
             return self._derive_scipy_constraints_from_cones(problem_data)
 
         # Fallback: assume all variables are non-negative if no cone structure
         n_vars = len(problem_data.c) if problem_data.c is not None else 0
-        return {
-            'A_ub': None,
-            'b_ub': None,
-            'bounds': [(0, None)] * n_vars
-        }
+        return {"A_ub": None, "b_ub": None, "bounds": [(0, None)] * n_vars}
 
     def _derive_scipy_constraints_from_cones(self, problem_data: ProblemData) -> Dict:
         """
         Derive SciPy constraints from cone_structure.
-        
+
         Args:
             problem_data: ProblemData with cone_structure
-            
+
         Returns:
             Dictionary with SciPy-compatible constraints
         """
@@ -86,20 +79,20 @@ class ScipySolver(SolverInterface):
         var_idx = 0
 
         # Free variables: no bounds
-        free_vars = cone_structure.get('free_vars', 0)
+        free_vars = cone_structure.get("free_vars", 0)
         for _ in range(free_vars):
             bounds.append((None, None))
             var_idx += 1
 
         # Non-negative variables: lower bound 0
-        nonneg_vars = cone_structure.get('nonneg_vars', 0)
+        nonneg_vars = cone_structure.get("nonneg_vars", 0)
         for _ in range(nonneg_vars):
             bounds.append((0, None))
             var_idx += 1
 
         # SOC cone variables: first variable >= ||(remaining variables)||
         # For SciPy, we'll approximate as non-negative (conservative approach)
-        soc_cones = cone_structure.get('soc_cones', [])
+        soc_cones = cone_structure.get("soc_cones", [])
         for cone_dim in soc_cones:
             for _ in range(cone_dim):
                 bounds.append((0, None))  # Conservative: all SOC variables >= 0
@@ -107,7 +100,7 @@ class ScipySolver(SolverInterface):
 
         # SDP cone variables: represent as non-negative (matrix entries)
         # This is a simplification - full SDP constraints need specialized solvers
-        sdp_cones = cone_structure.get('sdp_cones', [])
+        sdp_cones = cone_structure.get("sdp_cones", [])
         for cone_dim in sdp_cones:
             # SDP cone has cone_dim*(cone_dim+1)/2 variables (upper triangular)
             sdp_vars = cone_dim * (cone_dim + 1) // 2
@@ -121,20 +114,20 @@ class ScipySolver(SolverInterface):
 
         # For LP problems, we don't need additional inequality constraints
         # The cone structure is captured by the bounds
-        return {
-            'A_ub': None,
-            'b_ub': None,
-            'bounds': bounds
-        }
+        return {"A_ub": None, "b_ub": None, "bounds": bounds}
 
-    def _create_standardized_result(self, solve_time: float, status: str,
-                                  primal_objective_value: Optional[float] = None,
-                                  dual_objective_value: Optional[float] = None,
-                                  duality_gap: Optional[float] = None,
-                                  primal_infeasibility: Optional[float] = None,
-                                  dual_infeasibility: Optional[float] = None,
-                                  iterations: Optional[int] = None,
-                                  additional_info: Optional[Dict] = None) -> SolverResult:
+    def _create_standardized_result(
+        self,
+        solve_time: float,
+        status: str,
+        primal_objective_value: Optional[float] = None,
+        dual_objective_value: Optional[float] = None,
+        duality_gap: Optional[float] = None,
+        primal_infeasibility: Optional[float] = None,
+        dual_infeasibility: Optional[float] = None,
+        iterations: Optional[int] = None,
+        additional_info: Optional[Dict] = None,
+    ) -> SolverResult:
         """Create standardized SolverResult."""
         return SolverResult(
             solve_time=solve_time,
@@ -147,17 +140,17 @@ class ScipySolver(SolverInterface):
             iterations=iterations,
             solver_name=self.solver_name,
             solver_version=self.get_version(),
-            additional_info=additional_info
+            additional_info=additional_info,
         )
 
     def solve(self, problem_data: ProblemData, timeout: Optional[float] = None) -> SolverResult:
         """
         Solve optimization problem using SciPy.
-        
+
         Args:
             problem_data: Problem data to solve
             timeout: Optional timeout in seconds (ignored for SciPy)
-            
+
         Returns:
             SolverResult containing solve status and results
         """
@@ -192,9 +185,9 @@ class ScipySolver(SolverInterface):
 
         # Convert SeDuMi format to SciPy format if needed
         scipy_format = self._convert_sedumi_to_scipy_format(problem_data)
-        A_ub = scipy_format['A_ub']
-        b_ub = scipy_format['b_ub']
-        bounds = scipy_format['bounds']
+        A_ub = scipy_format["A_ub"]
+        b_ub = scipy_format["b_ub"]
+        bounds = scipy_format["bounds"]
 
         # Convert bounds to scipy format if they exist
         if bounds:
@@ -208,48 +201,42 @@ class ScipySolver(SolverInterface):
                     bounds_list.append((0, None))  # Default non-negative
             bounds = bounds_list
 
-        self.logger.debug(f"LP problem dimensions: c={c.shape if c is not None else None}, "
-                         f"A_ub={A_ub.shape if A_ub is not None else None}, "
-                         f"A_eq={A_eq.shape if A_eq is not None else None}")
+        self.logger.debug(
+            f"LP problem dimensions: c={c.shape if c is not None else None}, "
+            f"A_ub={A_ub.shape if A_ub is not None else None}, "
+            f"A_eq={A_eq.shape if A_eq is not None else None}"
+        )
 
         # Solve using linprog
         result = linprog(
-            c=c,
-            A_ub=A_ub,
-            b_ub=b_ub,
-            A_eq=A_eq,
-            b_eq=b_eq,
-            bounds=bounds,
-            method=self.method,
-            options=self.options
+            c=c, A_ub=A_ub, b_ub=b_ub, A_eq=A_eq, b_eq=b_eq, bounds=bounds, method=self.method, options=self.options
         )
 
         solve_time = time.time() - start_time
 
         # Map SciPy status to standard status
         status_mapping = {
-            0: 'OPTIMAL',      # Optimization terminated successfully
-            1: 'MAX_ITERATIONS',   # Iteration limit reached
-            2: 'INFEASIBLE',   # Problem appears to be infeasible
-            3: 'UNBOUNDED',    # Problem appears to be unbounded
-            4: 'ERROR'         # Numerical difficulties encountered
+            0: "OPTIMAL",  # Optimization terminated successfully
+            1: "MAX_ITERATIONS",  # Iteration limit reached
+            2: "INFEASIBLE",  # Problem appears to be infeasible
+            3: "UNBOUNDED",  # Problem appears to be unbounded
+            4: "ERROR",  # Numerical difficulties encountered
         }
 
-        status = status_mapping.get(result.status, 'UNKNOWN')
+        status = status_mapping.get(result.status, "UNKNOWN")
         primal_objective_value = float(result.fun) if result.success else None
 
         # Calculate infeasibility measures if available
         primal_infeasibility = None
-        if hasattr(result, 'con') and result.con is not None and len(result.con) > 0:
+        if hasattr(result, "con") and result.con is not None and len(result.con) > 0:
             primal_infeasibility = float(np.max(np.abs(result.con)))
 
         # Extract minimal solver timing information for memo
-        additional_info = {
-            "solver_solve_time": solve_time
-        }
+        additional_info = {"solver_solve_time": solve_time}
 
-        self.logger.debug(f"LP solve completed: status={status}, "
-                         f"objective={primal_objective_value}, time={solve_time:.3f}s")
+        self.logger.debug(
+            f"LP solve completed: status={status}, objective={primal_objective_value}, time={solve_time:.3f}s"
+        )
 
         return self._create_standardized_result(
             solve_time=solve_time,
@@ -259,8 +246,8 @@ class ScipySolver(SolverInterface):
             duality_gap=None,
             primal_infeasibility=primal_infeasibility,
             dual_infeasibility=None,
-            iterations=getattr(result, 'nit', None),
-            additional_info=additional_info
+            iterations=getattr(result, "nit", None),
+            additional_info=additional_info,
         )
 
     def _solve_qp(self, problem_data: ProblemData, start_time: float) -> SolverResult:
@@ -269,7 +256,7 @@ class ScipySolver(SolverInterface):
         # For QP: minimize 0.5 * x^T * Q * x + c^T * x
         # Subject to: A_ub * x <= b_ub, A_eq * x = b_eq, bounds
 
-        Q = getattr(problem_data, 'Q', None)
+        Q = getattr(problem_data, "Q", None)
         if Q is None:
             error_msg = "QP problem missing quadratic matrix Q"
             solve_time = time.time() - start_time
@@ -299,19 +286,11 @@ class ScipySolver(SolverInterface):
 
         # Equality constraints
         if A_eq is not None and b_eq is not None:
-            constraints.append({
-                'type': 'eq',
-                'fun': lambda x: np.dot(A_eq, x) - b_eq,
-                'jac': lambda x: A_eq
-            })
+            constraints.append({"type": "eq", "fun": lambda x: np.dot(A_eq, x) - b_eq, "jac": lambda x: A_eq})
 
         # Inequality constraints (A_ub * x <= b_ub)
         if A_ub is not None and b_ub is not None:
-            constraints.append({
-                'type': 'ineq',
-                'fun': lambda x: b_ub - np.dot(A_ub, x),
-                'jac': lambda x: -A_ub
-            })
+            constraints.append({"type": "ineq", "fun": lambda x: b_ub - np.dot(A_ub, x), "jac": lambda x: -A_ub})
 
         # Convert bounds to scipy format
         if bounds:
@@ -330,50 +309,48 @@ class ScipySolver(SolverInterface):
         # Initial guess (zero vector)
         x0 = np.zeros(n_vars)
 
-        self.logger.debug(f"QP problem dimensions: Q={Q.shape}, c={c.shape}, "
-                         f"constraints={len(constraints)}")
+        self.logger.debug(f"QP problem dimensions: Q={Q.shape}, c={c.shape}, constraints={len(constraints)}")
 
         # Solve using minimize
         result = minimize(
             fun=objective,
             x0=x0,
-            method='trust-constr',  # Good for constrained QP
+            method="trust-constr",  # Good for constrained QP
             jac=gradient,
             hess=hessian,
             bounds=bounds,
             constraints=constraints,
-            options=self.options
+            options=self.options,
         )
 
         solve_time = time.time() - start_time
 
         # Map SciPy status to standard status
         if result.success:
-            status = 'OPTIMAL'
+            status = "OPTIMAL"
         else:
             # Try to infer status from message
             message = result.message.lower()
-            if 'infeasible' in message:
-                status = 'INFEASIBLE'
-            elif 'unbounded' in message:
-                status = 'UNBOUNDED'
+            if "infeasible" in message:
+                status = "INFEASIBLE"
+            elif "unbounded" in message:
+                status = "UNBOUNDED"
             else:
-                status = 'ERROR'
+                status = "ERROR"
 
         primal_objective_value = float(result.fun) if result.success else None
 
         # Calculate constraint violations if available
         primal_infeasibility = None
-        if hasattr(result, 'constr_violation') and result.constr_violation is not None:
+        if hasattr(result, "constr_violation") and result.constr_violation is not None:
             primal_infeasibility = float(result.constr_violation)
 
         # Extract minimal solver timing information for memo
-        additional_info = {
-            "solver_solve_time": solve_time
-        }
+        additional_info = {"solver_solve_time": solve_time}
 
-        self.logger.debug(f"QP solve completed: status={status}, "
-                         f"objective={primal_objective_value}, time={solve_time:.3f}s")
+        self.logger.debug(
+            f"QP solve completed: status={status}, objective={primal_objective_value}, time={solve_time:.3f}s"
+        )
 
         return self._create_standardized_result(
             solve_time=solve_time,
@@ -383,8 +360,8 @@ class ScipySolver(SolverInterface):
             duality_gap=None,
             primal_infeasibility=primal_infeasibility,
             dual_infeasibility=None,
-            iterations=getattr(result, 'nit', None),
-            additional_info=additional_info
+            iterations=getattr(result, "nit", None),
+            additional_info=additional_info,
         )
 
     def get_version(self) -> str:
@@ -394,6 +371,7 @@ class ScipySolver(SolverInterface):
     def validate_problem_compatibility(self, problem_data: ProblemData) -> bool:
         """Check if the solver can handle the given problem type."""
         return problem_data.problem_class in ["LP", "QP"]
+
 
 if __name__ == "__main__":
     # Test script to verify SciPy solver
@@ -417,7 +395,7 @@ if __name__ == "__main__":
             c=np.array([1.0, 2.0]),
             A_ub=np.array([[1.0, 1.0]]),
             b_ub=np.array([1.0]),
-            bounds=[(0, None), (0, None)]
+            bounds=[(0, None), (0, None)],
         )
 
         result = solver.solve(simple_lp)
@@ -432,11 +410,7 @@ if __name__ == "__main__":
     # Test error handling
     print("\nTesting error handling:")
     try:
-        invalid_problem = ProblemData(
-            name="invalid",
-            problem_class="INVALID",
-            c=np.array([1.0])
-        )
+        invalid_problem = ProblemData(name="invalid", problem_class="INVALID", c=np.array([1.0]))
 
         error_result = solver.solve(invalid_problem)
         print(f"✓ Error handling result: {error_result.status}")

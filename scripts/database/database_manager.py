@@ -18,7 +18,7 @@ class DatabaseManager:
     def __init__(self, db_path: str = "database/results.db"):
         """
         Initialize database manager with path to SQLite database.
-        
+
         Args:
             db_path: Path to SQLite database file
         """
@@ -39,7 +39,7 @@ class DatabaseManager:
             if not schema_path.exists():
                 raise FileNotFoundError(f"Schema file not found: {schema_path}")
 
-            with open(schema_path, 'r') as f:
+            with open(schema_path, "r") as f:
                 schema_sql = f.read()
 
             # Replace CREATE TABLE with CREATE TABLE IF NOT EXISTS for graceful handling
@@ -56,26 +56,28 @@ class DatabaseManager:
             self.logger.error(f"Failed to ensure database schema: {e}")
             raise
 
-    def store_result(self,
-                    solver_name: str,
-                    solver_version: str,
-                    problem_library: str,
-                    problem_name: str,
-                    problem_type: str,
-                    environment_info: Dict[str, Any],
-                    commit_hash: str,
-                    solve_time: Optional[float] = None,
-                    status: Optional[str] = None,
-                    primal_objective_value: Optional[float] = None,
-                    dual_objective_value: Optional[float] = None,
-                    duality_gap: Optional[float] = None,
-                    primal_infeasibility: Optional[float] = None,
-                    dual_infeasibility: Optional[float] = None,
-                    iterations: Optional[int] = None,
-                    memo: Optional[str] = None) -> None:
+    def store_result(
+        self,
+        solver_name: str,
+        solver_version: str,
+        problem_library: str,
+        problem_name: str,
+        problem_type: str,
+        environment_info: Dict[str, Any],
+        commit_hash: str,
+        solve_time: Optional[float] = None,
+        status: Optional[str] = None,
+        primal_objective_value: Optional[float] = None,
+        dual_objective_value: Optional[float] = None,
+        duality_gap: Optional[float] = None,
+        primal_infeasibility: Optional[float] = None,
+        dual_infeasibility: Optional[float] = None,
+        iterations: Optional[int] = None,
+        memo: Optional[str] = None,
+    ) -> None:
         """
         Store single benchmark result (append-only).
-        
+
         Args:
             solver_name: Name of the solver
             solver_version: Version string of the solver
@@ -108,12 +110,27 @@ class DatabaseManager:
             """
 
             with sqlite3.connect(self.db_path) as conn:
-                conn.execute(insert_sql, (
-                    solver_name, solver_version, problem_library, problem_name, problem_type,
-                    environment_json, commit_hash, solve_time, status,
-                    primal_objective_value, dual_objective_value, duality_gap,
-                    primal_infeasibility, dual_infeasibility, iterations, memo
-                ))
+                conn.execute(
+                    insert_sql,
+                    (
+                        solver_name,
+                        solver_version,
+                        problem_library,
+                        problem_name,
+                        problem_type,
+                        environment_json,
+                        commit_hash,
+                        solve_time,
+                        status,
+                        primal_objective_value,
+                        dual_objective_value,
+                        duality_gap,
+                        primal_infeasibility,
+                        dual_infeasibility,
+                        iterations,
+                        memo,
+                    ),
+                )
                 conn.commit()
 
             self.logger.debug(f"Stored result: {solver_name} on {problem_name}")
@@ -126,14 +143,16 @@ class DatabaseManager:
             self.logger.error(f"Failed to store result: {e}")
             raise
 
-    def get_latest_results(self, commit_hash: Optional[str] = None, environment_info: Optional[Dict[str, Any]] = None) -> List[Dict[str, Any]]:
+    def get_latest_results(
+        self, commit_hash: Optional[str] = None, environment_info: Optional[Dict[str, Any]] = None
+    ) -> List[Dict[str, Any]]:
         """
         Get latest results for reporting.
-        
+
         Args:
             commit_hash: Specific git commit hash (if None, uses latest)
             environment_info: Specific environment info (if None, uses latest)
-            
+
         Returns:
             List of latest results as dictionaries
         """
@@ -147,7 +166,7 @@ class DatabaseManager:
             if commit_hash and environment_json:
                 # Query for specific commit and environment
                 query = """
-                SELECT * FROM results 
+                SELECT * FROM results
                 WHERE commit_hash = ? AND environment_info = ?
                 ORDER BY timestamp DESC
                 """
@@ -158,10 +177,10 @@ class DatabaseManager:
                 SELECT r1.* FROM results r1
                 INNER JOIN (
                     SELECT solver_name, problem_name, MAX(timestamp) as max_timestamp
-                    FROM results 
+                    FROM results
                     GROUP BY solver_name, problem_name
-                ) r2 ON r1.solver_name = r2.solver_name 
-                     AND r1.problem_name = r2.problem_name 
+                ) r2 ON r1.solver_name = r2.solver_name
+                     AND r1.problem_name = r2.problem_name
                      AND r1.timestamp = r2.max_timestamp
                 ORDER BY r1.problem_library, r1.problem_name, r1.solver_name, r1.id DESC
                 """
@@ -175,8 +194,8 @@ class DatabaseManager:
                 for row in cursor.fetchall():
                     result_dict = dict(row)
                     # Parse environment_info JSON back to dict
-                    if result_dict['environment_info']:
-                        result_dict['environment_info'] = json.loads(result_dict['environment_info'])
+                    if result_dict["environment_info"]:
+                        result_dict["environment_info"] = json.loads(result_dict["environment_info"])
                     results.append(result_dict)
 
                 self.logger.info(f"Retrieved {len(results)} latest results")

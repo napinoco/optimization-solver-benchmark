@@ -28,7 +28,7 @@ class DataExporter:
 
     def __init__(self, output_dir: str = None, full_environment_info: bool = False):
         """Initialize data exporter with output directory
-        
+
         Args:
             output_dir: Directory to save exported files
             full_environment_info: If True, export complete environment_info without sanitization
@@ -46,27 +46,29 @@ class DataExporter:
     def _result_to_complete_dict(self, result: BenchmarkResult) -> Dict[str, Any]:
         """Convert BenchmarkResult to complete dictionary for database dump-style export"""
         # Use full environment_info if requested, otherwise use sanitized version
-        env_info_data = result.environment_info if self.full_environment_info else result.get_sanitized_environment_info()
+        env_info_data = (
+            result.environment_info if self.full_environment_info else result.get_sanitized_environment_info()
+        )
 
         return {
-            'id': result.id,
-            'solver_name': result.solver_name,
-            'solver_version': result.solver_version,
-            'problem_library': result.problem_library,
-            'problem_name': result.problem_name,
-            'problem_type': result.problem_type,
-            'environment_info': env_info_data,
-            'commit_hash': result.commit_hash,
-            'timestamp': result.timestamp.isoformat() if result.timestamp else None,
-            'solve_time': result.solve_time,
-            'status': result.status,
-            'primal_objective_value': result.primal_objective_value,
-            'dual_objective_value': result.dual_objective_value,
-            'duality_gap': result.duality_gap,
-            'primal_infeasibility': result.primal_infeasibility,
-            'dual_infeasibility': result.dual_infeasibility,
-            'iterations': result.iterations,
-            'memo': result.memo
+            "id": result.id,
+            "solver_name": result.solver_name,
+            "solver_version": result.solver_version,
+            "problem_library": result.problem_library,
+            "problem_name": result.problem_name,
+            "problem_type": result.problem_type,
+            "environment_info": env_info_data,
+            "commit_hash": result.commit_hash,
+            "timestamp": result.timestamp.isoformat() if result.timestamp else None,
+            "solve_time": result.solve_time,
+            "status": result.status,
+            "primal_objective_value": result.primal_objective_value,
+            "dual_objective_value": result.dual_objective_value,
+            "duality_gap": result.duality_gap,
+            "primal_infeasibility": result.primal_infeasibility,
+            "dual_infeasibility": result.dual_infeasibility,
+            "iterations": result.iterations,
+            "memo": result.memo,
         }
 
     def export_latest_results(self) -> bool:
@@ -127,7 +129,7 @@ class DataExporter:
 
     def export_json(self, results: List[BenchmarkResult], filename_suffix: str = "results") -> bool:
         """Export results to JSON format
-        
+
         Args:
             results: List of BenchmarkResult objects to export
             filename_suffix: Suffix for filename (e.g., 'latest', 'all')
@@ -145,19 +147,21 @@ class DataExporter:
                 "metadata": {
                     "generated_at": datetime.now().isoformat(),
                     "total_results": len(results),
-                    "export_format": "complete_database_dump" if self.full_environment_info else "sanitized_benchmark_results",
+                    "export_format": "complete_database_dump"
+                    if self.full_environment_info
+                    else "sanitized_benchmark_results",
                     "version": "2.0",
                     "full_environment_info": self.full_environment_info,
-                    "data_scope": filename_suffix
+                    "data_scope": filename_suffix,
                 },
                 "summary": summary,
                 "solver_comparison": solver_comparison,
-                "results": [self._result_to_complete_dict(result) for result in results]
+                "results": [self._result_to_complete_dict(result) for result in results],
             }
 
             # Export to JSON file with suffix
             output_file = self.output_dir / f"benchmark_results_{filename_suffix}.json"
-            with open(output_file, 'w') as f:
+            with open(output_file, "w") as f:
                 json.dump(export_data, f, indent=2, default=str)
 
             self.logger.info(f"JSON export saved to {output_file}")
@@ -169,7 +173,7 @@ class DataExporter:
 
     def export_csv(self, results: List[BenchmarkResult], filename_suffix: str = "results") -> bool:
         """Export results to CSV format
-        
+
         Args:
             results: List of BenchmarkResult objects to export
             filename_suffix: Suffix for filename (e.g., 'latest', 'all')
@@ -182,54 +186,58 @@ class DataExporter:
 
             # Define CSV fieldnames (all database result fields for complete dump)
             fieldnames = [
-                'id',
-                'solver_name',
-                'solver_version',
-                'problem_library',
-                'problem_name',
-                'problem_type',
-                'environment_info',
-                'commit_hash',
-                'timestamp',
-                'solve_time',
-                'status',
-                'primal_objective_value',
-                'dual_objective_value',
-                'duality_gap',
-                'primal_infeasibility',
-                'dual_infeasibility',
-                'iterations',
-                'memo'
+                "id",
+                "solver_name",
+                "solver_version",
+                "problem_library",
+                "problem_name",
+                "problem_type",
+                "environment_info",
+                "commit_hash",
+                "timestamp",
+                "solve_time",
+                "status",
+                "primal_objective_value",
+                "dual_objective_value",
+                "duality_gap",
+                "primal_infeasibility",
+                "dual_infeasibility",
+                "iterations",
+                "memo",
             ]
 
-            with open(output_file, 'w', newline='') as csvfile:
+            with open(output_file, "w", newline="") as csvfile:
                 writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
                 writer.writeheader()
 
                 for result in results:
                     # Convert result to flat dictionary for CSV (complete database dump)
                     # Use full environment_info if requested, otherwise use sanitized version
-                    env_info_data = result.environment_info if self.full_environment_info else result.get_sanitized_environment_info()
+                    env_info_data = (
+                        result.environment_info
+                        if self.full_environment_info
+                        else result.get_sanitized_environment_info()
+                    )
 
                     row = {
-                        'id': result.id,
-                        'solver_name': result.solver_name,
-                        'solver_version': result.solver_version,
-                        'problem_library': result.problem_library,
-                        'problem_name': result.problem_name,
-                        'problem_type': result.problem_type,
-                        'environment_info': json.dumps(env_info_data) if env_info_data else None,
-                        'commit_hash': result.commit_hash,
-                        'timestamp': result.timestamp.isoformat() if result.timestamp else None,
-                        'solve_time': result.solve_time,
-                        'status': result.status,
-                        'primal_objective_value': result.primal_objective_value,
-                        'dual_objective_value': result.dual_objective_value,
-                        'duality_gap': result.duality_gap,
-                        'primal_infeasibility': result.primal_infeasibility,
-                        'dual_infeasibility': result.dual_infeasibility,
-                        'iterations': result.iterations,
-                        'memo': json.dumps(result.memo) if result.memo else None
+                        "id": result.id,
+                        "solver_name": result.solver_name,
+                        "solver_version": result.solver_version,
+                        "problem_library": result.problem_library,
+                        "problem_name": result.problem_name,
+                        "problem_type": result.problem_type,
+                        "environment_info": json.dumps(env_info_data) if env_info_data else None,
+                        "commit_hash": result.commit_hash,
+                        "timestamp": result.timestamp.isoformat() if result.timestamp else None,
+                        "solve_time": result.solve_time,
+                        "status": result.status,
+                        "primal_objective_value": result.primal_objective_value,
+                        "dual_objective_value": result.dual_objective_value,
+                        "duality_gap": result.duality_gap,
+                        "primal_infeasibility": result.primal_infeasibility,
+                        "dual_infeasibility": result.dual_infeasibility,
+                        "iterations": result.iterations,
+                        "memo": json.dumps(result.memo) if result.memo else None,
                     }
                     writer.writerow(row)
 
@@ -262,19 +270,21 @@ class DataExporter:
                 "metadata": {
                     "generated_at": datetime.now().isoformat(),
                     "total_results": len(results),
-                    "format": "summary_only"
+                    "format": "summary_only",
                 },
                 "overall_statistics": summary,
                 "solver_performance": solver_comparison,
                 "environment": {
                     "commit_hash": results[0].commit_hash if results else "unknown",
-                    "platform": results[0].environment_info.get('os', {}).get('system', 'Unknown') if results and results[0].environment_info else "Unknown"
-                }
+                    "platform": results[0].environment_info.get("os", {}).get("system", "Unknown")
+                    if results and results[0].environment_info
+                    else "Unknown",
+                },
             }
 
             # Export summary JSON
             output_file = self.output_dir / "summary.json"
-            with open(output_file, 'w') as f:
+            with open(output_file, "w") as f:
                 json.dump(summary_data, f, indent=2, default=str)
 
             self.logger.info(f"Summary export saved to {output_file}")

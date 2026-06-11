@@ -37,7 +37,7 @@ logger = get_logger("python_process_interface")
 class PythonProcessInterface:
     """
     Process-based interface for managing Python solver execution.
-    
+
     This class provides subprocess isolation for Python-based optimization solvers,
     matching the architecture of MatlabProcessInterface for consistency.
     Each solver execution runs in a separate process with configurable resource limits.
@@ -45,25 +45,28 @@ class PythonProcessInterface:
 
     # Python solver configurations (delegated to python_solver_runner.py)
     PYTHON_SOLVER_CONFIGS = {
-        'cvxpy_clarabel': {'display_name': 'CLARABEL (CVXPY)'},
-        'cvxpy_scs': {'display_name': 'SCS (CVXPY)'},
-        'cvxpy_ecos': {'display_name': 'ECOS (CVXPY)'},
-        'cvxpy_osqp': {'display_name': 'OSQP (CVXPY)'},
-        'cvxpy_cvxopt': {'display_name': 'CVXOPT (CVXPY)'},
-        'cvxpy_sdpa': {'display_name': 'SDPA (CVXPY)'},
-        'cvxpy_scip': {'display_name': 'SCIP (CVXPY)'},
-        'cvxpy_highs': {'display_name': 'HIGHS (CVXPY)'},
-        'scipy_linprog': {'display_name': 'LINPROG (SciPy)'},
+        "cvxpy_clarabel": {"display_name": "CLARABEL (CVXPY)"},
+        "cvxpy_scs": {"display_name": "SCS (CVXPY)"},
+        "cvxpy_ecos": {"display_name": "ECOS (CVXPY)"},
+        "cvxpy_osqp": {"display_name": "OSQP (CVXPY)"},
+        "cvxpy_cvxopt": {"display_name": "CVXOPT (CVXPY)"},
+        "cvxpy_sdpa": {"display_name": "SDPA (CVXPY)"},
+        "cvxpy_scip": {"display_name": "SCIP (CVXPY)"},
+        "cvxpy_highs": {"display_name": "HIGHS (CVXPY)"},
+        "scipy_linprog": {"display_name": "LINPROG (SciPy)"},
     }
 
-    def __init__(self, save_solutions: bool = False,
-                 problem_interface: Optional[ProblemInterface] = None,
-                 python_executable: str = sys.executable,
-                 timeout: Optional[float] = 300,
-                 **kwargs):
+    def __init__(
+        self,
+        save_solutions: bool = False,
+        problem_interface: Optional[ProblemInterface] = None,
+        python_executable: str = sys.executable,
+        timeout: Optional[float] = 300,
+        **kwargs,
+    ):
         """
         Initialize Python process interface.
-        
+
         Args:
             save_solutions: Whether to save optimal solutions to disk
             problem_interface: Optional problem interface for loading problems
@@ -85,21 +88,25 @@ class PythonProcessInterface:
         logger.info("Initialized Python process interface (subprocess isolation)")
         logger.debug(f"Python executable: {python_executable}")
 
-    def solve(self, problem_name: str, solver_name: str,
-              problem_data: Optional[ProblemData] = None,
-              timeout: Optional[float] = None) -> SolverResult:
+    def solve(
+        self,
+        problem_name: str,
+        solver_name: str,
+        problem_data: Optional[ProblemData] = None,
+        timeout: Optional[float] = None,
+    ) -> SolverResult:
         """
         Solve optimization problem using subprocess isolation.
-        
+
         Args:
             problem_name: Name of the problem to solve
             solver_name: Name of the solver to use (e.g., 'cvxpy_clarabel')
             problem_data: Optional pre-loaded problem data (ignored - subprocess loads directly)
             timeout: Optional timeout for solver execution
-            
+
         Returns:
             SolverResult with standardized fields
-            
+
         Raises:
             ValueError: If solver not available
         """
@@ -115,9 +122,7 @@ class PythonProcessInterface:
 
             # 3. Execute solver in subprocess
             result = self._call_python_solver(
-                problem_name=problem_name,
-                solver_name=solver_name,
-                timeout=actual_timeout
+                problem_name=problem_name, solver_name=solver_name, timeout=actual_timeout
             )
 
             # 4. Ensure solver metadata is set
@@ -129,12 +134,12 @@ class PythonProcessInterface:
                 problem_data = self.problem_interface.load_problem(problem_name)
                 if not result.additional_info:
                     result.additional_info = {}
-                result.additional_info['problem_class'] = problem_data.problem_class
+                result.additional_info["problem_class"] = problem_data.problem_class
             except Exception as e:
                 logger.debug(f"Could not get problem class for {problem_name}: {e}")
                 if not result.additional_info:
                     result.additional_info = {}
-                result.additional_info['problem_class'] = 'UNKNOWN'
+                result.additional_info["problem_class"] = "UNKNOWN"
 
             logger.info(f"Completed {solver_name} on {problem_name}: {result.status}")
             return result
@@ -147,22 +152,18 @@ class PythonProcessInterface:
             logger.error(error_msg)
 
             return SolverResult.create_error_result(
-                error_msg,
-                solve_time=0.0,
-                solver_name=solver_name,
-                solver_version="unknown"
+                error_msg, solve_time=0.0, solver_name=solver_name, solver_version="unknown"
             )
 
-    def _call_python_solver(self, problem_name: str, solver_name: str,
-                           timeout: float) -> SolverResult:
+    def _call_python_solver(self, problem_name: str, solver_name: str, timeout: float) -> SolverResult:
         """
         Execute Python solver in subprocess.
-        
+
         Args:
             problem_name: Name of the problem
             solver_name: Python solver name
             timeout: Timeout in seconds
-            
+
         Returns:
             SolverResult from solver execution
         """
@@ -179,25 +180,22 @@ class PythonProcessInterface:
                 cmd = [
                     self.python_executable,
                     str(solver_runner_path),
-                    '--problem', problem_name,
-                    '--solver', solver_name,
-                    '--result-file', result_file
+                    "--problem",
+                    problem_name,
+                    "--solver",
+                    solver_name,
+                    "--result-file",
+                    result_file,
                 ]
 
                 if self.save_solutions:
-                    cmd.append('--save-solutions')
+                    cmd.append("--save-solutions")
 
                 logger.debug(f"Executing Python solver command: {' '.join(cmd)}")
 
                 # Execute with timeout
                 try:
-                    result = subprocess.run(
-                        cmd,
-                        capture_output=True,
-                        text=True,
-                        timeout=timeout,
-                        cwd=project_root
-                    )
+                    result = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout, cwd=project_root)
 
                     # Check execution success
                     if result.returncode != 0:
@@ -212,7 +210,7 @@ class PythonProcessInterface:
                                 solve_time=solve_time,
                                 solver_name=solver_name,
                                 solver_version="unknown",
-                                error_details=f"Process terminated (returncode {result.returncode}). {error_msg}"
+                                error_details=f"Process terminated (returncode {result.returncode}). {error_msg}",
                             )
                         # Other subprocess errors
                         else:
@@ -224,7 +222,7 @@ class PythonProcessInterface:
                                 error_message=error_msg,
                                 solve_time=solve_time,
                                 solver_name=solver_name,
-                                solver_version="unknown"
+                                solver_version="unknown",
                             )
 
                     # Read JSON result file
@@ -233,19 +231,19 @@ class PythonProcessInterface:
                             "Python solver did not produce result file",
                             solve_time=time.time() - start_time,
                             solver_name=solver_name,
-                            solver_version="unknown"
+                            solver_version="unknown",
                         )
 
                     # Read and parse JSON result
                     try:
-                        with open(result_file, 'r') as f:
+                        with open(result_file, "r") as f:
                             solver_result_dict = json.load(f)
                     except (json.JSONDecodeError, IOError) as e:
                         return SolverResult.create_error_result(
                             f"Error reading result file: {e}",
                             solve_time=time.time() - start_time,
                             solver_name=solver_name,
-                            solver_version="unknown"
+                            solver_version="unknown",
                         )
 
                     # Convert dict to SolverResult
@@ -253,19 +251,14 @@ class PythonProcessInterface:
 
                 except subprocess.TimeoutExpired:
                     return SolverResult.create_timeout_result(
-                        timeout,
-                        solver_name=solver_name,
-                        solver_version="unknown"
+                        timeout, solver_name=solver_name, solver_version="unknown"
                     )
 
         except Exception as e:
             error_msg = f"Unexpected error in Python solver subprocess: {str(e)}"
             logger.error(error_msg)
             return SolverResult.create_error_result(
-                error_msg,
-                solve_time=time.time() - start_time,
-                solver_name=solver_name,
-                solver_version="unknown"
+                error_msg, solve_time=time.time() - start_time, solver_name=solver_name, solver_version="unknown"
             )
 
     def _parse_python_error(self, stderr: str, stdout: str) -> str:
@@ -275,26 +268,26 @@ class PythonProcessInterface:
 
         # Check stderr first
         if stderr:
-            lines = stderr.strip().split('\n')
+            lines = stderr.strip().split("\n")
             # Look for Python exception messages
             for i, line in enumerate(lines):
-                if 'Traceback' in line:
+                if "Traceback" in line:
                     # Include traceback and error message
                     error_lines.extend(lines[i:])
                     break
-                elif 'Error:' in line or 'error:' in line:
+                elif "Error:" in line or "error:" in line:
                     error_lines.append(line)
 
         # If no clear error in stderr, check stdout
         if not error_lines and stdout:
-            lines = stdout.strip().split('\n')
+            lines = stdout.strip().split("\n")
             for line in lines:
-                if 'Error:' in line or 'error:' in line:
+                if "Error:" in line or "error:" in line:
                     error_lines.append(line)
 
         # Return parsed error or raw stderr
         if error_lines:
-            return '\n'.join(error_lines[-10:])  # Last 10 lines to avoid huge errors
+            return "\n".join(error_lines[-10:])  # Last 10 lines to avoid huge errors
         else:
             return stderr.strip() or stdout.strip() or "Unknown error"
 
@@ -302,26 +295,26 @@ class PythonProcessInterface:
         """Convert dictionary from subprocess to SolverResult object."""
         # Handle both direct fields and nested 'additional_info'
         return SolverResult(
-            solve_time=result_dict.get('solve_time', 0.0),
-            status=result_dict.get('status', 'error'),
-            primal_objective_value=result_dict.get('primal_objective_value'),
-            dual_objective_value=result_dict.get('dual_objective_value'),
-            duality_gap=result_dict.get('duality_gap'),
-            primal_infeasibility=result_dict.get('primal_infeasibility'),
-            dual_infeasibility=result_dict.get('dual_infeasibility'),
-            iterations=result_dict.get('iterations'),
-            solver_name=result_dict.get('solver_name', solver_name),
-            solver_version=result_dict.get('solver_version', 'unknown'),
-            additional_info=result_dict.get('additional_info', {})
+            solve_time=result_dict.get("solve_time", 0.0),
+            status=result_dict.get("status", "error"),
+            primal_objective_value=result_dict.get("primal_objective_value"),
+            dual_objective_value=result_dict.get("dual_objective_value"),
+            duality_gap=result_dict.get("duality_gap"),
+            primal_infeasibility=result_dict.get("primal_infeasibility"),
+            dual_infeasibility=result_dict.get("dual_infeasibility"),
+            iterations=result_dict.get("iterations"),
+            solver_name=result_dict.get("solver_name", solver_name),
+            solver_version=result_dict.get("solver_version", "unknown"),
+            additional_info=result_dict.get("additional_info", {}),
         )
 
     def get_available_solvers(self) -> List[str]:
         """
         Get list of available Python solvers.
-        
+
         This returns all configured solvers - actual availability is checked
         during execution by the subprocess.
-        
+
         Returns:
             List of solver names
         """
@@ -330,10 +323,10 @@ class PythonProcessInterface:
     def create_solver(self, solver_name: str) -> Any:
         """
         Create solver instance (not used in subprocess mode).
-        
+
         This method exists for interface compatibility but is not used
         since solvers are created in the subprocess.
-        
+
         Raises:
             NotImplementedError: Always raised as subprocess mode doesn't create local instances
         """

@@ -21,15 +21,18 @@ def make_result(**overrides):
 
 
 class TestValidation:
-
     def test_valid_result(self):
         result = make_result()
         assert result.status == "OPTIMAL"
 
     def test_none_fields_allowed(self):
         result = make_result(
-            solve_time=None, primal_objective_value=None, dual_objective_value=None,
-            duality_gap=None, primal_infeasibility=None, dual_infeasibility=None,
+            solve_time=None,
+            primal_objective_value=None,
+            dual_objective_value=None,
+            duality_gap=None,
+            primal_infeasibility=None,
+            dual_infeasibility=None,
             iterations=None,
         )
         assert result.solve_time is None
@@ -64,22 +67,28 @@ class TestValidation:
 
 
 class TestToDict:
-
     def test_contains_all_fields(self):
         result = make_result(solver_name="test", solver_version="1.0")
         d = result.to_dict()
         expected_keys = {
-            'solve_time', 'status', 'primal_objective_value', 'dual_objective_value',
-            'duality_gap', 'primal_infeasibility', 'dual_infeasibility', 'iterations',
-            'solver_name', 'solver_version', 'additional_info',
+            "solve_time",
+            "status",
+            "primal_objective_value",
+            "dual_objective_value",
+            "duality_gap",
+            "primal_infeasibility",
+            "dual_infeasibility",
+            "iterations",
+            "solver_name",
+            "solver_version",
+            "additional_info",
         }
         assert set(d.keys()) == expected_keys
-        assert d['solve_time'] == 1.5
-        assert d['solver_name'] == "test"
+        assert d["solve_time"] == 1.5
+        assert d["solver_name"] == "test"
 
 
 class TestFactoryMethods:
-
     def test_error_result(self):
         result = SolverResult.create_error_result("boom", solve_time=0.5, solver_name="s")
         assert result.status == "ERROR"

@@ -28,11 +28,17 @@ logger = get_logger("cvxpy_solver")
 class CvxpySolver(SolverInterface):
     """CVXPY-based solver for LP, QP, SOCP, and SDP problems."""
 
-    def __init__(self, backend: str = "CLARABEL", verbose: bool = False,
-                 solver_options: Optional[Dict] = None, save_solutions: bool = False, **kwargs):
+    def __init__(
+        self,
+        backend: str = "CLARABEL",
+        verbose: bool = False,
+        solver_options: Optional[Dict] = None,
+        save_solutions: bool = False,
+        **kwargs,
+    ):
         """
         Initialize CVXPY solver with specific backend.
-        
+
         Args:
             backend: CVXPY backend solver (CLARABEL, OSQP, SCS, etc.)
             verbose: Whether to enable verbose solver output
@@ -43,8 +49,7 @@ class CvxpySolver(SolverInterface):
         # Auto-generate name with proper format
         solver_name = f"cvxpy_{backend.lower()}"
 
-        super().__init__(solver_name, backend=backend, verbose=verbose,
-                        solver_options=solver_options, **kwargs)
+        super().__init__(solver_name, backend=backend, verbose=verbose, solver_options=solver_options, **kwargs)
         self.backend = backend
         self.verbose = verbose
         self.solver_options = solver_options or {}
@@ -58,8 +63,7 @@ class CvxpySolver(SolverInterface):
         # Verify solver availability - no fallbacks for pure benchmarking
         available_solvers = cp.installed_solvers()
         if backend not in available_solvers:
-            raise RuntimeError(f"Requested backend {backend} not available. "
-                             f"Available backends: {available_solvers}")
+            raise RuntimeError(f"Requested backend {backend} not available. Available backends: {available_solvers}")
 
         # Backend capabilities determined dynamically
         self.backend_capabilities = self._get_backend_capabilities()
@@ -72,10 +76,7 @@ class CvxpySolver(SolverInterface):
         try:
             solver_obj = getattr(cp, self.backend, None)
             if solver_obj is None:
-                return {
-                    "supported_problem_types": [],
-                    "backend_name": self.backend
-                }
+                return {"supported_problem_types": [], "backend_name": self.backend}
 
             supported_types = []
 
@@ -132,10 +133,7 @@ class CvxpySolver(SolverInterface):
 
         logger.debug(f"Detected capabilities for {self.backend}: {supported_types}")
 
-        return {
-            "supported_problem_types": supported_types,
-            "backend_name": self.backend
-        }
+        return {"supported_problem_types": supported_types, "backend_name": self.backend}
 
     def _get_solver_options(self, timeout: Optional[float] = None) -> Dict:
         """Get solver options with verbosity and timeout."""
@@ -144,77 +142,74 @@ class CvxpySolver(SolverInterface):
         # Handle backend-specific option formats
         if self.backend == "SCIPY":
             # SCIPY solver requires options in scipy_options dict
-            scipy_options = options.get('scipy_options', {})
+            scipy_options = options.get("scipy_options", {})
 
             # Set method to HiGHS for better performance
-            if 'method' not in scipy_options:
-                scipy_options['method'] = 'highs'
+            if "method" not in scipy_options:
+                scipy_options["method"] = "highs"
 
             # Add timeout if specified
             if timeout is not None:
-                scipy_options['maxiter'] = int(timeout * 1000)  # rough conversion
+                scipy_options["maxiter"] = int(timeout * 1000)  # rough conversion
 
-            options = {
-                'verbose': self.verbose,
-                'scipy_options': scipy_options
-            }
+            options = {"verbose": self.verbose, "scipy_options": scipy_options}
         elif self.backend == "SCIP":
             # SCIP solver has different parameter names
-            if 'verbose' not in options:
-                options['verbose'] = self.verbose
+            if "verbose" not in options:
+                options["verbose"] = self.verbose
 
             # SCIP timeout parameter is not well supported in CVXPY, skip for now
             # TODO: Research correct SCIP timeout parameter format
         elif self.backend == "HIGHS":
             # HiGHS solver options
-            if 'verbose' not in options:
-                options['verbose'] = self.verbose
+            if "verbose" not in options:
+                options["verbose"] = self.verbose
 
             # HiGHS supports time_limit parameter
             if timeout is not None:
-                options['time_limit'] = timeout
+                options["time_limit"] = timeout
         elif self.backend == "SCS":
             # SCS solver options
-            if 'verbose' not in options:
-                options['verbose'] = self.verbose
+            if "verbose" not in options:
+                options["verbose"] = self.verbose
 
             # SCS supports max_iters for timeout (approximate)
             if timeout is not None:
                 # Use max_iters as rough timeout control (iterations per second estimate)
-                options['max_iters'] = int(timeout * 1000)
+                options["max_iters"] = int(timeout * 1000)
         elif self.backend == "ECOS":
             # ECOS solver options
-            if 'verbose' not in options:
-                options['verbose'] = self.verbose
+            if "verbose" not in options:
+                options["verbose"] = self.verbose
 
             # ECOS supports feastol_inacc for timeout (no direct time limit)
             # Skip timeout parameter for ECOS - rely on manual detection
         elif self.backend == "CLARABEL":
             # CLARABEL solver options (no direct timeout support)
-            if 'verbose' not in options:
-                options['verbose'] = self.verbose
+            if "verbose" not in options:
+                options["verbose"] = self.verbose
 
             # CLARABEL doesn't support direct timeout - rely on manual detection
         else:
             # Standard format for other solvers (CVXOPT, OSQP, SDPA, etc.)
-            if 'verbose' not in options:
-                options['verbose'] = self.verbose
+            if "verbose" not in options:
+                options["verbose"] = self.verbose
 
             # Try max_time parameter for solvers that support it
             # If solver doesn't recognize it, it will be ignored
             if timeout is not None:
-                options['max_time'] = timeout
+                options["max_time"] = timeout
 
         return options
 
     def solve(self, problem_data: ProblemData, timeout: Optional[float] = None) -> SolverResult:
         """
         Solve optimization problem using CVXPY.
-        
+
         Args:
             problem_data: Problem data to solve
             timeout: Optional timeout in seconds
-            
+
         Returns:
             SolverResult containing solve status and results
         """
@@ -238,19 +233,14 @@ class CvxpySolver(SolverInterface):
 
             # Solve the problem
             solve_start_time = time.time()
-            cvx_problem.solve(
-                solver=getattr(cp, self.backend),
-                **solver_options
-            )
+            cvx_problem.solve(solver=getattr(cp, self.backend), **solver_options)
             solve_time = time.time() - solve_start_time
 
             # Check if timeout was exceeded (with small tolerance for processing time)
             if timeout is not None and solve_time > (timeout + 1.0):
                 self.logger.warning(f"Solver exceeded timeout: {solve_time:.3f}s > {timeout}s")
                 return SolverResult.create_timeout_result(
-                    timeout,
-                    solver_name=self.solver_name,
-                    solver_version=self.get_version()
+                    timeout, solver_name=self.solver_name, solver_version=self.get_version()
                 )
 
             return self._create_result_from_cvxpy(cvx_problem, solve_time, problem_data, timeout)
@@ -264,23 +254,23 @@ class CvxpySolver(SolverInterface):
     def _convert_to_cvxpy(self, problem_data: ProblemData) -> cp.Problem:
         """
         Convert ProblemData to CVXPY Problem format (unified for all problem types).
-        
+
         This method now works entirely from SeDuMi format (A_eq/b_eq + cone_structure)
         without requiring legacy CVXPY fields.
-        
+
         Args:
             problem_data: Problem data from any loader (SeDuMi format)
-            
+
         Returns:
             CVXPY Problem object ready for solving
         """
         # Get cone structure from first-class field (Phase 2 enhancement)
         cone_structure = None
-        if hasattr(problem_data, 'cone_structure') and problem_data.cone_structure:
+        if hasattr(problem_data, "cone_structure") and problem_data.cone_structure:
             cone_structure = problem_data.cone_structure
-        elif hasattr(problem_data, 'metadata') and 'cone_structure' in problem_data.metadata:
+        elif hasattr(problem_data, "metadata") and "cone_structure" in problem_data.metadata:
             # Backward compatibility fallback
-            cone_structure = problem_data.metadata['cone_structure']
+            cone_structure = problem_data.metadata["cone_structure"]
             self.logger.debug("Using cone_structure from metadata (legacy)")
 
         # Validate SeDuMi format inputs
@@ -292,32 +282,32 @@ class CvxpySolver(SolverInterface):
         b_eq = problem_data.b_eq
         c = problem_data.c
         (m, n) = A_eq.shape
-        y = cp.Variable((m, 1) , name="y")
+        y = cp.Variable((m, 1), name="y")
 
-        P = problem_data.P if hasattr(problem_data, 'P') else None
+        P = problem_data.P if hasattr(problem_data, "P") else None
         obj_func = b_eq.T @ y - (cp.quad_form(y, P) / 2 if P is not None else 0)
 
         nvar_cnt = 0
         constraints = []
         cmAty = c - (y.T @ A_eq).T
-        if 'free_vars' in cone_structure:
-            free_vars = cone_structure['free_vars']
+        if "free_vars" in cone_structure:
+            free_vars = cone_structure["free_vars"]
             if free_vars:
                 begin = nvar_cnt
                 end = nvar_cnt + free_vars
                 z = cmAty[begin:end]
                 constraints.append(z[:, 0] == 0)
                 nvar_cnt = end
-        if 'nonneg_vars' in cone_structure:
-            nonneg_vars = cone_structure['nonneg_vars']
+        if "nonneg_vars" in cone_structure:
+            nonneg_vars = cone_structure["nonneg_vars"]
             if nonneg_vars:
                 begin = nvar_cnt
                 end = nvar_cnt + nonneg_vars
                 z = cmAty[begin:end]
                 constraints.append(z[:, 0] >= 0)
                 nvar_cnt = end
-        if 'soc_cones' in cone_structure:
-            soc_cones = cone_structure['soc_cones']
+        if "soc_cones" in cone_structure:
+            soc_cones = cone_structure["soc_cones"]
             for ndim in soc_cones:
                 if ndim <= 0:
                     continue
@@ -326,57 +316,62 @@ class CvxpySolver(SolverInterface):
                 z = cmAty[begin:end]
                 constraints.append(cp.SOC(z[0, 0], z[1:, 0]))
                 nvar_cnt = end
-        if 'sdp_cones' in cone_structure:
-            sdp_cones = cone_structure['sdp_cones']
+        if "sdp_cones" in cone_structure:
+            sdp_cones = cone_structure["sdp_cones"]
             for ndim in sdp_cones:
                 if ndim <= 0:
                     continue
                 begin = nvar_cnt
                 end = nvar_cnt + ndim * ndim
-                z = cp.reshape(cmAty[begin:end], (ndim, ndim), order='C')
+                z = cp.reshape(cmAty[begin:end], (ndim, ndim), order="C")
                 constraints.append(z >> 0)
                 nvar_cnt = end
 
         cvx_problem = cp.Problem(cp.Maximize(obj_func), constraints)
 
         n_vars = nvar_cnt
-        self.logger.debug(f"Converted {problem_data.problem_class} problem: {n_vars} vars, {len(constraints)} constraints")
+        self.logger.debug(
+            f"Converted {problem_data.problem_class} problem: {n_vars} vars, {len(constraints)} constraints"
+        )
 
         return cvx_problem
 
-    def _create_result_from_cvxpy(self, cvx_problem: cp.Problem, solve_time: float, problem_data: ProblemData, timeout: Optional[float] = None) -> SolverResult:
+    def _create_result_from_cvxpy(
+        self, cvx_problem: cp.Problem, solve_time: float, problem_data: ProblemData, timeout: Optional[float] = None
+    ) -> SolverResult:
         """Create standardized result from CVXPY problem with manual duality calculations."""
 
         # Map CVXPY status to standard status
         status_mapping = {
-            cp.OPTIMAL: 'OPTIMAL',
-            cp.INFEASIBLE: 'INFEASIBLE',
-            cp.UNBOUNDED: 'UNBOUNDED',
-            cp.INFEASIBLE_INACCURATE: 'INFEASIBLE (INACCURATE)',
-            cp.UNBOUNDED_INACCURATE: 'UNBOUNDED (INACCURATE)',
-            cp.OPTIMAL_INACCURATE: 'OPTIMAL (INACCURATE)',
+            cp.OPTIMAL: "OPTIMAL",
+            cp.INFEASIBLE: "INFEASIBLE",
+            cp.UNBOUNDED: "UNBOUNDED",
+            cp.INFEASIBLE_INACCURATE: "INFEASIBLE (INACCURATE)",
+            cp.UNBOUNDED_INACCURATE: "UNBOUNDED (INACCURATE)",
+            cp.OPTIMAL_INACCURATE: "OPTIMAL (INACCURATE)",
         }
 
         # Detect timeout conditions
-        if (timeout is not None and solve_time >= timeout) or \
-           (cvx_problem.status in [cp.SOLVER_ERROR] and timeout is not None and solve_time >= (timeout * 0.9)):
+        if (timeout is not None and solve_time >= timeout) or (
+            cvx_problem.status in [cp.SOLVER_ERROR] and timeout is not None and solve_time >= (timeout * 0.9)
+        ):
             # If solve time is close to or exceeds timeout, consider it a timeout
-            self.logger.info(f"Detected timeout condition: status={cvx_problem.status}, solve_time={solve_time:.3f}s, timeout={timeout}s")
+            self.logger.info(
+                f"Detected timeout condition: status={cvx_problem.status}, solve_time={solve_time:.3f}s, timeout={timeout}s"
+            )
             return SolverResult.create_timeout_result(
-                timeout,
-                solver_name=self.solver_name,
-                solver_version=self.get_version()
+                timeout, solver_name=self.solver_name, solver_version=self.get_version()
             )
 
-        status = status_mapping.get(cvx_problem.status, 'UNKNOWN')
+        status = status_mapping.get(cvx_problem.status, "UNKNOWN")
 
         # Additional timeout detection for unknown status close to timeout
-        if status == 'UNKNOWN' and timeout is not None and solve_time >= (timeout * 0.95):
-            self.logger.info(f"Detected likely timeout with unknown status: solve_time={solve_time:.3f}s, timeout={timeout}s")
+        if status == "UNKNOWN" and timeout is not None and solve_time >= (timeout * 0.95):
+            self.logger.info(
+                f"Detected likely timeout with unknown status: solve_time={solve_time:.3f}s, timeout={timeout}s"
+            )
             return SolverResult.create_timeout_result(
-                timeout,
-                solver_name=self.solver_name,
-                solver_version=self.get_version()
+                timeout, solver_name=self.solver_name, solver_version=self.get_version()
             )
 
         # Manual duality calculations for unified comparison
@@ -395,7 +390,7 @@ class CvxpySolver(SolverInterface):
             # Get primal solution of SeDuMi format (=dual solution of CVXPY)
             x_list = []
             for i, constraint in enumerate(cvx_problem.constraints):
-                if not hasattr(constraint, 'dual_value') or constraint.dual_value is None:
+                if not hasattr(constraint, "dual_value") or constraint.dual_value is None:
                     self.logger.debug(f"Constraint {i} has no dual value")
                     x_list = []
                     break
@@ -447,21 +442,22 @@ class CvxpySolver(SolverInterface):
             nvar_cnt = 0
             cmAty = c - A_eq.T @ y
             dinf2 = 0  # similar to np.sum(constraint.violation() ** 2 for constraint in cvx_problem.constraints)
-            if 'free_vars' in cone_structure:
-                free_vars = cone_structure['free_vars']
+            if "free_vars" in cone_structure:
+                free_vars = cone_structure["free_vars"]
                 if free_vars:
                     begin = nvar_cnt
                     end = nvar_cnt + free_vars
                     dinf2 += np.linalg.norm(cmAty[begin:end], ord=2) ** 2
                     nvar_cnt = end
-            if 'nonneg_vars' in cone_structure:
-                nonneg_vars = cone_structure['nonneg_vars']
+            if "nonneg_vars" in cone_structure:
+                nonneg_vars = cone_structure["nonneg_vars"]
                 if nonneg_vars:
                     begin = nvar_cnt
                     end = nvar_cnt + nonneg_vars
                     dinf2 += np.linalg.norm(np.minimum(cmAty[begin:end], 0), ord=2) ** 2
                     nvar_cnt = end
-            if 'soc_cones' in cone_structure:
+            if "soc_cones" in cone_structure:
+
                 def proj_onto_soc(z):
                     z0 = z[0]
                     znorm = np.linalg.norm(z[1:], ord=2)
@@ -475,7 +471,8 @@ class CvxpySolver(SolverInterface):
                         z0_new = np.array([[1]])  # Make it a column vector
                         z_tail_new = z[1:] / znorm  # Already column vector
                         return np.vstack([z0_new, z_tail_new]) * scale
-                soc_cones = cone_structure['soc_cones']
+
+                soc_cones = cone_structure["soc_cones"]
                 for ndim in soc_cones:
                     if ndim <= 0:
                         continue
@@ -483,8 +480,8 @@ class CvxpySolver(SolverInterface):
                     end = nvar_cnt + ndim
                     dinf2 += np.linalg.norm(proj_onto_soc(-cmAty[begin:end]), ord=2) ** 2  # Pi_{K*}(-z) = z - Pi_K(z)
                     nvar_cnt = end
-            if 'sdp_cones' in cone_structure:
-                sdp_cones = cone_structure['sdp_cones']
+            if "sdp_cones" in cone_structure:
+                sdp_cones = cone_structure["sdp_cones"]
                 for ndim in sdp_cones:
                     if ndim <= 0:
                         continue
@@ -492,16 +489,22 @@ class CvxpySolver(SolverInterface):
                     end = nvar_cnt + ndim * ndim
                     eigvals = np.linalg.eigvalsh(cmAty[begin:end].reshape(ndim, ndim))
                     neg_eigvals = np.minimum(eigvals, 0)
-                    dinf2 += np.sum(neg_eigvals ** 2)
+                    dinf2 += np.sum(neg_eigvals**2)
                     nvar_cnt = end
-            dual_infeasibility = float(np.sqrt(dinf2) / (1 + np.sum(c ** 2)))
-            self.logger.debug(f"Calculated dual infeasibility: sqrt({dinf2}) / (1 + {np.sum(c ** 2)}) = {dual_infeasibility}")
+            dual_infeasibility = float(np.sqrt(dinf2) / (1 + np.sum(c**2)))
+            self.logger.debug(
+                f"Calculated dual infeasibility: sqrt({dinf2}) / (1 + {np.sum(c**2)}) = {dual_infeasibility}"
+            )
 
             if primal_objective_value is not None and dual_objective_value is not None:
                 duality_gap = primal_objective_value - dual_objective_value
-                self.logger.debug(f"Calculated duality gap: primal={primal_objective_value} - dual={dual_objective_value} = {duality_gap}")
+                self.logger.debug(
+                    f"Calculated duality gap: primal={primal_objective_value} - dual={dual_objective_value} = {duality_gap}"
+                )
             else:
-                self.logger.debug(f"Cannot calculate duality gap: primal={primal_objective_value}, dual={dual_objective_value}")
+                self.logger.debug(
+                    f"Cannot calculate duality gap: primal={primal_objective_value}, dual={dual_objective_value}"
+                )
 
             # Save solution if requested
             if self.save_solutions:
@@ -510,29 +513,29 @@ class CvxpySolver(SolverInterface):
         except Exception as e:
             self.logger.warning(f"Manual duality calculation failed: {e}")
             import traceback
+
             self.logger.debug(f"Full traceback: {traceback.format_exc()}")
 
         # Get iterations if available (enhanced for multiple backends)
         iterations = None
         if cvx_problem.solver_stats:
             # Primary method: standard num_iters attribute
-            if hasattr(cvx_problem.solver_stats, 'num_iters') and cvx_problem.solver_stats.num_iters is not None:
+            if hasattr(cvx_problem.solver_stats, "num_iters") and cvx_problem.solver_stats.num_iters is not None:
                 iterations = cvx_problem.solver_stats.num_iters
             # Alternative method: check extra_stats for iteration information
-            elif (cvx_problem.solver_stats.extra_stats and
-                  isinstance(cvx_problem.solver_stats.extra_stats, dict)):
+            elif cvx_problem.solver_stats.extra_stats and isinstance(cvx_problem.solver_stats.extra_stats, dict):
                 extra_stats = cvx_problem.solver_stats.extra_stats
 
                 # Try different possible keys for iteration information
-                possible_keys = ['iter', 'iterations', 'num_iters', 'niter']
+                possible_keys = ["iter", "iterations", "num_iters", "niter"]
                 for key in possible_keys:
                     if key in extra_stats:
                         iterations = extra_stats[key]
                         break
 
                 # For solvers that nest iteration info (e.g., SCS has info.iter)
-                if iterations is None and 'info' in extra_stats:
-                    info_dict = extra_stats['info']
+                if iterations is None and "info" in extra_stats:
+                    info_dict = extra_stats["info"]
                     if isinstance(info_dict, dict):
                         for key in possible_keys:
                             if key in info_dict:
@@ -548,18 +551,24 @@ class CvxpySolver(SolverInterface):
         else:
             self.logger.debug(f"No iteration information available for backend {self.backend}")
             # Document known limitations for specific backends
-            if self.backend in ['CVXOPT', 'SDPA']:
-                self.logger.debug(f"Backend {self.backend} does not expose iteration information through CVXPY interface")
+            if self.backend in ["CVXOPT", "SDPA"]:
+                self.logger.debug(
+                    f"Backend {self.backend} does not expose iteration information through CVXPY interface"
+                )
                 # Add this limitation to additional_info for transparency
-                additional_info["iteration_info_limitation"] = f"{self.backend} does not provide iteration count through CVXPY"
+                additional_info["iteration_info_limitation"] = (
+                    f"{self.backend} does not provide iteration count through CVXPY"
+                )
 
         # Only add solver internal timing for memo
-        if cvx_problem.solver_stats and hasattr(cvx_problem.solver_stats, 'solve_time'):
+        if cvx_problem.solver_stats and hasattr(cvx_problem.solver_stats, "solve_time"):
             additional_info["solver_solve_time"] = cvx_problem.solver_stats.solve_time
 
-        self.logger.debug(f"Solve completed: status={status}, "
-                         f"primal_obj={primal_objective_value}, dual_obj={dual_objective_value}, "
-                         f"time={solve_time:.3f}s, dual_gap={duality_gap}, dual_inf={dual_infeasibility}")
+        self.logger.debug(
+            f"Solve completed: status={status}, "
+            f"primal_obj={primal_objective_value}, dual_obj={dual_objective_value}, "
+            f"time={solve_time:.3f}s, dual_gap={duality_gap}, dual_inf={dual_infeasibility}"
+        )
 
         return SolverResult(
             solve_time=solve_time,
@@ -572,7 +581,7 @@ class CvxpySolver(SolverInterface):
             iterations=iterations,
             solver_name=self.solver_name,
             solver_version=self.get_version(),
-            additional_info=additional_info
+            additional_info=additional_info,
         )
 
     def get_version(self) -> str:
@@ -592,7 +601,7 @@ class CvxpySolver(SolverInterface):
                 "CVXOPT": self._get_package_version("cvxopt"),
                 "SDPA": self._get_package_version("sdpa-python"),
                 "SCIP": self._get_package_version("pyscipopt"),
-                "HIGHS": self._get_package_version("highspy")
+                "HIGHS": self._get_package_version("highspy"),
             }
 
             return backend_version_map.get(self.backend, "unknown")
@@ -609,16 +618,12 @@ class CvxpySolver(SolverInterface):
             out_dir.mkdir(parents=True, exist_ok=True)
 
             # Generate filename: problemname_solvername.npz
-            problem_name = problem_data.name.replace('/', '_').replace('\\', '_')
+            problem_name = problem_data.name.replace("/", "_").replace("\\", "_")
             filename = f"{problem_name}_{self.solver_name}.npz"
             filepath = out_dir / filename
 
             # Save solution data
-            np.savez_compressed(
-                filepath,
-                primal_solution=primal_solution,
-                dual_solution=dual_solution
-            )
+            np.savez_compressed(filepath, primal_solution=primal_solution, dual_solution=dual_solution)
 
             self.logger.debug(f"Saved solution to {filepath}")
 
@@ -629,6 +634,7 @@ class CvxpySolver(SolverInterface):
         """Get version of a specific Python package."""
         try:
             import importlib.metadata
+
             return importlib.metadata.version(package_name)
         except importlib.metadata.PackageNotFoundError:
             self.logger.debug(f"Package metadata not found for {package_name}")
@@ -636,7 +642,7 @@ class CvxpySolver(SolverInterface):
         # Try direct import with __version__ attribute
         try:
             module = __import__(package_name)
-            if hasattr(module, '__version__'):
+            if hasattr(module, "__version__"):
                 return module.__version__
         except ImportError as e:
             self.logger.debug(f"Cannot import {package_name}: {e}")

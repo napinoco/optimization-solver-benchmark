@@ -19,10 +19,7 @@ def setup_logger(name="benchmark", level=logging.INFO):
     logs_dir.mkdir(exist_ok=True)
 
     # Create formatter
-    formatter = logging.Formatter(
-        '%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-        datefmt='%Y-%m-%d %H:%M:%S'
-    )
+    formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s", datefmt="%Y-%m-%d %H:%M:%S")
 
     # File handler
     log_file = logs_dir / "benchmark.log"
@@ -41,9 +38,11 @@ def setup_logger(name="benchmark", level=logging.INFO):
 
     return logger
 
+
 def get_logger(name="benchmark"):
     """Get existing logger or create new one."""
     return setup_logger(name)
+
 
 if __name__ == "__main__":
     # Test script to verify logging works

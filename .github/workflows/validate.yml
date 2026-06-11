@@ -48,6 +48,11 @@ jobs:
     - name: Install dev tools
       run: pip install pytest==8.3.5 ruff==0.11.13
 
+    - name: Lint and format check
+      run: |
+        ruff check scripts/ main.py tests/
+        ruff format --check scripts/ main.py tests/
+
     - name: Run unit tests
       run: pytest tests/ -v
 

@@ -11,7 +11,7 @@ re-architected design principles:
 - Error resilience with graceful degradation
 
 Key Features:
-- Load problems using format-specific loaders (MAT, DAT, MPS, QPS, Python)  
+- Load problems using format-specific loaders (MAT, DAT, MPS, QPS, Python)
 - Create solvers with direct if-elif logic (no complex configuration)
 - Execute benchmarks with standardized SolverResult output
 - Store results directly in simplified database schema
@@ -46,20 +46,23 @@ logger = get_logger("benchmark_runner")
 class BenchmarkRunner:
     """Main benchmark execution engine with symmetrical solver interfaces"""
 
-    def __init__(self, database_manager: Optional[DatabaseManager] = None,
-                 dry_run: bool = False,
-                 save_solutions: bool = False,
-                 default_timeout: float = 120.0):
+    def __init__(
+        self,
+        database_manager: Optional[DatabaseManager] = None,
+        dry_run: bool = False,
+        save_solutions: bool = False,
+        default_timeout: float = 120.0,
+    ):
         """
         Initialize benchmark runner with symmetrical solver interfaces.
-        
+
         Args:
             database_manager: Optional database manager (creates default if None)
             dry_run: If True, skip database operations (for testing)
             save_solutions: If True, save optimal solutions to disk
-            default_timeout: Default timeout in seconds for solver execution. Solvers 
+            default_timeout: Default timeout in seconds for solver execution. Solvers
                             exceeding this limit will be terminated and marked as TIMEOUT.
-                            Default: 120.0 seconds. Use larger values (300-1800) for 
+                            Default: 120.0 seconds. Use larger values (300-1800) for
                             computationally intensive problems like large SDP instances.
         """
         self.db = database_manager or DatabaseManager()
@@ -87,7 +90,9 @@ class BenchmarkRunner:
 
         logger.info("Benchmark runner initialized with unified interfaces")
         logger.info(f"Git commit: {self.commit_hash}")
-        logger.info(f"Environment: {self.environment_info['os']['system']} {self.environment_info['python']['version']}")
+        logger.info(
+            f"Environment: {self.environment_info['os']['system']} {self.environment_info['python']['version']}"
+        )
         logger.info(f"Default timeout: {self.default_timeout}s")
 
         python_configured = len(PythonProcessInterface.PYTHON_SOLVER_CONFIGS)
@@ -96,7 +101,9 @@ class BenchmarkRunner:
 
         logger.info(f"Python interface: {python_configured} solvers configured (lazy detection)")
         logger.info(f"MATLAB interface: {matlab_configured} solvers configured (lazy detection)")
-        logger.info(f"Problem interface: {problem_stats['total_problems']} problems from {len(problem_stats['libraries'])} libraries")
+        logger.info(
+            f"Problem interface: {problem_stats['total_problems']} problems from {len(problem_stats['libraries'])} libraries"
+        )
 
     @property
     def python_interface(self) -> PythonProcessInterface:
@@ -104,8 +111,7 @@ class BenchmarkRunner:
         if self._python_interface is None:
             logger.debug("Initializing Python interface on first access")
             self._python_interface = PythonProcessInterface(
-                save_solutions=self.save_solutions,
-                problem_interface=self.problem_interface
+                save_solutions=self.save_solutions, problem_interface=self.problem_interface
             )
         return self._python_interface
 
@@ -117,8 +123,7 @@ class BenchmarkRunner:
             try:
                 logger.debug("Initializing MATLAB interface on first access")
                 self._matlab_interface = MatlabProcessInterface(
-                    save_solutions=self.save_solutions,
-                    problem_interface=self.problem_interface
+                    save_solutions=self.save_solutions, problem_interface=self.problem_interface
                 )
             except Exception as e:
                 logger.warning(f"Failed to initialize MATLAB interface: {e}")
@@ -128,7 +133,7 @@ class BenchmarkRunner:
     def _build_solver_interface_map(self) -> Dict[str, str]:
         """
         Build mapping from solver names to interface types.
-        
+
         Returns:
             Dictionary mapping solver_name -> interface_type ('python' or 'matlab')
         """
@@ -136,29 +141,28 @@ class BenchmarkRunner:
 
         # Add Python solvers
         for solver_name in PythonProcessInterface.PYTHON_SOLVER_CONFIGS.keys():
-            mapping[solver_name] = 'python'
+            mapping[solver_name] = "python"
 
         # Add MATLAB solvers
         for solver_name in MatlabProcessInterface.MATLAB_SOLVER_CONFIGS.keys():
-            mapping[solver_name] = 'matlab'
+            mapping[solver_name] = "matlab"
 
         logger.debug(f"Built solver interface mapping: {len(mapping)} solvers")
         return mapping
 
-
     def create_solver(self, solver_name: str) -> SolverInterface:
         """
         Create solver instance (for backward compatibility).
-        
+
         Note: This method is kept for backward compatibility but the preferred
         approach is to use the unified solve methods on the interfaces directly.
-        
+
         Args:
             solver_name: Name of solver to create
-            
+
         Returns:
             Solver instance
-            
+
         Raises:
             ValueError: If solver name is unknown
         """
@@ -182,9 +186,9 @@ class BenchmarkRunner:
     def get_available_solvers(self) -> List[str]:
         """
         Get list of currently available solvers from all interfaces.
-        
+
         Note: This method forces initialization of interfaces for validation purposes.
-        
+
         Returns:
             List of solver names that can be created
         """
@@ -200,42 +204,47 @@ class BenchmarkRunner:
     def load_problem(self, problem_name: str, problem_config: Optional[Dict[str, Any]] = None) -> Any:
         """
         Load problem using problem interface (symmetrical design).
-        
+
         Args:
             problem_name: Name of the problem
             problem_config: Optional problem configuration (delegated to interface)
-            
+
         Returns:
             Loaded problem data
         """
         return self.problem_interface.load_problem(problem_name, problem_config)
 
-    def store_result(self, solver_name: str, problem_name: str,
-                    result: SolverResult, problem_config: Dict[str, Any],
-                    problem_data=None) -> None:
+    def store_result(
+        self,
+        solver_name: str,
+        problem_name: str,
+        result: SolverResult,
+        problem_config: Dict[str, Any],
+        problem_data=None,
+    ) -> None:
         """
         Store result in database using simplified schema.
-        
+
         Args:
             solver_name: Name of the solver
-            problem_name: Name of the problem  
+            problem_name: Name of the problem
             result: Standardized solver result
             problem_config: Problem configuration for metadata
             problem_data: Optional problem data for type detection
         """
         try:
             # Determine problem library and type
-            problem_library = problem_config.get('library_name', 'internal')
+            problem_library = problem_config.get("library_name", "internal")
 
             # Get problem type from actual problem data (most reliable)
-            if problem_data and hasattr(problem_data, 'problem_class'):
+            if problem_data and hasattr(problem_data, "problem_class"):
                 problem_type = problem_data.problem_class
-            elif hasattr(result, 'additional_info') and result.additional_info:
+            elif hasattr(result, "additional_info") and result.additional_info:
                 # Try to get problem class from solver result
-                problem_type = result.additional_info.get('problem_class', 'UNKNOWN')
+                problem_type = result.additional_info.get("problem_class", "UNKNOWN")
             else:
                 # Fallback to config, then to UNKNOWN
-                problem_type = problem_config.get('problem_type', 'UNKNOWN')
+                problem_type = problem_config.get("problem_type", "UNKNOWN")
 
             # Skip database operations in dry-run mode
             if self.dry_run:
@@ -246,6 +255,7 @@ class BenchmarkRunner:
             memo = None
             if result.additional_info:
                 import json
+
                 memo = json.dumps(result.additional_info, indent=2, default=str)
 
             # Store in database using the simplified schema
@@ -265,7 +275,7 @@ class BenchmarkRunner:
                 primal_infeasibility=result.primal_infeasibility,
                 dual_infeasibility=result.dual_infeasibility,
                 iterations=result.iterations,
-                memo=memo
+                memo=memo,
             )
 
             logger.debug(f"Stored result: {solver_name} on {problem_name}")
@@ -273,12 +283,12 @@ class BenchmarkRunner:
         except Exception as e:
             logger.error(f"Failed to store result for {solver_name} on {problem_name}: {e}")
 
-    def store_error_result(self, solver_name: str, problem_name: str,
-                          error_message: str, problem_config: Dict[str, Any],
-                          problem_data=None) -> None:
+    def store_error_result(
+        self, solver_name: str, problem_name: str, error_message: str, problem_config: Dict[str, Any], problem_data=None
+    ) -> None:
         """
         Store error result in database.
-        
+
         Args:
             solver_name: Name of the solver
             problem_name: Name of the problem
@@ -292,27 +302,24 @@ class BenchmarkRunner:
             return
 
         error_result = SolverResult.create_error_result(
-            error_message=error_message,
-            solve_time=0.0,
-            solver_name=solver_name,
-            solver_version="unknown"
+            error_message=error_message, solve_time=0.0, solver_name=solver_name, solver_version="unknown"
         )
 
         # Add problem class to additional_info if available
-        if problem_data and hasattr(problem_data, 'problem_class'):
+        if problem_data and hasattr(problem_data, "problem_class"):
             if not error_result.additional_info:
                 error_result.additional_info = {}
-            error_result.additional_info['problem_class'] = problem_data.problem_class
+            error_result.additional_info["problem_class"] = problem_data.problem_class
 
         self.store_result(solver_name, problem_name, error_result, problem_config, problem_data)
 
     def run_single_benchmark(self, problem_name: str, solver_name: str) -> None:
         """
         Execute single problem-solver combination using explicit interface routing.
-        
+
         This method uses explicit solver-to-interface mapping to route directly to the
         appropriate interface, eliminating unnecessary exceptions and improving efficiency.
-        
+
         Args:
             problem_name: Name of the problem to solve
             solver_name: Name of the solver to use
@@ -323,15 +330,17 @@ class BenchmarkRunner:
             # Get the appropriate interface type from mapping
             interface_type = self._solver_interface_map.get(solver_name)
 
-            if interface_type == 'python':
+            if interface_type == "python":
                 # Route directly to Python interface
                 result = self.python_interface.solve(problem_name, solver_name, timeout=self.default_timeout)
 
-            elif interface_type == 'matlab':
+            elif interface_type == "matlab":
                 result = self.matlab_interface.solve(problem_name, solver_name, timeout=self.default_timeout)
 
             else:
-                raise ValueError(f"Unknown solver '{solver_name}'. Available solvers: {list(self._solver_interface_map.keys())}")
+                raise ValueError(
+                    f"Unknown solver '{solver_name}'. Available solvers: {list(self._solver_interface_map.keys())}"
+                )
 
             # Success! Get problem configuration and store result
             problem_config = self.problem_interface.get_problem_config(problem_name)
@@ -341,7 +350,9 @@ class BenchmarkRunner:
             if result.status == "UNSUPPORTED":
                 logger.info(f"Completed {solver_name} on {problem_name}: {result.status} (problem type not supported)")
             elif result.solve_time is not None and result.primal_objective_value is not None:
-                logger.info(f"Completed {solver_name} on {problem_name}: {result.status} in {result.solve_time:.3f}s, objective: {result.primal_objective_value:.6e}")
+                logger.info(
+                    f"Completed {solver_name} on {problem_name}: {result.status} in {result.solve_time:.3f}s, objective: {result.primal_objective_value:.6e}"
+                )
             elif result.solve_time is not None:
                 logger.info(f"Completed {solver_name} on {problem_name}: {result.status} in {result.solve_time:.3f}s")
             else:
@@ -362,15 +373,17 @@ class BenchmarkRunner:
                 self.store_error_result(solver_name, problem_name, error_msg, problem_config)
             except (ValueError, KeyError) as config_error:
                 # If we can't even get problem config, create minimal config
-                logger.warning(f"Could not get problem config for {problem_name}: {config_error}; "
-                               f"storing error result with minimal config")
-                minimal_config = {'library_name': 'unknown', 'problem_type': 'UNKNOWN'}
+                logger.warning(
+                    f"Could not get problem config for {problem_name}: {config_error}; "
+                    f"storing error result with minimal config"
+                )
+                minimal_config = {"library_name": "unknown", "problem_type": "UNKNOWN"}
                 self.store_error_result(solver_name, problem_name, error_msg, minimal_config)
 
     def run_benchmark_batch(self, problems: List[str], solvers: List[str]) -> None:
         """
         Run benchmark for all problem-solver combinations.
-        
+
         Args:
             problems: List of problem names to run
             solvers: List of solver names to use
@@ -378,7 +391,9 @@ class BenchmarkRunner:
         total_combinations = len(problems) * len(solvers)
         completed = 0
 
-        logger.info(f"Starting benchmark batch: {len(problems)} problems × {len(solvers)} solvers = {total_combinations} combinations")
+        logger.info(
+            f"Starting benchmark batch: {len(problems)} problems × {len(solvers)} solvers = {total_combinations} combinations"
+        )
 
         for problem_name in problems:
             for solver_name in solvers:
@@ -397,76 +412,61 @@ class BenchmarkRunner:
     def get_available_problems(self, for_test_only: bool = False) -> List[str]:
         """
         Get list of available problems using problem interface.
-        
+
         Args:
             for_test_only: If True, only return problems marked for testing
-            
+
         Returns:
             List of problem names
         """
         return self.problem_interface.get_available_problems(test_only=for_test_only)
 
-
     def validate_setup(self) -> Dict[str, Any]:
         """
         Validate that solvers and problems can be loaded.
-        
+
         Returns:
             Validation report
         """
         report = {
-            'solvers': {},
-            'problems': {},
-            'summary': {
-                'total_solvers': 0,
-                'working_solvers': 0,
-                'total_problems': 0,
-                'working_problems': 0
-            }
+            "solvers": {},
+            "problems": {},
+            "summary": {"total_solvers": 0, "working_solvers": 0, "total_problems": 0, "working_problems": 0},
         }
 
         # Test solver availability using lightweight import validation
         for solver_name in self.get_available_solvers():
-            report['summary']['total_solvers'] += 1
+            report["summary"]["total_solvers"] += 1
             try:
                 interface_type = self._solver_interface_map.get(solver_name)
 
-                if interface_type == 'python':
+                if interface_type == "python":
                     # Test Python solver availability via import
                     status, version_info = self._test_python_solver_import(solver_name)
-                elif interface_type == 'matlab':
+                elif interface_type == "matlab":
                     # Test MATLAB solver availability
                     if self.matlab_interface is None:
-                        report['solvers'][solver_name] = {
-                            'status': 'error',
-                            'error': 'MATLAB interface not available'
-                        }
+                        report["solvers"][solver_name] = {"status": "error", "error": "MATLAB interface not available"}
                         continue
                     status, version_info = self._test_matlab_solver_availability(solver_name)
                 else:
-                    report['solvers'][solver_name] = {
-                        'status': 'error',
-                        'error': f'Unknown interface type: {interface_type}'
+                    report["solvers"][solver_name] = {
+                        "status": "error",
+                        "error": f"Unknown interface type: {interface_type}",
                     }
                     continue
 
-                if status == 'working':
-                    report['solvers'][solver_name] = {
-                        'status': 'working',
-                        'version': version_info
-                    }
-                    report['summary']['working_solvers'] += 1
+                if status == "working":
+                    report["solvers"][solver_name] = {"status": "working", "version": version_info}
+                    report["summary"]["working_solvers"] += 1
                 else:
-                    report['solvers'][solver_name] = {
-                        'status': 'error',
-                        'error': version_info  # version_info contains error message when status != 'working'
+                    report["solvers"][solver_name] = {
+                        "status": "error",
+                        "error": version_info,  # version_info contains error message when status != 'working'
                     }
 
             except Exception as e:
-                report['solvers'][solver_name] = {
-                    'status': 'error',
-                    'error': str(e)
-                }
+                report["solvers"][solver_name] = {"status": "error", "error": str(e)}
 
         # Test problem loading using problem interface (lightweight validation)
         # Use test problems first, fall back to representative problems from each library
@@ -484,87 +484,93 @@ class BenchmarkRunner:
         test_problems = test_problems[:5]
 
         for problem_name in test_problems:
-            report['summary']['total_problems'] += 1
+            report["summary"]["total_problems"] += 1
             try:
                 problem_config = self.problem_interface.get_problem_config(problem_name)
                 self.load_problem(problem_name)
-                report['problems'][problem_name] = {
-                    'status': 'working',
-                    'type': problem_config.get('problem_type', 'unknown'),
-                    'library': problem_config.get('library_name', 'unknown')
+                report["problems"][problem_name] = {
+                    "status": "working",
+                    "type": problem_config.get("problem_type", "unknown"),
+                    "library": problem_config.get("library_name", "unknown"),
                 }
-                report['summary']['working_problems'] += 1
+                report["summary"]["working_problems"] += 1
             except Exception as e:
-                report['problems'][problem_name] = {
-                    'status': 'error',
-                    'error': str(e)
-                }
+                report["problems"][problem_name] = {"status": "error", "error": str(e)}
 
         return report
 
     def _test_python_solver_import(self, solver_name: str) -> Tuple[str, str]:
         """
         Test Python solver availability via import testing.
-        
+
         Args:
             solver_name: Name of the solver to test
-            
+
         Returns:
             Tuple of (status, version_info) where status is 'working' or 'error'
         """
         try:
             # Test basic imports for each solver type
-            if solver_name.startswith('cvxpy_'):
+            if solver_name.startswith("cvxpy_"):
                 import cvxpy as cp
-                backend = solver_name.replace('cvxpy_', '').upper()
+
+                backend = solver_name.replace("cvxpy_", "").upper()
 
                 # Test specific backend availability
-                if backend == 'CLARABEL':
+                if backend == "CLARABEL":
                     import clarabel
-                    return 'working', f"CVXPY {cp.__version__} + CLARABEL {clarabel.__version__}"
-                elif backend == 'SCS':
-                    import scs
-                    return 'working', f"CVXPY {cp.__version__} + SCS {scs.__version__}"
-                elif backend == 'ECOS':
-                    import ecos
-                    return 'working', f"CVXPY {cp.__version__} + ECOS {ecos.__version__}"
-                elif backend == 'OSQP':
-                    import osqp
-                    return 'working', f"CVXPY {cp.__version__} + OSQP {osqp.__version__}"
-                elif backend == 'CVXOPT':
-                    import cvxopt
-                    return 'working', f"CVXPY {cp.__version__} + CVXOPT {cvxopt.__version__}"
-                elif backend == 'SDPA':
-                    # SDPA is optional, may not have version
-                    return 'working', f"CVXPY {cp.__version__} + SDPA"
-                elif backend == 'SCIP':
-                    import pyscipopt
-                    return 'working', f"CVXPY {cp.__version__} + SCIP {pyscipopt.__version__}"
-                elif backend == 'HIGHS':
-                    import highspy  # noqa: F401  (import check)
-                    return 'working', f"CVXPY {cp.__version__} + HiGHS"
-                else:
-                    return 'error', f"Unknown CVXPY backend: {backend}"
 
-            elif solver_name == 'scipy_linprog':
+                    return "working", f"CVXPY {cp.__version__} + CLARABEL {clarabel.__version__}"
+                elif backend == "SCS":
+                    import scs
+
+                    return "working", f"CVXPY {cp.__version__} + SCS {scs.__version__}"
+                elif backend == "ECOS":
+                    import ecos
+
+                    return "working", f"CVXPY {cp.__version__} + ECOS {ecos.__version__}"
+                elif backend == "OSQP":
+                    import osqp
+
+                    return "working", f"CVXPY {cp.__version__} + OSQP {osqp.__version__}"
+                elif backend == "CVXOPT":
+                    import cvxopt
+
+                    return "working", f"CVXPY {cp.__version__} + CVXOPT {cvxopt.__version__}"
+                elif backend == "SDPA":
+                    # SDPA is optional, may not have version
+                    return "working", f"CVXPY {cp.__version__} + SDPA"
+                elif backend == "SCIP":
+                    import pyscipopt
+
+                    return "working", f"CVXPY {cp.__version__} + SCIP {pyscipopt.__version__}"
+                elif backend == "HIGHS":
+                    import highspy  # noqa: F401  (import check)
+
+                    return "working", f"CVXPY {cp.__version__} + HiGHS"
+                else:
+                    return "error", f"Unknown CVXPY backend: {backend}"
+
+            elif solver_name == "scipy_linprog":
                 import scipy
                 import scipy.optimize
-                return 'working', f"SciPy {scipy.__version__}"
+
+                return "working", f"SciPy {scipy.__version__}"
             else:
-                return 'error', f"Unknown Python solver: {solver_name}"
+                return "error", f"Unknown Python solver: {solver_name}"
 
         except ImportError as e:
-            return 'error', f"Import failed: {str(e)}"
+            return "error", f"Import failed: {str(e)}"
         except Exception as e:
-            return 'error', f"Validation error: {str(e)}"
+            return "error", f"Validation error: {str(e)}"
 
     def _test_matlab_solver_availability(self, solver_name: str) -> Tuple[str, str]:
         """
         Test MATLAB solver availability.
-        
+
         Args:
             solver_name: Name of the MATLAB solver to test
-            
+
         Returns:
             Tuple of (status, version_info) where status is 'working' or 'error'
         """
@@ -572,11 +578,11 @@ class BenchmarkRunner:
             # For MATLAB solvers, check if interface detected them
             if solver_name in self.matlab_interface.get_available_solvers():
                 # MATLAB interface already detected this solver during initialization
-                return 'working', 'MATLAB solver detected'
+                return "working", "MATLAB solver detected"
             else:
-                return 'error', 'MATLAB solver not detected'
+                return "error", "MATLAB solver not detected"
         except Exception as e:
-            return 'error', f"MATLAB validation error: {str(e)}"
+            return "error", f"MATLAB validation error: {str(e)}"
 
 
 if __name__ == "__main__":
@@ -596,26 +602,26 @@ if __name__ == "__main__":
         print("\n2. Validating setup...")
         validation_report = runner.validate_setup()
 
-        working_solvers = validation_report['summary']['working_solvers']
-        total_solvers = validation_report['summary']['total_solvers']
-        working_problems = validation_report['summary']['working_problems']
-        total_problems = validation_report['summary']['total_problems']
+        working_solvers = validation_report["summary"]["working_solvers"]
+        total_solvers = validation_report["summary"]["total_solvers"]
+        working_problems = validation_report["summary"]["working_problems"]
+        total_problems = validation_report["summary"]["total_problems"]
 
         print(f"   Solvers: {working_solvers}/{total_solvers} working")
         print(f"   Problems: {working_problems}/{total_problems} working")
 
         # Show working solvers
         print("\n   Working solvers:")
-        for solver_name, info in validation_report['solvers'].items():
-            if info['status'] == 'working':
+        for solver_name, info in validation_report["solvers"].items():
+            if info["status"] == "working":
                 print(f"     ✓ {solver_name}: {info['version']}")
             else:
                 print(f"     ✗ {solver_name}: {info['error']}")
 
         # Show working problems
         print("\n   Working problems:")
-        for problem_name, info in validation_report['problems'].items():
-            if info['status'] == 'working':
+        for problem_name, info in validation_report["problems"].items():
+            if info["status"] == "working":
                 print(f"     ✓ {problem_name} ({info['type']}, {info['library']})")
             else:
                 print(f"     ✗ {problem_name}: {info['error']}")
@@ -628,13 +634,13 @@ if __name__ == "__main__":
             working_solver = None
             working_problem = None
 
-            for solver_name, info in validation_report['solvers'].items():
-                if info['status'] == 'working':
+            for solver_name, info in validation_report["solvers"].items():
+                if info["status"] == "working":
                     working_solver = solver_name
                     break
 
-            for problem_name, info in validation_report['problems'].items():
-                if info['status'] == 'working':
+            for problem_name, info in validation_report["problems"].items():
+                if info["status"] == "working":
                     working_problem = problem_name
                     break
 

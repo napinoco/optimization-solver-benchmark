@@ -42,7 +42,7 @@ logger = get_logger("python_solver_runner")
 class PythonSolverManager:
     """
     Interface for managing Python solver ecosystem.
-    
+
     This class provides centralized management of Python-based optimization solvers,
     handling backend detection, solver creation, and compatibility validation.
     Creates architectural symmetry with the MATLAB interface module.
@@ -50,57 +50,25 @@ class PythonSolverManager:
 
     # Available Python solver configurations
     PYTHON_SOLVER_CONFIGS = {
-        "scipy_linprog": {
-            "class": ScipySolver,
-            "display_name": "SciPy linprog",
-            "kwargs": {}
-        },
+        "scipy_linprog": {"class": ScipySolver, "display_name": "SciPy linprog", "kwargs": {}},
         "cvxpy_clarabel": {
             "class": CvxpySolver,
             "display_name": "CLARABEL (via CVXPY)",
-            "kwargs": {"backend": "CLARABEL"}
+            "kwargs": {"backend": "CLARABEL"},
         },
-        "cvxpy_scs": {
-            "class": CvxpySolver,
-            "display_name": "SCS (via CVXPY)",
-            "kwargs": {"backend": "SCS"}
-        },
-        "cvxpy_ecos": {
-            "class": CvxpySolver,
-            "display_name": "ECOS (via CVXPY)",
-            "kwargs": {"backend": "ECOS"}
-        },
-        "cvxpy_osqp": {
-            "class": CvxpySolver,
-            "display_name": "OSQP (via CVXPY)",
-            "kwargs": {"backend": "OSQP"}
-        },
-        "cvxpy_cvxopt": {
-            "class": CvxpySolver,
-            "display_name": "CVXOPT (via CVXPY)",
-            "kwargs": {"backend": "CVXOPT"}
-        },
-        "cvxpy_sdpa": {
-            "class": CvxpySolver,
-            "display_name": "SDPA (via CVXPY)",
-            "kwargs": {"backend": "SDPA"}
-        },
-        "cvxpy_scip": {
-            "class": CvxpySolver,
-            "display_name": "SCIP (via CVXPY)",
-            "kwargs": {"backend": "SCIP"}
-        },
-        "cvxpy_highs": {
-            "class": CvxpySolver,
-            "display_name": "HiGHS (via CVXPY)",
-            "kwargs": {"backend": "HIGHS"}
-        }
+        "cvxpy_scs": {"class": CvxpySolver, "display_name": "SCS (via CVXPY)", "kwargs": {"backend": "SCS"}},
+        "cvxpy_ecos": {"class": CvxpySolver, "display_name": "ECOS (via CVXPY)", "kwargs": {"backend": "ECOS"}},
+        "cvxpy_osqp": {"class": CvxpySolver, "display_name": "OSQP (via CVXPY)", "kwargs": {"backend": "OSQP"}},
+        "cvxpy_cvxopt": {"class": CvxpySolver, "display_name": "CVXOPT (via CVXPY)", "kwargs": {"backend": "CVXOPT"}},
+        "cvxpy_sdpa": {"class": CvxpySolver, "display_name": "SDPA (via CVXPY)", "kwargs": {"backend": "SDPA"}},
+        "cvxpy_scip": {"class": CvxpySolver, "display_name": "SCIP (via CVXPY)", "kwargs": {"backend": "SCIP"}},
+        "cvxpy_highs": {"class": CvxpySolver, "display_name": "HiGHS (via CVXPY)", "kwargs": {"backend": "HIGHS"}},
     }
 
     def __init__(self, save_solutions: bool = False, problem_interface: Optional[ProblemInterface] = None, **kwargs):
         """
         Initialize Python solver interface.
-        
+
         Args:
             save_solutions: Whether to save optimal solutions to disk
             problem_interface: Optional problem interface for loading problems
@@ -120,13 +88,13 @@ class PythonSolverManager:
     def create_solver(self, solver_name: str) -> SolverInterface:
         """
         Create Python solver instance based on solver name.
-        
+
         Args:
             solver_name: Name of solver to create (e.g., 'cvxpy_clarabel', 'scipy_linprog')
-            
+
         Returns:
             Solver instance implementing SolverInterface
-            
+
         Raises:
             ValueError: If solver name is unknown or cannot be created
         """
@@ -159,7 +127,7 @@ class PythonSolverManager:
     def get_available_solvers(self) -> List[str]:
         """
         Get list of available Python solvers.
-        
+
         Returns:
             List of solver names that can be created successfully
         """
@@ -170,24 +138,28 @@ class PythonSolverManager:
             logger.debug(f"Available Python solvers: {self._available_solvers}")
         return self._available_solvers.copy()
 
-    def solve(self, problem_name: str, solver_name: str,
-             problem_data: Optional[ProblemData] = None,
-             timeout: Optional[float] = None) -> SolverResult:
+    def solve(
+        self,
+        problem_name: str,
+        solver_name: str,
+        problem_data: Optional[ProblemData] = None,
+        timeout: Optional[float] = None,
+    ) -> SolverResult:
         """
         Unified solve method that handles problem loading and solver execution.
-        
+
         This method provides a consistent interface matching the MATLAB implementation,
         enabling symmetrical architecture across all solver ecosystems.
-        
+
         Args:
             problem_name: Name of the problem to solve
             solver_name: Name of the solver to use
             problem_data: Optional pre-loaded problem data (if None, will load)
             timeout: Optional timeout for solver execution
-            
+
         Returns:
             SolverResult with standardized fields
-            
+
         Raises:
             ValueError: If solver not available or problem cannot be loaded
         """
@@ -206,14 +178,12 @@ class PythonSolverManager:
             if not solver.validate_problem_compatibility(problem_data):
                 problem_type = problem_data.problem_class
                 result = SolverResult.create_unsupported_result(
-                    problem_type=problem_type,
-                    solver_name=solver_name,
-                    solver_version=solver.get_version()
+                    problem_type=problem_type, solver_name=solver_name, solver_version=solver.get_version()
                 )
                 # Add problem class information to additional_info for database storage
                 if not result.additional_info:
                     result.additional_info = {}
-                result.additional_info['problem_class'] = problem_data.problem_class
+                result.additional_info["problem_class"] = problem_data.problem_class
                 return result
 
             # 4. Execute solver
@@ -228,7 +198,7 @@ class PythonSolverManager:
             # 6. Add problem class information to additional_info for database storage
             if not result.additional_info:
                 result.additional_info = {}
-            result.additional_info['problem_class'] = problem_data.problem_class
+            result.additional_info["problem_class"] = problem_data.problem_class
 
             logger.info(f"Completed {solver_name} on {problem_name}: {result.status}")
             return result
@@ -240,16 +210,13 @@ class PythonSolverManager:
             error_msg = f"Failed to solve {problem_name} with {solver_name}: {str(e)}"
             logger.error(error_msg)
             return SolverResult.create_error_result(
-                error_msg,
-                solve_time=0.0,
-                solver_name=solver_name,
-                solver_version="unknown"
+                error_msg, solve_time=0.0, solver_name=solver_name, solver_version="unknown"
             )
 
     def get_solver_statistics(self) -> Dict[str, Any]:
         """
         Get statistics about Python solver availability.
-        
+
         Returns:
             Dictionary with solver statistics
         """
@@ -270,13 +237,13 @@ class PythonSolverManager:
             "scipy_solvers": len(scipy_solvers),
             "cvxpy_solvers": len(cvxpy_solvers),
             "cvxpy_backends": [name.split("_", 1)[1] for name in cvxpy_solvers],
-            "unavailable_solvers": list(set(self.PYTHON_SOLVER_CONFIGS.keys()) - set(available_solvers_list))
+            "unavailable_solvers": list(set(self.PYTHON_SOLVER_CONFIGS.keys()) - set(available_solvers_list)),
         }
 
     def _detect_available_solvers(self) -> List[str]:
         """
         Detect which Python solvers are available in the current environment.
-        
+
         Returns:
             List of available solver names
         """
@@ -311,15 +278,15 @@ class PythonSolverManager:
         return available
 
 
-
 # =============================================================================
 # Subprocess Entry Point
 # =============================================================================
 
+
 def main():
     """
     Main entry point for subprocess execution.
-    
+
     This function is called when the module is executed directly as a subprocess
     by PythonProcessInterface. It handles argument parsing, solver execution,
     and result serialization.
@@ -330,17 +297,17 @@ def main():
     import resource
 
     # Parse command line arguments
-    parser = argparse.ArgumentParser(description='Python Solver Runner for Subprocess Execution')
-    parser.add_argument('--problem', required=True, help='Name of the problem to solve')
-    parser.add_argument('--solver', required=True, help='Name of the solver to use')
-    parser.add_argument('--result-file', required=True, help='Path to write JSON result')
-    parser.add_argument('--save-solutions', action='store_true', help='Save solution vectors')
-    parser.add_argument('--memory-limit', type=float, help='Memory limit in GB (Unix only)')
+    parser = argparse.ArgumentParser(description="Python Solver Runner for Subprocess Execution")
+    parser.add_argument("--problem", required=True, help="Name of the problem to solve")
+    parser.add_argument("--solver", required=True, help="Name of the solver to use")
+    parser.add_argument("--result-file", required=True, help="Path to write JSON result")
+    parser.add_argument("--save-solutions", action="store_true", help="Save solution vectors")
+    parser.add_argument("--memory-limit", type=float, help="Memory limit in GB (Unix only)")
 
     args = parser.parse_args()
 
     # Apply memory limit if specified (Unix only)
-    if args.memory_limit and platform.system() != 'Windows':
+    if args.memory_limit and platform.system() != "Windows":
         try:
             memory_bytes = int(args.memory_limit * 1024 * 1024 * 1024)
             resource.setrlimit(resource.RLIMIT_AS, (memory_bytes, memory_bytes))
@@ -358,21 +325,21 @@ def main():
 
         # Convert result to dictionary for JSON serialization
         result_dict = {
-            'solve_time': result.solve_time,
-            'status': result.status,
-            'primal_objective_value': result.primal_objective_value,
-            'dual_objective_value': result.dual_objective_value,
-            'duality_gap': result.duality_gap,
-            'primal_infeasibility': result.primal_infeasibility,
-            'dual_infeasibility': result.dual_infeasibility,
-            'iterations': result.iterations,
-            'solver_name': result.solver_name,
-            'solver_version': result.solver_version,
-            'additional_info': result.additional_info or {}
+            "solve_time": result.solve_time,
+            "status": result.status,
+            "primal_objective_value": result.primal_objective_value,
+            "dual_objective_value": result.dual_objective_value,
+            "duality_gap": result.duality_gap,
+            "primal_infeasibility": result.primal_infeasibility,
+            "dual_infeasibility": result.dual_infeasibility,
+            "iterations": result.iterations,
+            "solver_name": result.solver_name,
+            "solver_version": result.solver_version,
+            "additional_info": result.additional_info or {},
         }
 
         # Write result to JSON file
-        with open(args.result_file, 'w') as f:
+        with open(args.result_file, "w") as f:
             json.dump(result_dict, f, indent=2, default=str)
 
         logger.info(f"Subprocess completed successfully, result written to {args.result_file}")
@@ -380,18 +347,15 @@ def main():
     except Exception as e:
         # Create error result
         error_result = {
-            'solve_time': 0.0,
-            'status': 'error',
-            'solver_name': args.solver,
-            'solver_version': 'unknown',
-            'additional_info': {
-                'error_message': str(e),
-                'error_type': type(e).__name__
-            }
+            "solve_time": 0.0,
+            "status": "error",
+            "solver_name": args.solver,
+            "solver_version": "unknown",
+            "additional_info": {"error_message": str(e), "error_type": type(e).__name__},
         }
 
         # Write error result to JSON file
-        with open(args.result_file, 'w') as f:
+        with open(args.result_file, "w") as f:
             json.dump(error_result, f, indent=2)
 
         logger.error(f"Subprocess failed: {e}")

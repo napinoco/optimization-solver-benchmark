@@ -1,8 +1,8 @@
 """
 MATLAB Solver Process Interface for Benchmark System.
 
-This module provides a subprocess-based interface to MATLAB solvers that calls 
-matlab_solver_runner.m, providing symmetrical architecture with the Python 
+This module provides a subprocess-based interface to MATLAB solvers that calls
+matlab_solver_runner.m, providing symmetrical architecture with the Python
 process interface.
 
 Key Features:
@@ -38,7 +38,7 @@ logger = get_logger("matlab_process_interface")
 class MatlabProcessInterface:
     """
     Unified interface for managing MATLAB solver ecosystem.
-    
+
     This class provides centralized management of MATLAB-based optimization solvers,
     calling matlab_interface.m directly for clean architecture.
     """
@@ -48,23 +48,22 @@ class MatlabProcessInterface:
         "matlab_sedumi": {
             "display_name": "SeDuMi (MATLAB)",
             "matlab_solver": "sedumi",
-            "runner_function": "sedumi_runner"
+            "runner_function": "sedumi_runner",
         },
-        "matlab_sdpt3": {
-            "display_name": "SDPT3 (MATLAB)",
-            "matlab_solver": "sdpt3",
-            "runner_function": "sdpt3_runner"
-        }
+        "matlab_sdpt3": {"display_name": "SDPT3 (MATLAB)", "matlab_solver": "sdpt3", "runner_function": "sdpt3_runner"},
     }
 
-    def __init__(self, save_solutions: bool = False,
-                 problem_interface: Optional[ProblemInterface] = None,
-                 matlab_executable: str = 'matlab',
-                 timeout: Optional[float] = 300,
-                 **kwargs):
+    def __init__(
+        self,
+        save_solutions: bool = False,
+        problem_interface: Optional[ProblemInterface] = None,
+        matlab_executable: str = "matlab",
+        timeout: Optional[float] = 300,
+        **kwargs,
+    ):
         """
         Initialize MATLAB solver process interface.
-        
+
         Args:
             save_solutions: Whether to save optimal solutions to disk
             problem_interface: Optional problem interface for loading problems
@@ -86,21 +85,25 @@ class MatlabProcessInterface:
         logger.info("Initialized MATLAB process interface (subprocess isolation)")
         logger.debug(f"Using MATLAB at: {matlab_executable}")
 
-    def solve(self, problem_name: str, solver_name: str,
-             problem_data: Optional[ProblemData] = None,
-             timeout: Optional[float] = None) -> SolverResult:
+    def solve(
+        self,
+        problem_name: str,
+        solver_name: str,
+        problem_data: Optional[ProblemData] = None,
+        timeout: Optional[float] = None,
+    ) -> SolverResult:
         """
         Unified solve method that calls matlab_solver_runner.m via subprocess.
-        
+
         Args:
             problem_name: Name of the problem to solve
             solver_name: Name of the solver to use (e.g., 'matlab_sedumi')
             problem_data: Optional pre-loaded problem data (ignored - MATLAB loads directly)
             timeout: Optional timeout for solver execution
-            
+
         Returns:
             SolverResult with standardized fields
-            
+
         Raises:
             ValueError: If solver not available or problem cannot be loaded
         """
@@ -124,7 +127,7 @@ class MatlabProcessInterface:
                 problem_name=problem_name,
                 matlab_solver=matlab_solver,
                 runner_function=runner_function,
-                timeout=actual_timeout
+                timeout=actual_timeout,
             )
 
             # 4. Ensure solver metadata is set
@@ -134,16 +137,17 @@ class MatlabProcessInterface:
             # 5. Add problem class information to additional_info for database storage
             try:
                 from scripts.data_loaders.python.problem_interface import ProblemInterface
+
                 problem_interface = ProblemInterface()
                 problem_data = problem_interface.load_problem(problem_name)
                 if not result.additional_info:
                     result.additional_info = {}
-                result.additional_info['problem_class'] = problem_data.problem_class
+                result.additional_info["problem_class"] = problem_data.problem_class
             except Exception as e:
                 logger.debug(f"Could not get problem class for {problem_name}: {e}")
                 if not result.additional_info:
                     result.additional_info = {}
-                result.additional_info['problem_class'] = 'UNKNOWN'
+                result.additional_info["problem_class"] = "UNKNOWN"
 
             logger.info(f"Completed {solver_name} on {problem_name}: {result.status}")
             return result
@@ -156,23 +160,21 @@ class MatlabProcessInterface:
             logger.error(error_msg)
 
             return SolverResult.create_error_result(
-                error_msg,
-                solve_time=0.0,
-                solver_name=solver_name,
-                solver_version="unknown"
+                error_msg, solve_time=0.0, solver_name=solver_name, solver_version="unknown"
             )
 
-    def _call_matlab_interface(self, problem_name: str, matlab_solver: str,
-                             runner_function: str, timeout: float) -> SolverResult:
+    def _call_matlab_interface(
+        self, problem_name: str, matlab_solver: str, runner_function: str, timeout: float
+    ) -> SolverResult:
         """
         Call matlab_solver_runner.m via subprocess.
-        
+
         Args:
             problem_name: Name of the problem
             matlab_solver: MATLAB solver name ('sedumi' or 'sdpt3')
             runner_function: Runner function name
             timeout: Timeout in seconds
-            
+
         Returns:
             SolverResult from MATLAB execution
         """
@@ -201,7 +203,7 @@ class MatlabProcessInterface:
 
                 # Build command array
                 # Use minimal options, rely on environment variables for Java/X11 control
-                cmd = [self.matlab_executable, '-batch', matlab_command]
+                cmd = [self.matlab_executable, "-batch", matlab_command]
 
                 logger.debug(f"Executing MATLAB command: {' '.join(cmd)}")
 
@@ -212,17 +214,12 @@ class MatlabProcessInterface:
 
                     # Set environment variables to suppress Java warnings and X11 issues
                     env = os.environ.copy()
-                    env['DISPLAY'] = ''  # Disable X11
-                    env['_JAVA_OPTIONS'] = '-Djava.awt.headless=true'  # Headless Java mode
-                    env['MATLAB_LOG_DIR'] = '/dev/null'  # Suppress MATLAB logs
+                    env["DISPLAY"] = ""  # Disable X11
+                    env["_JAVA_OPTIONS"] = "-Djava.awt.headless=true"  # Headless Java mode
+                    env["MATLAB_LOG_DIR"] = "/dev/null"  # Suppress MATLAB logs
 
                     result = subprocess.run(
-                        cmd,
-                        capture_output=True,
-                        text=True,
-                        timeout=adjusted_timeout,
-                        cwd=project_root,
-                        env=env
+                        cmd, capture_output=True, text=True, timeout=adjusted_timeout, cwd=project_root, env=env
                     )
 
                     # Check execution success
@@ -238,7 +235,7 @@ class MatlabProcessInterface:
                                 solve_time=solve_time,
                                 solver_name=f"matlab_{matlab_solver}",
                                 solver_version="unknown",
-                                error_details=f"Process terminated (returncode {result.returncode}). {error_msg}"
+                                error_details=f"Process terminated (returncode {result.returncode}). {error_msg}",
                             )
                         # Other subprocess errors
                         else:
@@ -250,16 +247,16 @@ class MatlabProcessInterface:
                                 error_message=error_msg,
                                 solve_time=solve_time,
                                 solver_name=f"matlab_{matlab_solver}",
-                                solver_version="unknown"
+                                solver_version="unknown",
                             )
 
                     # Read JSON result file
                     if not os.path.exists(result_file):
                         return SolverResult.create_error_result(
                             "MATLAB interface did not produce result file",
-                            solve_time=float('nan'),
+                            solve_time=float("nan"),
                             solver_name=f"matlab_{matlab_solver}",
-                            solver_version="unknown"
+                            solver_version="unknown",
                         )
 
                     # Check if result file has content
@@ -268,35 +265,35 @@ class MatlabProcessInterface:
                         if file_stat.st_size == 0:
                             return SolverResult.create_error_result(
                                 "MATLAB interface produced empty result file",
-                                solve_time=float('nan'),
+                                solve_time=float("nan"),
                                 solver_name=f"matlab_{matlab_solver}",
-                                solver_version="unknown"
+                                solver_version="unknown",
                             )
                     except OSError as e:
                         return SolverResult.create_error_result(
                             f"Error accessing result file: {e}",
-                            solve_time=float('nan'),
+                            solve_time=float("nan"),
                             solver_name=f"matlab_{matlab_solver}",
-                            solver_version="unknown"
+                            solver_version="unknown",
                         )
 
                     # Read and parse JSON result
                     try:
-                        with open(result_file, 'r') as f:
+                        with open(result_file, "r") as f:
                             matlab_result = json.load(f)
                     except json.JSONDecodeError as e:
                         return SolverResult.create_error_result(
                             f"Invalid JSON in result file: {e}",
-                            solve_time=float('nan'),
+                            solve_time=float("nan"),
                             solver_name=f"matlab_{matlab_solver}",
-                            solver_version="unknown"
+                            solver_version="unknown",
                         )
                     except IOError as e:
                         return SolverResult.create_error_result(
                             f"Error reading result file: {e}",
-                            solve_time=float('nan'),
+                            solve_time=float("nan"),
                             solver_name=f"matlab_{matlab_solver}",
-                            solver_version="unknown"
+                            solver_version="unknown",
                         )
 
                     # Convert MATLAB result to SolverResult
@@ -304,26 +301,21 @@ class MatlabProcessInterface:
 
                 except subprocess.TimeoutExpired:
                     return SolverResult.create_timeout_result(
-                        timeout,
-                        solver_name=f"matlab_{matlab_solver}",
-                        solver_version="unknown"
+                        timeout, solver_name=f"matlab_{matlab_solver}", solver_version="unknown"
                     )
 
         except Exception as e:
             logger.error(f"MATLAB interface execution failed: {e}")
             return SolverResult.create_error_result(
-                str(e),
-                solve_time=float('nan'),
-                solver_name=f"matlab_{matlab_solver}",
-                solver_version="unknown"
+                str(e), solve_time=float("nan"), solver_name=f"matlab_{matlab_solver}", solver_version="unknown"
             )
 
     def _convert_matlab_result(self, matlab_result: Dict[str, Any], matlab_solver: str) -> SolverResult:
         """Convert MATLAB JSON result to SolverResult format."""
 
         # Extract solver version information
-        solver_version = matlab_result.get('solver_version', f"{matlab_solver.upper()} (version unknown)")
-        matlab_version = matlab_result.get('matlab_version', 'unknown')
+        solver_version = matlab_result.get("solver_version", f"{matlab_solver.upper()} (version unknown)")
+        matlab_version = matlab_result.get("matlab_version", "unknown")
         combined_version = f"{solver_version} (MATLAB {matlab_version})"
 
         # Handle None/null values from JSON
@@ -335,41 +327,41 @@ class MatlabProcessInterface:
 
         try:
             # Extract solve_time from MATLAB result, prioritizing actual solver execution time
-            matlab_solve_time = safe_float(matlab_result.get('solve_time'))
+            matlab_solve_time = safe_float(matlab_result.get("solve_time"))
 
             # Use MATLAB's solve_time if valid, otherwise set to NaN (don't use subprocess time)
             if matlab_solve_time is not None and matlab_solve_time >= 0:
                 final_solve_time = matlab_solve_time
             else:
                 # Don't mask errors by using subprocess time - set to NaN for transparency
-                final_solve_time = float('nan')
+                final_solve_time = float("nan")
                 self.logger.warning(f"Invalid solve_time from MATLAB result: {matlab_solve_time}, setting to NaN")
 
             return SolverResult(
                 solve_time=final_solve_time,
-                status=matlab_result.get('status', 'unknown').upper(),
-                primal_objective_value=safe_float(matlab_result.get('primal_objective_value')),
-                dual_objective_value=safe_float(matlab_result.get('dual_objective_value')),
-                duality_gap=safe_float(matlab_result.get('duality_gap')),
-                primal_infeasibility=safe_float(matlab_result.get('primal_infeasibility')),
-                dual_infeasibility=safe_float(matlab_result.get('dual_infeasibility')),
-                iterations=safe_int(matlab_result.get('iterations')),
+                status=matlab_result.get("status", "unknown").upper(),
+                primal_objective_value=safe_float(matlab_result.get("primal_objective_value")),
+                dual_objective_value=safe_float(matlab_result.get("dual_objective_value")),
+                duality_gap=safe_float(matlab_result.get("duality_gap")),
+                primal_infeasibility=safe_float(matlab_result.get("primal_infeasibility")),
+                dual_infeasibility=safe_float(matlab_result.get("dual_infeasibility")),
+                iterations=safe_int(matlab_result.get("iterations")),
                 solver_name=f"matlab_{matlab_solver}",
                 solver_version=combined_version,
                 additional_info={
-                    'matlab_output': matlab_result,
-                    'matlab_version': matlab_version,
-                    'solver_backend': matlab_solver,
-                    'execution_environment': 'matlab'
-                }
+                    "matlab_output": matlab_result,
+                    "matlab_version": matlab_version,
+                    "solver_backend": matlab_solver,
+                    "execution_environment": "matlab",
+                },
             )
         except Exception as e:
             # If conversion fails, return error result with NaN solve_time (don't use subprocess time)
             return SolverResult.create_error_result(
                 f"Failed to convert MATLAB result: {e}",
-                solve_time=float('nan'),
+                solve_time=float("nan"),
                 solver_name=f"matlab_{matlab_solver}",
-                solver_version=combined_version
+                solver_version=combined_version,
             )
 
     def _parse_matlab_error(self, stderr: str, stdout: str) -> str:
@@ -388,12 +380,12 @@ class MatlabProcessInterface:
             "License error",
             "license error",
             "Syntax error",
-            "syntax error"
+            "syntax error",
         ]
 
         # Extract relevant error lines
         error_lines = []
-        for line in full_output.split('\n'):
+        for line in full_output.split("\n"):
             line = line.strip()
             if any(pattern in line for pattern in error_patterns):
                 error_lines.append(line)
@@ -402,7 +394,7 @@ class MatlabProcessInterface:
             return "; ".join(error_lines[:3])  # Return up to 3 most relevant error lines
 
         # If no specific error patterns found, return first few lines of output
-        output_lines = [line.strip() for line in full_output.split('\n') if line.strip()]
+        output_lines = [line.strip() for line in full_output.split("\n") if line.strip()]
         if output_lines:
             return "; ".join(output_lines[:2])
 
@@ -411,7 +403,7 @@ class MatlabProcessInterface:
     def create_solver(self, solver_name: str):
         """
         Create solver method for backward compatibility.
-        
+
         Note: This is kept for interface compatibility but the preferred
         approach is to use the solve method directly.
         """
@@ -433,7 +425,7 @@ class MatlabProcessInterface:
     def get_available_solvers(self) -> List[str]:
         """
         Get list of available MATLAB solvers.
-        
+
         Returns:
             List of solver names that can be created successfully
         """
@@ -447,7 +439,7 @@ class MatlabProcessInterface:
     def _detect_available_solvers(self) -> List[str]:
         """
         Detect which MATLAB solvers are available in the current environment.
-        
+
         Returns:
             List of available solver names
         """
@@ -457,15 +449,9 @@ class MatlabProcessInterface:
 
         # First check if MATLAB is available
         try:
-            cmd = [self.matlab_executable, '-batch', 'disp("MATLAB_OK")']
+            cmd = [self.matlab_executable, "-batch", 'disp("MATLAB_OK")']
 
-            result = subprocess.run(
-                cmd,
-                capture_output=True,
-                text=True,
-                timeout=30,
-                cwd=project_root
-            )
+            result = subprocess.run(cmd, capture_output=True, text=True, timeout=30, cwd=project_root)
 
             if result.returncode != 0:
                 logger.warning(f"MATLAB not available: {result.stderr}")

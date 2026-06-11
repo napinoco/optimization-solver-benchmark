@@ -38,7 +38,7 @@ logger = get_logger("problem_interface")
 class ProblemInterface:
     """
     Interface for managing problem loading and registry operations.
-    
+
     This class provides centralized management of optimization problems,
     handling registry loading, format detection, and problem loading.
     Creates architectural symmetry with solver interface modules.
@@ -57,7 +57,7 @@ class ProblemInterface:
     def __init__(self, registry_path: Optional[str] = None, **kwargs):
         """
         Initialize problem interface.
-        
+
         Args:
             registry_path: Optional path to problem registry YAML file
             **kwargs: Additional configuration parameters
@@ -76,20 +76,22 @@ class ProblemInterface:
         # Cache for problem statistics
         self._statistics_cache = None
 
-        logger.info(f"Initialized problem interface with {len(self.problem_registry.get('problem_libraries', {}))} problems")
+        logger.info(
+            f"Initialized problem interface with {len(self.problem_registry.get('problem_libraries', {}))} problems"
+        )
         logger.debug(f"Registry path: {self.registry_path}")
 
     def load_problem(self, problem_name: str, problem_config: Optional[Dict[str, Any]] = None) -> ProblemData:
         """
         Load problem using appropriate loader based on file type.
-        
+
         Args:
             problem_name: Name of the problem to load
             problem_config: Optional problem configuration (if None, loads from registry)
-            
+
         Returns:
             Loaded problem data
-            
+
         Raises:
             ValueError: If problem not found or unsupported file type
         """
@@ -100,8 +102,8 @@ class ProblemInterface:
             problem_config = self.get_problem_config(problem_name)
 
         # Extract file information
-        file_type = problem_config['file_type']
-        file_path = self._resolve_file_path(problem_config['file_path'])
+        file_type = problem_config["file_type"]
+        file_path = self._resolve_file_path(problem_config["file_path"])
 
         logger.debug(f"Loading problem {problem_name} from {file_path} (type: {file_type})")
 
@@ -124,50 +126,50 @@ class ProblemInterface:
     def get_problem_config(self, problem_name: str) -> Dict[str, Any]:
         """
         Get configuration for a specific problem.
-        
+
         Args:
             problem_name: Name of the problem
-            
+
         Returns:
             Problem configuration dictionary
-            
+
         Raises:
             ValueError: If problem not found in registry
         """
-        problem_libraries = self.problem_registry.get('problem_libraries', {})
+        problem_libraries = self.problem_registry.get("problem_libraries", {})
 
         if problem_name not in problem_libraries:
             available_problems = list(problem_libraries.keys())
-            raise ValueError(f"Problem '{problem_name}' not found in registry. "
-                           f"Available problems: {available_problems}")
+            raise ValueError(
+                f"Problem '{problem_name}' not found in registry. Available problems: {available_problems}"
+            )
 
         return problem_libraries[problem_name]
 
-    def get_available_problems(self, library_filter: Optional[List[str]] = None,
-                             test_only: bool = False) -> List[str]:
+    def get_available_problems(self, library_filter: Optional[List[str]] = None, test_only: bool = False) -> List[str]:
         """
         Get list of available problems.
-        
+
         Args:
             library_filter: Optional list of library names to filter by
             test_only: If True, only return problems marked for testing
-            
+
         Returns:
             List of problem names
         """
         problems = []
-        problem_libraries = self.problem_registry.get('problem_libraries', {})
+        problem_libraries = self.problem_registry.get("problem_libraries", {})
 
         for problem_name, config in problem_libraries.items():
             # Filter by library if specified
             if library_filter:
-                library_name = config.get('library_name', 'unknown')
+                library_name = config.get("library_name", "unknown")
                 if library_name not in library_filter:
                     continue
 
             # Filter by test flag if specified
             if test_only:
-                if not config.get('for_test_flag', False):
+                if not config.get("for_test_flag", False):
                     continue
 
             problems.append(problem_name)
@@ -177,18 +179,18 @@ class ProblemInterface:
     def get_problems_by_type(self, problem_types: List[str]) -> List[str]:
         """
         Get problems filtered by problem type.
-        
+
         Args:
             problem_types: List of problem types (LP, QP, SOCP, SDP)
-            
+
         Returns:
             List of problem names matching the types
         """
         problems = []
-        problem_libraries = self.problem_registry.get('problem_libraries', {})
+        problem_libraries = self.problem_registry.get("problem_libraries", {})
 
         for problem_name, config in problem_libraries.items():
-            problem_type = config.get('problem_type', 'UNKNOWN')
+            problem_type = config.get("problem_type", "UNKNOWN")
             if problem_type in problem_types:
                 problems.append(problem_name)
 
@@ -197,10 +199,10 @@ class ProblemInterface:
     def get_problems_by_library(self, library_names: List[str]) -> List[str]:
         """
         Get problems filtered by library name.
-        
+
         Args:
             library_names: List of library names (DIMACS, SDPLIB, etc.)
-            
+
         Returns:
             List of problem names from specified libraries
         """
@@ -209,17 +211,17 @@ class ProblemInterface:
     def validate_problem_compatibility(self, problem_name: str, file_types: List[str]) -> bool:
         """
         Check if problem is compatible with specified file types.
-        
+
         Args:
             problem_name: Name of the problem
             file_types: List of supported file types
-            
+
         Returns:
             True if problem file type is supported
         """
         try:
             problem_config = self.get_problem_config(problem_name)
-            file_type = problem_config.get('file_type', 'unknown')
+            file_type = problem_config.get("file_type", "unknown")
             return file_type in file_types
         except ValueError:
             return False
@@ -227,7 +229,7 @@ class ProblemInterface:
     def get_problem_statistics(self) -> Dict[str, Any]:
         """
         Get statistics about available problems.
-        
+
         Returns:
             Dictionary with problem statistics
         """
@@ -239,7 +241,7 @@ class ProblemInterface:
     def refresh_registry(self) -> Dict[str, Any]:
         """
         Refresh the problem registry from file.
-        
+
         Returns:
             Updated problem registry
         """
@@ -254,7 +256,7 @@ class ProblemInterface:
     def validate_environment(self) -> Dict[str, Any]:
         """
         Validate problem loading environment and return detailed report.
-        
+
         Returns:
             Dictionary with validation results
         """
@@ -263,14 +265,10 @@ class ProblemInterface:
         validation_report = {
             "status": "success",
             "problems": {},
-            "summary": {
-                "total_problems": 0,
-                "loadable_problems": 0,
-                "failed_problems": 0
-            },
+            "summary": {"total_problems": 0, "loadable_problems": 0, "failed_problems": 0},
             "statistics": self.get_problem_statistics(),
             "registry_path": str(self.registry_path),
-            "registry_exists": self.registry_path.exists()
+            "registry_exists": self.registry_path.exists(),
         }
 
         # Test loading a few problems from each library
@@ -296,17 +294,16 @@ class ProblemInterface:
                     "status": "loadable",
                     "type": problem_data.problem_class,
                     "variables": problem_data._num_variables,
-                    "constraints": problem_data._num_constraints
+                    "constraints": problem_data._num_constraints,
                 }
                 validation_report["summary"]["loadable_problems"] += 1
 
             except Exception as e:
-                validation_report["problems"][problem_name] = {
-                    "status": "error",
-                    "error": str(e)
-                }
+                validation_report["problems"][problem_name] = {"status": "error", "error": str(e)}
                 validation_report["summary"]["failed_problems"] += 1
-                validation_report["status"] = "partial" if validation_report["summary"]["loadable_problems"] > 0 else "failed"
+                validation_report["status"] = (
+                    "partial" if validation_report["summary"]["loadable_problems"] > 0 else "failed"
+                )
 
         # Log summary
         loadable = validation_report["summary"]["loadable_problems"]
@@ -318,10 +315,10 @@ class ProblemInterface:
     def _load_problem_registry(self) -> Dict[str, Any]:
         """
         Load problem registry from YAML file.
-        
+
         Returns:
             Problem registry dictionary
-            
+
         Raises:
             FileNotFoundError: If registry file not found
             yaml.YAMLError: If registry file has invalid YAML
@@ -329,16 +326,16 @@ class ProblemInterface:
         logger.debug(f"Loading problem registry: {self.registry_path}")
 
         try:
-            with open(self.registry_path, 'r') as f:
+            with open(self.registry_path, "r") as f:
                 registry = yaml.safe_load(f)
 
             # Validate registry structure
             if not isinstance(registry, dict):
                 raise ValueError("Registry must be a dictionary")
 
-            if 'problem_libraries' not in registry:
+            if "problem_libraries" not in registry:
                 logger.warning("Registry missing 'problem_libraries' key, using empty structure")
-                registry['problem_libraries'] = {}
+                registry["problem_libraries"] = {}
 
             logger.info(f"Loaded {len(registry['problem_libraries'])} problems from registry")
             return registry
@@ -356,10 +353,10 @@ class ProblemInterface:
     def _resolve_file_path(self, relative_path: str) -> Path:
         """
         Resolve relative file path to absolute path.
-        
+
         Args:
             relative_path: Relative path from project root
-            
+
         Returns:
             Absolute path to problem file
         """
@@ -368,11 +365,11 @@ class ProblemInterface:
     def _compute_statistics(self) -> Dict[str, Any]:
         """
         Compute statistics about available problems.
-        
+
         Returns:
             Dictionary with computed statistics
         """
-        problem_libraries = self.problem_registry.get('problem_libraries', {})
+        problem_libraries = self.problem_registry.get("problem_libraries", {})
 
         # Count by library
         library_counts = {}
@@ -382,19 +379,19 @@ class ProblemInterface:
 
         for config in problem_libraries.values():
             # Count by library
-            library = config.get('library_name', 'unknown')
+            library = config.get("library_name", "unknown")
             library_counts[library] = library_counts.get(library, 0) + 1
 
             # Count by type
-            problem_type = config.get('problem_type', 'UNKNOWN')
+            problem_type = config.get("problem_type", "UNKNOWN")
             type_counts[problem_type] = type_counts.get(problem_type, 0) + 1
 
             # Count by format
-            file_type = config.get('file_type', 'unknown')
+            file_type = config.get("file_type", "unknown")
             format_counts[file_type] = format_counts.get(file_type, 0) + 1
 
             # Count test problems
-            if config.get('for_test_flag', False):
+            if config.get("for_test_flag", False):
                 test_problems += 1
 
         return {
@@ -403,18 +400,18 @@ class ProblemInterface:
             "problem_types": type_counts,
             "file_formats": format_counts,
             "test_problems": test_problems,
-            "supported_formats": list(self.FORMAT_LOADERS.keys())
+            "supported_formats": list(self.FORMAT_LOADERS.keys()),
         }
 
 
 def get_problem_interface(registry_path: Optional[str] = None, **kwargs) -> ProblemInterface:
     """
     Factory function to get problem interface instance.
-    
+
     Args:
         registry_path: Optional path to registry file
         **kwargs: Additional configuration parameters
-        
+
     Returns:
         Configured ProblemInterface instance
     """
@@ -425,10 +422,10 @@ def get_problem_interface(registry_path: Optional[str] = None, **kwargs) -> Prob
 def load_problem_registry(registry_path: Optional[str] = None) -> Dict[str, Any]:
     """
     Convenience function to load problem registry.
-    
+
     Args:
         registry_path: Optional path to registry file
-        
+
     Returns:
         Problem registry dictionary
     """
@@ -439,11 +436,11 @@ def load_problem_registry(registry_path: Optional[str] = None) -> Dict[str, Any]
 def load_problem(problem_name: str, problem_config: Optional[Dict[str, Any]] = None) -> ProblemData:
     """
     Convenience function to load a problem.
-    
+
     Args:
         problem_name: Name of problem to load
         problem_config: Optional problem configuration
-        
+
     Returns:
         Loaded problem data
     """
@@ -454,11 +451,11 @@ def load_problem(problem_name: str, problem_config: Optional[Dict[str, Any]] = N
 def get_available_problems(library_filter: Optional[List[str]] = None, test_only: bool = False) -> List[str]:
     """
     Convenience function to get available problems.
-    
+
     Args:
         library_filter: Optional library name filter
         test_only: Only return test problems
-        
+
     Returns:
         List of available problem names
     """
@@ -492,8 +489,8 @@ if __name__ == "__main__":
     for problem_name in available[:5]:  # Show first 5
         try:
             config = interface.get_problem_config(problem_name)
-            library = config.get('library_name', 'unknown')
-            problem_type = config.get('problem_type', 'unknown')
+            library = config.get("library_name", "unknown")
+            problem_type = config.get("problem_type", "unknown")
             print(f"   • {problem_name} ({library}, {problem_type})")
         except Exception as e:
             print(f"   • {problem_name} (error: {e})")

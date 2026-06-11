@@ -45,31 +45,30 @@ def write_dat(tmp_path, content, name="test.dat-s"):
 
 
 class TestParseSdpaFile:
-
     def test_parses_header(self, loader, tmp_path):
         parsed = loader.parse_sdpa_file(write_dat(tmp_path, SDPA_STANDARD))
-        assert parsed['m'] == 2
-        assert parsed['nblocks'] == 2
-        assert parsed['block_sizes'] == [2, -2]
+        assert parsed["m"] == 2
+        assert parsed["nblocks"] == 2
+        assert parsed["block_sizes"] == [2, -2]
 
     def test_skips_comment_lines(self, loader, tmp_path):
         # SDPA_STANDARD starts with " and * comment lines; header must still parse
         parsed = loader.parse_sdpa_file(write_dat(tmp_path, SDPA_STANDARD))
-        assert parsed['m'] == 2
+        assert parsed["m"] == 2
 
     def test_objective_vector_space_separated(self, loader, tmp_path):
         parsed = loader.parse_sdpa_file(write_dat(tmp_path, SDPA_STANDARD))
-        np.testing.assert_array_equal(parsed['c'], np.array([10.0, 20.0]))
+        np.testing.assert_array_equal(parsed["c"], np.array([10.0, 20.0]))
 
     def test_objective_vector_brace_format(self, loader, tmp_path):
         parsed = loader.parse_sdpa_file(write_dat(tmp_path, SDPA_BRACES))
-        np.testing.assert_array_equal(parsed['c'], np.array([10.0, 20.0]))
+        np.testing.assert_array_equal(parsed["c"], np.array([10.0, 20.0]))
 
     def test_off_diagonal_entries_are_symmetrized(self, loader, tmp_path):
         parsed = loader.parse_sdpa_file(write_dat(tmp_path, SDPA_STANDARD))
         # Entry "0 1 1 2 0.5" must be mirrored to (2, 1) in block 1 of F0
-        f0_block1 = parsed['matrices'][0][0]
-        entries = set(zip(f0_block1['i'], f0_block1['j'], strict=True))
+        f0_block1 = parsed["matrices"][0][0]
+        entries = set(zip(f0_block1["i"], f0_block1["j"], strict=True))
         assert (0, 1) in entries
         assert (1, 0) in entries
 
@@ -93,7 +92,6 @@ class TestParseSdpaFile:
 
 
 class TestLoad:
-
     def test_load_returns_problem_data(self, loader, tmp_path):
         problem = loader.load(write_dat(tmp_path, SDPA_STANDARD), problem_name="tiny_sdp")
         assert problem.name == "tiny_sdp"
@@ -112,10 +110,10 @@ class TestLoad:
         problem = loader.load(write_dat(tmp_path, SDPA_STANDARD), problem_name="tiny_sdp")
         cone = problem.cone_structure
         # Negative block size -2 expands to two 1x1 SDP cones
-        assert cone['sdp_cones'] == [2, 1, 1]
-        assert cone['free_vars'] == 0
-        assert cone['nonneg_vars'] == 0
-        assert cone['soc_cones'] == []
+        assert cone["sdp_cones"] == [2, 1, 1]
+        assert cone["free_vars"] == 0
+        assert cone["nonneg_vars"] == 0
+        assert cone["soc_cones"] == []
 
     def test_b_is_negated_objective(self, loader, tmp_path):
         problem = loader.load(write_dat(tmp_path, SDPA_STANDARD), problem_name="tiny_sdp")

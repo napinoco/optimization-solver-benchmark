@@ -15,10 +15,11 @@ from typing import Any, Dict, Optional
 class BenchmarkResult:
     """
     Single denormalized benchmark result model.
-    
+
     Represents one row in the results table with all necessary information
     for a single solver-problem combination execution.
     """
+
     # Primary key
     id: Optional[int] = None
 
@@ -29,7 +30,7 @@ class BenchmarkResult:
     # Problem information
     problem_library: str = ""  # 'internal', 'DIMACS', 'SDPLIB'
     problem_name: str = ""
-    problem_type: str = ""     # 'LP', 'QP', 'SOCP', 'SDP'
+    problem_type: str = ""  # 'LP', 'QP', 'SOCP', 'SDP'
 
     # Environment and execution context
     environment_info: Dict[str, Any] = None
@@ -57,27 +58,27 @@ class BenchmarkResult:
         """Convert to dictionary for JSON serialization"""
         result = {}
         for field_name, field_value in self.__dict__.items():
-            if field_name == 'timestamp' and field_value:
+            if field_name == "timestamp" and field_value:
                 result[field_name] = field_value.isoformat()
-            elif field_name == 'environment_info':
+            elif field_name == "environment_info":
                 result[field_name] = field_value or {}
             else:
                 result[field_name] = field_value
         return result
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> 'BenchmarkResult':
+    def from_dict(cls, data: Dict[str, Any]) -> "BenchmarkResult":
         """Create from dictionary (e.g., from database row)"""
         # Handle timestamp conversion
-        if 'timestamp' in data and isinstance(data['timestamp'], str):
-            data['timestamp'] = datetime.fromisoformat(data['timestamp'])
+        if "timestamp" in data and isinstance(data["timestamp"], str):
+            data["timestamp"] = datetime.fromisoformat(data["timestamp"])
 
         # Handle environment_info JSON
-        if 'environment_info' in data and isinstance(data['environment_info'], str):
+        if "environment_info" in data and isinstance(data["environment_info"], str):
             try:
-                data['environment_info'] = json.loads(data['environment_info'])
+                data["environment_info"] = json.loads(data["environment_info"])
             except (json.JSONDecodeError, TypeError):
-                data['environment_info'] = {}
+                data["environment_info"] = {}
 
         # Filter only known fields
         known_fields = set(cls.__annotations__.keys())
@@ -96,7 +97,7 @@ REQUIRED_FIELDS = [
     "problem_name",
     "problem_type",
     "environment_info",
-    "commit_hash"
+    "commit_hash",
 ]
 
 OPTIONAL_RESULT_FIELDS = [
@@ -107,7 +108,7 @@ OPTIONAL_RESULT_FIELDS = [
     "duality_gap",
     "primal_infeasibility",
     "dual_infeasibility",
-    "iterations"
+    "iterations",
 ]
 
 ALL_FIELDS = ["id", "timestamp"] + REQUIRED_FIELDS + OPTIONAL_RESULT_FIELDS

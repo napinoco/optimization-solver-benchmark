@@ -25,22 +25,18 @@ _git_info_cache = None
 def get_git_commit_hash() -> Optional[str]:
     """
     Get the current Git commit hash with caching.
-    
+
     Returns:
         Git commit hash or None if not available
     """
     global _git_info_cache
 
     if _git_info_cache is not None:
-        return _git_info_cache.get('commit_hash')
+        return _git_info_cache.get("commit_hash")
 
     try:
         result = subprocess.run(
-            ['git', 'rev-parse', 'HEAD'],
-            capture_output=True,
-            text=True,
-            timeout=10,
-            cwd=project_root
+            ["git", "rev-parse", "HEAD"], capture_output=True, text=True, timeout=10, cwd=project_root
         )
         if result.returncode == 0:
             commit_hash = result.stdout.strip()
@@ -49,7 +45,7 @@ def get_git_commit_hash() -> Optional[str]:
             # Initialize cache if not exists
             if _git_info_cache is None:
                 _git_info_cache = {}
-            _git_info_cache['commit_hash'] = commit_hash
+            _git_info_cache["commit_hash"] = commit_hash
 
             return commit_hash
         else:
@@ -69,17 +65,13 @@ def get_git_commit_hash() -> Optional[str]:
 def get_git_branch() -> Optional[str]:
     """
     Get the current Git branch name.
-    
+
     Returns:
         Git branch name or None if not available
     """
     try:
         result = subprocess.run(
-            ['git', 'rev-parse', '--abbrev-ref', 'HEAD'],
-            capture_output=True,
-            text=True,
-            timeout=10,
-            cwd=project_root
+            ["git", "rev-parse", "--abbrev-ref", "HEAD"], capture_output=True, text=True, timeout=10, cwd=project_root
         )
         if result.returncode == 0:
             branch = result.stdout.strip()
@@ -102,17 +94,13 @@ def get_git_branch() -> Optional[str]:
 def is_git_repo_dirty() -> Optional[bool]:
     """
     Check if the Git repository has uncommitted changes.
-    
+
     Returns:
         True if repo is dirty, False if clean, None if Git not available
     """
     try:
         result = subprocess.run(
-            ['git', 'status', '--porcelain'],
-            capture_output=True,
-            text=True,
-            timeout=10,
-            cwd=project_root
+            ["git", "status", "--porcelain"], capture_output=True, text=True, timeout=10, cwd=project_root
         )
         if result.returncode == 0:
             is_dirty = bool(result.stdout.strip())
@@ -135,19 +123,19 @@ def is_git_repo_dirty() -> Optional[bool]:
 def get_git_info() -> Dict[str, Any]:
     """
     Get comprehensive Git repository information.
-    
+
     Returns:
         Dictionary with Git information
     """
     info = {
-        'commit_hash': get_git_commit_hash(),
-        'branch': get_git_branch(),
-        'is_dirty': is_git_repo_dirty(),
-        'available': None
+        "commit_hash": get_git_commit_hash(),
+        "branch": get_git_branch(),
+        "is_dirty": is_git_repo_dirty(),
+        "available": None,
     }
 
     # Determine if Git is available based on any successful command
-    info['available'] = any(value is not None for value in info.values() if value != info['available'])
+    info["available"] = any(value is not None for value in info.values() if value != info["available"])
 
     return info
 
@@ -191,4 +179,3 @@ def get_git_info() -> Dict[str, Any]:
 #             return False
 #
 #     return False
-

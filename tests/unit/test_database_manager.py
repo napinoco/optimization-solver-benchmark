@@ -31,7 +31,6 @@ def store_sample(db, **overrides):
 
 
 class TestSchema:
-
     def test_schema_created_independent_of_cwd(self, tmp_path, monkeypatch):
         # ensure_schema must locate schema.sql relative to the module, not the CWD
         monkeypatch.chdir(tmp_path)
@@ -45,29 +44,27 @@ class TestSchema:
 
 
 class TestStoreAndRetrieve:
-
     def test_round_trip(self, db):
         store_sample(db)
         results = db.get_latest_results()
         assert len(results) == 1
         row = results[0]
-        assert row['solver_name'] == "cvxpy_clarabel"
-        assert row['problem_name'] == "nb"
-        assert row['solve_time'] == 1.23
-        assert row['status'] == "OPTIMAL"
-        assert row['iterations'] == 15
+        assert row["solver_name"] == "cvxpy_clarabel"
+        assert row["problem_name"] == "nb"
+        assert row["solve_time"] == 1.23
+        assert row["status"] == "OPTIMAL"
+        assert row["iterations"] == 15
 
     def test_environment_info_json_round_trip(self, db):
         store_sample(db)
         results = db.get_latest_results()
-        assert results[0]['environment_info'] == ENV_INFO
+        assert results[0]["environment_info"] == ENV_INFO
 
     def test_optional_fields_default_to_none(self, db):
-        store_sample(db, solve_time=None, status=None, primal_objective_value=None,
-                     iterations=None)
+        store_sample(db, solve_time=None, status=None, primal_objective_value=None, iterations=None)
         row = db.get_latest_results()[0]
-        assert row['solve_time'] is None
-        assert row['duality_gap'] is None
+        assert row["solve_time"] is None
+        assert row["duality_gap"] is None
 
     def test_duplicate_insert_is_ignored_without_raising(self, db):
         # Same UNIQUE key (solver, version, library, problem, commit, timestamp)
@@ -80,7 +77,6 @@ class TestStoreAndRetrieve:
 
 
 class TestLatestResults:
-
     def test_returns_only_latest_per_solver_problem(self, db):
         # Insert two rows with explicit distinct timestamps to test the
         # latest-per-(solver, problem) selection query deterministically
@@ -91,23 +87,23 @@ class TestLatestResults:
         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
         """
         with db.get_connection() as conn:
-            conn.execute(insert_sql, ("s1", "1.0", "DIMACS", "p1", "SDP", "{}",
-                                      "old", "2026-01-01 00:00:00", "ERROR"))
-            conn.execute(insert_sql, ("s1", "1.0", "DIMACS", "p1", "SDP", "{}",
-                                      "new", "2026-01-02 00:00:00", "OPTIMAL"))
+            conn.execute(insert_sql, ("s1", "1.0", "DIMACS", "p1", "SDP", "{}", "old", "2026-01-01 00:00:00", "ERROR"))
+            conn.execute(
+                insert_sql, ("s1", "1.0", "DIMACS", "p1", "SDP", "{}", "new", "2026-01-02 00:00:00", "OPTIMAL")
+            )
             conn.commit()
 
         results = db.get_latest_results()
         assert len(results) == 1
-        assert results[0]['commit_hash'] == "new"
-        assert results[0]['status'] == "OPTIMAL"
+        assert results[0]["commit_hash"] == "new"
+        assert results[0]["status"] == "OPTIMAL"
 
     def test_filter_by_commit_and_environment(self, db):
         store_sample(db, commit_hash="aaa")
         store_sample(db, commit_hash="bbb", problem_name="other")
         results = db.get_latest_results(commit_hash="aaa", environment_info=ENV_INFO)
         assert len(results) == 1
-        assert results[0]['commit_hash'] == "aaa"
+        assert results[0]["commit_hash"] == "aaa"
 
     def test_empty_database_returns_empty_list(self, db):
         assert db.get_latest_results() == []

@@ -38,9 +38,7 @@ def setup_logging(verbose: bool = False, quiet: bool = False):
         level = logging.INFO
 
     logging.basicConfig(
-        level=level,
-        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-        datefmt='%Y-%m-%d %H:%M:%S'
+        level=level, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", datefmt="%Y-%m-%d %H:%M:%S"
     )
 
 
@@ -55,7 +53,7 @@ def load_problem_registry() -> Optional[Dict[str, Any]]:
             logger.error("Problem registry not found")
             return None
 
-        with open(problem_registry_path, 'r') as f:
+        with open(problem_registry_path, "r") as f:
             problem_registry = yaml.safe_load(f)
 
         logger.info("Problem registry loaded successfully")
@@ -73,16 +71,13 @@ def validate_environment() -> bool:
     issues = []
 
     # Check for required directories
-    required_dirs = ['config', 'scripts', 'problems']
+    required_dirs = ["config", "scripts", "problems"]
     for dir_name in required_dirs:
         if not Path(dir_name).exists():
             issues.append(f"Missing directory: {dir_name}")
 
     # Check for configuration files
-    config_files = [
-        'config/site_config.yaml',
-        'config/problem_registry.yaml'
-    ]
+    config_files = ["config/site_config.yaml", "config/problem_registry.yaml"]
     for config_file in config_files:
         if not Path(config_file).exists():
             issues.append(f"Configuration file not found: {config_file}")
@@ -121,10 +116,10 @@ def validate_solver_setup(verbose: bool = False) -> bool:
         print("Running comprehensive solver validation...")
         validation_report = runner.validate_setup()
 
-        working_solvers = validation_report['summary']['working_solvers']
-        total_solvers = validation_report['summary']['total_solvers']
-        working_problems = validation_report['summary']['working_problems']
-        total_problems = validation_report['summary']['total_problems']
+        working_solvers = validation_report["summary"]["working_solvers"]
+        total_solvers = validation_report["summary"]["total_solvers"]
+        working_problems = validation_report["summary"]["working_problems"]
+        total_problems = validation_report["summary"]["total_problems"]
 
         print("\nSolver Validation Results:")
         print(f"  Working Solvers: {working_solvers}/{total_solvers}")
@@ -133,25 +128,26 @@ def validate_solver_setup(verbose: bool = False) -> bool:
         # Show solver details
         if verbose:
             print("\nDetailed Solver Status:")
-            for solver_name, info in validation_report['solvers'].items():
-                status = "✓" if info['status'] == 'working' else "✗"
-                if info['status'] == 'working':
+            for solver_name, info in validation_report["solvers"].items():
+                status = "✓" if info["status"] == "working" else "✗"
+                if info["status"] == "working":
                     print(f"  {status} {solver_name}: {info['version']}")
                 else:
                     print(f"  {status} {solver_name}: {info['error']}")
 
         # Check MATLAB solver availability
-        matlab_solvers = {name: info for name, info in validation_report['solvers'].items()
-                         if name.startswith('matlab_')}
+        matlab_solvers = {
+            name: info for name, info in validation_report["solvers"].items() if name.startswith("matlab_")
+        }
 
         if matlab_solvers:
-            matlab_working = sum(1 for info in matlab_solvers.values() if info['status'] == 'working')
+            matlab_working = sum(1 for info in matlab_solvers.values() if info["status"] == "working")
             print(f"\nMATLAB Solver Status: {matlab_working}/{len(matlab_solvers)} working")
 
             if verbose:
                 for solver_name, info in matlab_solvers.items():
-                    status = "✓" if info['status'] == 'working' else "✗"
-                    if info['status'] == 'working':
+                    status = "✓" if info["status"] == "working" else "✗"
+                    if info["status"] == "working":
                         print(f"  {status} {solver_name}: {info['version']}")
                     else:
                         print(f"  {status} {solver_name}: {info['error']}")
@@ -174,14 +170,16 @@ def validate_solver_setup(verbose: bool = False) -> bool:
         return False
 
 
-def run_benchmark(library_names: Optional[List[str]] = None,
-                 problems: Optional[List[str]] = None,
-                 solvers: Optional[List[str]] = None,
-                 dry_run: bool = False,
-                 save_solutions: bool = False,
-                 timeout: float = 120.0) -> bool:
+def run_benchmark(
+    library_names: Optional[List[str]] = None,
+    problems: Optional[List[str]] = None,
+    solvers: Optional[List[str]] = None,
+    dry_run: bool = False,
+    save_solutions: bool = False,
+    timeout: float = 120.0,
+) -> bool:
     """Run the benchmark suite with simplified registry-based approach.
-    
+
     Args:
         library_names: List of library names to filter by
         problems: List of specific problem names to run
@@ -349,93 +347,57 @@ Examples:
   python main.py --all --problems nb --solvers cvxpy_clarabel    # Run one problem with one solver
   python main.py --benchmark --library_names DIMACS --solvers cvxpy_scip  # Run DIMACS with SCIP
   python main.py --benchmark --problems nb --dry-run             # Test nb problem without DB storage
-  
+
   # Timeout configuration examples:
   python main.py --benchmark --timeout 60                        # Set 60-second timeout for quick tests
   python main.py --all --timeout 300                             # Run all with 5-minute timeout
   python main.py --benchmark --library_names SDPLIB --timeout 600  # Use 10-minute timeout for large SDP problems
   python main.py --benchmark --problems difficult_problem --timeout 1800  # 30-minute timeout for challenging problems
-        """
+        """,
     )
 
     # Main operation modes
     operation_group = parser.add_mutually_exclusive_group(required=True)
+    operation_group.add_argument("--benchmark", "-b", action="store_true", help="Run benchmark suite only")
+    operation_group.add_argument("--report", "-r", action="store_true", help="Generate HTML reports only")
+    operation_group.add_argument("--all", "-a", action="store_true", help="Run benchmarks and generate reports")
+    operation_group.add_argument("--validate", action="store_true", help="Validate environment and solver setup")
     operation_group.add_argument(
-        '--benchmark', '-b',
-        action='store_true',
-        help='Run benchmark suite only'
-    )
-    operation_group.add_argument(
-        '--report', '-r',
-        action='store_true',
-        help='Generate HTML reports only'
-    )
-    operation_group.add_argument(
-        '--all', '-a',
-        action='store_true',
-        help='Run benchmarks and generate reports'
-    )
-    operation_group.add_argument(
-        '--validate',
-        action='store_true',
-        help='Validate environment and solver setup'
-    )
-    operation_group.add_argument(
-        '--validate-verbose',
-        action='store_true',
-        help='Validate environment and solver setup with detailed output'
+        "--validate-verbose", action="store_true", help="Validate environment and solver setup with detailed output"
     )
 
     # Options
     parser.add_argument(
-        '--library_names', '-l',
+        "--library_names",
+        "-l",
         type=str,
-        help='Comma-separated list of library names to run (DIMACS, SDPLIB, internal)'
+        help="Comma-separated list of library names to run (DIMACS, SDPLIB, internal)",
+    )
+
+    parser.add_argument("--problems", "-p", type=str, help="Comma-separated list of specific problem names to run")
+
+    parser.add_argument("--solvers", "-s", type=str, help="Comma-separated list of solvers to run")
+
+    parser.add_argument(
+        "--dry-run", action="store_true", help="Run benchmarks without storing results in database (for testing)"
     )
 
     parser.add_argument(
-        '--problems', '-p',
-        type=str,
-        help='Comma-separated list of specific problem names to run'
+        "--save-solutions", action="store_true", help="Save optimal solutions to disk for verification and analysis"
     )
 
     parser.add_argument(
-        '--solvers', '-s',
-        type=str,
-        help='Comma-separated list of solvers to run'
-    )
-
-    parser.add_argument(
-        '--dry-run',
-        action='store_true',
-        help='Run benchmarks without storing results in database (for testing)'
-    )
-
-    parser.add_argument(
-        '--save-solutions',
-        action='store_true',
-        help='Save optimal solutions to disk for verification and analysis'
-    )
-
-    parser.add_argument(
-        '--timeout', '-t',
+        "--timeout",
+        "-t",
         type=float,
         default=120.0,
-        help='Solver timeout in seconds. Solvers exceeding this limit will be terminated and marked as TIMEOUT. Default: 120.0 (2 minutes). Use larger values (300-1800) for difficult problems.'
+        help="Solver timeout in seconds. Solvers exceeding this limit will be terminated and marked as TIMEOUT. Default: 120.0 (2 minutes). Use larger values (300-1800) for difficult problems.",
     )
 
     # Logging options
-    parser.add_argument(
-        '--verbose', '-v',
-        action='store_true',
-        help='Enable verbose logging'
-    )
+    parser.add_argument("--verbose", "-v", action="store_true", help="Enable verbose logging")
 
-    parser.add_argument(
-        '--quiet', '-q',
-        action='store_true',
-        help='Suppress non-error output'
-    )
+    parser.add_argument("--quiet", "-q", action="store_true", help="Suppress non-error output")
 
     args = parser.parse_args()
 
@@ -445,18 +407,17 @@ Examples:
     # Parse solver list
     solvers = None
     if args.solvers:
-        solvers = [s.strip() for s in args.solvers.split(',')]
+        solvers = [s.strip() for s in args.solvers.split(",")]
 
     # Parse library names list
     library_names = None
     if args.library_names:
-        library_names = [lib.strip() for lib in args.library_names.split(',')]
+        library_names = [lib.strip() for lib in args.library_names.split(",")]
 
     # Parse problem list
     problems = None
     if args.problems:
-        problems = [p.strip() for p in args.problems.split(',')]
-
+        problems = [p.strip() for p in args.problems.split(",")]
 
     try:
         # Validate environment first
@@ -483,7 +444,7 @@ Examples:
                 solvers=solvers,
                 dry_run=args.dry_run,
                 save_solutions=args.save_solutions,
-                timeout=args.timeout
+                timeout=args.timeout,
             )
 
         elif args.report:
@@ -497,7 +458,7 @@ Examples:
                 solvers=solvers,
                 dry_run=args.dry_run,
                 save_solutions=args.save_solutions,
-                timeout=args.timeout
+                timeout=args.timeout,
             )
 
             if benchmark_success:

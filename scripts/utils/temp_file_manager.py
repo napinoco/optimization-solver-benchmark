@@ -32,7 +32,7 @@ class TempFileManager:
     def __init__(self, base_prefix: str = "matlab_result", cleanup_age_hours: int = 1):
         """
         Initialize temporary file manager.
-        
+
         Args:
             base_prefix: Base prefix for temporary file names
             cleanup_age_hours: Age in hours after which orphaned files are cleaned up
@@ -41,23 +41,17 @@ class TempFileManager:
         self.cleanup_age_hours = cleanup_age_hours
         self.temp_dir = self._get_temp_directory()
 
-        logger.debug(f"TempFileManager initialized with prefix '{base_prefix}', "
-                    f"temp dir: {self.temp_dir}")
+        logger.debug(f"TempFileManager initialized with prefix '{base_prefix}', temp dir: {self.temp_dir}")
 
     def _get_temp_directory(self) -> str:
         """
         Get appropriate temporary directory with fallback options.
-        
+
         Returns:
             Path to temporary directory
         """
         # Try multiple temp directory options
-        temp_options = [
-            tempfile.gettempdir(),
-            os.path.join(str(project_root), "temp"),
-            "/tmp",
-            "."
-        ]
+        temp_options = [tempfile.gettempdir(), os.path.join(str(project_root), "temp"), "/tmp", "."]
 
         for temp_dir in temp_options:
             try:
@@ -66,7 +60,7 @@ class TempFileManager:
 
                 # Test write access
                 test_file = os.path.join(temp_dir, f"test_{uuid.uuid4().hex[:8]}.tmp")
-                with open(test_file, 'w') as f:
+                with open(test_file, "w") as f:
                     f.write("test")
                 os.remove(test_file)
 
@@ -82,10 +76,10 @@ class TempFileManager:
     def generate_unique_filename(self, extension: str = ".json") -> str:
         """
         Generate a unique temporary file name.
-        
+
         Args:
             extension: File extension (including dot)
-            
+
         Returns:
             Full path to unique temporary file
         """
@@ -102,10 +96,10 @@ class TempFileManager:
     def create_temp_file(self, extension: str = ".json") -> str:
         """
         Create a unique temporary file atomically.
-        
+
         Args:
             extension: File extension (including dot)
-            
+
         Returns:
             Path to created temporary file
         """
@@ -136,10 +130,10 @@ class TempFileManager:
     def cleanup_file(self, file_path: str) -> bool:
         """
         Safely clean up a temporary file.
-        
+
         Args:
             file_path: Path to file to clean up
-            
+
         Returns:
             True if file was cleaned up successfully, False otherwise
         """
@@ -159,7 +153,7 @@ class TempFileManager:
     def cleanup_orphaned_files(self) -> int:
         """
         Clean up orphaned temporary files older than cleanup_age_hours.
-        
+
         Returns:
             Number of files cleaned up
         """
@@ -198,10 +192,10 @@ class TempFileManager:
     def temp_file_context(self, extension: str = ".json") -> ContextManager[str]:
         """
         Context manager for temporary file with automatic cleanup.
-        
+
         Args:
             extension: File extension (including dot)
-            
+
         Yields:
             Path to temporary file
         """
@@ -216,7 +210,7 @@ class TempFileManager:
     def get_temp_file_stats(self) -> dict:
         """
         Get statistics about temporary files in temp directory.
-        
+
         Returns:
             Dictionary with temp file statistics
         """
@@ -241,11 +235,11 @@ class TempFileManager:
                 continue
 
         stats = {
-            'total_files': total_count,
-            'total_size_bytes': total_size,
-            'temp_directory': self.temp_dir,
-            'oldest_file': oldest_file,
-            'oldest_age_hours': (time.time() - oldest_time) / 3600 if oldest_file else 0
+            "total_files": total_count,
+            "total_size_bytes": total_size,
+            "temp_directory": self.temp_dir,
+            "oldest_file": oldest_file,
+            "oldest_age_hours": (time.time() - oldest_time) / 3600 if oldest_file else 0,
         }
 
         return stats
@@ -258,10 +252,10 @@ default_temp_manager = TempFileManager()
 def generate_temp_file(extension: str = ".json") -> str:
     """
     Convenience function to generate unique temp file using default manager.
-    
+
     Args:
         extension: File extension (including dot)
-        
+
     Returns:
         Path to unique temporary file
     """
@@ -271,10 +265,10 @@ def generate_temp_file(extension: str = ".json") -> str:
 def create_temp_file(extension: str = ".json") -> str:
     """
     Convenience function to create temp file using default manager.
-    
+
     Args:
         extension: File extension (including dot)
-        
+
     Returns:
         Path to created temporary file
     """
@@ -284,10 +278,10 @@ def create_temp_file(extension: str = ".json") -> str:
 def cleanup_temp_file(file_path: str) -> bool:
     """
     Convenience function to cleanup temp file using default manager.
-    
+
     Args:
         file_path: Path to file to clean up
-        
+
     Returns:
         True if cleaned up successfully
     """
@@ -297,7 +291,7 @@ def cleanup_temp_file(file_path: str) -> bool:
 def cleanup_orphaned_files() -> int:
     """
     Convenience function to cleanup orphaned files using default manager.
-    
+
     Returns:
         Number of files cleaned up
     """
@@ -308,10 +302,10 @@ def cleanup_orphaned_files() -> int:
 def temp_file_context(extension: str = ".json") -> ContextManager[str]:
     """
     Convenience context manager for temporary file with automatic cleanup.
-    
+
     Args:
         extension: File extension (including dot)
-        
+
     Yields:
         Path to temporary file
     """

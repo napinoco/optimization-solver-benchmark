@@ -38,9 +38,7 @@ def test_all_entries_have_required_keys(problems):
 def test_all_file_types_are_supported(problems):
     supported = set(ProblemInterface.FORMAT_LOADERS.keys())
     for name, config in problems.items():
-        assert config["file_type"] in supported, (
-            f"Problem '{name}' has unsupported file_type '{config['file_type']}'"
-        )
+        assert config["file_type"] in supported, f"Problem '{name}' has unsupported file_type '{config['file_type']}'"
 
 
 def test_all_library_names_are_known(problems):
@@ -61,17 +59,13 @@ def test_known_objective_values_are_numeric(problems):
     for name, config in problems.items():
         if "known_objective_value" in config:
             value = config["known_objective_value"]
-            assert isinstance(value, (int, float)), (
-                f"Problem '{name}' known_objective_value is not numeric: {value!r}"
-            )
+            assert isinstance(value, (int, float)), f"Problem '{name}' known_objective_value is not numeric: {value!r}"
 
 
 def test_for_test_flags_are_boolean(problems):
     for name, config in problems.items():
         if "for_test_flag" in config:
-            assert isinstance(config["for_test_flag"], bool), (
-                f"Problem '{name}' for_test_flag is not boolean"
-            )
+            assert isinstance(config["for_test_flag"], bool), f"Problem '{name}' for_test_flag is not boolean"
 
 
 def test_has_fast_test_problems(problems):
@@ -84,8 +78,5 @@ def test_problem_files_exist(problems):
     if not any(any((PROJECT_ROOT / "problems" / lib).iterdir()) for lib in KNOWN_LIBRARIES):
         pytest.skip("Problem library submodules not checked out")
 
-    missing = [
-        name for name, config in problems.items()
-        if not (PROJECT_ROOT / config["file_path"]).exists()
-    ]
+    missing = [name for name, config in problems.items() if not (PROJECT_ROOT / config["file_path"]).exists()]
     assert not missing, f"Registered problem files not found on disk: {missing}"

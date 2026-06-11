@@ -36,7 +36,7 @@ logger = get_logger("solver_interface")
 class SolverResult:
     """
     Standardized result format returned by all solvers.
-    
+
     This class ensures consistent data format across all solver implementations.
     All 8 fields are required for database insertion and result analysis.
     """
@@ -49,19 +49,19 @@ class SolverResult:
 
     # Required objective values (may be None if not available)
     primal_objective_value: Optional[float]  # Primal objective value
-    dual_objective_value: Optional[float]    # Dual objective value
+    dual_objective_value: Optional[float]  # Dual objective value
 
     # Required optimality measures (may be None if not available)
-    duality_gap: Optional[float]         # Gap between primal and dual objectives
+    duality_gap: Optional[float]  # Gap between primal and dual objectives
     primal_infeasibility: Optional[float]  # Primal constraint violation measure
-    dual_infeasibility: Optional[float]    # Dual constraint violation measure
+    dual_infeasibility: Optional[float]  # Dual constraint violation measure
 
     # Required iteration count (may be None if not available)
     iterations: Optional[int]  # Number of solver iterations
 
     # Optional additional information
-    solver_name: Optional[str] = None      # Name of the solver used
-    solver_version: Optional[str] = None   # Version of the solver
+    solver_name: Optional[str] = None  # Name of the solver used
+    solver_version: Optional[str] = None  # Version of the solver
     additional_info: Optional[Dict[str, Any]] = None  # Any additional solver-specific information
 
     def __post_init__(self):
@@ -71,7 +71,7 @@ class SolverResult:
     def validate(self) -> None:
         """
         Validate that the result contains all required fields with proper types.
-        
+
         Raises:
             ValueError: If any required field is missing or has invalid type
         """
@@ -90,8 +90,11 @@ class SolverResult:
 
         # Validate numeric fields (can be None)
         numeric_fields = [
-            'primal_objective_value', 'dual_objective_value',
-            'duality_gap', 'primal_infeasibility', 'dual_infeasibility'
+            "primal_objective_value",
+            "dual_objective_value",
+            "duality_gap",
+            "primal_infeasibility",
+            "dual_infeasibility",
         ]
 
         for field_name in numeric_fields:
@@ -108,36 +111,37 @@ class SolverResult:
     def to_dict(self) -> Dict[str, Any]:
         """
         Convert result to dictionary format for database storage.
-        
+
         Returns:
             Dictionary with all result fields
         """
         return {
-            'solve_time': self.solve_time,
-            'status': self.status,
-            'primal_objective_value': self.primal_objective_value,
-            'dual_objective_value': self.dual_objective_value,
-            'duality_gap': self.duality_gap,
-            'primal_infeasibility': self.primal_infeasibility,
-            'dual_infeasibility': self.dual_infeasibility,
-            'iterations': self.iterations,
-            'solver_name': self.solver_name,
-            'solver_version': self.solver_version,
-            'additional_info': self.additional_info
+            "solve_time": self.solve_time,
+            "status": self.status,
+            "primal_objective_value": self.primal_objective_value,
+            "dual_objective_value": self.dual_objective_value,
+            "duality_gap": self.duality_gap,
+            "primal_infeasibility": self.primal_infeasibility,
+            "dual_infeasibility": self.dual_infeasibility,
+            "iterations": self.iterations,
+            "solver_name": self.solver_name,
+            "solver_version": self.solver_version,
+            "additional_info": self.additional_info,
         }
 
     @classmethod
-    def create_error_result(cls, error_message: str, solve_time: float = 0.0,
-                          solver_name: str = "unknown", solver_version: str = "unknown") -> 'SolverResult':
+    def create_error_result(
+        cls, error_message: str, solve_time: float = 0.0, solver_name: str = "unknown", solver_version: str = "unknown"
+    ) -> "SolverResult":
         """
         Create a standardized error result.
-        
+
         Args:
             error_message: Description of the error
             solve_time: Time spent before error occurred
             solver_name: Name of the solver that failed
             solver_version: Version of the solver that failed
-            
+
         Returns:
             SolverResult indicating error status
         """
@@ -152,20 +156,21 @@ class SolverResult:
             iterations=None,
             solver_name=solver_name,
             solver_version=solver_version,
-            additional_info={"error_message": error_message}
+            additional_info={"error_message": error_message},
         )
 
     @classmethod
-    def create_timeout_result(cls, timeout_duration: float, solver_name: str = "unknown",
-                            solver_version: str = "unknown") -> 'SolverResult':
+    def create_timeout_result(
+        cls, timeout_duration: float, solver_name: str = "unknown", solver_version: str = "unknown"
+    ) -> "SolverResult":
         """
         Create a standardized timeout result.
-        
+
         Args:
             timeout_duration: Time limit that was exceeded
             solver_name: Name of the solver that timed out
             solver_version: Version of the solver that timed out
-            
+
         Returns:
             SolverResult indicating timeout status
         """
@@ -180,22 +185,28 @@ class SolverResult:
             iterations=None,
             solver_name=solver_name,
             solver_version=solver_version,
-            additional_info={"timeout_duration": timeout_duration}
+            additional_info={"timeout_duration": timeout_duration},
         )
 
     @classmethod
-    def create_subprocess_error_result(cls, returncode: int, error_message: str, solve_time: float = 0.0,
-                                     solver_name: str = "unknown", solver_version: str = "unknown") -> 'SolverResult':
+    def create_subprocess_error_result(
+        cls,
+        returncode: int,
+        error_message: str,
+        solve_time: float = 0.0,
+        solver_name: str = "unknown",
+        solver_version: str = "unknown",
+    ) -> "SolverResult":
         """
         Create a standardized result for subprocess execution errors.
-        
+
         Args:
             returncode: Process return code
             error_message: Error message from subprocess
             solve_time: Time spent before error occurred
             solver_name: Name of the solver that failed
             solver_version: Version of the solver that failed
-            
+
         Returns:
             SolverResult indicating subprocess error
         """
@@ -211,35 +222,37 @@ class SolverResult:
             solver_name=solver_name,
             solver_version=solver_version,
             additional_info={
-                'returncode': returncode,
-                'error_type': 'SUBPROCESS_ERROR',
-                'error_message': error_message
-            }
+                "returncode": returncode,
+                "error_type": "SUBPROCESS_ERROR",
+                "error_message": error_message,
+            },
         )
 
     @classmethod
-    def create_sigkill_result(cls, memory_limit_gb: Optional[float] = None, solve_time: float = 0.0,
-                            solver_name: str = "unknown", solver_version: str = "unknown",
-                            error_details: str = "") -> 'SolverResult':
+    def create_sigkill_result(
+        cls,
+        memory_limit_gb: Optional[float] = None,
+        solve_time: float = 0.0,
+        solver_name: str = "unknown",
+        solver_version: str = "unknown",
+        error_details: str = "",
+    ) -> "SolverResult":
         """
         Create a standardized SIGKILL result (process was forcibly terminated).
-        
+
         Args:
             memory_limit_gb: Memory limit if known (may be None if killed for other reasons)
             solve_time: Time spent before SIGKILL occurred
             solver_name: Name of the solver that was killed
             solver_version: Version of the solver that was killed
             error_details: Additional error details
-            
+
         Returns:
             SolverResult indicating SIGKILL status
         """
-        additional_info = {
-            'error_type': 'SIGKILL',
-            'error_details': error_details
-        }
+        additional_info = {"error_type": "SIGKILL", "error_details": error_details}
         if memory_limit_gb is not None:
-            additional_info['memory_limit_gb'] = memory_limit_gb
+            additional_info["memory_limit_gb"] = memory_limit_gb
 
         return cls(
             solve_time=solve_time,
@@ -252,20 +265,21 @@ class SolverResult:
             iterations=None,
             solver_name=solver_name,
             solver_version=solver_version,
-            additional_info=additional_info
+            additional_info=additional_info,
         )
 
     @classmethod
-    def create_unsupported_result(cls, problem_type: str, solver_name: str = "unknown",
-                                solver_version: str = "unknown") -> 'SolverResult':
+    def create_unsupported_result(
+        cls, problem_type: str, solver_name: str = "unknown", solver_version: str = "unknown"
+    ) -> "SolverResult":
         """
         Create a standardized result for unsupported problem types.
-        
+
         Args:
             problem_type: Type of problem that is not supported (LP, QP, SOCP, SDP)
             solver_name: Name of the solver
             solver_version: Version of the solver
-            
+
         Returns:
             SolverResult indicating unsupported problem type
         """
@@ -282,15 +296,15 @@ class SolverResult:
             solver_version=solver_version,
             additional_info={
                 "reason": f"Solver does not support {problem_type} problems",
-                "problem_type": problem_type
-            }
+                "problem_type": problem_type,
+            },
         )
 
 
 class SolverInterface(ABC):
     """
     Abstract base class for all optimization solvers.
-    
+
     All solver implementations must inherit from this class and implement
     required methods. This ensures consistent behavior across all solvers.
     """
@@ -298,7 +312,7 @@ class SolverInterface(ABC):
     def __init__(self, solver_name: str, **kwargs):
         """
         Initialize the solver interface.
-        
+
         Args:
             solver_name: Name of the solver
             **kwargs: Solver-specific configuration parameters
@@ -311,18 +325,18 @@ class SolverInterface(ABC):
     def solve(self, problem_data: ProblemData, timeout: Optional[float] = None) -> SolverResult:
         """
         Solve the optimization problem and return standardized result.
-        
+
         Args:
             problem_data: Problem data in unified format
-            timeout: Optional timeout in seconds. If specified, solver execution will be 
+            timeout: Optional timeout in seconds. If specified, solver execution will be
                     terminated after this duration and a TIMEOUT result will be returned.
-                    Different solver backends may handle timeout differently - some support 
+                    Different solver backends may handle timeout differently - some support
                     native timeout parameters while others use manual detection. If None,
                     solver will run without time limit (not recommended for automated systems).
-            
+
         Returns:
             SolverResult with standardized fields
-            
+
         Raises:
             NotImplementedError: If not implemented by subclass
         """
@@ -332,10 +346,10 @@ class SolverInterface(ABC):
     def get_version(self) -> str:
         """
         Get the version of the solver.
-        
+
         Returns:
             Version string of the solver
-            
+
         Raises:
             NotImplementedError: If not implemented by subclass
         """
@@ -344,28 +358,21 @@ class SolverInterface(ABC):
     def get_solver_info(self) -> Dict[str, Any]:
         """
         Get information about the solver configuration.
-        
+
         Returns:
             Dictionary with solver information
         """
-        return {
-            'solver_name': self.solver_name,
-            'version': self.get_version(),
-            'config': self.config
-        }
-
+        return {"solver_name": self.solver_name, "version": self.get_version(), "config": self.config}
 
     def validate_problem_compatibility(self, problem_data: ProblemData) -> bool:
         """
         Check if the solver can handle the given problem type.
-        
+
         Args:
             problem_data: Problem data to validate
-            
+
         Returns:
             True if solver can handle the problem, False otherwise
         """
         # Default implementation - subclasses should override for specific checks
         return True
-
-

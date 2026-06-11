@@ -9,4 +9,4 @@ from .data_exporter import DataExporter
 from .html_generator import HTMLGenerator
 from .result_processor import ResultProcessor
 
-__all__ = ['HTMLGenerator', 'ResultProcessor', 'DataExporter']
+__all__ = ["HTMLGenerator", "ResultProcessor", "DataExporter"]
