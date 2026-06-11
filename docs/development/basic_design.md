@@ -63,9 +63,10 @@ GITHUB ACTIONS (Publishing Only):
 
 ### Supported Components
 **Problem Libraries**:
-- **DIMACS**: 47 problems in SeDuMi .mat format
-- **SDPLIB**: 92+ problems in SDPA .dat-s format
-- **Total Coverage**: 139+ optimization problems
+- **DIMACS**: SeDuMi .mat format
+- **SDPLIB**: SDPA .dat-s format
+
+Roughly 120 problems are currently registered; the authoritative list (and exact count) is `config/problem_registry.yaml`.
 
 **Solver Support**:
 - **Python (9)**: SciPy, CVXPY backends (CLARABEL, SCS, ECOS, OSQP, CVXOPT, SDPA, SCIP, HIGHS)

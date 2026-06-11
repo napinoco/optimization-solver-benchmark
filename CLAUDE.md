@@ -19,7 +19,7 @@ This is an automated benchmark system for optimization solvers (LP, QP, SOCP, SD
 - **Platform**: GitHub Actions CI/CD with GitHub Pages deployment
 - **Languages**: Python 3.12+, MATLAB R2024+ (optional)
 - **Storage**: SQLite database (`database/results.db`)
-- **Reports**: `docs/pages/` (Bootstrap 5 + Chart.js)
+- **Reports**: `docs/pages/` (static HTML, inline CSS)
 
 For directory structure and architecture details, see [detail_design.md](docs/development/detail_design.md).
 

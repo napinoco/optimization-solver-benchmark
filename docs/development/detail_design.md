@@ -104,7 +104,7 @@ optimization-solver-benchmark/
 graph TB
     %% Parent Process Components
     subgraph "Parent Process Environment"
-        BR["🚀 BenchmarkRunner<br/>ENTRY POINT<br/>System Orchestrator"]
+        BR["BenchmarkRunner<br/>ENTRY POINT<br/>System Orchestrator"]
         PI["Process Interface<br/>PythonProcessInterface<br/>MatlabProcessInterface"]
     end
     
@@ -183,7 +183,7 @@ The parent process classifies subprocess outcomes by return code (see `_call_pyt
 
 ### Component Responsibilities
 
-**🚀 BenchmarkRunner** (System Orchestrator)
+**BenchmarkRunner** (System Orchestrator)
 - Problem loading coordination
 - Solver execution management
 - Result storage and reporting
@@ -200,7 +200,7 @@ The parent process classifies subprocess outcomes by return code (see `_call_pyt
 **Key Architecture Principles:**
 - Subprocess isolation for crash protection
 - Symmetric Python/MATLAB execution paths
-- Unified resource control (timeout + memory limits)
+- Timeout enforcement at the subprocess level
 - Centralized result storage and metadata tracking
 
 ---
@@ -238,8 +238,8 @@ Standardized dataclass returned by every solver: `solve_time`, `status`, primal/
 problem_name:
   display_name: string          # Human-readable problem name
   file_path: string            # Relative path to problem file
-  file_type: string            # "mat" | "dat-s" | "mps" | "qps"
-  library_name: string         # "DIMACS" | "SDPLIB" | "internal"
+  file_type: string            # "mat" | "dat-s" (supported formats: ProblemInterface.FORMAT_LOADERS)
+  library_name: string         # "DIMACS" | "SDPLIB"
   for_test_flag: boolean       # Mark problem for validation testing
 ```
 
@@ -251,7 +251,7 @@ problem_name:
 
 **Key Design Principles:**
 - **Process Isolation**: All solver execution in separate subprocesses for crash protection
-- **Resource Control**: ulimit-based memory limits and timeout control
+- **Timeout Control**: enforced via `subprocess.run(timeout=...)` in the parent process. A memory-limit mechanism exists in the subprocess entry point (`--memory-limit`, `resource.setrlimit`) but is currently not passed by the process interfaces
 - **Unified Error Detection**: Standardized error classification across Python/MATLAB
 - **JSON Communication**: Structured data exchange between parent and subprocess
 
@@ -275,7 +275,7 @@ A single denormalized `results` table (see `scripts/database/schema.sql`): solve
 ## Report Generation
 
 **Report Types:**
-- **Dashboard**: Interactive HTML reports with Bootstrap 5 + Chart.js
+- **Dashboard**: Static HTML reports (inline CSS, no JS frameworks)
 - **Results Matrix**: Problems × Solvers performance matrix
 - **Data Export**: JSON/CSV formats for research use
 
@@ -334,7 +334,3 @@ A single denormalized `results` table (see `scripts/database/schema.sql`): solve
 2. **Add format mapping** to `FORMAT_LOADERS` in `problem_interface.py`
 3. **Update problem registry** to include new format problems
 4. **Implement format conversion** to unified SeDuMi format
-
----
-
-This detailed design provides comprehensive implementation guidance while maintaining focus on research applications and eliminating unnecessary production complexity.

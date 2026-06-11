@@ -11,9 +11,9 @@ Benchmark results are continuously published at: https://napinoco.github.io/opti
 **Purpose**: Compare optimization solver performance using standardized problem sets and minimal solver configuration for unbiased evaluation.
 
 **Problem Libraries**:
-- **DIMACS**: 47 problems in SeDuMi .mat format
-- **SDPLIB**: 92+ problems in SDPA .dat-s format  
-- **Total**: 139+ optimization problems
+- **DIMACS**: SeDuMi .mat format
+- **SDPLIB**: SDPA .dat-s format
+- Roughly 120 registered problems; see `config/problem_registry.yaml` for the authoritative list
 
 **Supported Solvers**:
 - **Python (9)**: SciPy, CVXPY backends (CLARABEL, SCS, ECOS, OSQP, CVXOPT, SDPA, SCIP, HIGHS)
