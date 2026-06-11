@@ -27,6 +27,7 @@ sys.path.insert(0, str(project_root))
 
 from scripts.data_loaders.problem_loader import ProblemData
 from scripts.data_loaders.python.problem_interface import ProblemInterface
+from scripts.solvers.python.solver_configs import PYTHON_SOLVER_CONFIGS
 from scripts.solvers.solver_interface import SolverResult
 from scripts.utils.logger import get_logger
 from scripts.utils.temp_file_manager import temp_file_context
@@ -43,18 +44,9 @@ class PythonProcessInterface:
     Each solver execution runs in a separate process with configurable resource limits.
     """
 
-    # Python solver configurations (delegated to python_solver_runner.py)
-    PYTHON_SOLVER_CONFIGS = {
-        "cvxpy_clarabel": {"display_name": "CLARABEL (CVXPY)"},
-        "cvxpy_scs": {"display_name": "SCS (CVXPY)"},
-        "cvxpy_ecos": {"display_name": "ECOS (CVXPY)"},
-        "cvxpy_osqp": {"display_name": "OSQP (CVXPY)"},
-        "cvxpy_cvxopt": {"display_name": "CVXOPT (CVXPY)"},
-        "cvxpy_sdpa": {"display_name": "SDPA (CVXPY)"},
-        "cvxpy_scip": {"display_name": "SCIP (CVXPY)"},
-        "cvxpy_highs": {"display_name": "HIGHS (CVXPY)"},
-        "scipy_linprog": {"display_name": "LINPROG (SciPy)"},
-    }
+    # Python solver configurations (single source: solver_configs.py;
+    # solver execution is delegated to python_solver_runner.py)
+    PYTHON_SOLVER_CONFIGS = PYTHON_SOLVER_CONFIGS
 
     def __init__(
         self,

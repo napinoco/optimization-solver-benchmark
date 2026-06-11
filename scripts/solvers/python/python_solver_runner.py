@@ -33,10 +33,19 @@ from scripts.data_loaders.problem_loader import ProblemData
 from scripts.data_loaders.python.problem_interface import ProblemInterface
 from scripts.solvers.python.cvxpy_runner import CvxpySolver
 from scripts.solvers.python.scipy_runner import ScipySolver
+from scripts.solvers.python.solver_configs import PYTHON_SOLVER_CONFIGS
 from scripts.solvers.solver_interface import SolverInterface, SolverResult
 from scripts.utils.logger import get_logger
 
 logger = get_logger("python_solver_runner")
+
+# Resolve declarative "runner" keys from solver_configs to solver classes.
+# Kept here (not in solver_configs.py) so the main process can import the
+# configs without pulling in cvxpy/scipy.
+RUNNER_CLASSES = {
+    "scipy": ScipySolver,
+    "cvxpy": CvxpySolver,
+}
 
 
 class PythonSolverManager:
@@ -48,22 +57,8 @@ class PythonSolverManager:
     Creates architectural symmetry with the MATLAB interface module.
     """
 
-    # Available Python solver configurations
-    PYTHON_SOLVER_CONFIGS = {
-        "scipy_linprog": {"class": ScipySolver, "display_name": "SciPy linprog", "kwargs": {}},
-        "cvxpy_clarabel": {
-            "class": CvxpySolver,
-            "display_name": "CLARABEL (via CVXPY)",
-            "kwargs": {"backend": "CLARABEL"},
-        },
-        "cvxpy_scs": {"class": CvxpySolver, "display_name": "SCS (via CVXPY)", "kwargs": {"backend": "SCS"}},
-        "cvxpy_ecos": {"class": CvxpySolver, "display_name": "ECOS (via CVXPY)", "kwargs": {"backend": "ECOS"}},
-        "cvxpy_osqp": {"class": CvxpySolver, "display_name": "OSQP (via CVXPY)", "kwargs": {"backend": "OSQP"}},
-        "cvxpy_cvxopt": {"class": CvxpySolver, "display_name": "CVXOPT (via CVXPY)", "kwargs": {"backend": "CVXOPT"}},
-        "cvxpy_sdpa": {"class": CvxpySolver, "display_name": "SDPA (via CVXPY)", "kwargs": {"backend": "SDPA"}},
-        "cvxpy_scip": {"class": CvxpySolver, "display_name": "SCIP (via CVXPY)", "kwargs": {"backend": "SCIP"}},
-        "cvxpy_highs": {"class": CvxpySolver, "display_name": "HiGHS (via CVXPY)", "kwargs": {"backend": "HIGHS"}},
-    }
+    # Available Python solver configurations (single source: solver_configs.py)
+    PYTHON_SOLVER_CONFIGS = PYTHON_SOLVER_CONFIGS
 
     def __init__(self, save_solutions: bool = False, problem_interface: Optional[ProblemInterface] = None, **kwargs):
         """
@@ -106,7 +101,7 @@ class PythonSolverManager:
 
         # Get solver configuration
         solver_config = self.PYTHON_SOLVER_CONFIGS[solver_name]
-        solver_class = solver_config["class"]
+        solver_class = RUNNER_CLASSES[solver_config["runner"]]
         solver_kwargs = solver_config["kwargs"].copy()
 
         # Add common parameters
@@ -254,7 +249,7 @@ class PythonSolverManager:
         for solver_name, config in self.PYTHON_SOLVER_CONFIGS.items():
             try:
                 # Attempt to create solver instance
-                solver_class = config["class"]
+                solver_class = RUNNER_CLASSES[config["runner"]]
                 solver_kwargs = config["kwargs"].copy()
 
                 # Add minimal parameters for testing

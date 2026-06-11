@@ -1,33 +1,40 @@
-"""Regression tests for solver configuration consistency.
+"""Regression tests for the centralized Python solver configuration.
 
-The solver name list must stay consistent between the manager
-(python_solver_runner.py, used inside the subprocess) and the process
-interface (python_process_interface.py, used by the main process).
+scripts/solvers/python/solver_configs.py is the single source of truth,
+shared by PythonSolverManager (subprocess side) and PythonProcessInterface
+(main process side).
 """
 
 import pytest
 
-# python_solver_runner imports cvxpy at module level
-pytest.importorskip("cvxpy")
-
-from scripts.solvers.python.python_process_interface import PythonProcessInterface
-from scripts.solvers.python.python_solver_runner import PythonSolverManager
+from scripts.solvers.python.solver_configs import PYTHON_SOLVER_CONFIGS
 
 
-def test_solver_names_match_between_manager_and_process_interface():
-    manager_solvers = set(PythonSolverManager.PYTHON_SOLVER_CONFIGS.keys())
-    process_solvers = set(PythonProcessInterface.PYTHON_SOLVER_CONFIGS.keys())
-    assert manager_solvers == process_solvers
-
-
-def test_manager_configs_have_required_fields():
-    for name, config in PythonSolverManager.PYTHON_SOLVER_CONFIGS.items():
-        assert "class" in config, f"{name} missing 'class'"
-        assert "kwargs" in config, f"{name} missing 'kwargs'"
-        assert isinstance(config["kwargs"], dict), f"{name} 'kwargs' must be a dict"
+def test_configs_have_required_fields():
+    for name, config in PYTHON_SOLVER_CONFIGS.items():
+        assert "display_name" in config, f"{name} missing 'display_name'"
+        assert "runner" in config, f"{name} missing 'runner'"
+        assert isinstance(config.get("kwargs"), dict), f"{name} 'kwargs' must be a dict"
 
 
 def test_cvxpy_solvers_specify_backend():
-    for name, config in PythonSolverManager.PYTHON_SOLVER_CONFIGS.items():
+    for name, config in PYTHON_SOLVER_CONFIGS.items():
         if name.startswith("cvxpy_"):
+            assert config["runner"] == "cvxpy", f"{name} must use the cvxpy runner"
             assert "backend" in config["kwargs"], f"{name} missing backend kwarg"
+
+
+def test_process_interface_shares_the_config():
+    from scripts.solvers.python.python_process_interface import PythonProcessInterface
+
+    assert PythonProcessInterface.PYTHON_SOLVER_CONFIGS is PYTHON_SOLVER_CONFIGS
+
+
+def test_manager_shares_the_config_and_resolves_all_runners():
+    # python_solver_runner imports cvxpy at module level
+    pytest.importorskip("cvxpy")
+    from scripts.solvers.python.python_solver_runner import RUNNER_CLASSES, PythonSolverManager
+
+    assert PythonSolverManager.PYTHON_SOLVER_CONFIGS is PYTHON_SOLVER_CONFIGS
+    for name, config in PYTHON_SOLVER_CONFIGS.items():
+        assert config["runner"] in RUNNER_CLASSES, f"{name} has unresolvable runner '{config['runner']}'"
