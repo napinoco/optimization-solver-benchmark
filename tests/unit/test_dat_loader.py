@@ -69,7 +69,7 @@ class TestParseSdpaFile:
         parsed = loader.parse_sdpa_file(write_dat(tmp_path, SDPA_STANDARD))
         # Entry "0 1 1 2 0.5" must be mirrored to (2, 1) in block 1 of F0
         f0_block1 = parsed['matrices'][0][0]
-        entries = set(zip(f0_block1['i'], f0_block1['j']))
+        entries = set(zip(f0_block1['i'], f0_block1['j'], strict=True))
         assert (0, 1) in entries
         assert (1, 0) in entries
 

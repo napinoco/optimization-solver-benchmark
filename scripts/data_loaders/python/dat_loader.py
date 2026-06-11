@@ -22,10 +22,11 @@ The problem format is:
 Where matno=0 is F0, matno=1,2,... are F1,F2,...
 """
 
-import numpy as np
-from pathlib import Path
-from typing import Dict, Any
 import sys
+from pathlib import Path
+from typing import Any, Dict
+
+import numpy as np
 
 # Add project root to path for imports
 project_root = Path(__file__).parent.parent.parent.parent
@@ -39,11 +40,11 @@ logger = get_logger("dat_loader")
 
 class DATLoader:
     """Loader for optimization problems in SDPA .dat-s format."""
-    
+
     def __init__(self):
         """Initialize the DAT loader."""
         pass
-    
+
     def load(self, file_path: str, problem_name: str = None) -> ProblemData:
         """
         Load problem from .dat-s file.
@@ -58,14 +59,14 @@ class DATLoader:
         # Use provided name or extract from file path as fallback
         if problem_name is None:
             problem_name = Path(file_path).stem.replace('.dat-s', '')
-        
+
         # Parse and convert the file
         parsed_data = self.parse_sdpa_file(file_path)
         problem_data = self.convert_to_problem_data(parsed_data, problem_name)
-        
+
         logger.info(f"Successfully loaded DAT problem: {problem_data}")
         return problem_data
-    
+
     def parse_sdpa_file(self, file_path: str) -> Dict[str, Any]:
         """
         Parse SDPA sparse format file.
@@ -82,40 +83,40 @@ class DATLoader:
         """
         if not Path(file_path).exists():
             raise FileNotFoundError(f"File not found: {file_path}")
-        
+
         logger.info(f"Loading SDPA .dat-s file: {file_path}")
-        
+
         try:
             with open(file_path, 'r') as f:
                 lines = f.readlines()
-            
+
             # Remove comments and empty lines
             data_lines = []
             for line in lines:
                 line = line.strip()
                 if line and not line.startswith('"') and not line.startswith('*'):
                     data_lines.append(line)
-            
+
             if len(data_lines) < 4:
                 raise ValueError("Invalid SDPA format: insufficient data lines")
-            
+
             # Parse header
             m = int(data_lines[0].split()[0])  # Number of constraints
             nblocks = int(data_lines[1].split()[0])  # Number of blocks
-            
+
             # Parse block sizes
             block_sizes_line = data_lines[2]
             # Remove punctuation
             for char in ',(){}':
                 block_sizes_line = block_sizes_line.replace(char, ' ')
             block_sizes = [int(x) for x in block_sizes_line.split() if x.strip()]
-            
+
             if len(block_sizes) != nblocks:
                 raise ValueError(f"Block sizes count ({len(block_sizes)}) doesn't match nblocks ({nblocks})")
-            
+
             # Parse objective vector (handle both standard and array formats)
             c_line = data_lines[3]
-            
+
             # Check if it's array format with curly braces
             if c_line.strip().startswith('{') and c_line.strip().endswith('}'):
                 # Array format: {+0.0,+1.0,+1.0,...} (e.g., gpp100.dat-s uses this format)
@@ -126,10 +127,10 @@ class DATLoader:
             else:
                 # Standard space-separated format (e.g., arch0.dat-s uses this format)
                 c = np.array([float(x) for x in c_line.split()])
-            
+
             if len(c) != m:
                 raise ValueError(f"Objective vector length ({len(c)}) doesn't match m ({m})")
-            
+
             # Parse matrix entries
             matrices = [[{'i': [], 'j': [], 'val': []} for _ in range(nblocks)] for _ in range(m + 1)]
             for line in data_lines[4:]:
@@ -157,16 +158,16 @@ class DATLoader:
                 'c': c,
                 'matrices': matrices
             }
-            
+
             logger.debug(f"Parsed SDPA file: m={m}, nblocks={nblocks}, blocks={block_sizes}")
             return parsed_data
-            
+
         except Exception as e:
             logger.error(f"Failed to parse {file_path}: {e}")
             raise
-    
-    
-    def convert_to_problem_data(self, parsed_data: Dict[str, Any], 
+
+
+    def convert_to_problem_data(self, parsed_data: Dict[str, Any],
                               problem_name: str) -> ProblemData:
         """
         Convert parsed SDPA data to unified ProblemData format.
@@ -189,7 +190,7 @@ class DATLoader:
 
         # Build constraint matrices
         for matno, blk_data in enumerate(matrices):
-            for blkno_, entries in enumerate(blk_data):
+            for blkno_, _entries in enumerate(blk_data):
                 data = matrices[matno][blkno_]
                 mat = sp.csc_array((data['val'], (data['i'], data['j'])),
                                    shape=(abs(block_sizes[blkno_]), abs(block_sizes[blkno_])))
@@ -216,7 +217,7 @@ class DATLoader:
             'soc_cones': [],
             'sdp_cones': block_sizes
         }
-        
+
         # Determine problem class
         problem_class = 'SDP'
 
@@ -234,10 +235,10 @@ class DATLoader:
                 'constraints': A.shape[0]  # m (correct)
             }
         }
-        
+
         logger.info(f"Converted {problem_name}: {problem_class} problem "
                    f"({A.shape[1]} vars, {A.shape[0]} constraints)")
-        
+
         # Create ProblemData object
         # SDPA format uses equality constraints: Ax = b
         return ProblemData(
@@ -259,20 +260,20 @@ class DATLoader:
 if __name__ == "__main__":
     # Test script
     import sys
-    
+
     if len(sys.argv) < 2:
         print("Usage: python dat_loader.py <path_to_dat_s_file>")
         sys.exit(1)
-    
+
     file_path = sys.argv[1]
-    
+
     try:
         loader = DATLoader()
         problem = loader.load(file_path)
         print(f"Loaded problem: {problem}")
-        
+
         # The problem is now loaded and ready for use
-            
+
     except Exception as e:
         print(f"Error loading problem: {e}")
         sys.exit(1)

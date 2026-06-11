@@ -13,23 +13,23 @@ Key Features:
 - Protection against solver crashes affecting main process
 """
 
-import os
-import sys
 import json
+import os
 import subprocess
+import sys
 import time
 from pathlib import Path
-from typing import Optional, Dict, Any, List
+from typing import Any, Dict, List, Optional
 
 # Add project root to path for imports
 project_root = Path(__file__).parent.parent.parent.parent
 sys.path.insert(0, str(project_root))
 
-from scripts.solvers.solver_interface import SolverResult
 from scripts.data_loaders.problem_loader import ProblemData
 from scripts.data_loaders.python.problem_interface import ProblemInterface
-from scripts.utils.temp_file_manager import temp_file_context
+from scripts.solvers.solver_interface import SolverResult
 from scripts.utils.logger import get_logger
+from scripts.utils.temp_file_manager import temp_file_context
 
 logger = get_logger("python_process_interface")
 
@@ -42,7 +42,7 @@ class PythonProcessInterface:
     matching the architecture of MatlabProcessInterface for consistency.
     Each solver execution runs in a separate process with configurable resource limits.
     """
-    
+
     # Python solver configurations (delegated to python_solver_runner.py)
     PYTHON_SOLVER_CONFIGS = {
         'cvxpy_clarabel': {'display_name': 'CLARABEL (CVXPY)'},
@@ -55,7 +55,7 @@ class PythonProcessInterface:
         'cvxpy_highs': {'display_name': 'HIGHS (CVXPY)'},
         'scipy_linprog': {'display_name': 'LINPROG (SciPy)'},
     }
-    
+
     def __init__(self, save_solutions: bool = False,
                  problem_interface: Optional[ProblemInterface] = None,
                  python_executable: str = sys.executable,
@@ -75,16 +75,16 @@ class PythonProcessInterface:
         self.python_executable = python_executable
         self.default_timeout = timeout
         self.config = kwargs
-        
+
         # Initialize or create problem interface
         self.problem_interface = problem_interface or ProblemInterface()
-        
+
         # Lazy initialization - solvers detected only when needed
         self._available_solvers = None
-        
-        logger.info(f"Initialized Python process interface (subprocess isolation)")
+
+        logger.info("Initialized Python process interface (subprocess isolation)")
         logger.debug(f"Python executable: {python_executable}")
-    
+
     def solve(self, problem_name: str, solver_name: str,
               problem_data: Optional[ProblemData] = None,
               timeout: Optional[float] = None) -> SolverResult:
@@ -104,26 +104,26 @@ class PythonProcessInterface:
             ValueError: If solver not available
         """
         logger.info(f"Solving {problem_name} with {solver_name} (subprocess)")
-        
+
         try:
             # 1. Validate solver name
             if solver_name not in self.PYTHON_SOLVER_CONFIGS:
                 raise ValueError(f"'{solver_name}' is not a Python solver")
-            
+
             # 2. Use provided timeout or default
             actual_timeout = timeout or self.default_timeout
-            
+
             # 3. Execute solver in subprocess
             result = self._call_python_solver(
                 problem_name=problem_name,
                 solver_name=solver_name,
                 timeout=actual_timeout
             )
-            
+
             # 4. Ensure solver metadata is set
             if not result.solver_name:
                 result.solver_name = solver_name
-            
+
             # 5. Add problem class information for database storage
             try:
                 problem_data = self.problem_interface.load_problem(problem_name)
@@ -135,24 +135,24 @@ class PythonProcessInterface:
                 if not result.additional_info:
                     result.additional_info = {}
                 result.additional_info['problem_class'] = 'UNKNOWN'
-            
+
             logger.info(f"Completed {solver_name} on {problem_name}: {result.status}")
             return result
-            
+
         except ValueError:
             # Re-raise ValueError so EAFP pattern in runner can catch it
             raise
         except Exception as e:
             error_msg = f"Failed to solve {problem_name} with {solver_name}: {str(e)}"
             logger.error(error_msg)
-            
+
             return SolverResult.create_error_result(
                 error_msg,
                 solve_time=0.0,
                 solver_name=solver_name,
                 solver_version="unknown"
             )
-    
+
     def _call_python_solver(self, problem_name: str, solver_name: str,
                            timeout: float) -> SolverResult:
         """
@@ -167,15 +167,15 @@ class PythonProcessInterface:
             SolverResult from solver execution
         """
         start_time = time.time()
-        
+
         # Use context manager for automatic temp file cleanup
         try:
             with temp_file_context(".json") as result_file:
                 logger.debug(f"Using temporary result file: {result_file}")
-                
+
                 # Construct Python solver runner command
                 solver_runner_path = Path(__file__).parent / "python_solver_runner.py"
-                
+
                 cmd = [
                     self.python_executable,
                     str(solver_runner_path),
@@ -183,12 +183,12 @@ class PythonProcessInterface:
                     '--solver', solver_name,
                     '--result-file', result_file
                 ]
-                
+
                 if self.save_solutions:
                     cmd.append('--save-solutions')
-                
+
                 logger.debug(f"Executing Python solver command: {' '.join(cmd)}")
-                
+
                 # Execute with timeout
                 try:
                     result = subprocess.run(
@@ -198,12 +198,12 @@ class PythonProcessInterface:
                         timeout=timeout,
                         cwd=project_root
                     )
-                    
+
                     # Check execution success
                     if result.returncode != 0:
                         error_msg = self._parse_python_error(result.stderr, result.stdout)
                         solve_time = time.time() - start_time
-                        
+
                         # Check for SIGKILL (process forcibly terminated)
                         if result.returncode == -9 or result.returncode == 137:
                             logger.error(f"Process killed by SIGKILL, returncode: {result.returncode}")
@@ -218,7 +218,7 @@ class PythonProcessInterface:
                         else:
                             full_error = f"Python subprocess failed (code {result.returncode}): {error_msg}"
                             logger.error(full_error)
-                            
+
                             return SolverResult.create_subprocess_error_result(
                                 returncode=result.returncode,
                                 error_message=error_msg,
@@ -226,7 +226,7 @@ class PythonProcessInterface:
                                 solver_name=solver_name,
                                 solver_version="unknown"
                             )
-                    
+
                     # Read JSON result file
                     if not os.path.exists(result_file):
                         return SolverResult.create_error_result(
@@ -235,7 +235,7 @@ class PythonProcessInterface:
                             solver_name=solver_name,
                             solver_version="unknown"
                         )
-                    
+
                     # Read and parse JSON result
                     try:
                         with open(result_file, 'r') as f:
@@ -247,17 +247,17 @@ class PythonProcessInterface:
                             solver_name=solver_name,
                             solver_version="unknown"
                         )
-                    
+
                     # Convert dict to SolverResult
                     return self._dict_to_solver_result(solver_result_dict, solver_name)
-                    
+
                 except subprocess.TimeoutExpired:
                     return SolverResult.create_timeout_result(
                         timeout,
                         solver_name=solver_name,
                         solver_version="unknown"
                     )
-                    
+
         except Exception as e:
             error_msg = f"Unexpected error in Python solver subprocess: {str(e)}"
             logger.error(error_msg)
@@ -267,12 +267,12 @@ class PythonProcessInterface:
                 solver_name=solver_name,
                 solver_version="unknown"
             )
-    
+
     def _parse_python_error(self, stderr: str, stdout: str) -> str:
         """Parse error messages from Python subprocess output."""
         # Look for specific error patterns
         error_lines = []
-        
+
         # Check stderr first
         if stderr:
             lines = stderr.strip().split('\n')
@@ -284,20 +284,20 @@ class PythonProcessInterface:
                     break
                 elif 'Error:' in line or 'error:' in line:
                     error_lines.append(line)
-        
+
         # If no clear error in stderr, check stdout
         if not error_lines and stdout:
             lines = stdout.strip().split('\n')
             for line in lines:
                 if 'Error:' in line or 'error:' in line:
                     error_lines.append(line)
-        
+
         # Return parsed error or raw stderr
         if error_lines:
             return '\n'.join(error_lines[-10:])  # Last 10 lines to avoid huge errors
         else:
             return stderr.strip() or stdout.strip() or "Unknown error"
-    
+
     def _dict_to_solver_result(self, result_dict: Dict[str, Any], solver_name: str) -> SolverResult:
         """Convert dictionary from subprocess to SolverResult object."""
         # Handle both direct fields and nested 'additional_info'
@@ -314,7 +314,7 @@ class PythonProcessInterface:
             solver_version=result_dict.get('solver_version', 'unknown'),
             additional_info=result_dict.get('additional_info', {})
         )
-    
+
     def get_available_solvers(self) -> List[str]:
         """
         Get list of available Python solvers.
@@ -326,7 +326,7 @@ class PythonProcessInterface:
             List of solver names
         """
         return list(self.PYTHON_SOLVER_CONFIGS.keys())
-    
+
     def create_solver(self, solver_name: str) -> Any:
         """
         Create solver instance (not used in subprocess mode).
@@ -338,7 +338,7 @@ class PythonProcessInterface:
             NotImplementedError: Always raised as subprocess mode doesn't create local instances
         """
         raise NotImplementedError("Process interface does not create local solver instances")
-    
+
     def is_solver_available(self, solver_name: str) -> bool:
         """Check if solver is configured (actual availability checked in subprocess)."""
         return solver_name in self.PYTHON_SOLVER_CONFIGS

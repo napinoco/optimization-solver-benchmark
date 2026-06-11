@@ -19,11 +19,12 @@ The problem format is: min c'x subject to Ax = b, x in K
 """
 
 import gzip
+import sys
+from pathlib import Path
+from typing import Any, Dict
+
 import numpy as np
 import scipy.io
-from pathlib import Path
-from typing import Dict, List, Tuple, Any
-import sys
 
 # Add project root to path for imports
 project_root = Path(__file__).parent.parent.parent.parent
@@ -37,11 +38,11 @@ logger = get_logger("mat_loader")
 
 class MATLoader:
     """Loader for optimization problems in SeDuMi .mat/.mat.gz format."""
-    
+
     def __init__(self):
         """Initialize the MAT loader."""
         pass
-    
+
     def load(self, file_path: str, problem_name: str = None) -> ProblemData:
         """
         Load problem from .mat or .mat.gz file.
@@ -56,14 +57,14 @@ class MATLoader:
         # Use provided name or extract from file path as fallback
         if problem_name is None:
             problem_name = Path(file_path).stem.replace('.mat', '')
-        
+
         # Load and parse the file
         mat_data = self.load_sedumi_mat(file_path)
         problem_data = self.convert_to_problem_data(mat_data, problem_name)
-        
+
         logger.info(f"Successfully loaded MAT problem: {problem_data}")
         return problem_data
-    
+
     def load_sedumi_mat(self, file_path: str) -> Dict[str, Any]:
         """
         Load SeDuMi problem from .mat or .mat.gz file.
@@ -80,9 +81,9 @@ class MATLoader:
         """
         if not Path(file_path).exists():
             raise FileNotFoundError(f"File not found: {file_path}")
-        
+
         logger.info(f"Loading SeDuMi MAT file: {file_path}")
-        
+
         try:
             # Handle both compressed and uncompressed files
             if file_path.endswith('.gz'):
@@ -90,21 +91,21 @@ class MATLoader:
                     mat_data = scipy.io.loadmat(f, spmatrix=False)  # Load as sparray
             else:
                 mat_data = scipy.io.loadmat(file_path, spmatrix=False)  # Load as sparray
-            
+
             # SeDuMi format validation
             if 'A' not in mat_data and 'At' not in mat_data:
-                raise ValueError(f"Missing required SeDuMi field: A or At")
+                raise ValueError("Missing required SeDuMi field: A or At")
             for field in ['b', 'c', 'K']:
                 if field not in mat_data:
                     raise ValueError(f"Missing required SeDuMi field: {field}")
-            
+
             logger.debug(f"Loaded SeDuMi data with fields: {list(mat_data.keys())}")
             return mat_data
-            
+
         except Exception as e:
             logger.error(f"Failed to load {file_path}: {e}")
             raise
-    
+
     def parse_cone_structure(self, K: np.ndarray) -> Dict[str, Any]:
         """
         Parse SeDuMi cone structure K.
@@ -117,11 +118,11 @@ class MATLoader:
         """
         cone_info = {
             'free_vars': 0,
-            'nonneg_vars': 0, 
+            'nonneg_vars': 0,
             'soc_cones': [],
             'sdp_cones': []
         }
-        
+
         # K is a structured array, extract fields from first element
         try:
             # Access the fields using array indexing
@@ -148,10 +149,10 @@ class MATLoader:
         except (IndexError, KeyError, AttributeError) as e:
             logger.warning(f"Could not parse cone structure: {e}")
             # Fallback: treat as linear problem if parsing fails
-        
+
         logger.debug(f"Parsed cone structure: {cone_info}")
         return cone_info
-    
+
     def determine_problem_class(self, cone_info: Dict[str, Any]) -> str:
         """
         Determine problem class based on cone structure.
@@ -165,7 +166,7 @@ class MATLoader:
         """
         has_soc = len(cone_info['soc_cones']) > 0
         has_sdp = len(cone_info['sdp_cones']) > 0
-        
+
         # SDP takes priority - if it has SDP cones, classify as SDP
         if has_sdp:
             return 'SDP'
@@ -173,8 +174,8 @@ class MATLoader:
             return 'SOCP'
         else:
             return 'LP'
-    
-    def convert_to_problem_data(self, mat_data: Dict[str, Any], 
+
+    def convert_to_problem_data(self, mat_data: Dict[str, Any],
                               problem_name: str) -> ProblemData:
         """
         Convert SeDuMi data to unified ProblemData format.
@@ -195,7 +196,7 @@ class MATLoader:
             logger.debug("Using transposed constraint matrix 'At' from MAT file")
         else:
             raise ValueError("MAT file must contain 'A' or 'At' field for constraint matrix.")
-        
+
         # Handle sparse matrices for b and c
         b = mat_data['b']
         if hasattr(b, 'toarray'):
@@ -208,19 +209,19 @@ class MATLoader:
             c = c.toarray().reshape(-1, 1)
         else:
             c = c.reshape(-1, 1)
-        
+
         # Handle cone structure
         cone_info = {}
         if 'K' in mat_data:
             cone_info = self.parse_cone_structure(mat_data['K'])
-        
+
         # Determine problem class
         problem_class = self.determine_problem_class(cone_info)
-        
+
         # Convert sparse matrix to dense if needed
         if hasattr(A, 'toarray'):
             A = A.toarray()
-        
+
         # Create metadata
         matrix_variant = 'A' if 'A' in mat_data else 'At'
         metadata = {
@@ -233,10 +234,10 @@ class MATLoader:
                 'constraints': A.shape[0]
             }
         }
-        
+
         logger.info(f"Converted {problem_name}: {problem_class} problem "
                    f"({A.shape[1]} vars, {A.shape[0]} constraints)")
-        
+
         # Create ProblemData object
         # SeDuMi format uses equality constraints: Ax = b
         return ProblemData(
@@ -258,20 +259,20 @@ class MATLoader:
 if __name__ == "__main__":
     # Test script
     import sys
-    
+
     if len(sys.argv) < 2:
         print("Usage: python mat_loader.py <path_to_mat_file>")
         sys.exit(1)
-    
+
     file_path = sys.argv[1]
-    
+
     try:
         loader = MATLoader()
         problem = loader.load(file_path)
         print(f"Loaded problem: {problem}")
-        
+
         # The problem is now loaded and ready for use
-            
+
     except Exception as e:
         print(f"Error loading problem: {e}")
         sys.exit(1)

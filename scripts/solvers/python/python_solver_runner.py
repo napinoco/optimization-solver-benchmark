@@ -23,17 +23,17 @@ matching the pattern of matlab_solver_runner.m in the MATLAB ecosystem.
 
 import sys
 from pathlib import Path
-from typing import List, Optional, Dict, Any
+from typing import Any, Dict, List, Optional
 
 # Add project root to path for imports
 project_root = Path(__file__).parent.parent.parent.parent
 sys.path.insert(0, str(project_root))
 
-from scripts.solvers.solver_interface import SolverInterface, SolverResult
-from scripts.solvers.python.scipy_runner import ScipySolver
-from scripts.solvers.python.cvxpy_runner import CvxpySolver
 from scripts.data_loaders.problem_loader import ProblemData
 from scripts.data_loaders.python.problem_interface import ProblemInterface
+from scripts.solvers.python.cvxpy_runner import CvxpySolver
+from scripts.solvers.python.scipy_runner import ScipySolver
+from scripts.solvers.solver_interface import SolverInterface, SolverResult
 from scripts.utils.logger import get_logger
 
 logger = get_logger("python_solver_runner")
@@ -47,7 +47,7 @@ class PythonSolverManager:
     handling backend detection, solver creation, and compatibility validation.
     Creates architectural symmetry with the MATLAB interface module.
     """
-    
+
     # Available Python solver configurations
     PYTHON_SOLVER_CONFIGS = {
         "scipy_linprog": {
@@ -96,7 +96,7 @@ class PythonSolverManager:
             "kwargs": {"backend": "HIGHS"}
         }
     }
-    
+
     def __init__(self, save_solutions: bool = False, problem_interface: Optional[ProblemInterface] = None, **kwargs):
         """
         Initialize Python solver interface.
@@ -108,15 +108,15 @@ class PythonSolverManager:
         """
         self.save_solutions = save_solutions
         self.config = kwargs
-        
+
         # Initialize or create problem interface
         self.problem_interface = problem_interface or ProblemInterface()
-        
+
         # Lazy initialization - solvers detected only when needed
         self._available_solvers = None
-        
+
         logger.info("Initialized Python interface (lazy solver detection)")
-    
+
     def create_solver(self, solver_name: str) -> SolverInterface:
         """
         Create Python solver instance based on solver name.
@@ -131,20 +131,20 @@ class PythonSolverManager:
             ValueError: If solver name is unknown or cannot be created
         """
         logger.debug(f"Creating Python solver: {solver_name}")
-        
+
         # Check if solver is known
         if solver_name not in self.PYTHON_SOLVER_CONFIGS:
             raise ValueError(f"'{solver_name}' is not a Python solver")
-        
+
         # Get solver configuration
         solver_config = self.PYTHON_SOLVER_CONFIGS[solver_name]
         solver_class = solver_config["class"]
         solver_kwargs = solver_config["kwargs"].copy()
-        
+
         # Add common parameters
         solver_kwargs["save_solutions"] = self.save_solutions
         solver_kwargs.update(self.config)
-        
+
         # Try to create solver instance (EAFP approach)
         try:
             solver = solver_class(**solver_kwargs)
@@ -154,8 +154,8 @@ class PythonSolverManager:
             # Include backend info in error message if available
             backend = solver_config.get("kwargs", {}).get("backend", "")
             backend_msg = f" (backend: {backend})" if backend else ""
-            raise ValueError(f"Failed to create solver '{solver_name}'{backend_msg}: {e}")
-    
+            raise ValueError(f"Failed to create solver '{solver_name}'{backend_msg}: {e}") from e
+
     def get_available_solvers(self) -> List[str]:
         """
         Get list of available Python solvers.
@@ -169,7 +169,7 @@ class PythonSolverManager:
             logger.info(f"Detected {len(self._available_solvers)} available Python solvers on first access")
             logger.debug(f"Available Python solvers: {self._available_solvers}")
         return self._available_solvers.copy()
-    
+
     def solve(self, problem_name: str, solver_name: str,
              problem_data: Optional[ProblemData] = None,
              timeout: Optional[float] = None) -> SolverResult:
@@ -192,16 +192,16 @@ class PythonSolverManager:
             ValueError: If solver not available or problem cannot be loaded
         """
         logger.info(f"Solving {problem_name} with {solver_name}")
-        
+
         try:
             # 1. Create solver instance (will raise ValueError if not a Python solver)
             solver = self.create_solver(solver_name)
-            
+
             # 2. Load problem data if not provided
             if problem_data is None:
                 logger.debug(f"Loading problem data for {problem_name}")
                 problem_data = self.problem_interface.load_problem(problem_name)
-            
+
             # 3. Validate compatibility
             if not solver.validate_problem_compatibility(problem_data):
                 problem_type = problem_data.problem_class
@@ -215,24 +215,24 @@ class PythonSolverManager:
                     result.additional_info = {}
                 result.additional_info['problem_class'] = problem_data.problem_class
                 return result
-            
+
             # 4. Execute solver
             result = solver.solve(problem_data, timeout=timeout)
-            
+
             # 5. Ensure solver metadata is set
             if not result.solver_name:
                 result.solver_name = solver_name
             if not result.solver_version:
                 result.solver_version = solver.get_version()
-                
+
             # 6. Add problem class information to additional_info for database storage
             if not result.additional_info:
                 result.additional_info = {}
             result.additional_info['problem_class'] = problem_data.problem_class
-            
+
             logger.info(f"Completed {solver_name} on {problem_name}: {result.status}")
             return result
-            
+
         except ValueError:
             # Re-raise ValueError so EAFP pattern in runner can catch it
             raise
@@ -245,7 +245,7 @@ class PythonSolverManager:
                 solver_name=solver_name,
                 solver_version="unknown"
             )
-    
+
     def get_solver_statistics(self) -> Dict[str, Any]:
         """
         Get statistics about Python solver availability.
@@ -254,15 +254,15 @@ class PythonSolverManager:
             Dictionary with solver statistics
         """
         total_solvers = len(self.PYTHON_SOLVER_CONFIGS)
-        
+
         # For statistics, we need to actually detect solvers
         available_solvers_list = self.get_available_solvers()
         available_solvers = len(available_solvers_list)
-        
+
         # Group by type
         scipy_solvers = [name for name in available_solvers_list if name.startswith("scipy_")]
         cvxpy_solvers = [name for name in available_solvers_list if name.startswith("cvxpy_")]
-        
+
         return {
             "total_configured": total_solvers,
             "total_available": available_solvers,
@@ -272,7 +272,7 @@ class PythonSolverManager:
             "cvxpy_backends": [name.split("_", 1)[1] for name in cvxpy_solvers],
             "unavailable_solvers": list(set(self.PYTHON_SOLVER_CONFIGS.keys()) - set(available_solvers_list))
         }
-    
+
     def _detect_available_solvers(self) -> List[str]:
         """
         Detect which Python solvers are available in the current environment.
@@ -281,35 +281,35 @@ class PythonSolverManager:
             List of available solver names
         """
         available = []
-        
+
         logger.debug("Detecting available Python solvers...")
-        
+
         for solver_name, config in self.PYTHON_SOLVER_CONFIGS.items():
             try:
                 # Attempt to create solver instance
                 solver_class = config["class"]
                 solver_kwargs = config["kwargs"].copy()
-                
+
                 # Add minimal parameters for testing
                 solver_kwargs["save_solutions"] = False
-                
+
                 # Try to create solver
                 solver = solver_class(**solver_kwargs)
-                
+
                 # Test basic functionality (version detection)
                 version = solver.get_version()
-                
+
                 available.append(solver_name)
                 logger.debug(f"✓ {solver_name}: {version}")
-                
+
             except Exception as e:
                 logger.debug(f"✗ {solver_name}: {e}")
                 continue
-        
+
         logger.info(f"Detected {len(available)}/{len(self.PYTHON_SOLVER_CONFIGS)} available Python solvers")
-        
+
         return available
-    
+
 
 
 # =============================================================================
@@ -326,9 +326,9 @@ def main():
     """
     import argparse
     import json
-    import resource
     import platform
-    
+    import resource
+
     # Parse command line arguments
     parser = argparse.ArgumentParser(description='Python Solver Runner for Subprocess Execution')
     parser.add_argument('--problem', required=True, help='Name of the problem to solve')
@@ -336,9 +336,9 @@ def main():
     parser.add_argument('--result-file', required=True, help='Path to write JSON result')
     parser.add_argument('--save-solutions', action='store_true', help='Save solution vectors')
     parser.add_argument('--memory-limit', type=float, help='Memory limit in GB (Unix only)')
-    
+
     args = parser.parse_args()
-    
+
     # Apply memory limit if specified (Unix only)
     if args.memory_limit and platform.system() != 'Windows':
         try:
@@ -347,15 +347,15 @@ def main():
             logger.info(f"Set memory limit to {args.memory_limit}GB")
         except Exception as e:
             logger.warning(f"Failed to set memory limit: {e}")
-    
+
     # Initialize solver manager
     manager = PythonSolverManager(save_solutions=args.save_solutions)
-    
+
     try:
         # Execute solver
         logger.info(f"Subprocess solving {args.problem} with {args.solver}")
         result = manager.solve(args.problem, args.solver)
-        
+
         # Convert result to dictionary for JSON serialization
         result_dict = {
             'solve_time': result.solve_time,
@@ -370,13 +370,13 @@ def main():
             'solver_version': result.solver_version,
             'additional_info': result.additional_info or {}
         }
-        
+
         # Write result to JSON file
         with open(args.result_file, 'w') as f:
             json.dump(result_dict, f, indent=2, default=str)
-        
+
         logger.info(f"Subprocess completed successfully, result written to {args.result_file}")
-        
+
     except Exception as e:
         # Create error result
         error_result = {
@@ -389,11 +389,11 @@ def main():
                 'error_type': type(e).__name__
             }
         }
-        
+
         # Write error result to JSON file
         with open(args.result_file, 'w') as f:
             json.dump(error_result, f, indent=2)
-        
+
         logger.error(f"Subprocess failed: {e}")
         sys.exit(1)
 

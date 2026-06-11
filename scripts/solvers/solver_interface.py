@@ -16,12 +16,11 @@ The standardized result format includes 8 required fields:
 - iterations: Number of solver iterations (int or None)
 """
 
+import sys
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import Optional, Dict, Any, Union
-import time
 from pathlib import Path
-import sys
+from typing import Any, Dict, Optional
 
 # Add project root to path for imports
 project_root = Path(__file__).parent.parent.parent
@@ -41,34 +40,34 @@ class SolverResult:
     This class ensures consistent data format across all solver implementations.
     All 8 fields are required for database insertion and result analysis.
     """
-    
+
     # Required timing information (may be None if not applicable)
     solve_time: Optional[float]  # Time taken to solve the problem (seconds)
-    
+
     # Required solution status
     status: str  # Solution status (e.g., "OPTIMAL", "INFEASIBLE", "UNBOUNDED", "ERROR")
-    
+
     # Required objective values (may be None if not available)
     primal_objective_value: Optional[float]  # Primal objective value
     dual_objective_value: Optional[float]    # Dual objective value
-    
+
     # Required optimality measures (may be None if not available)
     duality_gap: Optional[float]         # Gap between primal and dual objectives
     primal_infeasibility: Optional[float]  # Primal constraint violation measure
     dual_infeasibility: Optional[float]    # Dual constraint violation measure
-    
+
     # Required iteration count (may be None if not available)
     iterations: Optional[int]  # Number of solver iterations
-    
+
     # Optional additional information
     solver_name: Optional[str] = None      # Name of the solver used
     solver_version: Optional[str] = None   # Version of the solver
     additional_info: Optional[Dict[str, Any]] = None  # Any additional solver-specific information
-    
+
     def __post_init__(self):
         """Validate the result data after initialization."""
         self.validate()
-    
+
     def validate(self) -> None:
         """
         Validate that the result contains all required fields with proper types.
@@ -82,30 +81,30 @@ class SolverResult:
                 raise ValueError(f"solve_time must be numeric or None, got {type(self.solve_time)}")
             if self.solve_time < 0:
                 raise ValueError(f"solve_time must be non-negative, got {self.solve_time}")
-        
+
         # Validate status
         if not isinstance(self.status, str):
             raise ValueError(f"status must be string, got {type(self.status)}")
         if not self.status.strip():
             raise ValueError("status cannot be empty")
-        
+
         # Validate numeric fields (can be None)
         numeric_fields = [
-            'primal_objective_value', 'dual_objective_value', 
+            'primal_objective_value', 'dual_objective_value',
             'duality_gap', 'primal_infeasibility', 'dual_infeasibility'
         ]
-        
+
         for field_name in numeric_fields:
             value = getattr(self, field_name)
             if value is not None and not isinstance(value, (int, float)):
                 raise ValueError(f"{field_name} must be numeric or None, got {type(value)}")
-        
+
         # Validate iterations
         if self.iterations is not None and not isinstance(self.iterations, int):
             raise ValueError(f"iterations must be int or None, got {type(self.iterations)}")
         if self.iterations is not None and self.iterations < 0:
             raise ValueError(f"iterations must be non-negative, got {self.iterations}")
-    
+
     def to_dict(self) -> Dict[str, Any]:
         """
         Convert result to dictionary format for database storage.
@@ -126,9 +125,9 @@ class SolverResult:
             'solver_version': self.solver_version,
             'additional_info': self.additional_info
         }
-    
+
     @classmethod
-    def create_error_result(cls, error_message: str, solve_time: float = 0.0, 
+    def create_error_result(cls, error_message: str, solve_time: float = 0.0,
                           solver_name: str = "unknown", solver_version: str = "unknown") -> 'SolverResult':
         """
         Create a standardized error result.
@@ -155,9 +154,9 @@ class SolverResult:
             solver_version=solver_version,
             additional_info={"error_message": error_message}
         )
-    
+
     @classmethod
-    def create_timeout_result(cls, timeout_duration: float, solver_name: str = "unknown", 
+    def create_timeout_result(cls, timeout_duration: float, solver_name: str = "unknown",
                             solver_version: str = "unknown") -> 'SolverResult':
         """
         Create a standardized timeout result.
@@ -183,7 +182,7 @@ class SolverResult:
             solver_version=solver_version,
             additional_info={"timeout_duration": timeout_duration}
         )
-    
+
     @classmethod
     def create_subprocess_error_result(cls, returncode: int, error_message: str, solve_time: float = 0.0,
                                      solver_name: str = "unknown", solver_version: str = "unknown") -> 'SolverResult':
@@ -217,7 +216,7 @@ class SolverResult:
                 'error_message': error_message
             }
         )
-    
+
     @classmethod
     def create_sigkill_result(cls, memory_limit_gb: Optional[float] = None, solve_time: float = 0.0,
                             solver_name: str = "unknown", solver_version: str = "unknown",
@@ -241,7 +240,7 @@ class SolverResult:
         }
         if memory_limit_gb is not None:
             additional_info['memory_limit_gb'] = memory_limit_gb
-            
+
         return cls(
             solve_time=solve_time,
             status="SIGKILL",
@@ -255,7 +254,7 @@ class SolverResult:
             solver_version=solver_version,
             additional_info=additional_info
         )
-    
+
     @classmethod
     def create_unsupported_result(cls, problem_type: str, solver_name: str = "unknown",
                                 solver_version: str = "unknown") -> 'SolverResult':
@@ -295,7 +294,7 @@ class SolverInterface(ABC):
     All solver implementations must inherit from this class and implement
     required methods. This ensures consistent behavior across all solvers.
     """
-    
+
     def __init__(self, solver_name: str, **kwargs):
         """
         Initialize the solver interface.
@@ -307,7 +306,7 @@ class SolverInterface(ABC):
         self.solver_name = solver_name
         self.config = kwargs
         self.logger = get_logger(f"solver_{solver_name}")
-    
+
     @abstractmethod
     def solve(self, problem_data: ProblemData, timeout: Optional[float] = None) -> SolverResult:
         """
@@ -328,7 +327,7 @@ class SolverInterface(ABC):
             NotImplementedError: If not implemented by subclass
         """
         raise NotImplementedError("Subclasses must implement solve() method")
-    
+
     @abstractmethod
     def get_version(self) -> str:
         """
@@ -341,7 +340,7 @@ class SolverInterface(ABC):
             NotImplementedError: If not implemented by subclass
         """
         raise NotImplementedError("Subclasses must implement get_version() method")
-    
+
     def get_solver_info(self) -> Dict[str, Any]:
         """
         Get information about the solver configuration.
@@ -354,8 +353,8 @@ class SolverInterface(ABC):
             'version': self.get_version(),
             'config': self.config
         }
-    
-    
+
+
     def validate_problem_compatibility(self, problem_data: ProblemData) -> bool:
         """
         Check if the solver can handle the given problem type.
@@ -368,5 +367,5 @@ class SolverInterface(ABC):
         """
         # Default implementation - subclasses should override for specific checks
         return True
-    
+
 

@@ -8,7 +8,7 @@ state for reproducibility tracking.
 import subprocess
 import sys
 from pathlib import Path
-from typing import Optional, Dict, Any
+from typing import Any, Dict, Optional
 
 # Add project root to path for imports
 project_root = Path(__file__).parent.parent.parent
@@ -30,10 +30,10 @@ def get_git_commit_hash() -> Optional[str]:
         Git commit hash or None if not available
     """
     global _git_info_cache
-    
+
     if _git_info_cache is not None:
         return _git_info_cache.get('commit_hash')
-    
+
     try:
         result = subprocess.run(
             ['git', 'rev-parse', 'HEAD'],
@@ -45,12 +45,12 @@ def get_git_commit_hash() -> Optional[str]:
         if result.returncode == 0:
             commit_hash = result.stdout.strip()
             logger.debug(f"Detected Git commit hash: {commit_hash}")
-            
+
             # Initialize cache if not exists
             if _git_info_cache is None:
                 _git_info_cache = {}
             _git_info_cache['commit_hash'] = commit_hash
-            
+
             return commit_hash
         else:
             logger.warning(f"Git command failed: {result.stderr.strip()}")
@@ -145,10 +145,10 @@ def get_git_info() -> Dict[str, Any]:
         'is_dirty': is_git_repo_dirty(),
         'available': None
     }
-    
+
     # Determine if Git is available based on any successful command
     info['available'] = any(value is not None for value in info.values() if value != info['available'])
-    
+
     return info
 
 

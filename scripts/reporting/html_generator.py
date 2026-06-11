@@ -10,17 +10,18 @@ Generates three focused HTML reports as specified in the re-architected design:
 Simple HTML structure without complex Bootstrap dashboards.
 """
 
-from pathlib import Path
-from typing import List, Dict, Any
 import sys
-import yaml
 from datetime import datetime, timezone
+from pathlib import Path
+from typing import Any, Dict, List
+
+import yaml
 
 # Add project root to path for imports
 project_root = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(project_root))
 
-from scripts.reporting.result_processor import ResultProcessor, BenchmarkResult
+from scripts.reporting.result_processor import BenchmarkResult, ResultProcessor
 from scripts.utils.logger import get_logger
 
 logger = get_logger("html_generator")
@@ -28,21 +29,21 @@ logger = get_logger("html_generator")
 
 class HTMLGenerator:
     """Generate simplified HTML reports for benchmark results"""
-    
+
     def __init__(self, output_dir: str = None):
         """Initialize HTML generator with output directory"""
         if output_dir is None:
             output_dir = project_root / "docs" / "pages"
-        
+
         self.output_dir = Path(output_dir)
         self.output_dir.mkdir(parents=True, exist_ok=True)
-        
+
         self.result_processor = ResultProcessor()
         self.logger = get_logger("html_generator")
-        
+
         # Load site configuration
         self.site_config = self._load_site_config()
-    
+
     def _load_site_config(self) -> Dict[str, Any]:
         """Load site configuration from config/site_config.yaml"""
         try:
@@ -52,75 +53,75 @@ class HTMLGenerator:
         except Exception as e:
             self.logger.warning(f"Failed to load site config: {e}")
             return {}
-    
+
     def _get_overview_section(self) -> str:
         """Generate overview section HTML from site config"""
         if not self.site_config or 'site' not in self.site_config:
             return ""
-        
+
         site_info = self.site_config.get('site', {})
         overview = site_info.get('overview', '').strip()
         author = site_info.get('author', '').strip()
-        
+
         if not overview:
             return ""
-        
+
         # Add author information after source code section for more natural flow
         author_html = f'<p style="margin-top: 2rem; padding-top: 1rem; border-top: 1px solid #e9ecef; color: #6c757d;"><strong>👤 Author:</strong> {author}</p>' if author else ""
-        
+
         # Add author info at the end for a more natural flow
         overview_with_author = overview + author_html
-        
+
         return f"""
         <div class="overview-section">
             <h2>📋 Project Overview</h2>
             <div class="overview-content">{overview_with_author}</div>
         </div>
         """
-    
+
     def _get_results_matrix_note(self) -> str:
         """Generate results matrix note HTML from site config"""
         if not self.site_config or 'site' not in self.site_config:
             return ""
-        
+
         site_info = self.site_config.get('site', {})
         note = site_info.get('results_matrix_note', '').strip()
-        
+
         if not note:
             return ""
-        
+
         return f"""
         <div class="matrix-note">
             <div class="matrix-note-content">{note}</div>
         </div>
         """
-    
+
     def _analyze_multiple_environments(self, results: List[BenchmarkResult]) -> Dict[str, Any]:
         """Analyze commit hashes and environments from all results"""
         commit_hashes = set()
         environments = set()
-        
+
         for result in results:
             # Collect commit hashes
             if hasattr(result, 'commit_hash') and result.commit_hash:
                 commit_hashes.add(result.commit_hash)
-            
+
             # Collect environment platforms
             env_info = getattr(result, 'environment_info', {})
             platform = self._get_platform_info(env_info)
             if platform != 'Unknown':
                 environments.add(platform)
-        
+
         return {
             'commit_hashes': sorted(list(commit_hashes)),
             'environments': sorted(list(environments)) if environments else ['Unknown']
         }
-    
+
     def _generate_environment_section(self, env_analysis: Dict[str, Any], env_info: Dict[str, Any]) -> str:
         """Generate environment information section HTML"""
         commit_hashes = env_analysis['commit_hashes']
         environments = env_analysis['environments']
-        
+
         # Generate commit hash display
         if len(commit_hashes) == 1:
             commit_display = f"<p><strong>Git Commit Hash:</strong> <code>{commit_hashes[0][:8]}</code></p>"
@@ -130,7 +131,7 @@ class HTMLGenerator:
             commit_display += f"<p><em>⚠️ Multiple environments detected: Results from {len(commit_hashes)} different Git commits</em></p>"
         else:
             commit_display = "<p><strong>Git Commit Hash:</strong> Unknown</p>"
-        
+
         # Generate environment display
         if len(environments) == 1:
             env_display = f"<p><strong>Platform:</strong> {environments[0]}</p>"
@@ -140,7 +141,7 @@ class HTMLGenerator:
             env_display += f"<p><em>⚠️ Multiple platforms detected: Results from {len(environments)} different environments</em></p>"
         else:
             env_display = "<p><strong>Platform:</strong> Unknown</p>"
-        
+
         # Python version (from latest result)
         python_info = env_info.get('python', {})
         python_version = python_info.get('version', 'Unknown')
@@ -149,7 +150,7 @@ class HTMLGenerator:
             python_display = f"<p><strong>Python Version:</strong> {python_implementation} {python_version}</p>"
         else:
             python_display = f"<p><strong>Python Version:</strong> {python_version}</p>"
-        
+
         # Operating System details
         os_info = env_info.get('os', {})
         os_system = os_info.get('system', 'Unknown')
@@ -158,7 +159,7 @@ class HTMLGenerator:
             os_display = f"<p><strong>Operating System:</strong> {os_system} {os_release}</p>"
         else:
             os_display = f"<p><strong>Operating System:</strong> {os_system}</p>"
-        
+
         # CPU information
         cpu_info = env_info.get('cpu', {})
         cpu_count = cpu_info.get('cpu_count', 'Unknown')
@@ -169,7 +170,7 @@ class HTMLGenerator:
             cpu_display = f"<p><strong>CPU Cores:</strong> {cpu_count}</p>"
         else:
             cpu_display = f"<p><strong>CPU:</strong> {processor}</p>"
-        
+
         # Memory information
         memory_info = env_info.get('memory', {})
         memory_gb = memory_info.get('total_gb', 'Unknown')
@@ -177,30 +178,30 @@ class HTMLGenerator:
             memory_display = f"<p><strong>Memory:</strong> {memory_gb:.1f} GB</p>"
         else:
             memory_display = "<p><strong>Memory:</strong> Unknown</p>"
-        
+
         # Note about MATLAB (since we can't easily detect versions from environment)
         matlab_note = "<p><strong>MATLAB:</strong> Available (version detection via solver results)</p>"
-        
+
         return commit_display + env_display + python_display + os_display + cpu_display + memory_display + matlab_note
-    
+
     def _get_platform_info(self, environment_info: Dict[str, Any]) -> str:
         """Extract platform information including CPU and memory details"""
         if not isinstance(environment_info, dict):
             return 'Unknown'
-            
+
         os_info = environment_info.get('os', {})
         cpu_info = environment_info.get('cpu', {})
         memory_info = environment_info.get('memory', {})
-        
+
         platform_base = os_info.get('system', 'Unknown')
         cpu_count = cpu_info.get('cpu_count', 'Unknown')
         memory_gb = memory_info.get('total_gb', 'Unknown')
-        
+
         if platform_base != 'Unknown' and cpu_count != 'Unknown' and memory_gb != 'Unknown':
             return f"{platform_base} ({cpu_count}CPU, {memory_gb:.0f}GB)"
         else:
             return platform_base
-    
+
     def _get_common_css(self) -> str:
         """Get common CSS styles for all reports"""
         return """
@@ -329,58 +330,55 @@ class HTMLGenerator:
             text-decoration: underline;
         }
         """
-    
+
     def generate_all_reports(self) -> bool:
         """Generate all three HTML reports"""
-        
+
         self.logger.info("Generating simplified HTML reports...")
-        
+
         try:
             # Get latest results
             results = self.result_processor.get_latest_results_for_reporting()
-            
+
             if not results:
                 self.logger.warning("No results found for report generation")
                 return False
-            
+
             # Generate all four reports
             self.generate_overview(results)
             self.generate_results_matrix(results)
             self.generate_raw_data(results)
             self.generate_data_index()
-            
+
             self.logger.info("All simplified HTML reports generated successfully")
             return True
-            
+
         except Exception as e:
             self.logger.error(f"Failed to generate HTML reports: {e}")
             return False
-    
+
     def generate_overview(self, results: List[BenchmarkResult]) -> str:
         """Generate overview dashboard showing performance-focused statistics"""
-        
+
         self.logger.info("Generating overview dashboard...")
-        
+
         # Get summary statistics
         summary = self.result_processor.get_summary_statistics(results)
         problem_counts = self.result_processor.get_problem_count_by_library_and_type(results)
-        
+
         # Analyze multiple environments and commit hashes
         env_analysis = self._analyze_multiple_environments(results)
-        
+
         # Generate environment info from latest result for fallback
         if results:
             # Handle both dict and object result formats
             if isinstance(results[0], dict):
                 env_info = results[0].get('environment_info', {})
-                latest_commit_hash = results[0].get('commit_hash', 'unknown')
             else:
                 env_info = getattr(results[0], 'environment_info', {})
-                latest_commit_hash = getattr(results[0], 'commit_hash', 'unknown')
         else:
             env_info = {}
-            latest_commit_hash = "unknown"
-        
+
         html_content = f"""<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -680,10 +678,10 @@ class HTMLGenerator:
                 <div style="margin-top: 1rem;">
                     <strong>Solver Names:</strong>
                     <ul style="column-count: 2; column-gap: 2rem; margin: 1rem 0; padding-left: 1.5rem;">"""
-        
+
         for solver_name in sorted(summary['solver_names']):
             html_content += f"<li>{solver_name}</li>"
-        
+
         html_content += """
                     </ul>
                 </div>
@@ -703,7 +701,7 @@ class HTMLGenerator:
                         </tr>
                     </thead>
                     <tbody>"""
-        
+
         # Generate problem count table
         for library in sorted(problem_counts.keys()):
             for problem_type in sorted(problem_counts[library].keys()):
@@ -714,7 +712,7 @@ class HTMLGenerator:
                             <td>{problem_type}</td>
                             <td>{count}</td>
                         </tr>"""
-        
+
         html_content += """
                     </tbody>
                 </table>
@@ -756,27 +754,27 @@ class HTMLGenerator:
     </footer>
 </body>
 </html>"""
-        
+
         # Save to file
         output_file = self.output_dir / "index.html"
         with open(output_file, 'w') as f:
             f.write(html_content)
-        
+
         self.logger.info(f"Overview report saved to {output_file}")
         return html_content
-    
+
     def generate_results_matrix(self, results: List[BenchmarkResult]) -> str:
         """Generate problems × solvers results matrix"""
-        
+
         self.logger.info("Generating results matrix...")
-        
+
         # Get matrix data
         matrix_data = self.result_processor.get_results_matrix(results)
         problems = matrix_data['problems']
         solvers = matrix_data['solvers']
         matrix = matrix_data['matrix']
         problem_metadata = matrix_data['problem_metadata']
-        
+
         # Copy the same CSS from overview
         css_styles = """
         * {
@@ -1050,7 +1048,7 @@ class HTMLGenerator:
             text-decoration: underline;
         }
         """
-        
+
         html_content = f"""<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1111,24 +1109,24 @@ class HTMLGenerator:
                             <th>Problem</th>
                             <th>Type</th>
                             <th>Known Objective</th>"""
-        
+
         for solver in solvers:
             html_content += f"<th>{solver}</th>"
-        
+
         html_content += """
                         </tr>
                     </thead>
                     <tbody>"""
-        
+
         prev_library = None
         for problem in problems:
             metadata = problem_metadata[problem]
             known_obj = metadata['known_objective_value']
             current_library = metadata['library_name']
-            
+
             # Check if this is the same library as the previous row for grouping
             is_same_library = prev_library == current_library
-            
+
             # Handle known objective value formatting - use scientific notation with 5 decimal places
             if known_obj is None:
                 known_obj_str = "—"
@@ -1140,36 +1138,36 @@ class HTMLGenerator:
                 except (ValueError, TypeError):
                     # If conversion fails, use the string as-is
                     known_obj_str = str(known_obj)
-            
+
             # Check if this is a library boundary
             row_class = "library-boundary" if not is_same_library and prev_library is not None else ""
-            
+
             # Find fastest time among excellent accuracy solvers for this problem
             # If no excellent accuracy solvers exist, fallback to good accuracy solvers
             fastest_excellent_time = float('inf')
             fastest_excellent_solver = None
             fastest_good_time = float('inf')
             fastest_good_solver = None
-            
+
             if known_obj is not None:
                 for solver in solvers:
                     result = matrix[problem][solver]
                     if result and result['status']:
                         obj_val = result['objective_value']
                         solve_time = result['solve_time']
-                        
+
                         # Only consider results with valid objective value and solve time
                         if obj_val is not None and solve_time is not None and solve_time > 0:
                             try:
                                 obj_float = float(obj_val)
                                 known_float = float(known_obj)
-                                
+
                                 # Calculate relative error
                                 if known_float != 0:
                                     rel_error = abs(obj_float - known_float) / abs(known_float)
                                 else:
                                     rel_error = abs(obj_float)
-                                
+
                                 # Check for excellent accuracy
                                 if rel_error < 1e-4 and solve_time < fastest_excellent_time:
                                     fastest_excellent_time = solve_time
@@ -1180,18 +1178,18 @@ class HTMLGenerator:
                                     fastest_good_solver = solver
                             except (ValueError, TypeError):
                                 pass
-                
+
                 # Use excellent if available, otherwise fallback to good
                 if fastest_excellent_solver is None and fastest_good_solver is not None:
                     fastest_excellent_solver = fastest_good_solver
-            
+
             html_content += f"""
             <tr class="{row_class}">
                 <td>{metadata['library_name']}</td>
                 <td class="problem-name">{problem}</td>
                 <td>{metadata['problem_type']}</td>
                 <td>{known_obj_str}</td>"""
-            
+
             for solver in solvers:
                 result = matrix[problem][solver]
                 if result is None:
@@ -1207,7 +1205,7 @@ class HTMLGenerator:
                     status = result['status'] or 'unknown'
                     solve_time = result['solve_time']
                     obj_val = result['objective_value']
-                    
+
                     # Determine CSS class based on status
                     status_lower = status.lower()
                     if status_lower == 'optimal':
@@ -1228,7 +1226,7 @@ class HTMLGenerator:
                         css_class = 'status-infeasible'
                     else:
                         css_class = 'status-unknown'
-                    
+
                     # Format solve time (2nd row)
                     solve_time_str = "—"  # Default placeholder
                     solve_time_class = "cell-solve-time"
@@ -1237,7 +1235,7 @@ class HTMLGenerator:
                         # Check if this is the fastest among excellent accuracy
                         if solver == fastest_excellent_solver:
                             solve_time_class += " fastest-excellent"
-                    
+
                     # Format objective value (3rd row) with accuracy-based coloring
                     obj_val_str = "—"  # Default placeholder
                     accuracy_class = "accuracy-unknown"
@@ -1245,7 +1243,7 @@ class HTMLGenerator:
                         try:
                             obj_float = float(obj_val)
                             obj_val_str = f"{obj_float:.5e}"
-                            
+
                             # Calculate accuracy compared to known objective
                             if known_obj is not None:
                                 try:
@@ -1272,7 +1270,7 @@ class HTMLGenerator:
                         except (ValueError, TypeError):
                             # Keep the default placeholder "—" for invalid values
                             pass
-                    
+
                     # Generate 3-row fixed layout cell
                     html_content += f'''<td class="{css_class}">
                         <div class="cell-content">
@@ -1281,10 +1279,10 @@ class HTMLGenerator:
                             <div class="cell-objective {accuracy_class}">{obj_val_str}</div>
                         </div>
                     </td>'''
-            
+
             html_content += "</tr>"
             prev_library = current_library  # Update previous library for next iteration
-        
+
         html_content += f"""
                     </tbody>
                 </table>
@@ -1323,20 +1321,20 @@ class HTMLGenerator:
     </footer>
 </body>
 </html>"""
-        
+
         # Save to file
         output_file = self.output_dir / "results_matrix.html"
         with open(output_file, 'w') as f:
             f.write(html_content)
-        
+
         self.logger.info(f"Results matrix saved to {output_file}")
         return html_content
-    
+
     def generate_raw_data(self, results: List[BenchmarkResult]) -> str:
         """Generate raw data table for detailed inspection"""
-        
+
         self.logger.info("Generating raw data report...")
-        
+
         # Use the same professional CSS as other reports
         css_styles = """
         * {
@@ -1604,7 +1602,7 @@ class HTMLGenerator:
             text-decoration: underline;
         }
         """
-        
+
         html_content = f"""<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1653,7 +1651,7 @@ class HTMLGenerator:
                             </tr>
                         </thead>
                         <tbody>"""
-        
+
         # Sort results by library_name, problem_type, problem_name
         sorted_results = sorted(
             results,
@@ -1663,11 +1661,11 @@ class HTMLGenerator:
                 r.problem_name or 'zzz'       # Put None/empty at end
             )
         )
-        
+
         for result in sorted_results:
             # Format values
             solve_time = f"{result.solve_time:.4f}" if result.solve_time is not None else "—"
-            
+
             # Handle objective value formatting
             if result.primal_objective_value is not None:
                 try:
@@ -1678,7 +1676,7 @@ class HTMLGenerator:
             else:
                 objective = "—"
             iterations = str(result.iterations) if result.iterations is not None else "—"
-            
+
             # Handle duality gap formatting
             if result.duality_gap is not None:
                 try:
@@ -1689,17 +1687,17 @@ class HTMLGenerator:
             else:
                 duality_gap = "—"
             timestamp = result.timestamp.strftime('%Y-%m-%d %H:%M:%S') if result.timestamp else "—"
-            
+
             # Format commit hash and environment
             commit_hash = getattr(result, 'commit_hash', None) or "—"
             if commit_hash != "—" and len(commit_hash) > 8:
                 commit_hash_short = commit_hash[:8]
             else:
                 commit_hash_short = commit_hash
-                
+
             environment_info = getattr(result, 'environment_info', {})
             platform = self._get_platform_info(environment_info)
-            
+
             # Status styling
             status = result.status or "unknown"
             status_lower = status.lower()
@@ -1715,7 +1713,7 @@ class HTMLGenerator:
                 status_class = 'status-infeasible'
             else:
                 status_class = ''
-            
+
             html_content += f"""
             <tr>
                 <td><span class="solver-name">{result.solver_name}</span></td>
@@ -1732,8 +1730,8 @@ class HTMLGenerator:
                 <td><span class="platform">{platform}</span></td>
                 <td class="timestamp">{timestamp}</td>
             </tr>"""
-        
-        html_content += f"""
+
+        html_content += """
                     </tbody>
                 </table>
                 </div>
@@ -1751,20 +1749,20 @@ class HTMLGenerator:
     </footer>
 </body>
 </html>"""
-        
+
         # Save to file
         output_file = self.output_dir / "raw_data.html"
         with open(output_file, 'w') as f:
             f.write(html_content)
-        
+
         self.logger.info(f"Raw data report saved to {output_file}")
         return html_content
-    
+
     def generate_data_index(self) -> str:
         """Generate index.html for data directory with links to data files"""
-        
+
         self.logger.info("Generating data index page...")
-        
+
         html_content = f"""<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -2001,15 +1999,15 @@ class HTMLGenerator:
     </footer>
 </body>
 </html>"""
-        
+
         # Save to data directory
         data_dir = self.output_dir / "data"
         data_dir.mkdir(parents=True, exist_ok=True)
         output_file = data_dir / "index.html"
-        
+
         with open(output_file, 'w') as f:
             f.write(html_content)
-        
+
         self.logger.info(f"Data index page saved to {output_file}")
         return html_content
 
@@ -2017,10 +2015,10 @@ class HTMLGenerator:
 def main():
     """Test HTML generator"""
     generator = HTMLGenerator()
-    
+
     print("Testing HTML Generator...")
     success = generator.generate_all_reports()
-    
+
     if success:
         print("✅ All HTML reports generated successfully!")
         print("Generated files:")
