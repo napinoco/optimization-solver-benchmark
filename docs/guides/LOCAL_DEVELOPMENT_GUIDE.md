@@ -193,21 +193,7 @@ python main.py --all --quiet
 
 ## Development Workflow
 
-### Project Structure
-```
-optimization-solver-benchmark/
-├── main.py                    # Main entry point
-├── config/                    # Configuration files
-├── scripts/                   # Core implementation
-│   ├── benchmark/            # Benchmark execution
-│   ├── solvers/              # Solver implementations
-│   ├── reporting/            # Report generation
-│   └── utils/                # Utilities
-├── problems/                 # Problem libraries (DIMACS, SDPLIB)
-├── docs/                     # Generated reports (committed)
-├── database/                 # SQLite database
-└── tests/                    # Test suite
-```
+For the project structure, see [detail_design.md](../development/detail_design.md#directory-layout).
 
 ### Local Development Cycle
 

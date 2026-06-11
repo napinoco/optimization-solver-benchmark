@@ -87,11 +87,11 @@ python scripts/database/table_restorer.py --compare-with database/original_resul
 
 ## Design Philosophy
 
-**Fair Baseline Benchmarking**: Uses solver default parameters to avoid optimization bias and provide genuine "out of the box" performance comparison.
+- **Fair baseline benchmarking**: solver default parameters for genuine "out of the box" comparison
+- **Reproducible results**: problem libraries pinned via git submodules, solver versions pinned in requirements.txt
+- **Complete version tracking**: every result stored with solver versions, Git commit, and environment details
 
-**Reproducible Results**: Problem libraries are pinned to specific commit hashes via git submodules, and solver versions are fixed in requirements.txt to ensure identical benchmarking environments across all executions.
-
-**Complete Version Tracking**: All benchmark results are stored in a SQLite database with complete version information (solver versions, Git commit hashes, environment details) to enable historical analysis and ensure full reproducibility of any reported result.
+See [basic_design.md](docs/development/basic_design.md) for the full design principles.
 
 ## Project Structure
 

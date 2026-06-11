@@ -30,63 +30,7 @@ Co-Authored-By: Claude <noreply@anthropic.com>
 - **Clear Function Structure**: Separate function signature from body with proper indentation
 - **Nested Functions**: Apply consistent indentation for nested function definitions
 
-#### MATLAB Function Structure
-```matlab
-function result = example_function(param1, param2)
-    % Function description and documentation
-    % 
-    % Args:
-    %   param1: Description of parameter
-    %   param2: Description of parameter
-    %
-    % Returns:
-    %   result: Description of return value
-    
-    % All function body code must be indented
-    if nargin < 2
-        param2 = default_value;
-    end
-    
-    try
-        % Implementation logic with proper indentation
-        intermediate_value = process_data(param1);
-        result = combine_results(intermediate_value, param2);
-        
-        % Nested function calls maintain indentation
-        if result.status == 'success'
-            fprintf('Operation completed successfully\n');
-        end
-        
-    catch ME
-        % Error handling with consistent indentation
-        fprintf('Error in example_function: %s\n', ME.message);
-        result = create_error_result(ME);
-    end
-    
-end
-
-function nested_result = helper_function(data)
-    % Nested functions also follow indentation rules
-    
-    nested_result = struct();
-    nested_result.processed_data = data * 2;
-    nested_result.timestamp = datestr(now);
-    
-end
-```
-
-#### MATLAB Indentation Rules
-1. **Function Body**: All code within `function...end` blocks must be indented by 4 spaces
-2. **Control Structures**: `if`, `for`, `while`, `try` blocks require additional indentation
-3. **Nested Functions**: Each nested function follows the same indentation rules
-4. **Comments**: Maintain indentation level consistent with surrounding code
-5. **Line Continuation**: Use proper indentation for multi-line statements
-
-#### MATLAB Documentation Standards
-- Use `%` for single-line comments with proper indentation
-- Document function parameters and return values
-- Include usage examples for complex functions
-- Maintain consistent commenting style throughout functions
+For reference style, see the existing runners such as `scripts/solvers/matlab/sedumi_runner.m`. Document function parameters and return values with `%` comments.
 
 ---
 
@@ -98,57 +42,7 @@ end
 - **Docstrings**: Google-style docstrings for all classes and functions
 - **Error Handling**: Explicit exception handling with meaningful messages; bare `except:` is forbidden (ruff E722)
 
-#### Code Structure
-```python
-# File header example
-"""
-Module description.
-
-This module provides [functionality description].
-"""
-
-import standard_library
-import third_party_packages
-import local_modules
-
-class ExampleClass:
-    """Class description following Google docstring format.
-    
-    Args:
-        param1: Description of parameter
-        param2: Description of parameter
-        
-    Returns:
-        Description of return value
-        
-    Raises:
-        ExceptionType: Description of when this exception is raised
-    """
-    
-    def __init__(self, param1: str, param2: int) -> None:
-        """Initialize the class with required parameters."""
-        self.param1 = param1
-        self.param2 = param2
-    
-    def example_method(self, input_data: Dict[str, Any]) -> List[str]:
-        """Method description with clear purpose.
-        
-        Args:
-            input_data: Dictionary containing input parameters
-            
-        Returns:
-            List of processed results
-            
-        Raises:
-            ValueError: If input_data is invalid
-        """
-        try:
-            # Implementation with clear error handling
-            result = self._process_data(input_data)
-            return result
-        except KeyError as e:
-            raise ValueError(f"Invalid input data: missing key {e}") from e
-```
+For reference style (module docstrings, Google-style docstrings, error handling), see `scripts/solvers/solver_interface.py`.
 
 #### Naming Conventions
 - **Classes**: PascalCase (`BenchmarkRunner`, `SolverInterface`)
@@ -158,53 +52,11 @@ class ExampleClass:
 - **Private Members**: Leading underscore (`_internal_method`, `_private_variable`)
 
 #### Import Organization
-```python
-# Standard library imports
-import json
-import logging
-from pathlib import Path
-from typing import Dict, List, Optional, Union
-
-# Third-party imports
-import numpy as np
-import pandas as pd
-import yaml
-from sqlalchemy import create_engine
-
-# Local application imports
-from scripts.solvers.solver_interface import SolverInterface
-from scripts.utils.config_loader import ConfigLoader
-```
+Imports are grouped (standard library / third-party / local) and sorted automatically by `ruff check --fix` (isort rules).
 
 ### Configuration Standards
-
-#### YAML Configuration Format
-```yaml
-# Use clear hierarchical structure
-benchmark:
-  timeout: 300                 # Always include units in comments
-  parallel_jobs: 1             # Explain reasoning for non-obvious values
-  problem_sets:
-    light_set: "problems/light_set"
-    medium_set: "problems/medium_set"
-
-# Group related configurations
-reporting:
-  formats: ["html", "json", "csv"]
-  include_environment_info: true
-  
-# Use descriptive names and document purpose
-solver_backends:
-  cvxpy:
-    default: "CLARABEL"        # Default backend for CVXPY
-    available: ["CLARABEL", "SCS", "ECOS", "OSQP"]
-```
-
-#### Configuration Validation
-- **Schema Validation**: Use YAML schema validation for all config files
-- **Range Checking**: Validate numerical values are within acceptable ranges
-- **Required Fields**: Clearly specify required vs optional configuration
-- **Default Values**: Provide sensible defaults for all optional settings
+- YAML files live in `config/` (`site_config.yaml`, `problem_registry.yaml`); use clear hierarchical structure and comment non-obvious values
+- Validate configuration changes with `python main.py --validate`
 
 ---
 
@@ -226,31 +78,9 @@ solver_backends:
 - **Class Docstrings**: Describe class purpose and usage patterns
 - **Module Docstrings**: Explain module purpose and key components
 
-### Documentation Structure
-```markdown
-# Standard documentation format
-## Overview
-Brief description of the component/feature
-
-## Usage
-Code examples showing how to use the feature
-
-## Configuration
-Configuration options and their effects
-
-## Examples
-Real-world usage examples
-
-## Troubleshooting
-Common issues and solutions
-```
-
 ### Markdown Standards
-- **Headers**: Use hierarchical structure (H1 → H2 → H3)
-- **Code Blocks**: Always specify language for syntax highlighting
-- **Links**: Use relative paths for internal documentation
-- **Lists**: Use consistent bullet points and numbering
-- **Tables**: Include headers and align columns properly
+- Use hierarchical headers, specify languages for code blocks, and use relative paths for internal links
+- Do not duplicate code in documentation: describe the role briefly and reference the source file. Documentation that repeats what the code says goes stale
 
 ---
 
@@ -263,40 +93,7 @@ Common issues and solutions
 4. **Error Boundaries**: Isolate failures to prevent cascade effects
 
 ### Component Integration
-```python
-# Standard interface pattern
-class SolverInterface(ABC):
-    """Abstract base class defining solver contract."""
-    
-    @abstractmethod
-    def solve(self, problem: Problem) -> SolverResult:
-        """Solve the given optimization problem."""
-        pass
-    
-    @abstractmethod
-    def is_compatible(self, problem: Problem) -> bool:
-        """Check if solver can handle the problem type."""
-        pass
-
-# Implementation pattern
-class ConcreteSolver(SolverInterface):
-    """Concrete implementation with clear responsibilities."""
-    
-    def __init__(self, config: Dict[str, Any]) -> None:
-        """Initialize with configuration dependency injection."""
-        self.config = config
-        self._validate_config()
-    
-    def solve(self, problem: Problem) -> SolverResult:
-        """Implementation with error handling and validation."""
-        if not self.is_compatible(problem):
-            raise ValueError(f"Solver cannot handle {problem.type}")
-        
-        try:
-            return self._execute_solve(problem)
-        except Exception as e:
-            return SolverResult(status="error", error_message=str(e))
-```
+New solvers implement the abstract contract in `scripts/solvers/solver_interface.py` (`solve()` returning a `SolverResult`, plus version detection and compatibility checks). See `scripts/solvers/python/cvxpy_runner.py` for a complete implementation.
 
 ### Data Model Standards
 - **Immutable Data**: Use dataclasses or named tuples for data transfer
@@ -314,29 +111,12 @@ class ConcreteSolver(SolverInterface):
 - **Parallel Execution**: Use configured parallel job limits
 - **Memory Efficiency**: Avoid memory leaks in long-running operations
 
-### GitHub Actions Optimization
-- **Caching**: Cache dependencies and intermediate results
-- **Artifact Management**: Efficiently handle build artifacts
-- **Resource Awareness**: Respect GitHub Actions resource limits
-- **Execution Time**: Target <5 minutes for light problem sets
-
 ---
 
 ## Security Standards
 
 ### Input Validation
-```python
-# Always validate external inputs
-def load_problem(file_path: str) -> Problem:
-    """Load problem with comprehensive validation."""
-    if not Path(file_path).exists():
-        raise FileNotFoundError(f"Problem file not found: {file_path}")
-    
-    if not file_path.endswith(('.mps', '.qps', '.py')):
-        raise ValueError(f"Unsupported file format: {file_path}")
-    
-    # Additional validation...
-```
+Always validate external inputs (file existence, supported formats) before processing; see the loaders in `scripts/data_loaders/python/` for the expected pattern.
 
 ### Error Handling
 - **Never Expose Sensitive Data**: Sanitize error messages
@@ -346,20 +126,9 @@ def load_problem(file_path: str) -> Problem:
 
 ---
 
-## Release Management
+## Quality Gates
 
-### Version Control
-- **Semantic Versioning**: Use MAJOR.MINOR.PATCH format
-- **Release Branches**: Create release branches for final testing
-- **Tag Releases**: Tag all releases with version numbers
-- **Changelog**: Maintain detailed changelog for each release
-
-### Quality Gates
-1. **All Tests Pass**: Complete test suite must pass
-2. **Code Coverage**: Maintain minimum coverage requirements
-3. **Documentation Updated**: All documentation reflects current state
-4. **Performance Validated**: No significant performance regression
-5. **Security Review**: Basic security checklist completed
+Before merging: tests pass (`pytest tests/`), lint/format checks pass (`ruff check` / `ruff format --check`), and documentation reflects the current implementation.
 
 ---
 
