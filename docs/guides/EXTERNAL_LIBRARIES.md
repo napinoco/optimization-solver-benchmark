@@ -249,12 +249,5 @@ New libraries should provide:
 - **VSDP Project**: [Verified SDP Library](https://github.com/vsdp)
 
 ### Related Documentation
-- **[Problem Structure Analysis](../development/tasks.md#task-70-create-problem-structure-analysis-module)**: Technical details on automatic problem analysis
-- **[CVXPY Converter](../development/tasks.md#fix-external-library-cvxpy-problem-conversion)**: Implementation of external problem conversion
-- **[Benchmark Configuration](../guides/MANUAL_TRIGGER_GUIDE.md)**: Advanced benchmark options
-
----
-
-**Last Updated**: June 2025  
-**Status**: Production Ready ✅  
-**Compatibility**: DIMACS (47 problems), SDPLIB (92 problems), 139 total external problems
+- **[Technical Design](../development/detail_design.md)**: Problem loaders and data model
+- **[Local Development Guide](LOCAL_DEVELOPMENT_GUIDE.md)**: Running benchmarks locally

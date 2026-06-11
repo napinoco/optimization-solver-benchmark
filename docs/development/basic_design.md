@@ -63,9 +63,10 @@ GITHUB ACTIONS (Publishing Only):
 
 ### Supported Components
 **Problem Libraries**:
-- **DIMACS**: 47 problems in SeDuMi .mat format
-- **SDPLIB**: 92+ problems in SDPA .dat-s format
-- **Total Coverage**: 139+ optimization problems
+- **DIMACS**: SeDuMi .mat format
+- **SDPLIB**: SDPA .dat-s format
+
+Roughly 120 problems are currently registered; the authoritative list (and exact count) is `config/problem_registry.yaml`.
 
 **Solver Support**:
 - **Python (9)**: SciPy, CVXPY backends (CLARABEL, SCS, ECOS, OSQP, CVXOPT, SDPA, SCIP, HIGHS)
@@ -97,46 +98,9 @@ GITHUB ACTIONS (Publishing Only):
 
 ---
 
-## Development Status
-
-### Completed Features ✅
-- **Core Benchmarking**: Python and MATLAB solver execution
-- **External Libraries**: DIMACS and SDPLIB integration via git submodules  
-- **Data Publishing**: Interactive HTML reports with CSV/JSON export
-- **Version Tracking**: Complete environment and solver version recording
-- **CI/CD Pipeline**: GitHub Actions automation with GitHub Pages deployment
-- **Validation Framework**: Problem and solver compatibility testing
-
-### Current Solver Coverage
-```
-Problem Type | Solvers Available | Success Rate
-LP          | 9 solvers        | ~100%
-QP          | 8 solvers        | ~100%  
-SOCP        | 6 solvers        | ~40-60%
-SDP         | 5 solvers        | ~20-40%
-```
-
-### Architecture Benefits
-- **Fair Comparison**: Minimal configuration prevents solver bias
-- **Research Ready**: Complete metadata for paper publication
-- **Extensible**: Easy addition of new solvers and problem formats
-- **Automated**: Hands-off operation via GitHub Actions
-
----
-
 ## Usage Scenarios
 
-### Research Applications
-- **Solver Performance Analysis**: Compare solvers across problem types
-- **Algorithm Development**: Benchmark new optimization algorithms
-- **Problem Difficulty Assessment**: Analyze which problems are challenging
-- **Historical Trends**: Track solver performance improvements over time
-
-### Academic Use Cases
-- **Course Materials**: Demonstrate optimization solver capabilities
-- **Student Projects**: Provide baseline results for comparison
-- **Research Publication**: Reference standardized benchmark results
-- **Collaboration**: Share reproducible performance data
+Intended for research and academic use: comparing solver performance across problem types, benchmarking new algorithms against published baselines, and referencing reproducible results in publications.
 
 ---
 

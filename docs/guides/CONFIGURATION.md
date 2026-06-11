@@ -8,57 +8,15 @@ The benchmark system uses YAML configuration files to manage solvers, problems, 
 
 ## Configuration Files
 
-### 1. Solver Registry (`config/solver_registry.yaml`)
+### 1. Problem Registry (`config/problem_registry.yaml`)
 
-The solver registry defines all available solvers and their display names for reports.
+Defines available benchmark problems from external libraries (DIMACS, SDPLIB): file paths, formats, and known objective values.
 
-```yaml
-solvers:
-  # Python solvers (always available)
-  scipy_linprog:
-    display_name: "SciPy linprog"
-  
-  cvxpy_clarabel:
-    display_name: "CLARABEL (via CVXPY)"
-  
-  cvxpy_scs:
-    display_name: "SCS (via CVXPY)"
-  
-  cvxpy_ecos:
-    display_name: "ECOS (via CVXPY)"
-  
-  cvxpy_osqp:
-    display_name: "OSQP (via CVXPY)"
-  
-  cvxpy_cvxopt:
-    display_name: "CVXOPT (via CVXPY)"
-  
-  cvxpy_sdpa:
-    display_name: "SDPA (via CVXPY)"
-  
-  cvxpy_scip:
-    display_name: "SCIP (via CVXPY)"
-  
-  cvxpy_highs:
-    display_name: "HiGHS (via CVXPY)"
-    
-  # MATLAB solvers (require MATLAB installation)
-  matlab_sedumi:
-    display_name: "SeDuMi (via MATLAB)"
-  
-  matlab_sdpt3:
-    display_name: "SDPT3 (via MATLAB)"
-```
+### 2. Site Configuration (`config/site_config.yaml`)
 
-**Note**: The solver registry only contains display names. Actual solver initialization logic is implemented in code for better maintainability and dynamic availability detection.
+Contains site metadata for the generated reports and the solver `display_order`.
 
-### 2. Problem Registry (`config/problem_registry.yaml`)
-
-Defines available benchmark problems from various libraries (DIMACS, SDPLIB, internal).
-
-### 3. Site Configuration (`config/site_config.yaml`)
-
-Contains general system settings and reporting configuration.
+**Note**: Solver definitions are not configured via YAML. Python solver configurations live in `scripts/solvers/python/solver_configs.py` (single source of truth), and MATLAB solver configurations in `scripts/solvers/matlab/matlab_process_interface.py`. Availability is detected dynamically at runtime.
 
 ## MATLAB Solver Configuration
 
@@ -238,18 +196,7 @@ print(f'SeDuMi version: {sedumi.get_version()}')
 
 ### Debug Information
 
-For debugging MATLAB integration issues:
-
-```python
-# Enable debug logging
-import logging
-logging.basicConfig(level=logging.DEBUG)
-
-# Test MATLAB solver
-from scripts.solvers.matlab.matlab_interface import SeDuMiSolver
-solver = SeDuMiSolver()
-print(f"Solver initialized: {solver.solver_name}")
-```
+For debugging MATLAB integration issues, see `scripts/solvers/matlab/matlab_process_interface.py` and check `logs/benchmark.log` (the process interface logs MATLAB availability detection at startup).
 
 ## Configuration Best Practices
 
@@ -281,31 +228,7 @@ print(f"Solver initialized: {solver.solver_name}")
 
 ### Custom Solver Addition
 
-To add new solvers:
-
-1. **Implement SolverInterface**: Create solver class inheriting from `SolverInterface`
-2. **Update BenchmarkRunner**: Add solver creation logic to `create_solver()` method
-3. **Add to Registry**: Include solver in `solver_registry.yaml`
-4. **Update Documentation**: Document new solver requirements and setup
-
-### Environment-Specific Settings
-
-Create environment-specific configurations:
-
-```yaml
-# config/solver_registry_dev.yaml - Development environment
-solvers:
-  # Only fast solvers for development
-  scipy_linprog:
-    display_name: "SciPy linprog"
-  cvxpy_clarabel:
-    display_name: "CLARABEL (via CVXPY)"
-
-# config/solver_registry_prod.yaml - Production environment  
-solvers:
-  # All solvers including MATLAB for comprehensive benchmarking
-  # ... (full solver list)
-```
+See "Adding New Solvers" in the [Local Development Guide](LOCAL_DEVELOPMENT_GUIDE.md) — the entry point is `scripts/solvers/python/solver_configs.py`.
 
 ## Related Documentation
 

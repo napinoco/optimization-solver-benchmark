@@ -1,25 +1,27 @@
-import platform
-import psutil
-import sys
-import subprocess
+import json
 import os
+import platform
+import subprocess
+import sys
 import time
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Dict, Any
-import json
+from typing import Any, Dict
+
+import psutil
 
 # Add project root to path for imports
 project_root = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(project_root))
 
-from scripts.utils.logger import get_logger
 from scripts.utils.git_utils import get_git_info
+from scripts.utils.logger import get_logger
 
 logger = get_logger("environment_info")
 
 # Global cache to avoid repeated expensive environment collection
 _environment_cache = None
+
 
 def get_os_info() -> Dict[str, str]:
     """Get operating system information with enhanced Ubuntu detection."""
@@ -29,9 +31,9 @@ def get_os_info() -> Dict[str, str]:
         "version": platform.version(),
         "machine": platform.machine(),
         "architecture": platform.architecture()[0],
-        "platform": platform.platform()
+        "platform": platform.platform(),
     }
-    
+
     # Enhanced Ubuntu version detection
     if platform.system() == "Linux":
         try:
@@ -39,28 +41,28 @@ def get_os_info() -> Dict[str, str]:
             if os.path.exists("/etc/os-release"):
                 with open("/etc/os-release", "r") as f:
                     os_release = f.read()
-                    for line in os_release.split('\n'):
-                        if line.startswith('PRETTY_NAME='):
-                            os_info["ubuntu_version"] = line.split('=')[1].strip('"')
+                    for line in os_release.split("\n"):
+                        if line.startswith("PRETTY_NAME="):
+                            os_info["ubuntu_version"] = line.split("=")[1].strip('"')
                             break
-                        elif line.startswith('VERSION='):
-                            os_info["version_number"] = line.split('=')[1].strip('"')
-                        elif line.startswith('VERSION_ID='):
-                            os_info["version_id"] = line.split('=')[1].strip('"')
-            
+                        elif line.startswith("VERSION="):
+                            os_info["version_number"] = line.split("=")[1].strip('"')
+                        elif line.startswith("VERSION_ID="):
+                            os_info["version_id"] = line.split("=")[1].strip('"')
+
             # Try lsb_release as fallback
             try:
-                result = subprocess.run(['lsb_release', '-d'], 
-                                      capture_output=True, text=True, timeout=5)
+                result = subprocess.run(["lsb_release", "-d"], capture_output=True, text=True, timeout=5)
                 if result.returncode == 0:
-                    os_info["lsb_description"] = result.stdout.strip().split('\t')[1]
+                    os_info["lsb_description"] = result.stdout.strip().split("\t")[1]
             except (subprocess.TimeoutExpired, FileNotFoundError, IndexError):
                 pass
-                
+
         except Exception as e:
             logger.debug(f"Could not get detailed Ubuntu version: {e}")
-    
+
     return os_info
+
 
 def get_cpu_info() -> Dict[str, Any]:
     """Get CPU information."""
@@ -68,8 +70,9 @@ def get_cpu_info() -> Dict[str, Any]:
         "processor": platform.processor(),
         "cpu_count": psutil.cpu_count(logical=True),
         "cpu_count_physical": psutil.cpu_count(logical=False),
-        "cpu_freq": psutil.cpu_freq()._asdict() if psutil.cpu_freq() else None
+        "cpu_freq": psutil.cpu_freq()._asdict() if psutil.cpu_freq() else None,
     }
+
 
 def get_memory_info() -> Dict[str, Any]:
     """Get memory information."""
@@ -81,8 +84,9 @@ def get_memory_info() -> Dict[str, Any]:
         "used": memory.used,
         "free": memory.free,
         "total_gb": round(memory.total / (1024**3), 2),
-        "available_gb": round(memory.available / (1024**3), 2)
+        "available_gb": round(memory.available / (1024**3), 2),
     }
+
 
 def get_python_info() -> Dict[str, str]:
     """Get Python environment information."""
@@ -90,168 +94,165 @@ def get_python_info() -> Dict[str, str]:
         "version": platform.python_version(),
         "implementation": platform.python_implementation(),
         "executable": sys.executable,
-        "version_info": f"{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}"
+        "version_info": f"{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}",
     }
+
 
 def get_disk_info() -> Dict[str, Any]:
     """Get disk usage information."""
-    disk_usage = psutil.disk_usage('/')
+    disk_usage = psutil.disk_usage("/")
     return {
         "total": disk_usage.total,
         "used": disk_usage.used,
         "free": disk_usage.free,
         "percent": round((disk_usage.used / disk_usage.total) * 100, 2),
         "total_gb": round(disk_usage.total / (1024**3), 2),
-        "free_gb": round(disk_usage.free / (1024**3), 2)
+        "free_gb": round(disk_usage.free / (1024**3), 2),
     }
+
 
 def get_timezone_info() -> Dict[str, Any]:
     """Get timezone and time information."""
-    
+
     timezone_info = {
         "current_time_utc": datetime.now(timezone.utc).isoformat(),
         "current_time_local": datetime.now().isoformat(),
         "utc_offset_seconds": time.timezone if time.daylight == 0 else time.altzone,
         "utc_offset_hours": -(time.timezone if time.daylight == 0 else time.altzone) / 3600,
         "timezone_name": time.tzname[0] if time.daylight == 0 else time.tzname[1],
-        "daylight_saving": bool(time.daylight and time.localtime().tm_isdst)
+        "daylight_saving": bool(time.daylight and time.localtime().tm_isdst),
     }
-    
+
     # Try to get more detailed timezone info
     try:
         # Try to get timezone from TZ environment variable
-        tz_env = os.environ.get('TZ')
+        tz_env = os.environ.get("TZ")
         if tz_env:
             timezone_info["tz_environment"] = tz_env
-            
+
         # Try to read /etc/timezone (Linux/Ubuntu)
-        if os.path.exists('/etc/timezone'):
-            with open('/etc/timezone', 'r') as f:
+        if os.path.exists("/etc/timezone"):
+            with open("/etc/timezone", "r") as f:
                 system_timezone = f.read().strip()
                 timezone_info["system_timezone"] = system_timezone
-                
+
         # Try to read timezone from timedatectl (systemd systems)
         try:
-            result = subprocess.run(['timedatectl', 'show', '--property=Timezone', '--value'], 
-                                  capture_output=True, text=True, timeout=5)
+            result = subprocess.run(
+                ["timedatectl", "show", "--property=Timezone", "--value"], capture_output=True, text=True, timeout=5
+            )
             if result.returncode == 0:
                 timezone_info["timedatectl_timezone"] = result.stdout.strip()
         except (subprocess.TimeoutExpired, FileNotFoundError):
             pass
-            
+
         # For macOS, try to get timezone from systemsetup
         if platform.system() == "Darwin":
             try:
-                result = subprocess.run(['systemsetup', '-gettimezone'], 
-                                      capture_output=True, text=True, timeout=5)
+                result = subprocess.run(["systemsetup", "-gettimezone"], capture_output=True, text=True, timeout=5)
                 if result.returncode == 0:
                     tz_line = result.stdout.strip()
                     if "Time Zone:" in tz_line:
                         timezone_info["macos_timezone"] = tz_line.split("Time Zone:")[1].strip()
             except (subprocess.TimeoutExpired, FileNotFoundError):
                 pass
-    
+
     except Exception as e:
         logger.debug(f"Could not get detailed timezone info: {e}")
-    
+
     return timezone_info
+
 
 def collect_environment_info() -> Dict[str, Any]:
     """Collect sanitized environment information for benchmark reproducibility with caching."""
     global _environment_cache
-    
+
     if _environment_cache is not None:
         logger.debug("Using cached environment information")
         return _environment_cache
-    
+
     logger.info("Collecting environment information...")
-    
+
     # Collect full environment info first
     full_env_info = {
         "timestamp": psutil.boot_time(),  # System boot time as reference
         "os": get_os_info(),
-        "cpu": get_cpu_info(), 
+        "cpu": get_cpu_info(),
         "memory": get_memory_info(),
         "python": get_python_info(),
         "disk": get_disk_info(),
         "timezone": get_timezone_info(),
-        "git": get_git_info()  # Add Git repository information
+        "git": get_git_info(),  # Add Git repository information
     }
-    
+
     # Apply sanitization to remove sensitive information
     env_info = _sanitize_environment_info(full_env_info)
-    
+
     _environment_cache = env_info
     logger.info("Environment information collected, sanitized, and cached successfully")
     logger.debug(f"Environment details: {json.dumps(env_info, indent=2, default=str)}")
-    
+
     return env_info
 
 
 def _sanitize_environment_info(env_info: Dict[str, Any]) -> Dict[str, Any]:
     """Sanitize environment info to remove sensitive information at collection time."""
-    
+
     # Create sanitized copy with minimal information for privacy protection
     sanitized = {}
-    
+
     # CPU info - keep essential performance info only
-    if 'cpu' in env_info:
-        cpu = env_info['cpu']
-        sanitized['cpu'] = {
-            'cpu_count': cpu.get('cpu_count'),
-            'cpu_count_physical': cpu.get('cpu_count_physical'),
-            'processor': cpu.get('processor'),
-            'architecture': cpu.get('architecture') or env_info.get('os', {}).get('architecture')
+    if "cpu" in env_info:
+        cpu = env_info["cpu"]
+        sanitized["cpu"] = {
+            "cpu_count": cpu.get("cpu_count"),
+            "cpu_count_physical": cpu.get("cpu_count_physical"),
+            "processor": cpu.get("processor"),
+            "architecture": cpu.get("architecture") or env_info.get("os", {}).get("architecture"),
         }
-    
+
     # Memory info - keep total only (performance relevant)
-    if 'memory' in env_info:
-        memory = env_info['memory']
-        sanitized['memory'] = {
-            'total_gb': memory.get('total_gb')
-        }
-    
+    if "memory" in env_info:
+        memory = env_info["memory"]
+        sanitized["memory"] = {"total_gb": memory.get("total_gb")}
+
     # OS info - keep basic system info only (no version details that could identify specific systems)
-    if 'os' in env_info:
-        os_info = env_info['os']
-        sanitized['os'] = {
-            'system': os_info.get('system'),      # Darwin, Linux, Windows
-            'machine': os_info.get('machine'),    # arm64, x86_64
-            'release': os_info.get('release')     # Keep for compatibility testing
+    if "os" in env_info:
+        os_info = env_info["os"]
+        sanitized["os"] = {
+            "system": os_info.get("system"),  # Darwin, Linux, Windows
+            "machine": os_info.get("machine"),  # arm64, x86_64
+            "release": os_info.get("release"),  # Keep for compatibility testing
         }
         # Remove: architecture (duplicated), platform (too detailed), version (too specific)
-    
+
     # Python info - keep version only (remove all paths)
-    if 'python' in env_info:
-        python = env_info['python']
-        sanitized['python'] = {
-            'implementation': python.get('implementation'),  # CPython, PyPy
-            'version': python.get('version'),                # 3.12.2
-            'version_info': python.get('version_info')       # 3.12.2
+    if "python" in env_info:
+        python = env_info["python"]
+        sanitized["python"] = {
+            "implementation": python.get("implementation"),  # CPython, PyPy
+            "version": python.get("version"),  # 3.12.2
+            "version_info": python.get("version_info"),  # 3.12.2
         }
         # Remove: executable (contains user paths)
-    
+
     # Git info - keep commit hash only (remove branch and dirty status)
-    if 'git' in env_info:
-        git = env_info['git']
-        if git.get('available') and git.get('commit_hash'):
-            sanitized['git'] = {
-                'commit_hash': git.get('commit_hash')
-            }
+    if "git" in env_info:
+        git = env_info["git"]
+        if git.get("available") and git.get("commit_hash"):
+            sanitized["git"] = {"commit_hash": git.get("commit_hash")}
         # Remove: available, branch, is_dirty (privacy/security sensitive)
-    
+
     # Timezone - UTC ONLY (remove all location-specific timezone info)
     # Replace all timezone info with UTC standard to prevent location identification
-    sanitized['timezone'] = {
-        'timezone_name': 'UTC',
-        'utc_offset_hours': 0.0
-    }
-    
+    sanitized["timezone"] = {"timezone_name": "UTC", "utc_offset_hours": 0.0}
+
     # Timestamp - keep original timestamp (should be in UTC for consistency)
-    if 'timestamp' in env_info:
-        sanitized['timestamp'] = env_info['timestamp']
-    
+    if "timestamp" in env_info:
+        sanitized["timestamp"] = env_info["timestamp"]
+
     return sanitized
+
 
 # def get_environment_summary() -> str:
 #     """Get a human-readable summary of the environment."""
@@ -294,4 +295,3 @@ def _sanitize_environment_info(env_info: Dict[str, Any]) -> Dict[str, Any]:
 # Disk: {env_info['disk']['free_gb']} GB free of {env_info['disk']['total_gb']} GB total"""
 #
 #     return summary
-

@@ -11,9 +11,9 @@ Benchmark results are continuously published at: https://napinoco.github.io/opti
 **Purpose**: Compare optimization solver performance using standardized problem sets and minimal solver configuration for unbiased evaluation.
 
 **Problem Libraries**:
-- **DIMACS**: 47 problems in SeDuMi .mat format
-- **SDPLIB**: 92+ problems in SDPA .dat-s format  
-- **Total**: 139+ optimization problems
+- **DIMACS**: SeDuMi .mat format
+- **SDPLIB**: SDPA .dat-s format
+- Roughly 120 registered problems; see `config/problem_registry.yaml` for the authoritative list
 
 **Supported Solvers**:
 - **Python (9)**: SciPy, CVXPY backends (CLARABEL, SCS, ECOS, OSQP, CVXOPT, SDPA, SCIP, HIGHS)
@@ -45,8 +45,8 @@ python main.py --validate
 python main.py --all
 
 # Specific libraries
-python main.py --benchmark --problem-set dimacs
-python main.py --benchmark --problem-set sdplib
+python main.py --benchmark --library_names DIMACS
+python main.py --benchmark --library_names SDPLIB
 
 # Generate reports only
 python main.py --report
@@ -87,11 +87,11 @@ python scripts/database/table_restorer.py --compare-with database/original_resul
 
 ## Design Philosophy
 
-**Fair Baseline Benchmarking**: Uses solver default parameters to avoid optimization bias and provide genuine "out of the box" performance comparison.
+- **Fair baseline benchmarking**: solver default parameters for genuine "out of the box" comparison
+- **Reproducible results**: problem libraries pinned via git submodules, solver versions pinned in requirements.txt
+- **Complete version tracking**: every result stored with solver versions, Git commit, and environment details
 
-**Reproducible Results**: Problem libraries are pinned to specific commit hashes via git submodules, and solver versions are fixed in requirements.txt to ensure identical benchmarking environments across all executions.
-
-**Complete Version Tracking**: All benchmark results are stored in a SQLite database with complete version information (solver versions, Git commit hashes, environment details) to enable historical analysis and ensure full reproducibility of any reported result.
+See [basic_design.md](docs/development/basic_design.md) for the full design principles.
 
 ## Project Structure
 
@@ -124,8 +124,8 @@ python scripts/database/table_restorer.py --compare-with database/original_resul
 ## Adding Components
 
 ### New Solvers
-**Python**: Add configuration to `PYTHON_SOLVER_CONFIGS` in `python_interface.py`  
-**MATLAB**: Create `{solver}_runner.m` and add to `MATLAB_SOLVER_CONFIGS` in `matlab_interface.py`
+**Python**: Add an entry to `scripts/solvers/python/solver_configs.py`  
+**MATLAB**: Create `{solver}_runner.m` and add to `MATLAB_SOLVER_CONFIGS` in `matlab_process_interface.py`
 
 ### New Problems
 Add external libraries as git submodules in `problems/` and extend loaders in `scripts/data_loaders/`

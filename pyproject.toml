@@ -1,0 +1,29 @@
+# Development tooling configuration.
+# Note: pytest and ruff are development tools and intentionally NOT listed in
+# requirements.txt (which defines the reproducible benchmark runtime).
+# Install them separately: pip install pytest ruff
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra"
+markers = [
+    "slow: tests that execute real solvers (excluded from default CI runs)",
+]
+
+[tool.ruff]
+target-version = "py312"
+line-length = 120
+extend-exclude = ["problems", "docs"]
+
+[tool.ruff.lint]
+select = [
+    "E",   # pycodestyle errors (includes E722 bare except)
+    "F",   # pyflakes (unused imports, undefined names)
+    "W",   # pycodestyle warnings
+    "I",   # isort import ordering
+    "B",   # flake8-bugbear
+]
+ignore = [
+    "E501",  # long lines tolerated for now (log messages, HTML templates)
+    "E402",  # imports follow the project's sys.path bootstrap pattern
+]
