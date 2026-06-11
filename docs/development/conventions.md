@@ -10,10 +10,6 @@ Coding standards and engineering guidelines for the optimization solver benchmar
 [Type] Brief description (50 chars max)
 
 - Specific changes made
-
-🤖 Generated with [Claude Code](https://claude.ai/code)
-
-Co-Authored-By: Claude <noreply@anthropic.com>
 ```
 
 **Commit Types**: Fix, Add, Update, Refactor, Docs, Test
