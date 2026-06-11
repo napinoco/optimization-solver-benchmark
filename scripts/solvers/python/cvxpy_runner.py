@@ -89,8 +89,8 @@ class CvxpySolver(SolverInterface):
                 prob.solve(solver=solver_obj, verbose=False)
                 if prob.status not in [cp.SOLVER_ERROR]:
                     supported_types.append("LP")
-            except:
-                pass
+            except Exception as e:
+                logger.debug(f"{self.backend} LP probe failed: {e}")
             
             # Test QP support
             try:
@@ -99,8 +99,8 @@ class CvxpySolver(SolverInterface):
                 prob.solve(solver=solver_obj, verbose=False)
                 if prob.status not in [cp.SOLVER_ERROR]:
                     supported_types.append("QP")
-            except:
-                pass
+            except Exception as e:
+                logger.debug(f"{self.backend} QP probe failed: {e}")
             
             # Test SOCP support
             try:
@@ -109,8 +109,8 @@ class CvxpySolver(SolverInterface):
                 prob.solve(solver=solver_obj, verbose=False)
                 if prob.status not in [cp.SOLVER_ERROR]:
                     supported_types.append("SOCP")
-            except:
-                pass
+            except Exception as e:
+                logger.debug(f"{self.backend} SOCP probe failed: {e}")
             
             # Test SDP support
             try:
@@ -119,8 +119,8 @@ class CvxpySolver(SolverInterface):
                 prob.solve(solver=solver_obj, verbose=False)
                 if prob.status not in [cp.SOLVER_ERROR]:
                     supported_types.append("SDP")
-            except:
-                pass
+            except Exception as e:
+                logger.debug(f"{self.backend} SDP probe failed: {e}")
             
             # If no tests passed, default to LP
             if not supported_types:
@@ -203,11 +203,7 @@ class CvxpySolver(SolverInterface):
             # Try max_time parameter for solvers that support it
             # If solver doesn't recognize it, it will be ignored
             if timeout is not None:
-                try:
-                    options['max_time'] = timeout
-                except:
-                    # If max_time is not supported, skip timeout parameter
-                    pass
+                options['max_time'] = timeout
         
         return options
     
@@ -634,24 +630,17 @@ class CvxpySolver(SolverInterface):
         try:
             import importlib.metadata
             return importlib.metadata.version(package_name)
-        except ImportError:
-            # Fallback for Python < 3.8
-            try:
-                import pkg_resources
-                return pkg_resources.get_distribution(package_name).version
-            except:
-                pass
-        except:
-            pass
-        
+        except importlib.metadata.PackageNotFoundError:
+            self.logger.debug(f"Package metadata not found for {package_name}")
+
         # Try direct import with __version__ attribute
         try:
             module = __import__(package_name)
             if hasattr(module, '__version__'):
                 return module.__version__
-        except:
-            pass
-        
+        except ImportError as e:
+            self.logger.debug(f"Cannot import {package_name}: {e}")
+
         return "unknown"
     
     def validate_problem_compatibility(self, problem_data: ProblemData) -> bool:

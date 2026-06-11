@@ -363,8 +363,10 @@ class BenchmarkRunner:
             try:
                 problem_config = self.problem_interface.get_problem_config(problem_name)
                 self.store_error_result(solver_name, problem_name, error_msg, problem_config)
-            except:
+            except (ValueError, KeyError) as config_error:
                 # If we can't even get problem config, create minimal config
+                logger.warning(f"Could not get problem config for {problem_name}: {config_error}; "
+                               f"storing error result with minimal config")
                 minimal_config = {'library_name': 'unknown', 'problem_type': 'UNKNOWN'}
                 self.store_error_result(solver_name, problem_name, error_msg, minimal_config)
     
