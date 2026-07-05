@@ -105,4 +105,4 @@ class TestStatistics:
         assert stats["libraries"] == {"SDPLIB": 1, "DIMACS": 1, "OTHER": 1}
         assert stats["test_problems"] == 1
         assert stats["file_formats"] == {"dat-s": 1, "mat": 1, "qps": 1}
-        assert set(stats["supported_formats"]) == {"mat", "dat-s"}
+        assert set(stats["supported_formats"]) == {"mat", "dat-s", "mps"}
