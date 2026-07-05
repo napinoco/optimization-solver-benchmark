@@ -46,6 +46,8 @@ function matlab_solver_runner(problem_name, solver_name, result_file, save_solut
             [A, b, c, K] = mat_loader(file_path);
         elseif strcmp(file_type, 'dat-s')
             [A, b, c, K] = dat_loader(file_path);
+        elseif strcmp(file_type, 'mps')
+            [A, b, c, K] = mps_loader(file_path);
         else
             error('Unsupported file type: %s', file_type);
         end
