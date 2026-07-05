@@ -176,6 +176,12 @@ function result = create_sedumi_result(info)
     elseif isfield(info, 'dinf') && info.dinf == 1
         result.status = 'unbounded';  
         result.termination_reason = 'Dual infeasible (primal unbounded)';
+    elseif isfield(info, 'numerr') && info.numerr == 1
+        result.status = 'optimal (inaccurate)';
+        result.termination_reason = 'Numerical problems warning (low accuracy)';
+    elseif isfield(info, 'numerr') && info.numerr == 2
+        result.status = 'num_error';
+        result.termination_reason = 'Complete numerical failure';
     elseif isfield(info, 'numerr') && info.numerr > 0
         result.status = 'num_error';
         result.termination_reason = sprintf('Numerical error (code: %d)', info.numerr);
@@ -206,5 +212,25 @@ function result = create_sedumi_result(info)
     result.primal_infeasibility = NaN;
     result.dual_infeasibility = NaN;
     result.error_message = '';
+    
+    % Store original SEDUMI status information for reproducibility
+    result.original_status = struct();
+    if isfield(info, 'pinf')
+        result.original_status.pinf = info.pinf;
+    end
+    if isfield(info, 'dinf')
+        result.original_status.dinf = info.dinf;
+    end
+    if isfield(info, 'numerr')
+        result.original_status.numerr = info.numerr;
+    end
+    if isfield(info, 'iter')
+        result.original_status.iter = info.iter;
+    end
+    if isfield(info, 'feasratio')
+        result.original_status.feasratio = info.feasratio;
+    end
+    % Store complete info structure for full reproducibility
+    result.original_status.full_info = info;
 end
 

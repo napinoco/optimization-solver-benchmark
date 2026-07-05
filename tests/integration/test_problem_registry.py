@@ -11,7 +11,7 @@ PROJECT_ROOT = Path(__file__).parent.parent.parent
 REGISTRY_PATH = PROJECT_ROOT / "config" / "problem_registry.yaml"
 
 REQUIRED_KEYS = {"display_name", "file_path", "file_type", "library_name"}
-KNOWN_LIBRARIES = {"DIMACS", "SDPLIB"}
+KNOWN_LIBRARIES = {"DIMACS", "SDPLIB", "NETLIB"}
 
 
 @pytest.fixture(scope="module")
@@ -74,8 +74,13 @@ def test_has_fast_test_problems(problems):
 
 
 def test_problem_files_exist(problems):
-    # Skip when submodules (problems/DIMACS, problems/SDPLIB) are not checked out
-    if not any(any((PROJECT_ROOT / "problems" / lib).iterdir()) for lib in KNOWN_LIBRARIES):
+    # Skip when submodules are not checked out (all must be present to run this test)
+    submodule_dirs = {
+        "DIMACS": PROJECT_ROOT / "problems" / "DIMACS" / "data",
+        "SDPLIB": PROJECT_ROOT / "problems" / "SDPLIB" / "data",
+        "NETLIB": PROJECT_ROOT / "problems" / "NETLIB" / "mps_files",
+    }
+    if not all(d.exists() and any(d.iterdir()) for d in submodule_dirs.values()):
         pytest.skip("Problem library submodules not checked out")
 
     missing = [name for name, config in problems.items() if not (PROJECT_ROOT / config["file_path"]).exists()]

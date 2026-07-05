@@ -353,6 +353,8 @@ class MatlabProcessInterface:
                     "matlab_version": matlab_version,
                     "solver_backend": matlab_solver,
                     "execution_environment": "matlab",
+                    # Preserve original solver status codes for reproducibility
+                    "original_status": matlab_result.get("original_status", {}),
                 },
             )
         except Exception as e:

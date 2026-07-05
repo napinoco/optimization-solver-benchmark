@@ -8,5 +8,6 @@
 | [PR_PREVIEW_GUIDE.md](PR_PREVIEW_GUIDE.md) | Pull request preview deployments |
 | [EXTERNAL_LIBRARIES.md](EXTERNAL_LIBRARIES.md) | DIMACS / SDPLIB problem library setup |
 | [EXPORT_GUIDE.md](EXPORT_GUIDE.md) | Accessing exported benchmark data (JSON/CSV) |
+| [NETLIB_KNOWN_OBJECTIVES.md](NETLIB_KNOWN_OBJECTIVES.md) | Source and caveats for NETLIB `known_objective_value` entries |
 
 For design documents, see [docs/development/](../development/). When updating guides, verify commands and file paths against the current implementation (`python main.py --help`).

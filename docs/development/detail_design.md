@@ -220,11 +220,22 @@ Standardized dataclass returned by every solver: `solve_time`, `status`, primal/
 | Status | Meaning |
 |--------|---------|
 | `OPTIMAL` | Solver found an optimal solution |
+| `OPTIMAL (INACCURATE)` | Solution found but with numerical warnings |
 | `ERROR` | Solver-level error (convergence failure, numerical issues) |
+| `NUM_ERROR` | Numerical difficulties (matrix singularity, divergence) |
+| `STALLED` | Algorithm progress stagnated (can retry with different params) |
+| `MAX_ITER` | Maximum iteration limit reached |
+| `INFEASIBLE` | Problem has no feasible solution |
+| `UNBOUNDED` | Problem is unbounded |
 | `UNSUPPORTED` | Problem type not supported by the solver |
 | `TIMEOUT` | Execution time limit exceeded |
 | `SIGKILL` | Process forcibly terminated (typically OOM) |
 | `SUBPROCESS_ERROR` | Subprocess execution error (crash, library issues) |
+| `UNKNOWN` | Unclear solver state |
+
+**`additional_info['original_status']`** preserves complete solver-specific status information for reproducibility:
+- MATLAB solvers (SDPT3/SEDUMI): `termcode`/`pinf`/`dinf`/`numerr` (original solver status codes), `iter` (iteration count), `full_info` (complete solver info structure)
+- Python solvers (CVXPY/SciPy): `cvxpy_status`/`scipy_status` (original solver status), `solver_stats` (complete backend statistics), backend-specific metrics (`solve_time`, `num_iters`, etc.)
 
 ---
 

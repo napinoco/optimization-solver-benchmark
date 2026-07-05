@@ -184,15 +184,36 @@ function result = create_sdpt3_result(info)
             case 2
                 result.status = 'unbounded';
                 result.termination_reason = 'Dual infeasible (primal unbounded)';
+            case 3
+                result.status = 'num_error';
+                result.termination_reason = 'Variables diverging (norm(X) or norm(Z))';
             case -1
                 result.status = 'max_iter';
-                result.termination_reason = 'Maximum iterations reached';
+                result.termination_reason = 'Relative gap < infeasibility';
             case -2
-                result.status = 'num_error';
-                result.termination_reason = 'Numerical difficulties';
+                result.status = 'stalled';
+                result.termination_reason = 'Lack of progress in predictor or corrector';
             case -3
                 result.status = 'num_error';
-                result.termination_reason = 'No progress in iterations';
+                result.termination_reason = 'X or Z not positive definite';
+            case -4
+                result.status = 'num_error';
+                result.termination_reason = 'Difficulty computing predictor or corrector direction';
+            case -5
+                result.status = 'stalled';
+                result.termination_reason = 'Poor progress in relative gap or infeasibility';
+            case -6
+                result.status = 'max_iter';
+                result.termination_reason = 'Maximum number of iterations reached';
+            case -7
+                result.status = 'stalled';
+                result.termination_reason = 'Primal infeasibility deteriorated too much';
+            case -8
+                result.status = 'stalled';
+                result.termination_reason = 'Progress in relative gap deteriorated';
+            case -9
+                result.status = 'stalled';
+                result.termination_reason = 'Lack of progress in infeasibility';
             otherwise
                 result.status = 'unknown';
                 result.termination_reason = sprintf('Unknown termination code: %d', info.termcode);
@@ -218,5 +239,16 @@ function result = create_sdpt3_result(info)
     result.primal_infeasibility = NaN;
     result.dual_infeasibility = NaN;
     result.error_message = '';
+    
+    % Store original SDPT3 status information for reproducibility
+    result.original_status = struct();
+    if isfield(info, 'termcode')
+        result.original_status.termcode = info.termcode;
+    end
+    if isfield(info, 'iter')
+        result.original_status.iter = info.iter;
+    end
+    % Store complete info structure for full reproducibility
+    result.original_status.full_info = info;
 end
 

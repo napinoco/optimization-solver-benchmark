@@ -564,6 +564,29 @@ class CvxpySolver(SolverInterface):
         if cvx_problem.solver_stats and hasattr(cvx_problem.solver_stats, "solve_time"):
             additional_info["solver_solve_time"] = cvx_problem.solver_stats.solve_time
 
+        # Preserve original CVXPY status information for reproducibility
+        original_status = {
+            "cvxpy_status": str(cvx_problem.status),
+            "cvxpy_value": cvx_problem.value,
+        }
+
+        if cvx_problem.solver_stats:
+            solver_stats_dict = {}
+            # Collect all available solver stats
+            for attr in ["solve_time", "setup_time", "num_iters", "solver_name"]:
+                if hasattr(cvx_problem.solver_stats, attr):
+                    value = getattr(cvx_problem.solver_stats, attr)
+                    if value is not None:
+                        solver_stats_dict[attr] = value
+
+            # Include extra_stats if available
+            if hasattr(cvx_problem.solver_stats, "extra_stats") and cvx_problem.solver_stats.extra_stats:
+                solver_stats_dict["extra_stats"] = cvx_problem.solver_stats.extra_stats
+
+            original_status["solver_stats"] = solver_stats_dict
+
+        additional_info["original_status"] = original_status
+
         self.logger.debug(
             f"Solve completed: status={status}, "
             f"primal_obj={primal_objective_value}, dual_obj={dual_objective_value}, "
