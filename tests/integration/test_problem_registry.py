@@ -75,9 +75,11 @@ def test_has_fast_test_problems(problems):
 
 def test_problem_files_exist(problems):
     # Skip when submodules are not checked out (all must be present to run this test)
-    submodule_dirs = {"DIMACS": PROJECT_ROOT / "problems" / "DIMACS" / "data",
-                      "SDPLIB": PROJECT_ROOT / "problems" / "SDPLIB" / "data",
-                      "NETLIB": PROJECT_ROOT / "problems" / "NETLIB" / "mps_files"}
+    submodule_dirs = {
+        "DIMACS": PROJECT_ROOT / "problems" / "DIMACS" / "data",
+        "SDPLIB": PROJECT_ROOT / "problems" / "SDPLIB" / "data",
+        "NETLIB": PROJECT_ROOT / "problems" / "NETLIB" / "mps_files",
+    }
     if not all(d.exists() and any(d.iterdir()) for d in submodule_dirs.values()):
         pytest.skip("Problem library submodules not checked out")
 
