@@ -1,13 +1,6 @@
 # CLAUDE.md - AI Development Context
 
-> **⚠️ CRITICAL INSTRUCTION FOR LLM AGENTS:**  
-> **You MUST read the linked documentation below BEFORE starting any development work.**  
-> This file serves as a dispatching hub - the actual implementation details, coding standards, and development context are in the linked documents.
->
-> **⚠️ AFTER AUTO-COMPACT OPERATIONS:**
-> **You MUST re-read CLAUDE.md and all related documentation carefully after any auto-compact operation to ensure you maintain proper context and understanding of the project requirements and constraints.**
-
----
+This file is a navigation hub: detailed design, architecture, and coding standards live in the linked documents below. Read the relevant ones before starting development work.
 
 ## Project Overview
 
@@ -15,77 +8,22 @@ This is an automated benchmark system for optimization solvers (LP, QP, SOCP, SD
 
 **Core Mission**: *"Regularly benchmark publicly available solvers and publish the results as data"*
 
----
+## Essential Documentation
 
-## 🔗 Essential Documentation Links
+1. **[Basic Design](docs/development/basic_design.md)** - Project vision, design philosophy, system overview
+2. **[Detailed Design](docs/development/detail_design.md)** - Technical architecture, directory structure, implementation specs
+3. **[Development Conventions](docs/development/conventions.md)** - Coding standards and engineering guidelines
 
-> **⚠️ DISPATCH HUB NOTICE:**  
-> **CLAUDE.md serves as a navigation hub. All detailed design content is in dedicated documents below.**
+## Development Environment
 
-### **REQUIRED READING** (Read these documents carefully before any development):
-
-1. **[📋 Basic Design](docs/development/basic_design.md)** - Project vision, design philosophy, and system overview
-2. **[🏗️ Detailed Design](docs/development/detail_design.md)** - Complete technical architecture, implementation specifications, and code examples
-3. **[📝 Development Conventions](docs/development/conventions.md)** - Coding standards, git protocols, and engineering guidelines
-4. **[✅ Current Tasks](docs/development/tasks.md)** - Active development tasks for current phase
-
-### **Quick Reference**:
-- **[🚀 Setup Guides](docs/guides/)** - Installation and configuration guides
-- **[📊 README.md](README.md)** - Project overview and quick start
-
-> **📖 For system architecture, solver configurations, and implementation details, always refer to the dedicated design documents above rather than this file.**
-
----
-
-## 🎯 Current Development Status
-
-**Phase**: Research Tool Complete ✅  
-**Achievement**: Comprehensive Benchmark System with External Libraries  
-**Status**: 139 problems (DIMACS + SDPLIB) with 11 solvers (9 Python + 2 MATLAB)
-
-**Key Achievement**: Comprehensive optimization solver benchmarking platform with external problem libraries, complete version tracking, and research-grade HTML reports with data export capabilities.
-
----
-
-## 🔧 Development Environment Context
-
-### Core Architecture
 - **Platform**: GitHub Actions CI/CD with GitHub Pages deployment
-- **Languages**: Python 3.12+, MATLAB R2024+
-- **Storage**: SQLite database with structured schema
-- **Reporting**: Bootstrap 5 + Chart.js interactive dashboards
+- **Languages**: Python 3.12+, MATLAB R2024+ (optional)
+- **Storage**: SQLite database (`database/results.db`)
+- **Reports**: `docs/pages/` (static HTML, inline CSS)
 
-### Key Directories
-```
-├── config/          # YAML configuration files
-├── scripts/         # Core system implementation
-│   ├── benchmark/   # Benchmark execution engine
-│   ├── solvers/     # Solver implementations
-│   │   ├── python/  # Python solver interfaces
-│   │   └── matlab/ # MATLAB interfaces
-│   ├── data_loaders/ # Problem format loaders
-│   │   ├── python/  # Python loaders (MAT/DAT)
-│   │   └── matlab/ # MATLAB loaders
-│   ├── utils/       # Problem structure analysis, version detection
-│   ├── database/    # Data models and storage
-│   └── reporting/   # HTML generation and data publishing
-├── problems/        # Benchmark problem files
-│   ├── DIMACS/     # External DIMACS library (47 problems)
-│   └── SDPLIB/     # External SDPLIB library (92 problems)
-├── database/       # SQLite database files
-│   └── results.db  # Benchmark results storage
-├── docs/           # Generated reports (GitHub Pages)
-└── requirements.txt # Python dependencies (single file)
-```
+For directory structure and architecture details, see [detail_design.md](docs/development/detail_design.md).
 
-### Current Capabilities
-**System Status**: Research Tool Complete with **11 solvers** (9 Python + 2 MATLAB) across **139 problems** (DIMACS + SDPLIB)
-
-**For detailed solver coverage and problem statistics, see [basic_design.md](docs/development/basic_design.md).**
-
----
-
-## 🚀 Quick Development Commands
+## Quick Development Commands
 
 ```bash
 # Clone with submodules (required for external libraries)
@@ -97,129 +35,58 @@ python main.py --validate
 # Run complete benchmark with all libraries
 python main.py --all
 
-# Run external library benchmarks
-python main.py --benchmark --problem-set external
-
 # Run specific library benchmarks
-python main.py --benchmark --problem-set dimacs
-python main.py --benchmark --problem-set sdplib
+python main.py --benchmark --library_names DIMACS
+python main.py --benchmark --library_names SDPLIB
 
-# Generate reports only  
+# Generate reports only
 python main.py --report
 
 # Install dependencies
 pip install -r requirements.txt
 
+# Run tests and lint (dev tools: pip install pytest ruff)
+pytest tests/
+ruff check scripts/ main.py tests/
+
 # Setup MATLAB solvers (optional)
 matlab -batch "setup_matlab_solvers"
 ```
 
----
+## Development Principles
 
-## 🔄 Development Workflow
+- **MVP First**: Implement the simplest solution that meets the requirement
+- **YAGNI**: Do not add functionality beyond what is explicitly requested
+- **User Confirmation**: Ask before implementing features not explicitly requested
+- **Commit on Request**: Only commit changes when the user explicitly asks
 
-### **MANDATORY WORKFLOW** (Follow exactly):
-1. **Read Documentation**: Study [basic_design.md](docs/development/basic_design.md), [detail_design.md](docs/development/detail_design.md), and [conventions.md](docs/development/conventions.md)
-2. **Check Current Tasks**: Review [tasks.md](docs/development/tasks.md) for active development tasks
-3. **Follow Task Protocol**: Complete one task at a time following priority order
-4. **Test Implementation**: Validate using task-specific test criteria
-5. **Commit Changes**: Use established git commit protocol after user confirmation
+## Design Philosophy
 
-### Task-Based Development
-- **Sequential Execution**: Complete one task at a time
-- **Test-Driven Validation**: Each task includes specific test criteria  
-- **Documentation-First**: Update docs for all features
-- **User Review**: Stop and wait for approval after each task
+Fair baseline benchmarking with minimal configuration, reproducible results, and modular architecture for research applications. See [basic_design.md](docs/development/basic_design.md) for the full principles.
 
-### MVP Development Principles
-- **Minimal Viable Product**: Always implement the simplest solution that meets the requirement
-- **No Extra Features**: Do not add functionality beyond what is explicitly requested
-- **User Confirmation Required**: Before implementing any feature that seems necessary but wasn't explicitly requested, ask the user for confirmation
-- **YAGNI Principle**: "You Aren't Gonna Need It" - implement only what is needed right now
-- **Incremental Development**: Build the core functionality first, then iterate based on user feedback
+## Implementation Notes
 
----
-
-## 🎯 Design Philosophy
-
-**For complete design principles and technical philosophy, see [basic_design.md](docs/development/basic_design.md).**
-
-Core principles: Fair baseline benchmarking with minimal configuration, reproducible results, and modular architecture for research applications.
-
----
-
-## ⚠️ Important Implementation Notes
-
-### Core System Requirements
 - **Solver Configurations**: Use minimal parameters (primarily `verbose: false`) for fair comparison
 - **Database Operations**: SQLite with comprehensive metadata and version tracking
 - **Result Validation**: Positive solve times, valid status codes, structure analysis
 - **External Libraries**: CVXPY conversion for DIMACS/SDPLIB compatibility
-- **Problem Structure Analysis**: Automatic variable/constraint counting and classification
 - **Version Tracking**: Complete solver backend and Git commit recording
-- **Logging**: Structured with appropriate levels (DEBUG, INFO, WARNING, ERROR)
-- **Problem Formats**: MPS (LP), QPS (QP), Python (SOCP/SDP), SeDuMi .mat (DIMACS), SDPA .dat-s (SDPLIB)
+- **Problem Formats**: SeDuMi .mat (DIMACS), SDPA .dat-s (SDPLIB)
 
-### 🚨 CRITICAL DEVELOPMENT CONSTRAINTS (DO NOT VIOLATE)
+## Critical Development Constraints
 
-#### Dependencies Management
-- **NEVER create new requirements files**: The project uses a single `requirements.txt` file at the root
-- **DO NOT create requirements/ directory**: All dependencies are managed through the existing `requirements.txt`
-- **DO NOT split requirements**: Never create separate base.txt, python.txt, or other requirement files
-- **Use existing requirements.txt**: All GitHub Actions workflows must reference the single `requirements.txt`
+These encode past failures; do not relax them without explicit user instruction.
 
-#### CI/CD Philosophy  
-- **CI must fail when problems exist**: Continuous Integration is designed to detect issues, not hide them
-- **DO NOT mask solver installation failures**: If a solver cannot be installed, the CI should fail
-- **NO graceful degradation in CI**: Avoid `|| echo "warning"` patterns that mask real problems
-- **Validate all dependencies**: The purpose of validation workflows is to ensure all required components work
+- **Single `requirements.txt`**: All runtime dependencies are pinned in the one root `requirements.txt` — that file *is* the definition of the reproducible benchmark environment. Do not create a `requirements/` directory or split files (base.txt, python.txt); that structure existed before and was deliberately removed. Dev tools (pytest, ruff) stay out of it and are installed separately in CI.
+- **CI must fail when problems exist**: Validation workflows exist to detect issues, not hide them. Do not mask failures with patterns like `|| echo "warning"` or graceful degradation — a masked solver installation failure once made CI green while validating nothing.
+- **File structure integrity**: Do not reorganize files without explicit user instruction. Generated reports go in `docs/pages/`, the database in `database/results.db`, YAML configs in `config/`.
 
-#### File Structure Integrity
-- **Respect existing file organization**: Do not reorganize without explicit user instruction
-- **Generated reports location**: HTML reports are generated in `docs/pages/` directory
-- **Database location**: SQLite database is at `database/results.db`
-- **Configuration location**: YAML configs are in `config/` directory
+## Extension Points
+
+For implementation guidance on adding new solvers and problems, see [detail_design.md](docs/development/detail_design.md).
+
+Quick reference: Python solvers via `scripts/solvers/python/solver_configs.py`, MATLAB solvers via `{solver}_runner.m`, new problems via `problem_registry.yaml`.
 
 ---
 
-## 🛠️ Extension Points
-
-**For complete implementation guidance on adding new solvers and problems, see [detail_design.md](docs/development/detail_design.md).**
-
-Quick reference: Python solvers via `python_interface.py`, MATLAB solvers via `{solver}_runner.m`, new problems via `problem_registry.yaml`.
-
----
-
-## 📋 For LLM Agents: Pre-Development Checklist
-
-> **🚨 CRITICAL: CLAUDE.md is a dispatch hub only. All design content is in dedicated documents.**
-
-**BEFORE starting any coding task, confirm you have:**
-
-- [ ] Read [@docs/development/basic_design.md](docs/development/basic_design.md) for project vision, design philosophy, and system overview
-- [ ] Read [@docs/development/detail_design.md](docs/development/detail_design.md) for complete technical architecture and implementation details
-- [ ] Read [@docs/development/conventions.md](docs/development/conventions.md) for coding standards and protocols
-- [ ] Reviewed [tasks.md](docs/development/tasks.md) for current development context
-- [ ] Understood that all design decisions and technical details are documented in the linked design files, not in CLAUDE.md
-
-**🚨 CRITICAL CONSTRAINTS CHECKLIST (MUST VERIFY):**
-
-- [ ] **Requirements Management**: Confirmed to use ONLY the existing `requirements.txt` (do not create requirements/ directory)
-- [ ] **CI/CD Philosophy**: Understood that CI should fail when problems exist (no graceful degradation)
-- [ ] **File Structure**: Verified existing file locations (docs/pages/, database/, config/) before modification
-- [ ] **GitHub Workflows**: Ensured any workflow changes reference existing `requirements.txt` file
-- [ ] **Solver Dependencies**: Acknowledged that solver installation failures should cause CI to fail
-
-**Failure to read these documents or violating critical constraints will result in implementation that doesn't align with project standards and philosophy.**
-
----
-
-
-## 📝 Development Memories
-
-### Task Management
-- **Reflection Note**: Please reflect the latest situation into task.md after completing each task.
-
-*This dispatch document provides entry point context only. All implementation details, coding standards, and development protocols are documented in the linked files above.*
-
-*Last Updated: July 2025*
+*Last Updated: June 2026*

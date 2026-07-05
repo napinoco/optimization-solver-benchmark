@@ -36,6 +36,7 @@ optimization-solver-benchmark/
 │   │   ├── solver_interface.py # Abstract base classes and SolverResult
 │   │   ├── python/             # Python solver implementations (subprocess)
 │   │   │   ├── __init__.py
+│   │   │   ├── solver_configs.py            # Solver registry (single source of truth)
 │   │   │   ├── python_process_interface.py  # Python subprocess coordinator
 │   │   │   ├── python_solver_runner.py      # Subprocess entry point + solver manager
 │   │   │   ├── cvxpy_runner.py              # CVXPY backend handler
@@ -67,32 +68,28 @@ optimization-solver-benchmark/
 │   │   └── schema.sql          # Database schema
 │   ├── reporting/              # Report generation
 │   │   ├── __init__.py
-│   │   ├── html_generator.py   # HTML report creation
+│   │   ├── html_generator.py   # HTMLGenerator facade (public API)
+│   │   ├── report_base.py      # Shared base class and HTML/CSS helpers
+│   │   ├── overview_report.py  # Overview dashboard (index.html)
+│   │   ├── results_matrix_report.py # Problems × Solvers matrix
+│   │   ├── raw_data_report.py  # Raw data table
+│   │   ├── data_index_report.py # Data export index page
 │   │   ├── result_processor.py # Result aggregation
 │   │   └── data_exporter.py    # JSON/CSV export
-│   └── utils/                  # Utility modules
-│       ├── __init__.py
-│       ├── environment_info.py # System information capture
-│       ├── git_utils.py        # Git operations
-│       ├── logger.py           # Logging configuration
-│       ├── resource_limits.py  # Memory/CPU limitation utilities
-│       └── temp_file_manager.py # Temporary file handling
+│   └── utils/                  # Utility modules (logging, env info, git, temp files)
+├── tests/                      # pytest test suite
+│   ├── unit/                   # Unit tests (synthetic fixtures, no submodules needed)
+│   └── integration/            # Problem registry integrity checks
 ├── problems/                   # Problem library files
 │   ├── DIMACS/                 # External DIMACS library (git submodule)
 │   └── SDPLIB/                 # External SDPLIB library (git submodule)
-├── database/                   # SQLite database files
-│   └── results.db              # Benchmark results storage
-├── docs/                       # Generated reports and documentation
-│   ├── pages/                  # Generated HTML reports
-│   │   ├── index.html          # Main dashboard
-│   │   ├── results_matrix.html # Problems × Solvers matrix
-│   │   ├── raw_data.html       # Detailed data view
-│   │   └── data/               # Exported data files
-│   │       ├── benchmark_results.json
-│   │       ├── benchmark_results.csv
-│   │       └── summary.json
-│   └── development/            # Development documentation
-└── requirements.txt            # Python dependencies
+├── database/                   # SQLite database files (results.db, gitignored)
+├── docs/
+│   ├── pages/                  # Generated HTML reports and data exports
+│   ├── development/            # Design documents
+│   └── guides/                 # User/setup guides
+├── pyproject.toml              # pytest and ruff configuration
+└── requirements.txt            # Python dependencies (single file, all pinned)
 ```
 
 ---
@@ -107,7 +104,7 @@ optimization-solver-benchmark/
 graph TB
     %% Parent Process Components
     subgraph "Parent Process Environment"
-        BR["🚀 BenchmarkRunner<br/>ENTRY POINT<br/>System Orchestrator"]
+        BR["BenchmarkRunner<br/>ENTRY POINT<br/>System Orchestrator"]
         PI["Process Interface<br/>PythonProcessInterface<br/>MatlabProcessInterface"]
     end
     
@@ -175,48 +172,18 @@ graph TB
     class SUB isolationBox
 ```
 
-#### Node Legend and Execution Flow
-- **🔴 Entry Point** `[]` (Red): **BenchmarkRunner** - Main system orchestrator and entry point
-- **🔵 Processes** `[]` (Blue): Active execution components - Process Interface, Report Generator, Solvers
-- **🟡 Internal Data** `()` (Yellow): Temporary in-memory data structures - ProblemData, SolverResult  
-- **🟢 Database Storage** `[()]` (Green): Persistent database file - results.db
-- **🟣 Document Files** `[[]]` (Purple): File-based documents - Problem Libraries, JSON Files, Generated Reports
-
-#### Sequential Execution Steps
-1. **(1) solve(problem, solver)**: BenchmarkRunner calls Process Interface with problem and solver names
-2. **(2) subprocess.run**: Process Interface launches isolated subprocess with ulimit + timeout controls
-3. **(3) return SolverResult (JSON IPC)**: Subprocess writes JSON result file, Process Interface reads and converts
-4. **(4) return SolverResult**: Process Interface returns standardized SolverResult object to BenchmarkRunner
-5. **(5) insert DB**: BenchmarkRunner stores result with complete metadata directly in results.db file
-
-
 #### Error Detection and Status Flow
-```
-SUBPROCESS EXECUTION RESULTS:
-┌─────────────────────┐    ┌─────────────────────┐    ┌─────────────────────┐
-│ Return Code 0       │───▶│ Read JSON Result    │───▶│ Normal SolverResult │
-│ (Success)           │    │ File                │    │ (OPTIMAL, etc.)     │
-└─────────────────────┘    └─────────────────────┘    └─────────────────────┘
 
-┌─────────────────────┐    ┌─────────────────────┐    ┌─────────────────────┐
-│ Return Code -9/137  │───▶│ No JSON needed      │───▶│ SIGKILL Result      │
-│ (SIGKILL)           │    │ (Process killed)    │    │ + Memory Limit Info │
-└─────────────────────┘    └─────────────────────┘    └─────────────────────┘
+The parent process classifies subprocess outcomes by return code (see `_call_python_solver` in `python_process_interface.py`):
 
-┌─────────────────────┐    ┌─────────────────────┐    ┌─────────────────────┐
-│ Timeout Expired     │───▶│ No JSON needed      │───▶│ TIMEOUT Result      │
-│ (Process killed)    │    │ (Process killed)    │    │ + Timeout Duration  │
-└─────────────────────┘    └─────────────────────┘    └─────────────────────┘
-
-┌─────────────────────┐    ┌─────────────────────┐    ┌─────────────────────┐
-│ Return Code ≠ 0     │───▶│ Parse stderr/stdout │───▶│ SUBPROCESS_ERROR    │
-│ (Other errors)      │    │ for error details   │    │ + Error Message     │
-└─────────────────────┘    └─────────────────────┘    └─────────────────────┘
-```
+- **Return code 0** → read the JSON result file → normal `SolverResult` (OPTIMAL, etc.)
+- **Return code -9/137 (SIGKILL)** → `SIGKILL` result (typically OOM)
+- **Timeout expired** → `TIMEOUT` result with the timeout duration
+- **Other non-zero codes** → parse stderr/stdout → `SUBPROCESS_ERROR` result
 
 ### Component Responsibilities
 
-**🚀 BenchmarkRunner** (System Orchestrator)
+**BenchmarkRunner** (System Orchestrator)
 - Problem loading coordination
 - Solver execution management
 - Result storage and reporting
@@ -233,122 +200,42 @@ SUBPROCESS EXECUTION RESULTS:
 **Key Architecture Principles:**
 - Subprocess isolation for crash protection
 - Symmetric Python/MATLAB execution paths
-- Unified resource control (timeout + memory limits)
+- Timeout enforcement at the subprocess level
 - Centralized result storage and metadata tracking
 
 ---
 
 ## Core Data Models
 
-### Problem Data Structure
-```python
-# scripts/data_loaders/problem_loader.py
-class ProblemData:
-    """Unified problem representation using SeDuMi format"""
-    def __init__(self, name: str, problem_class: str):
-        self.name = name                     # Problem identifier
-        self.problem_class = problem_class   # 'LP', 'QP', 'SOCP', 'SDP'
-        
-        # SeDuMi standard format (internal representation)
-        self.A_eq = None          # Constraint matrix (sparse)
-        self.b_eq = None          # RHS vector
-        self.c = None             # Objective coefficients
-        self.cone_structure = {}  # Cone constraints specification
-        
-        # Optional QP data
-        self.P = None             # Quadratic term matrix
-        
-        # Problem metadata
-        self._num_variables = 0
-        self._num_constraints = 0
-        self.metadata = {}        # Additional problem information
-```
+### ProblemData (`scripts/data_loaders/problem_loader.py`)
 
-### Solver Result Structure (Enhanced Error Detection)
-```python
-# scripts/solvers/solver_interface.py
-@dataclass
-class SolverResult:
-    """Standardized result format for all solvers with comprehensive error detection"""
-    solve_time: float                        # Execution time in seconds
-    status: str                              # Status codes (see below)
-    primal_objective_value: Optional[float] = None
-    dual_objective_value: Optional[float] = None
-    duality_gap: Optional[float] = None
-    primal_infeasibility: Optional[float] = None
-    dual_infeasibility: Optional[float] = None
-    iterations: Optional[int] = None
-    solver_name: Optional[str] = None
-    solver_version: Optional[str] = None
-    additional_info: Optional[Dict[str, Any]] = None
-    
-    # Status codes with clear error distinction:
-    # OPTIMAL         - Solver found optimal solution
-    # OPTIMAL (INACCURATE) - Solution found but with numerical warnings
-    # ERROR           - Solver-level error (convergence failure, numerical issues)
-    # NUM_ERROR       - Numerical difficulties (matrix singularity, divergence)
-    # STALLED         - Algorithm progress stagnated (can retry with different params)
-    # MAX_ITER        - Maximum iteration limit reached
-    # INFEASIBLE      - Problem has no feasible solution
-    # UNBOUNDED       - Problem is unbounded
-    # UNSUPPORTED     - Problem type not supported by solver
-    # TIMEOUT         - Execution time limit exceeded
-    # SIGKILL         - Process forcibly terminated (OOM, manual kill, resource limits)
-    # SUBPROCESS_ERROR - Subprocess execution error (Python crash, library issues)
-    # UNKNOWN         - Unclear solver state
-    
-    # Additional Info Structure:
-    # additional_info['original_status'] - Original solver-specific status information
-    #   For MATLAB solvers (SDPT3/SEDUMI):
-    #     - termcode/pinf/dinf/numerr: Original solver status codes
-    #     - iter: Iteration count from solver
-    #     - full_info: Complete solver info structure
-    #   For Python solvers (CVXPY/SciPy):
-    #     - cvxpy_status/scipy_status: Original solver status
-    #     - solver_stats: Complete backend statistics
-    #     - Backend-specific metrics (solve_time, num_iters, etc.)
-    
-    @classmethod
-    def create_error_result(cls, error_msg: str, solve_time: float = 0.0,
-                          solver_name: str = "unknown", solver_version: str = "unknown") -> 'SolverResult':
-        """Create standardized solver-level error result"""
-        return cls(solve_time=solve_time, status='ERROR', 
-                  solver_name=solver_name, solver_version=solver_version,
-                  additional_info={'error_message': error_msg})
-    
-    @classmethod
-    def create_timeout_result(cls, timeout_duration: float, solver_name: str = "unknown",
-                            solver_version: str = "unknown") -> 'SolverResult':
-        """Create standardized timeout result"""
-        return cls(solve_time=timeout_duration, status='TIMEOUT',
-                  solver_name=solver_name, solver_version=solver_version,
-                  additional_info={'timeout_duration': timeout_duration})
-    
-    @classmethod
-    def create_sigkill_result(cls, memory_limit_gb: Optional[float] = None, 
-                            solve_time: float = 0.0, solver_name: str = "unknown",
-                            solver_version: str = "unknown", error_details: str = "") -> 'SolverResult':
-        """Create standardized SIGKILL result (process forcibly terminated)"""
-        additional_info = {'error_type': 'SIGKILL', 'error_details': error_details}
-        if memory_limit_gb is not None:
-            additional_info['memory_limit_gb'] = memory_limit_gb
-        return cls(solve_time=solve_time, status='SIGKILL',
-                  solver_name=solver_name, solver_version=solver_version,
-                  additional_info=additional_info)
-    
-    @classmethod
-    def create_subprocess_error_result(cls, returncode: int, error_message: str,
-                                     solve_time: float = 0.0, solver_name: str = "unknown",
-                                     solver_version: str = "unknown") -> 'SolverResult':
-        """Create standardized subprocess execution error result"""
-        return cls(solve_time=solve_time, status='SUBPROCESS_ERROR',
-                  solver_name=solver_name, solver_version=solver_version,
-                  additional_info={
-                      'returncode': returncode,
-                      'error_type': 'SUBPROCESS_ERROR',
-                      'error_message': error_message
-                  })
-```
+Unified problem representation in SeDuMi standard form: equality constraints (`A_eq`, `b_eq`), objective `c`, cone structure (free / nonnegative / SOC / SDP), optional quadratic term `P`, plus name, problem class, and metadata. All format loaders convert into this structure.
+
+### SolverResult (`scripts/solvers/solver_interface.py`)
+
+Standardized dataclass returned by every solver: `solve_time`, `status`, primal/dual objective values, duality gap, primal/dual infeasibility, iterations, solver name/version, and an `additional_info` dict. Factory methods (`create_error_result`, `create_timeout_result`, `create_sigkill_result`, `create_subprocess_error_result`, `create_unsupported_result`) build consistent results for each failure mode.
+
+**Status codes**:
+
+| Status | Meaning |
+|--------|---------|
+| `OPTIMAL` | Solver found an optimal solution |
+| `OPTIMAL (INACCURATE)` | Solution found but with numerical warnings |
+| `ERROR` | Solver-level error (convergence failure, numerical issues) |
+| `NUM_ERROR` | Numerical difficulties (matrix singularity, divergence) |
+| `STALLED` | Algorithm progress stagnated (can retry with different params) |
+| `MAX_ITER` | Maximum iteration limit reached |
+| `INFEASIBLE` | Problem has no feasible solution |
+| `UNBOUNDED` | Problem is unbounded |
+| `UNSUPPORTED` | Problem type not supported by the solver |
+| `TIMEOUT` | Execution time limit exceeded |
+| `SIGKILL` | Process forcibly terminated (typically OOM) |
+| `SUBPROCESS_ERROR` | Subprocess execution error (crash, library issues) |
+| `UNKNOWN` | Unclear solver state |
+
+**`additional_info['original_status']`** preserves complete solver-specific status information for reproducibility:
+- MATLAB solvers (SDPT3/SEDUMI): `termcode`/`pinf`/`dinf`/`numerr` (original solver status codes), `iter` (iteration count), `full_info` (complete solver info structure)
+- Python solvers (CVXPY/SciPy): `cvxpy_status`/`scipy_status` (original solver status), `solver_stats` (complete backend statistics), backend-specific metrics (`solve_time`, `num_iters`, etc.)
 
 ---
 
@@ -362,34 +249,20 @@ class SolverResult:
 problem_name:
   display_name: string          # Human-readable problem name
   file_path: string            # Relative path to problem file
-  file_type: string            # "mat" | "dat-s" | "mps" | "qps"
-  library_name: string         # "DIMACS" | "SDPLIB" | "internal"
+  file_type: string            # "mat" | "dat-s" (supported formats: ProblemInterface.FORMAT_LOADERS)
+  library_name: string         # "DIMACS" | "SDPLIB"
   for_test_flag: boolean       # Mark problem for validation testing
 ```
 
 ### Solver Interface Specifications
 
-**Python Solver Interface:**
-```python
-class PythonProcessInterface:
-    def solve(self, problem_name: str, solver_name: str,
-              timeout: Optional[float] = None,
-              memory_limit_gb: Optional[float] = None) -> SolverResult
-```
-
-**MATLAB Solver Interface:**
-```python
-class MatlabProcessInterface:
-    def solve(self, problem_name: str, solver_name: str,
-              timeout: Optional[float] = None,
-              memory_limit_gb: Optional[float] = None) -> SolverResult
-```
+`PythonProcessInterface` and `MatlabProcessInterface` expose the same `solve(problem_name, solver_name, timeout=...)` method returning a `SolverResult`, keeping the two ecosystems symmetric.
 
 ### Subprocess Architecture Design
 
 **Key Design Principles:**
 - **Process Isolation**: All solver execution in separate subprocesses for crash protection
-- **Resource Control**: ulimit-based memory limits and timeout control
+- **Timeout Control**: enforced via `subprocess.run(timeout=...)` in the parent process. A memory-limit mechanism exists in the subprocess entry point (`--memory-limit`, `resource.setrlimit`) but is currently not passed by the process interfaces
 - **Unified Error Detection**: Standardized error classification across Python/MATLAB
 - **JSON Communication**: Structured data exchange between parent and subprocess
 
@@ -397,45 +270,9 @@ class MatlabProcessInterface:
 
 ## Database Implementation
 
-### Schema Definition
-```sql
--- scripts/database/schema.sql
-CREATE TABLE results (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    
-    -- Solver information
-    solver_name TEXT NOT NULL,           -- 'cvxpy_clarabel', 'matlab_sedumi', etc.
-    solver_version TEXT NOT NULL,        -- Full version with backend info
-    
-    -- Problem information  
-    problem_library TEXT NOT NULL,       -- 'DIMACS', 'SDPLIB', 'internal'
-    problem_name TEXT NOT NULL,          -- Problem identifier
-    problem_type TEXT NOT NULL,          -- 'LP', 'QP', 'SOCP', 'SDP'
-    
-    -- Environment and execution context
-    environment_info TEXT NOT NULL,      -- JSON string with system info
-    commit_hash TEXT NOT NULL,           -- Git commit hash
-    timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
-    
-    -- Standardized solver results
-    solve_time REAL,                     -- Execution time in seconds
-    status TEXT,                         -- 'OPTIMAL', 'INFEASIBLE', 'UNBOUNDED', 'ERROR', 'TIMEOUT', 'UNSUPPORTED'
-    primal_objective_value REAL,        -- Primal objective value
-    dual_objective_value REAL,          -- Dual objective value
-    duality_gap REAL,                   -- Primal-dual gap
-    primal_infeasibility REAL,          -- Primal constraint violation
-    dual_infeasibility REAL,            -- Dual constraint violation
-    iterations INTEGER,                  -- Number of solver iterations
-    memo TEXT,                          -- Additional solver-specific info (JSON)
-    
-    UNIQUE(solver_name, solver_version, problem_library, problem_name, commit_hash, timestamp)
-);
+### Schema
 
--- Indexes for efficient querying
-CREATE INDEX idx_latest_results ON results(commit_hash, environment_info, timestamp DESC);
-CREATE INDEX idx_solver_problem ON results(solver_name, problem_name);
-CREATE INDEX idx_problem_type ON results(problem_type);
-```
+A single denormalized `results` table (see `scripts/database/schema.sql`): solver name/version, problem library/name/type, environment info (JSON), git commit hash, timestamp, and the standardized solver result fields (solve time, status, objective values, gap, infeasibilities, iterations, memo). Rows are append-only with a UNIQUE constraint on (solver, version, library, problem, commit, timestamp).
 
 ### Database Operations
 
@@ -449,7 +286,7 @@ CREATE INDEX idx_problem_type ON results(problem_type);
 ## Report Generation
 
 **Report Types:**
-- **Dashboard**: Interactive HTML reports with Bootstrap 5 + Chart.js
+- **Dashboard**: Static HTML reports (inline CSS, no JS frameworks)
 - **Results Matrix**: Problems × Solvers performance matrix
 - **Data Export**: JSON/CSV formats for research use
 
@@ -492,23 +329,19 @@ CREATE INDEX idx_problem_type ON results(problem_type);
 ## Development Guidelines
 
 ### Adding New Python Solvers
-1. **Add configuration** to `PYTHON_SOLVER_CONFIGS` in `python_interface.py`
-2. **Create runner class** if needed (or extend existing `CvxpyRunner`)
-3. **Update problem type compatibility** in configuration
-4. **Test with validation framework**
+1. **Add an entry** to `scripts/solvers/python/solver_configs.py` (single source of truth; for a new CVXPY backend this is the only code change)
+2. **Create a runner class** only if the solver is not a CVXPY backend (see `cvxpy_runner.py` / `scipy_runner.py`), and register it in `RUNNER_CLASSES` in `python_solver_runner.py`
+3. **Add the dependency** to `requirements.txt` and the solver name to `display_order` in `config/site_config.yaml`
+4. **Verify** with `python main.py --validate`
 
 ### Adding New MATLAB Solvers
 1. **Create solver runner** `{solver}_runner.m` following standard interface
-2. **Add configuration** to `MATLAB_SOLVER_CONFIGS` in `matlab_interface.py`
+2. **Add configuration** to `MATLAB_SOLVER_CONFIGS` in `matlab_process_interface.py`
 3. **Implement MEX compilation** in `setup_matlab_solvers.m`
-4. **Test with validation framework**
+4. **Verify** with `python main.py --validate`
 
 ### Adding New Problem Formats
 1. **Create loader classes** in both `python/` and `matlab/` directories
 2. **Add format mapping** to `FORMAT_LOADERS` in `problem_interface.py`
 3. **Update problem registry** to include new format problems
 4. **Implement format conversion** to unified SeDuMi format
-
----
-
-This detailed design provides comprehensive implementation guidance while maintaining focus on research applications and eliminating unnecessary production complexity.

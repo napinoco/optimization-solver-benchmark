@@ -1,9 +1,9 @@
-import os
-import yaml
-import numpy as np
 import sys
 from pathlib import Path
-from typing import Dict, List, Tuple, Optional, Any
+from typing import Any, Dict, List, Tuple
+
+import numpy as np
+import yaml
 
 # Add project root to path for imports
 project_root = Path(__file__).parent.parent.parent
@@ -14,6 +14,7 @@ from scripts.utils.logger import get_logger
 logger = get_logger("problem_loader")
 
 # Import for lazy loading to avoid circular imports
+
 
 class ProblemData:
     """
@@ -29,58 +30,62 @@ class ProblemData:
                subject to  z = c - A_eq.T y
                            z \\in K*             (Dual cone constraints)
     """
-    def __init__(self, name: str, problem_class: str, c: np.ndarray = None, 
-                 A_eq: np.ndarray = None, b_eq: np.ndarray = None,
-                 A_ub: np.ndarray = None, b_ub: np.ndarray = None,
-                 bounds: List[Tuple] = None, P: np.ndarray = None,
-                 cone_structure: Dict[str, Any] = None,  # First-class cone structure field
-                 metadata=None):
+
+    def __init__(
+        self,
+        name: str,
+        problem_class: str,
+        c: np.ndarray = None,
+        A_eq: np.ndarray = None,
+        b_eq: np.ndarray = None,
+        A_ub: np.ndarray = None,
+        b_ub: np.ndarray = None,
+        bounds: List[Tuple] = None,
+        P: np.ndarray = None,
+        cone_structure: Dict[str, Any] = None,  # First-class cone structure field
+        metadata=None,
+    ):
         self.name = name
         self.problem_class = problem_class
         self.c = c  # objective coefficients
         self.A_eq = A_eq  # equality constraint matrix
         self.b_eq = b_eq  # equality constraint RHS
-        self.A_ub = A_ub  # inequality constraint matrix  
+        self.A_ub = A_ub  # inequality constraint matrix
         self.b_ub = b_ub  # inequality constraint RHS
         self.bounds = bounds  # variable bounds
         self.P = P  # quadratic objective matrix for QP
-        
+
         # NEW: First-class cone structure support with backward compatibility
         if cone_structure is not None:
             self.cone_structure = cone_structure
-        elif metadata and 'cone_structure' in metadata:
+        elif metadata and "cone_structure" in metadata:
             # Backward compatibility: extract from metadata if not provided directly
-            self.cone_structure = metadata['cone_structure']
+            self.cone_structure = metadata["cone_structure"]
         else:
             # Default empty cone structure
-            self.cone_structure = {
-                'free_vars': 0,
-                'nonneg_vars': 0,
-                'soc_cones': [],
-                'sdp_cones': []
-            }
-        
+            self.cone_structure = {"free_vars": 0, "nonneg_vars": 0, "soc_cones": [], "sdp_cones": []}
+
         # Additional problem metadata
         self.metadata = metadata or {}  # Additional problem metadata
-        
+
         # Ensure cone_structure is also in metadata for backward compatibility
-        if 'cone_structure' not in self.metadata and self.cone_structure:
-            self.metadata['cone_structure'] = self.cone_structure
-        
+        if "cone_structure" not in self.metadata and self.cone_structure:
+            self.metadata["cone_structure"] = self.cone_structure
+
         # Basic problem dimensions for display
         self._num_variables = self._compute_num_variables()
         self._num_constraints = self._compute_num_constraints()
-        
+
     def _compute_num_variables(self):
         """Compute number of variables from problem data."""
         if self.c is not None:
-            return self.c.shape[0] if hasattr(self.c, 'shape') else len(self.c)
+            return self.c.shape[0] if hasattr(self.c, "shape") else len(self.c)
         elif self.A_eq is not None:
             return self.A_eq.shape[1]
         elif self.A_ub is not None:
             return self.A_ub.shape[1]
         return 0
-    
+
     def _compute_num_constraints(self):
         """Compute number of constraints from problem data."""
         total = 0
@@ -89,21 +94,23 @@ class ProblemData:
         if self.A_ub is not None:
             total += self.A_ub.shape[0]
         return total
-        
+
     def __repr__(self):
         structure_info = f", {self._num_variables} vars, {self._num_constraints} constraints"
         return f"ProblemData(name='{self.name}', class='{self.problem_class}'{structure_info})"
 
+
 # MPS and QPS file format parsers removed - no problems in registry use these formats
+
 
 def load_problem_registry() -> Dict:
     """Load the problem registry YAML file."""
     project_root = Path(__file__).parent.parent.parent
     registry_path = project_root / "config" / "problem_registry.yaml"
-    
+
     logger.info(f"Loading problem registry: {registry_path}")
-    
-    with open(registry_path, 'r') as f:
+
+    with open(registry_path, "r") as f:
         return yaml.safe_load(f)
 
 

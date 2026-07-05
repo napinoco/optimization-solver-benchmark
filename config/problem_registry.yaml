@@ -1174,3 +1174,763 @@ problem_libraries:
     library_name: "SDPLIB"
     for_test_flag: false
     known_objective_value: 1.33115e+02
+
+  # ============================================================================
+  # NETLIB Library - LP Benchmark Problems (94 problems)
+  # Source: https://github.com/ozy4dm/lp-data-netlib
+  # Format: MPS (Mathematical Programming System)
+  # ============================================================================
+
+  # Small test problems (for_test_flag: true)
+  afiro:
+    display_name: "AFIRO (NETLIB)"
+    file_path: "problems/NETLIB/mps_files/afiro.mps"
+    file_type: "mps"
+    library_name: "NETLIB"
+    problem_type: "LP"
+    for_test_flag: true
+
+  sc50a:
+    display_name: "SC50A (NETLIB)"
+    file_path: "problems/NETLIB/mps_files/sc50a.mps"
+    file_type: "mps"
+    library_name: "NETLIB"
+    problem_type: "LP"
+    for_test_flag: true
+
+  sc50b:
+    display_name: "SC50B (NETLIB)"
+    file_path: "problems/NETLIB/mps_files/sc50b.mps"
+    file_type: "mps"
+    library_name: "NETLIB"
+    problem_type: "LP"
+    for_test_flag: true
+
+  blend:
+    display_name: "BLEND (NETLIB)"
+    file_path: "problems/NETLIB/mps_files/blend.mps"
+    file_type: "mps"
+    library_name: "NETLIB"
+    problem_type: "LP"
+    for_test_flag: true
+
+  kb2:
+    display_name: "KB2 (NETLIB)"
+    file_path: "problems/NETLIB/mps_files/kb2.mps"
+    file_type: "mps"
+    library_name: "NETLIB"
+    problem_type: "LP"
+    for_test_flag: true
+
+  # Remaining NETLIB problems (alphabetical order)
+  netlib_25fv47:
+    display_name: "25FV47 (NETLIB)"
+    file_path: "problems/NETLIB/mps_files/25fv47.mps"
+    file_type: "mps"
+    library_name: "NETLIB"
+    problem_type: "LP"
+    for_test_flag: false
+
+  netlib_80bau3b:
+    display_name: "80BAU3B (NETLIB)"
+    file_path: "problems/NETLIB/mps_files/80bau3b.mps"
+    file_type: "mps"
+    library_name: "NETLIB"
+    problem_type: "LP"
+    for_test_flag: false
+
+  adlittle:
+    display_name: "ADLITTLE (NETLIB)"
+    file_path: "problems/NETLIB/mps_files/adlittle.mps"
+    file_type: "mps"
+    library_name: "NETLIB"
+    problem_type: "LP"
+    for_test_flag: false
+
+  agg:
+    display_name: "AGG (NETLIB)"
+    file_path: "problems/NETLIB/mps_files/agg.mps"
+    file_type: "mps"
+    library_name: "NETLIB"
+    problem_type: "LP"
+    for_test_flag: false
+
+  agg2:
+    display_name: "AGG2 (NETLIB)"
+    file_path: "problems/NETLIB/mps_files/agg2.mps"
+    file_type: "mps"
+    library_name: "NETLIB"
+    problem_type: "LP"
+    for_test_flag: false
+
+  agg3:
+    display_name: "AGG3 (NETLIB)"
+    file_path: "problems/NETLIB/mps_files/agg3.mps"
+    file_type: "mps"
+    library_name: "NETLIB"
+    problem_type: "LP"
+    for_test_flag: false
+
+  bandm:
+    display_name: "BANDM (NETLIB)"
+    file_path: "problems/NETLIB/mps_files/bandm.mps"
+    file_type: "mps"
+    library_name: "NETLIB"
+    problem_type: "LP"
+    for_test_flag: false
+
+  beaconfd:
+    display_name: "BEACONFD (NETLIB)"
+    file_path: "problems/NETLIB/mps_files/beaconfd.mps"
+    file_type: "mps"
+    library_name: "NETLIB"
+    problem_type: "LP"
+    for_test_flag: false
+
+  bnl1:
+    display_name: "BNL1 (NETLIB)"
+    file_path: "problems/NETLIB/mps_files/bnl1.mps"
+    file_type: "mps"
+    library_name: "NETLIB"
+    problem_type: "LP"
+    for_test_flag: false
+
+  bnl2:
+    display_name: "BNL2 (NETLIB)"
+    file_path: "problems/NETLIB/mps_files/bnl2.mps"
+    file_type: "mps"
+    library_name: "NETLIB"
+    problem_type: "LP"
+    for_test_flag: false
+
+  boeing1:
+    display_name: "BOEING1 (NETLIB)"
+    file_path: "problems/NETLIB/mps_files/boeing1.mps"
+    file_type: "mps"
+    library_name: "NETLIB"
+    problem_type: "LP"
+    for_test_flag: false
+
+  boeing2:
+    display_name: "BOEING2 (NETLIB)"
+    file_path: "problems/NETLIB/mps_files/boeing2.mps"
+    file_type: "mps"
+    library_name: "NETLIB"
+    problem_type: "LP"
+    for_test_flag: false
+
+  bore3d:
+    display_name: "BORE3D (NETLIB)"
+    file_path: "problems/NETLIB/mps_files/bore3d.mps"
+    file_type: "mps"
+    library_name: "NETLIB"
+    problem_type: "LP"
+    for_test_flag: false
+
+  brandy:
+    display_name: "BRANDY (NETLIB)"
+    file_path: "problems/NETLIB/mps_files/brandy.mps"
+    file_type: "mps"
+    library_name: "NETLIB"
+    problem_type: "LP"
+    for_test_flag: false
+
+  capri:
+    display_name: "CAPRI (NETLIB)"
+    file_path: "problems/NETLIB/mps_files/capri.mps"
+    file_type: "mps"
+    library_name: "NETLIB"
+    problem_type: "LP"
+    for_test_flag: false
+
+  cycle:
+    display_name: "CYCLE (NETLIB)"
+    file_path: "problems/NETLIB/mps_files/cycle.mps"
+    file_type: "mps"
+    library_name: "NETLIB"
+    problem_type: "LP"
+    for_test_flag: false
+
+  czprob:
+    display_name: "CZPROB (NETLIB)"
+    file_path: "problems/NETLIB/mps_files/czprob.mps"
+    file_type: "mps"
+    library_name: "NETLIB"
+    problem_type: "LP"
+    for_test_flag: false
+
+  d2q06c:
+    display_name: "D2Q06C (NETLIB)"
+    file_path: "problems/NETLIB/mps_files/d2q06c.mps"
+    file_type: "mps"
+    library_name: "NETLIB"
+    problem_type: "LP"
+    for_test_flag: false
+
+  d6cube:
+    display_name: "D6CUBE (NETLIB)"
+    file_path: "problems/NETLIB/mps_files/d6cube.mps"
+    file_type: "mps"
+    library_name: "NETLIB"
+    problem_type: "LP"
+    for_test_flag: false
+
+  degen2:
+    display_name: "DEGEN2 (NETLIB)"
+    file_path: "problems/NETLIB/mps_files/degen2.mps"
+    file_type: "mps"
+    library_name: "NETLIB"
+    problem_type: "LP"
+    for_test_flag: false
+
+  degen3:
+    display_name: "DEGEN3 (NETLIB)"
+    file_path: "problems/NETLIB/mps_files/degen3.mps"
+    file_type: "mps"
+    library_name: "NETLIB"
+    problem_type: "LP"
+    for_test_flag: false
+
+  dfl001:
+    display_name: "DFL001 (NETLIB)"
+    file_path: "problems/NETLIB/mps_files/dfl001.mps"
+    file_type: "mps"
+    library_name: "NETLIB"
+    problem_type: "LP"
+    for_test_flag: false
+
+  e226:
+    display_name: "E226 (NETLIB)"
+    file_path: "problems/NETLIB/mps_files/e226.mps"
+    file_type: "mps"
+    library_name: "NETLIB"
+    problem_type: "LP"
+    for_test_flag: false
+
+  etamacro:
+    display_name: "ETAMACRO (NETLIB)"
+    file_path: "problems/NETLIB/mps_files/etamacro.mps"
+    file_type: "mps"
+    library_name: "NETLIB"
+    problem_type: "LP"
+    for_test_flag: false
+
+  fffff800:
+    display_name: "FFFFF800 (NETLIB)"
+    file_path: "problems/NETLIB/mps_files/fffff800.mps"
+    file_type: "mps"
+    library_name: "NETLIB"
+    problem_type: "LP"
+    for_test_flag: false
+
+  finnis:
+    display_name: "FINNIS (NETLIB)"
+    file_path: "problems/NETLIB/mps_files/finnis.mps"
+    file_type: "mps"
+    library_name: "NETLIB"
+    problem_type: "LP"
+    for_test_flag: false
+
+  fit1d:
+    display_name: "FIT1D (NETLIB)"
+    file_path: "problems/NETLIB/mps_files/fit1d.mps"
+    file_type: "mps"
+    library_name: "NETLIB"
+    problem_type: "LP"
+    for_test_flag: false
+
+  fit1p:
+    display_name: "FIT1P (NETLIB)"
+    file_path: "problems/NETLIB/mps_files/fit1p.mps"
+    file_type: "mps"
+    library_name: "NETLIB"
+    problem_type: "LP"
+    for_test_flag: false
+
+  fit2d:
+    display_name: "FIT2D (NETLIB)"
+    file_path: "problems/NETLIB/mps_files/fit2d.mps"
+    file_type: "mps"
+    library_name: "NETLIB"
+    problem_type: "LP"
+    for_test_flag: false
+
+  fit2p:
+    display_name: "FIT2P (NETLIB)"
+    file_path: "problems/NETLIB/mps_files/fit2p.mps"
+    file_type: "mps"
+    library_name: "NETLIB"
+    problem_type: "LP"
+    for_test_flag: false
+
+  forplan:
+    display_name: "FORPLAN (NETLIB)"
+    file_path: "problems/NETLIB/mps_files/forplan.mps"
+    file_type: "mps"
+    library_name: "NETLIB"
+    problem_type: "LP"
+    for_test_flag: false
+
+  ganges:
+    display_name: "GANGES (NETLIB)"
+    file_path: "problems/NETLIB/mps_files/ganges.mps"
+    file_type: "mps"
+    library_name: "NETLIB"
+    problem_type: "LP"
+    for_test_flag: false
+
+  gfrd_pnc:
+    display_name: "GFRD-PNC (NETLIB)"
+    file_path: "problems/NETLIB/mps_files/gfrd-pnc.mps"
+    file_type: "mps"
+    library_name: "NETLIB"
+    problem_type: "LP"
+    for_test_flag: false
+
+  greenbea:
+    display_name: "GREENBEA (NETLIB)"
+    file_path: "problems/NETLIB/mps_files/greenbea.mps"
+    file_type: "mps"
+    library_name: "NETLIB"
+    problem_type: "LP"
+    for_test_flag: false
+
+  greenbeb:
+    display_name: "GREENBEB (NETLIB)"
+    file_path: "problems/NETLIB/mps_files/greenbeb.mps"
+    file_type: "mps"
+    library_name: "NETLIB"
+    problem_type: "LP"
+    for_test_flag: false
+
+  grow15:
+    display_name: "GROW15 (NETLIB)"
+    file_path: "problems/NETLIB/mps_files/grow15.mps"
+    file_type: "mps"
+    library_name: "NETLIB"
+    problem_type: "LP"
+    for_test_flag: false
+
+  grow22:
+    display_name: "GROW22 (NETLIB)"
+    file_path: "problems/NETLIB/mps_files/grow22.mps"
+    file_type: "mps"
+    library_name: "NETLIB"
+    problem_type: "LP"
+    for_test_flag: false
+
+  grow7:
+    display_name: "GROW7 (NETLIB)"
+    file_path: "problems/NETLIB/mps_files/grow7.mps"
+    file_type: "mps"
+    library_name: "NETLIB"
+    problem_type: "LP"
+    for_test_flag: false
+
+  israel:
+    display_name: "ISRAEL (NETLIB)"
+    file_path: "problems/NETLIB/mps_files/israel.mps"
+    file_type: "mps"
+    library_name: "NETLIB"
+    problem_type: "LP"
+    for_test_flag: false
+
+  lotfi:
+    display_name: "LOTFI (NETLIB)"
+    file_path: "problems/NETLIB/mps_files/lotfi.mps"
+    file_type: "mps"
+    library_name: "NETLIB"
+    problem_type: "LP"
+    for_test_flag: false
+
+  maros:
+    display_name: "MAROS (NETLIB)"
+    file_path: "problems/NETLIB/mps_files/maros.mps"
+    file_type: "mps"
+    library_name: "NETLIB"
+    problem_type: "LP"
+    for_test_flag: false
+
+  maros_r7:
+    display_name: "MAROS-R7 (NETLIB)"
+    file_path: "problems/NETLIB/mps_files/maros-r7.mps"
+    file_type: "mps"
+    library_name: "NETLIB"
+    problem_type: "LP"
+    for_test_flag: false
+
+  modszk1:
+    display_name: "MODSZK1 (NETLIB)"
+    file_path: "problems/NETLIB/mps_files/modszk1.mps"
+    file_type: "mps"
+    library_name: "NETLIB"
+    problem_type: "LP"
+    for_test_flag: false
+
+  nesm:
+    display_name: "NESM (NETLIB)"
+    file_path: "problems/NETLIB/mps_files/nesm.mps"
+    file_type: "mps"
+    library_name: "NETLIB"
+    problem_type: "LP"
+    for_test_flag: false
+
+  perold:
+    display_name: "PEROLD (NETLIB)"
+    file_path: "problems/NETLIB/mps_files/perold.mps"
+    file_type: "mps"
+    library_name: "NETLIB"
+    problem_type: "LP"
+    for_test_flag: false
+
+  pilot:
+    display_name: "PILOT (NETLIB)"
+    file_path: "problems/NETLIB/mps_files/pilot.mps"
+    file_type: "mps"
+    library_name: "NETLIB"
+    problem_type: "LP"
+    for_test_flag: false
+
+  pilot_ja:
+    display_name: "PILOT.JA (NETLIB)"
+    file_path: "problems/NETLIB/mps_files/pilot.ja.mps"
+    file_type: "mps"
+    library_name: "NETLIB"
+    problem_type: "LP"
+    for_test_flag: false
+
+  pilot_we:
+    display_name: "PILOT.WE (NETLIB)"
+    file_path: "problems/NETLIB/mps_files/pilot.we.mps"
+    file_type: "mps"
+    library_name: "NETLIB"
+    problem_type: "LP"
+    for_test_flag: false
+
+  pilot4:
+    display_name: "PILOT4 (NETLIB)"
+    file_path: "problems/NETLIB/mps_files/pilot4.mps"
+    file_type: "mps"
+    library_name: "NETLIB"
+    problem_type: "LP"
+    for_test_flag: false
+
+  pilot87:
+    display_name: "PILOT87 (NETLIB)"
+    file_path: "problems/NETLIB/mps_files/pilot87.mps"
+    file_type: "mps"
+    library_name: "NETLIB"
+    problem_type: "LP"
+    for_test_flag: false
+
+  pilotnov:
+    display_name: "PILOTNOV (NETLIB)"
+    file_path: "problems/NETLIB/mps_files/pilotnov.mps"
+    file_type: "mps"
+    library_name: "NETLIB"
+    problem_type: "LP"
+    for_test_flag: false
+
+  recipe:
+    display_name: "RECIPE (NETLIB)"
+    file_path: "problems/NETLIB/mps_files/recipe.mps"
+    file_type: "mps"
+    library_name: "NETLIB"
+    problem_type: "LP"
+    for_test_flag: false
+
+  sc105:
+    display_name: "SC105 (NETLIB)"
+    file_path: "problems/NETLIB/mps_files/sc105.mps"
+    file_type: "mps"
+    library_name: "NETLIB"
+    problem_type: "LP"
+    for_test_flag: false
+
+  sc205:
+    display_name: "SC205 (NETLIB)"
+    file_path: "problems/NETLIB/mps_files/sc205.mps"
+    file_type: "mps"
+    library_name: "NETLIB"
+    problem_type: "LP"
+    for_test_flag: false
+
+  scagr25:
+    display_name: "SCAGR25 (NETLIB)"
+    file_path: "problems/NETLIB/mps_files/scagr25.mps"
+    file_type: "mps"
+    library_name: "NETLIB"
+    problem_type: "LP"
+    for_test_flag: false
+
+  scagr7:
+    display_name: "SCAGR7 (NETLIB)"
+    file_path: "problems/NETLIB/mps_files/scagr7.mps"
+    file_type: "mps"
+    library_name: "NETLIB"
+    problem_type: "LP"
+    for_test_flag: false
+
+  scfxm1:
+    display_name: "SCFXM1 (NETLIB)"
+    file_path: "problems/NETLIB/mps_files/scfxm1.mps"
+    file_type: "mps"
+    library_name: "NETLIB"
+    problem_type: "LP"
+    for_test_flag: false
+
+  scfxm2:
+    display_name: "SCFXM2 (NETLIB)"
+    file_path: "problems/NETLIB/mps_files/scfxm2.mps"
+    file_type: "mps"
+    library_name: "NETLIB"
+    problem_type: "LP"
+    for_test_flag: false
+
+  scfxm3:
+    display_name: "SCFXM3 (NETLIB)"
+    file_path: "problems/NETLIB/mps_files/scfxm3.mps"
+    file_type: "mps"
+    library_name: "NETLIB"
+    problem_type: "LP"
+    for_test_flag: false
+
+  scorpion:
+    display_name: "SCORPION (NETLIB)"
+    file_path: "problems/NETLIB/mps_files/scorpion.mps"
+    file_type: "mps"
+    library_name: "NETLIB"
+    problem_type: "LP"
+    for_test_flag: false
+
+  scrs8:
+    display_name: "SCRS8 (NETLIB)"
+    file_path: "problems/NETLIB/mps_files/scrs8.mps"
+    file_type: "mps"
+    library_name: "NETLIB"
+    problem_type: "LP"
+    for_test_flag: false
+
+  scsd1:
+    display_name: "SCSD1 (NETLIB)"
+    file_path: "problems/NETLIB/mps_files/scsd1.mps"
+    file_type: "mps"
+    library_name: "NETLIB"
+    problem_type: "LP"
+    for_test_flag: false
+
+  scsd6:
+    display_name: "SCSD6 (NETLIB)"
+    file_path: "problems/NETLIB/mps_files/scsd6.mps"
+    file_type: "mps"
+    library_name: "NETLIB"
+    problem_type: "LP"
+    for_test_flag: false
+
+  scsd8:
+    display_name: "SCSD8 (NETLIB)"
+    file_path: "problems/NETLIB/mps_files/scsd8.mps"
+    file_type: "mps"
+    library_name: "NETLIB"
+    problem_type: "LP"
+    for_test_flag: false
+
+  sctap1:
+    display_name: "SCTAP1 (NETLIB)"
+    file_path: "problems/NETLIB/mps_files/sctap1.mps"
+    file_type: "mps"
+    library_name: "NETLIB"
+    problem_type: "LP"
+    for_test_flag: false
+
+  sctap2:
+    display_name: "SCTAP2 (NETLIB)"
+    file_path: "problems/NETLIB/mps_files/sctap2.mps"
+    file_type: "mps"
+    library_name: "NETLIB"
+    problem_type: "LP"
+    for_test_flag: false
+
+  sctap3:
+    display_name: "SCTAP3 (NETLIB)"
+    file_path: "problems/NETLIB/mps_files/sctap3.mps"
+    file_type: "mps"
+    library_name: "NETLIB"
+    problem_type: "LP"
+    for_test_flag: false
+
+  seba:
+    display_name: "SEBA (NETLIB)"
+    file_path: "problems/NETLIB/mps_files/seba.mps"
+    file_type: "mps"
+    library_name: "NETLIB"
+    problem_type: "LP"
+    for_test_flag: false
+
+  share1b:
+    display_name: "SHARE1B (NETLIB)"
+    file_path: "problems/NETLIB/mps_files/share1b.mps"
+    file_type: "mps"
+    library_name: "NETLIB"
+    problem_type: "LP"
+    for_test_flag: false
+
+  share2b:
+    display_name: "SHARE2B (NETLIB)"
+    file_path: "problems/NETLIB/mps_files/share2b.mps"
+    file_type: "mps"
+    library_name: "NETLIB"
+    problem_type: "LP"
+    for_test_flag: false
+
+  shell:
+    display_name: "SHELL (NETLIB)"
+    file_path: "problems/NETLIB/mps_files/shell.mps"
+    file_type: "mps"
+    library_name: "NETLIB"
+    problem_type: "LP"
+    for_test_flag: false
+
+  ship04l:
+    display_name: "SHIP04L (NETLIB)"
+    file_path: "problems/NETLIB/mps_files/ship04l.mps"
+    file_type: "mps"
+    library_name: "NETLIB"
+    problem_type: "LP"
+    for_test_flag: false
+
+  ship04s:
+    display_name: "SHIP04S (NETLIB)"
+    file_path: "problems/NETLIB/mps_files/ship04s.mps"
+    file_type: "mps"
+    library_name: "NETLIB"
+    problem_type: "LP"
+    for_test_flag: false
+
+  ship08l:
+    display_name: "SHIP08L (NETLIB)"
+    file_path: "problems/NETLIB/mps_files/ship08l.mps"
+    file_type: "mps"
+    library_name: "NETLIB"
+    problem_type: "LP"
+    for_test_flag: false
+
+  ship08s:
+    display_name: "SHIP08S (NETLIB)"
+    file_path: "problems/NETLIB/mps_files/ship08s.mps"
+    file_type: "mps"
+    library_name: "NETLIB"
+    problem_type: "LP"
+    for_test_flag: false
+
+  ship12l:
+    display_name: "SHIP12L (NETLIB)"
+    file_path: "problems/NETLIB/mps_files/ship12l.mps"
+    file_type: "mps"
+    library_name: "NETLIB"
+    problem_type: "LP"
+    for_test_flag: false
+
+  ship12s:
+    display_name: "SHIP12S (NETLIB)"
+    file_path: "problems/NETLIB/mps_files/ship12s.mps"
+    file_type: "mps"
+    library_name: "NETLIB"
+    problem_type: "LP"
+    for_test_flag: false
+
+  sierra:
+    display_name: "SIERRA (NETLIB)"
+    file_path: "problems/NETLIB/mps_files/sierra.mps"
+    file_type: "mps"
+    library_name: "NETLIB"
+    problem_type: "LP"
+    for_test_flag: false
+
+  stair:
+    display_name: "STAIR (NETLIB)"
+    file_path: "problems/NETLIB/mps_files/stair.mps"
+    file_type: "mps"
+    library_name: "NETLIB"
+    problem_type: "LP"
+    for_test_flag: false
+
+  standata:
+    display_name: "STANDATA (NETLIB)"
+    file_path: "problems/NETLIB/mps_files/standata.mps"
+    file_type: "mps"
+    library_name: "NETLIB"
+    problem_type: "LP"
+    for_test_flag: false
+
+  standgub:
+    display_name: "STANDGUB (NETLIB)"
+    file_path: "problems/NETLIB/mps_files/standgub.mps"
+    file_type: "mps"
+    library_name: "NETLIB"
+    problem_type: "LP"
+    for_test_flag: false
+
+  standmps:
+    display_name: "STANDMPS (NETLIB)"
+    file_path: "problems/NETLIB/mps_files/standmps.mps"
+    file_type: "mps"
+    library_name: "NETLIB"
+    problem_type: "LP"
+    for_test_flag: false
+
+  stocfor1:
+    display_name: "STOCFOR1 (NETLIB)"
+    file_path: "problems/NETLIB/mps_files/stocfor1.mps"
+    file_type: "mps"
+    library_name: "NETLIB"
+    problem_type: "LP"
+    for_test_flag: false
+
+  stocfor2:
+    display_name: "STOCFOR2 (NETLIB)"
+    file_path: "problems/NETLIB/mps_files/stocfor2.mps"
+    file_type: "mps"
+    library_name: "NETLIB"
+    problem_type: "LP"
+    for_test_flag: false
+
+  netlib_truss:
+    display_name: "TRUSS (NETLIB)"
+    file_path: "problems/NETLIB/mps_files/truss.mps"
+    file_type: "mps"
+    library_name: "NETLIB"
+    problem_type: "LP"
+    for_test_flag: false
+
+  tuff:
+    display_name: "TUFF (NETLIB)"
+    file_path: "problems/NETLIB/mps_files/tuff.mps"
+    file_type: "mps"
+    library_name: "NETLIB"
+    problem_type: "LP"
+    for_test_flag: false
+
+  vtp_base:
+    display_name: "VTP.BASE (NETLIB)"
+    file_path: "problems/NETLIB/mps_files/vtp.base.mps"
+    file_type: "mps"
+    library_name: "NETLIB"
+    problem_type: "LP"
+    for_test_flag: false
+
+  wood1p:
+    display_name: "WOOD1P (NETLIB)"
+    file_path: "problems/NETLIB/mps_files/wood1p.mps"
+    file_type: "mps"
+    library_name: "NETLIB"
+    problem_type: "LP"
+    for_test_flag: false
+
+  woodw:
+    display_name: "WOODW (NETLIB)"
+    file_path: "problems/NETLIB/mps_files/woodw.mps"
+    file_type: "mps"
+    library_name: "NETLIB"
+    problem_type: "LP"
+    for_test_flag: false

@@ -44,7 +44,18 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
-        
+
+    - name: Install dev tools
+      run: pip install pytest==8.3.5 ruff==0.11.13
+
+    - name: Lint and format check
+      run: |
+        ruff check scripts/ main.py tests/
+        ruff format --check scripts/ main.py tests/
+
+    - name: Run unit tests
+      run: pytest tests/ -v
+
     - name: Validate system configuration
       run: |
         echo "## System Validation" >> $GITHUB_STEP_SUMMARY
@@ -65,26 +76,6 @@ jobs:
         echo "- **Platform**: ${{ runner.os }}" >> $GITHUB_STEP_SUMMARY
         echo "- **Architecture**: $(uname -m)" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
-        
-    - name: Check solver availability
-      run: |
-        echo "### Solver Backend Availability" >> $GITHUB_STEP_SUMMARY
-        python -c "
-        import sys
-        sys.path.insert(0, '.')
-        try:
-            from scripts.utils.solver_validation import SolverValidator
-            from scripts.utils.logger import get_logger
-            
-            logger = get_logger('ci_validation')
-            validator = SolverValidator(logger)
-            validator.validate_all_backends()
-            print('✅ Solver validation completed')
-        except ImportError as e:
-            print(f'⚠️ Solver validation skipped: {e}')
-        except Exception as e:
-            print(f'⚠️ Solver validation warning: {e}')
-        " 2>&1 || echo "⚠️ Solver validation completed with warnings" >> $GITHUB_STEP_SUMMARY
         
     - name: Display validation summary
       if: success()

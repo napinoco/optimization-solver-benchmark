@@ -10,3 +10,6 @@
 [submodule "scripts/solvers/matlab/sdpt3"]
 	path = scripts/solvers/matlab/sdpt3
 	url = https://github.com/sqlp/sdpt3
+[submodule "problems/NETLIB"]
+	path = problems/NETLIB
+	url = https://github.com/ozy4dm/lp-data-netlib.git

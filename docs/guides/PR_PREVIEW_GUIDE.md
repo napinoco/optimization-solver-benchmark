@@ -166,13 +166,7 @@ Check the "Deploy PR Preview" workflow in GitHub Actions for:
 
 ### Customizing Preview Behavior
 
-The preview system can be customized by editing `.github/workflows/pr-preview.yml`:
-
-**Change Benchmark Configuration:**
-```yaml
-# Modify the benchmark execution step
-python main.py --benchmark --solvers "scipy_linprog,cvxpy_clarabel" --library_names "DIMACS,SDPLIB"
-```
+The preview system can be customized by editing `.github/workflows/deploy.yml`:
 
 **Modify Preview Banner:**
 ```yaml
