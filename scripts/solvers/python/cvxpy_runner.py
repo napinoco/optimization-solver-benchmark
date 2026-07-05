@@ -593,7 +593,6 @@ class CvxpySolver(SolverInterface):
             f"time={solve_time:.3f}s, dual_gap={duality_gap}, dual_inf={dual_infeasibility}"
         )
 
-
         return SolverResult(
             solve_time=solve_time,
             status=status,

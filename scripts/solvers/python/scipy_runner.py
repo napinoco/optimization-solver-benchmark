@@ -259,7 +259,6 @@ class ScipySolver(SolverInterface):
             f"LP solve completed: status={status}, objective={primal_objective_value}, time={solve_time:.3f}s"
         )
 
-
         return self._create_standardized_result(
             solve_time=solve_time,
             status=status,
