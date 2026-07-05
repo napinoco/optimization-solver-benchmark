@@ -18,82 +18,6 @@ Detailed technical specifications for the optimization solver benchmark system s
 
 ---
 
-## Project Structure
-
-### Directory Layout
-```
-optimization-solver-benchmark/
-├── main.py                     # Entry point with argument parsing
-├── config/                     # Configuration files
-│   ├── site_config.yaml        # Site metadata and overview
-│   └── problem_registry.yaml   # Problem metadata and file paths
-├── scripts/
-│   ├── benchmark/              # Benchmark execution engine
-│   │   ├── __init__.py
-│   │   └── runner.py           # Main BenchmarkRunner class
-│   ├── solvers/                # Solver interface implementations
-│   │   ├── __init__.py
-│   │   ├── solver_interface.py # Abstract base classes and SolverResult
-│   │   ├── python/             # Python solver implementations (subprocess)
-│   │   │   ├── __init__.py
-│   │   │   ├── solver_configs.py            # Solver registry (single source of truth)
-│   │   │   ├── python_process_interface.py  # Python subprocess coordinator
-│   │   │   ├── python_solver_runner.py      # Subprocess entry point + solver manager
-│   │   │   ├── cvxpy_runner.py              # CVXPY backend handler
-│   │   │   └── scipy_runner.py              # SciPy linprog handler
-│   │   └── matlab/      # MATLAB integration (subprocess)
-│   │       ├── __init__.py
-│   │       ├── matlab_process_interface.py  # Python-MATLAB subprocess bridge
-│   │       ├── matlab_solver_runner.m       # MATLAB subprocess entry point
-│   │       ├── sedumi_runner.m              # SeDuMi solver wrapper
-│   │       ├── sdpt3_runner.m               # SDPT3 solver wrapper
-│   │       ├── setup_matlab_solvers.m       # MEX compilation script
-│   │       ├── sedumi/         # SeDuMi solver (git submodule)
-│   │       └── sdpt3/          # SDPT3 solver (git submodule)
-│   ├── data_loaders/           # Problem format loaders
-│   │   ├── __init__.py
-│   │   ├── problem_loader.py   # ProblemData class definition
-│   │   ├── python/             # Python format loaders
-│   │   │   ├── __init__.py
-│   │   │   ├── problem_interface.py  # Problem loading coordinator
-│   │   │   ├── mat_loader.py         # DIMACS .mat loader
-│   │   │   └── dat_loader.py         # SDPLIB .dat-s loader
-│   │   └── matlab/      # MATLAB format loaders
-│   │       ├── mat_loader.m    # MATLAB .mat loader
-│   │       └── dat_loader.m    # MATLAB .dat-s loader
-│   ├── database/               # Database management
-│   │   ├── __init__.py
-│   │   ├── database_manager.py # Database operations
-│   │   ├── models.py           # Data models
-│   │   └── schema.sql          # Database schema
-│   ├── reporting/              # Report generation
-│   │   ├── __init__.py
-│   │   ├── html_generator.py   # HTMLGenerator facade (public API)
-│   │   ├── report_base.py      # Shared base class and HTML/CSS helpers
-│   │   ├── overview_report.py  # Overview dashboard (index.html)
-│   │   ├── results_matrix_report.py # Problems × Solvers matrix
-│   │   ├── raw_data_report.py  # Raw data table
-│   │   ├── data_index_report.py # Data export index page
-│   │   ├── result_processor.py # Result aggregation
-│   │   └── data_exporter.py    # JSON/CSV export
-│   └── utils/                  # Utility modules (logging, env info, git, temp files)
-├── tests/                      # pytest test suite
-│   ├── unit/                   # Unit tests (synthetic fixtures, no submodules needed)
-│   └── integration/            # Problem registry integrity checks
-├── problems/                   # Problem library files
-│   ├── DIMACS/                 # External DIMACS library (git submodule)
-│   └── SDPLIB/                 # External SDPLIB library (git submodule)
-├── database/                   # SQLite database files (results.db, gitignored)
-├── docs/
-│   ├── pages/                  # Generated HTML reports and data exports
-│   ├── development/            # Design documents
-│   └── guides/                 # User/setup guides
-├── pyproject.toml              # pytest and ruff configuration
-└── requirements.txt            # Python dependencies (single file, all pinned)
-```
-
----
-
 ## Component Architecture
 
 ### System Data Flow
@@ -202,6 +126,82 @@ The parent process classifies subprocess outcomes by return code (see `_call_pyt
 - Symmetric Python/MATLAB execution paths
 - Timeout enforcement at the subprocess level
 - Centralized result storage and metadata tracking
+
+---
+
+## Project Structure
+
+### Directory Layout
+```
+optimization-solver-benchmark/
+├── main.py                     # Entry point with argument parsing
+├── config/                     # Configuration files
+│   ├── site_config.yaml        # Site metadata and overview
+│   └── problem_registry.yaml   # Problem metadata and file paths
+├── scripts/
+│   ├── benchmark/              # Benchmark execution engine
+│   │   ├── __init__.py
+│   │   └── runner.py           # Main BenchmarkRunner class
+│   ├── solvers/                # Solver interface implementations
+│   │   ├── __init__.py
+│   │   ├── solver_interface.py # Abstract base classes and SolverResult
+│   │   ├── python/             # Python solver implementations (subprocess)
+│   │   │   ├── __init__.py
+│   │   │   ├── solver_configs.py            # Solver registry (single source of truth)
+│   │   │   ├── python_process_interface.py  # Python subprocess coordinator
+│   │   │   ├── python_solver_runner.py      # Subprocess entry point + solver manager
+│   │   │   ├── cvxpy_runner.py              # CVXPY backend handler
+│   │   │   └── scipy_runner.py              # SciPy linprog handler
+│   │   └── matlab/      # MATLAB integration (subprocess)
+│   │       ├── __init__.py
+│   │       ├── matlab_process_interface.py  # Python-MATLAB subprocess bridge
+│   │       ├── matlab_solver_runner.m       # MATLAB subprocess entry point
+│   │       ├── sedumi_runner.m              # SeDuMi solver wrapper
+│   │       ├── sdpt3_runner.m               # SDPT3 solver wrapper
+│   │       ├── setup_matlab_solvers.m       # MEX compilation script
+│   │       ├── sedumi/         # SeDuMi solver (git submodule)
+│   │       └── sdpt3/          # SDPT3 solver (git submodule)
+│   ├── data_loaders/           # Problem format loaders
+│   │   ├── __init__.py
+│   │   ├── problem_loader.py   # ProblemData class definition
+│   │   ├── python/             # Python format loaders
+│   │   │   ├── __init__.py
+│   │   │   ├── problem_interface.py  # Problem loading coordinator
+│   │   │   ├── mat_loader.py         # DIMACS .mat loader
+│   │   │   └── dat_loader.py         # SDPLIB .dat-s loader
+│   │   └── matlab/      # MATLAB format loaders
+│   │       ├── mat_loader.m    # MATLAB .mat loader
+│   │       └── dat_loader.m    # MATLAB .dat-s loader
+│   ├── database/               # Database management
+│   │   ├── __init__.py
+│   │   ├── database_manager.py # Database operations
+│   │   ├── models.py           # Data models
+│   │   └── schema.sql          # Database schema
+│   ├── reporting/              # Report generation
+│   │   ├── __init__.py
+│   │   ├── html_generator.py   # HTMLGenerator facade (public API)
+│   │   ├── report_base.py      # Shared base class and HTML/CSS helpers
+│   │   ├── overview_report.py  # Overview dashboard (index.html)
+│   │   ├── results_matrix_report.py # Problems × Solvers matrix
+│   │   ├── raw_data_report.py  # Raw data table
+│   │   ├── data_index_report.py # Data export index page
+│   │   ├── result_processor.py # Result aggregation
+│   │   └── data_exporter.py    # JSON/CSV export
+│   └── utils/                  # Utility modules (logging, env info, git, temp files)
+├── tests/                      # pytest test suite
+│   ├── unit/                   # Unit tests (synthetic fixtures, no submodules needed)
+│   └── integration/            # Problem registry integrity checks
+├── problems/                   # Problem library files
+│   ├── DIMACS/                 # External DIMACS library (git submodule)
+│   └── SDPLIB/                 # External SDPLIB library (git submodule)
+├── database/                   # SQLite database files (results.db, gitignored)
+├── docs/
+│   ├── pages/                  # Generated HTML reports and data exports
+│   ├── development/            # Design documents
+│   └── guides/                 # User/setup guides
+├── pyproject.toml              # pytest and ruff configuration
+└── requirements.txt            # Python dependencies (single file, all pinned)
+```
 
 ---
 

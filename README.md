@@ -121,6 +121,8 @@ See [basic_design.md](docs/development/basic_design.md) for the full design prin
 
 **Multi-Language Support**: Unified Python/MATLAB integration via JSON data exchange and standardized result format.
 
+See [Component Architecture](docs/development/detail_design.md#component-architecture) for the full process flow diagram.
+
 ## Adding Components
 
 ### New Solvers

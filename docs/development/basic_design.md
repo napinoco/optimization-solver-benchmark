@@ -34,7 +34,7 @@ This system prioritizes unbiased solver comparison through minimal configuration
 
 ## System Overview
 
-### Core Architecture
+### Deployment & Execution Overview
 ```
 LOCAL DEVELOPMENT:
 ┌─────────────┐    ┌──────────────┐    ┌─────────────┐
