@@ -179,6 +179,9 @@ class ResultsMatrixReportGenerator(ReportGeneratorBase):
         .status-error,
         .status-infeasible,
         .status-unsupported,
+        .status-stalled,
+        .status-max-iter,
+        .status-num-error,
         .status-unknown {
             /* No background colors - focus on accuracy/speed instead */
         }
@@ -492,6 +495,12 @@ class ResultsMatrixReportGenerator(ReportGeneratorBase):
                         css_class = "status-sigkill"
                     elif status_lower == "subprocess_error":
                         css_class = "status-subprocess-error"
+                    elif status_lower == "stalled":
+                        css_class = "status-stalled"
+                    elif status_lower == "max_iter":
+                        css_class = "status-max-iter"
+                    elif status_lower == "num_error":
+                        css_class = "status-num-error"
                     elif status_lower == "error":
                         css_class = "status-error"
                     elif status_lower in ["infeasible", "unbounded"]:
@@ -575,6 +584,9 @@ class ResultsMatrixReportGenerator(ReportGeneratorBase):
                     <p><span class="status-optimal" style="padding: 5px 10px; border-radius: 3px;">OPTIMAL</span> - Successfully solved to optimality</p>
                     <p><span class="status-error" style="padding: 5px 10px; border-radius: 3px;">ERROR</span> - Solver encountered an error</p>
                     <p><span class="status-infeasible" style="padding: 5px 10px; border-radius: 3px;">INFEASIBLE/UNBOUNDED</span> - Problem has no feasible solution</p>
+                    <p><span class="status-stalled" style="padding: 5px 10px; border-radius: 3px;">STALLED</span> - Algorithm progress stagnated</p>
+                    <p><span class="status-max-iter" style="padding: 5px 10px; border-radius: 3px;">MAX_ITER</span> - Maximum iterations reached</p>
+                    <p><span class="status-num-error" style="padding: 5px 10px; border-radius: 3px;">NUM_ERROR</span> - Numerical difficulties encountered</p>
                 </div>
                 <div>
                     <p><span class="status-unsupported" style="padding: 5px 10px; border-radius: 3px; color: #999;">UNSUPPORTED</span> - Solver does not support this problem type</p>

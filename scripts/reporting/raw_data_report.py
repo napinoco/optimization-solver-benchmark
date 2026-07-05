@@ -188,6 +188,62 @@ class RawDataReportGenerator(ReportGeneratorBase):
             border-radius: 4px;
         }
 
+        .status-stalled {
+            background-color: #ffe8cc;
+            color: #664d00;
+            font-weight: bold;
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
+
+        .status-max-iter {
+            background-color: #f0e6ff;
+            color: #5a3d8a;
+            font-weight: bold;
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
+
+        .status-num-error {
+            background-color: #ffcccc;
+            color: #990000;
+            font-weight: bold;
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
+
+        .status-timeout {
+            background-color: #e8e8e8;
+            color: #666666;
+            font-weight: bold;
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
+
+        .status-sigkill {
+            background-color: #d8d8d8;
+            color: #555555;
+            font-weight: bold;
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
+
+        .status-subprocess-error {
+            background-color: #f0f0f0;
+            color: #777777;
+            font-weight: bold;
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
+
+        .status-unknown {
+            background-color: #f8f8f8;
+            color: #999999;
+            font-weight: bold;
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
+
         .solver-name {
             font-weight: 600;
             color: #2c3e50;
@@ -395,12 +451,24 @@ class RawDataReportGenerator(ReportGeneratorBase):
                 status_class = "status-optimal-inaccurate"
             elif status_lower == "unsupported":
                 status_class = "status-unsupported"
+            elif status_lower == "timeout":
+                status_class = "status-timeout"
+            elif status_lower == "sigkill":
+                status_class = "status-sigkill"
+            elif status_lower == "subprocess_error":
+                status_class = "status-subprocess-error"
+            elif status_lower == "stalled":
+                status_class = "status-stalled"
+            elif status_lower == "max_iter":
+                status_class = "status-max-iter"
+            elif status_lower == "num_error":
+                status_class = "status-num-error"
             elif status_lower == "error":
                 status_class = "status-error"
             elif status_lower in ["infeasible", "unbounded"]:
                 status_class = "status-infeasible"
             else:
-                status_class = ""
+                status_class = "status-unknown"
 
             html_content += f"""
             <tr>
