@@ -1189,6 +1189,7 @@ problem_libraries:
     library_name: "NETLIB"
     problem_type: "LP"
     for_test_flag: true
+    known_objective_value: -464.7531429
 
   sc50a:
     display_name: "SC50A (NETLIB)"
@@ -1197,6 +1198,7 @@ problem_libraries:
     library_name: "NETLIB"
     problem_type: "LP"
     for_test_flag: true
+    known_objective_value: -64.57507706
 
   sc50b:
     display_name: "SC50B (NETLIB)"
@@ -1205,6 +1207,7 @@ problem_libraries:
     library_name: "NETLIB"
     problem_type: "LP"
     for_test_flag: true
+    known_objective_value: -70
 
   blend:
     display_name: "BLEND (NETLIB)"
@@ -1213,6 +1216,7 @@ problem_libraries:
     library_name: "NETLIB"
     problem_type: "LP"
     for_test_flag: true
+    known_objective_value: -30.81214985
 
   kb2:
     display_name: "KB2 (NETLIB)"
@@ -1221,6 +1225,7 @@ problem_libraries:
     library_name: "NETLIB"
     problem_type: "LP"
     for_test_flag: true
+    known_objective_value: -1749.90013
 
   # Remaining NETLIB problems (alphabetical order)
   netlib_25fv47:
@@ -1230,6 +1235,7 @@ problem_libraries:
     library_name: "NETLIB"
     problem_type: "LP"
     for_test_flag: false
+    known_objective_value: 5501.845888
 
   netlib_80bau3b:
     display_name: "80BAU3B (NETLIB)"
@@ -1238,6 +1244,7 @@ problem_libraries:
     library_name: "NETLIB"
     problem_type: "LP"
     for_test_flag: false
+    known_objective_value: 987232.1607
 
   adlittle:
     display_name: "ADLITTLE (NETLIB)"
@@ -1246,6 +1253,7 @@ problem_libraries:
     library_name: "NETLIB"
     problem_type: "LP"
     for_test_flag: false
+    known_objective_value: 225494.9632
 
   agg:
     display_name: "AGG (NETLIB)"
@@ -1254,6 +1262,7 @@ problem_libraries:
     library_name: "NETLIB"
     problem_type: "LP"
     for_test_flag: false
+    known_objective_value: -35991767.29
 
   agg2:
     display_name: "AGG2 (NETLIB)"
@@ -1262,6 +1271,7 @@ problem_libraries:
     library_name: "NETLIB"
     problem_type: "LP"
     for_test_flag: false
+    known_objective_value: -20239252.36
 
   agg3:
     display_name: "AGG3 (NETLIB)"
@@ -1270,6 +1280,7 @@ problem_libraries:
     library_name: "NETLIB"
     problem_type: "LP"
     for_test_flag: false
+    known_objective_value: 10312115.94
 
   bandm:
     display_name: "BANDM (NETLIB)"
@@ -1278,6 +1289,7 @@ problem_libraries:
     library_name: "NETLIB"
     problem_type: "LP"
     for_test_flag: false
+    known_objective_value: -158.6280185
 
   beaconfd:
     display_name: "BEACONFD (NETLIB)"
@@ -1286,6 +1298,7 @@ problem_libraries:
     library_name: "NETLIB"
     problem_type: "LP"
     for_test_flag: false
+    known_objective_value: 33592.48581
 
   bnl1:
     display_name: "BNL1 (NETLIB)"
@@ -1294,6 +1307,7 @@ problem_libraries:
     library_name: "NETLIB"
     problem_type: "LP"
     for_test_flag: false
+    known_objective_value: 1977.629286
 
   bnl2:
     display_name: "BNL2 (NETLIB)"
@@ -1302,6 +1316,7 @@ problem_libraries:
     library_name: "NETLIB"
     problem_type: "LP"
     for_test_flag: false
+    known_objective_value: 1811.23654
 
   boeing1:
     display_name: "BOEING1 (NETLIB)"
@@ -1310,6 +1325,7 @@ problem_libraries:
     library_name: "NETLIB"
     problem_type: "LP"
     for_test_flag: false
+    known_objective_value: -335.2135675
 
   boeing2:
     display_name: "BOEING2 (NETLIB)"
@@ -1318,6 +1334,7 @@ problem_libraries:
     library_name: "NETLIB"
     problem_type: "LP"
     for_test_flag: false
+    known_objective_value: -315.018728
 
   bore3d:
     display_name: "BORE3D (NETLIB)"
@@ -1326,6 +1343,7 @@ problem_libraries:
     library_name: "NETLIB"
     problem_type: "LP"
     for_test_flag: false
+    known_objective_value: 1373.080394
 
   brandy:
     display_name: "BRANDY (NETLIB)"
@@ -1334,6 +1352,7 @@ problem_libraries:
     library_name: "NETLIB"
     problem_type: "LP"
     for_test_flag: false
+    known_objective_value: 1518.509896
 
   capri:
     display_name: "CAPRI (NETLIB)"
@@ -1342,6 +1361,7 @@ problem_libraries:
     library_name: "NETLIB"
     problem_type: "LP"
     for_test_flag: false
+    known_objective_value: 2690.012914
 
   cycle:
     display_name: "CYCLE (NETLIB)"
@@ -1350,6 +1370,7 @@ problem_libraries:
     library_name: "NETLIB"
     problem_type: "LP"
     for_test_flag: false
+    known_objective_value: -5.226393025
 
   czprob:
     display_name: "CZPROB (NETLIB)"
@@ -1358,6 +1379,7 @@ problem_libraries:
     library_name: "NETLIB"
     problem_type: "LP"
     for_test_flag: false
+    known_objective_value: 2185196.699
 
   d2q06c:
     display_name: "D2Q06C (NETLIB)"
@@ -1366,6 +1388,7 @@ problem_libraries:
     library_name: "NETLIB"
     problem_type: "LP"
     for_test_flag: false
+    known_objective_value: 122784.2361
 
   d6cube:
     display_name: "D6CUBE (NETLIB)"
@@ -1374,6 +1397,7 @@ problem_libraries:
     library_name: "NETLIB"
     problem_type: "LP"
     for_test_flag: false
+    known_objective_value: 315.4916667
 
   degen2:
     display_name: "DEGEN2 (NETLIB)"
@@ -1382,6 +1406,7 @@ problem_libraries:
     library_name: "NETLIB"
     problem_type: "LP"
     for_test_flag: false
+    known_objective_value: -1435.178
 
   degen3:
     display_name: "DEGEN3 (NETLIB)"
@@ -1390,6 +1415,7 @@ problem_libraries:
     library_name: "NETLIB"
     problem_type: "LP"
     for_test_flag: false
+    known_objective_value: -987.294
 
   dfl001:
     display_name: "DFL001 (NETLIB)"
@@ -1398,6 +1424,7 @@ problem_libraries:
     library_name: "NETLIB"
     problem_type: "LP"
     for_test_flag: false
+    known_objective_value: 11266400
 
   e226:
     display_name: "E226 (NETLIB)"
@@ -1406,6 +1433,7 @@ problem_libraries:
     library_name: "NETLIB"
     problem_type: "LP"
     for_test_flag: false
+    known_objective_value: -18.75192907
 
   etamacro:
     display_name: "ETAMACRO (NETLIB)"
@@ -1414,6 +1442,7 @@ problem_libraries:
     library_name: "NETLIB"
     problem_type: "LP"
     for_test_flag: false
+    known_objective_value: -755.7152177
 
   fffff800:
     display_name: "FFFFF800 (NETLIB)"
@@ -1422,6 +1451,7 @@ problem_libraries:
     library_name: "NETLIB"
     problem_type: "LP"
     for_test_flag: false
+    known_objective_value: 555679.6116
 
   finnis:
     display_name: "FINNIS (NETLIB)"
@@ -1430,6 +1460,7 @@ problem_libraries:
     library_name: "NETLIB"
     problem_type: "LP"
     for_test_flag: false
+    known_objective_value: 172790.9655
 
   fit1d:
     display_name: "FIT1D (NETLIB)"
@@ -1438,6 +1469,7 @@ problem_libraries:
     library_name: "NETLIB"
     problem_type: "LP"
     for_test_flag: false
+    known_objective_value: -9146.378092
 
   fit1p:
     display_name: "FIT1P (NETLIB)"
@@ -1446,6 +1478,7 @@ problem_libraries:
     library_name: "NETLIB"
     problem_type: "LP"
     for_test_flag: false
+    known_objective_value: 9146.378092
 
   fit2d:
     display_name: "FIT2D (NETLIB)"
@@ -1454,6 +1487,7 @@ problem_libraries:
     library_name: "NETLIB"
     problem_type: "LP"
     for_test_flag: false
+    known_objective_value: -68464.29329
 
   fit2p:
     display_name: "FIT2P (NETLIB)"
@@ -1462,6 +1496,7 @@ problem_libraries:
     library_name: "NETLIB"
     problem_type: "LP"
     for_test_flag: false
+    known_objective_value: 68464.29323
 
   forplan:
     display_name: "FORPLAN (NETLIB)"
@@ -1470,6 +1505,7 @@ problem_libraries:
     library_name: "NETLIB"
     problem_type: "LP"
     for_test_flag: false
+    known_objective_value: -664.2187395
 
   ganges:
     display_name: "GANGES (NETLIB)"
@@ -1478,6 +1514,7 @@ problem_libraries:
     library_name: "NETLIB"
     problem_type: "LP"
     for_test_flag: false
+    known_objective_value: -109586.3636
 
   gfrd_pnc:
     display_name: "GFRD-PNC (NETLIB)"
@@ -1486,6 +1523,7 @@ problem_libraries:
     library_name: "NETLIB"
     problem_type: "LP"
     for_test_flag: false
+    known_objective_value: 6902235.999
 
   greenbea:
     display_name: "GREENBEA (NETLIB)"
@@ -1494,6 +1532,7 @@ problem_libraries:
     library_name: "NETLIB"
     problem_type: "LP"
     for_test_flag: false
+    known_objective_value: -72462405.91
 
   greenbeb:
     display_name: "GREENBEB (NETLIB)"
@@ -1502,6 +1541,7 @@ problem_libraries:
     library_name: "NETLIB"
     problem_type: "LP"
     for_test_flag: false
+    known_objective_value: -4302147.606
 
   grow15:
     display_name: "GROW15 (NETLIB)"
@@ -1510,6 +1550,7 @@ problem_libraries:
     library_name: "NETLIB"
     problem_type: "LP"
     for_test_flag: false
+    known_objective_value: -106870941.3
 
   grow22:
     display_name: "GROW22 (NETLIB)"
@@ -1518,6 +1559,7 @@ problem_libraries:
     library_name: "NETLIB"
     problem_type: "LP"
     for_test_flag: false
+    known_objective_value: -160834336.5
 
   grow7:
     display_name: "GROW7 (NETLIB)"
@@ -1526,6 +1568,7 @@ problem_libraries:
     library_name: "NETLIB"
     problem_type: "LP"
     for_test_flag: false
+    known_objective_value: -47787811.81
 
   israel:
     display_name: "ISRAEL (NETLIB)"
@@ -1534,6 +1577,7 @@ problem_libraries:
     library_name: "NETLIB"
     problem_type: "LP"
     for_test_flag: false
+    known_objective_value: -896644.8219
 
   lotfi:
     display_name: "LOTFI (NETLIB)"
@@ -1542,6 +1586,7 @@ problem_libraries:
     library_name: "NETLIB"
     problem_type: "LP"
     for_test_flag: false
+    known_objective_value: -25.26470606
 
   maros:
     display_name: "MAROS (NETLIB)"
@@ -1550,6 +1595,7 @@ problem_libraries:
     library_name: "NETLIB"
     problem_type: "LP"
     for_test_flag: false
+    known_objective_value: -58063.7437
 
   maros_r7:
     display_name: "MAROS-R7 (NETLIB)"
@@ -1558,6 +1604,7 @@ problem_libraries:
     library_name: "NETLIB"
     problem_type: "LP"
     for_test_flag: false
+    known_objective_value: 1497185.167
 
   modszk1:
     display_name: "MODSZK1 (NETLIB)"
@@ -1566,6 +1613,7 @@ problem_libraries:
     library_name: "NETLIB"
     problem_type: "LP"
     for_test_flag: false
+    known_objective_value: 320.6197291
 
   nesm:
     display_name: "NESM (NETLIB)"
@@ -1574,6 +1622,7 @@ problem_libraries:
     library_name: "NETLIB"
     problem_type: "LP"
     for_test_flag: false
+    known_objective_value: 14076073.04
 
   perold:
     display_name: "PEROLD (NETLIB)"
@@ -1582,6 +1631,7 @@ problem_libraries:
     library_name: "NETLIB"
     problem_type: "LP"
     for_test_flag: false
+    known_objective_value: -9380.758077
 
   pilot:
     display_name: "PILOT (NETLIB)"
@@ -1590,6 +1640,7 @@ problem_libraries:
     library_name: "NETLIB"
     problem_type: "LP"
     for_test_flag: false
+    known_objective_value: -557.4043001
 
   pilot_ja:
     display_name: "PILOT.JA (NETLIB)"
@@ -1598,6 +1649,7 @@ problem_libraries:
     library_name: "NETLIB"
     problem_type: "LP"
     for_test_flag: false
+    known_objective_value: -6113.134411
 
   pilot_we:
     display_name: "PILOT.WE (NETLIB)"
@@ -1606,6 +1658,7 @@ problem_libraries:
     library_name: "NETLIB"
     problem_type: "LP"
     for_test_flag: false
+    known_objective_value: -2720102.744
 
   pilot4:
     display_name: "PILOT4 (NETLIB)"
@@ -1614,6 +1667,7 @@ problem_libraries:
     library_name: "NETLIB"
     problem_type: "LP"
     for_test_flag: false
+    known_objective_value: -2581.139264
 
   pilot87:
     display_name: "PILOT87 (NETLIB)"
@@ -1622,6 +1676,7 @@ problem_libraries:
     library_name: "NETLIB"
     problem_type: "LP"
     for_test_flag: false
+    known_objective_value: 301.7107283
 
   pilotnov:
     display_name: "PILOTNOV (NETLIB)"
@@ -1630,6 +1685,7 @@ problem_libraries:
     library_name: "NETLIB"
     problem_type: "LP"
     for_test_flag: false
+    known_objective_value: -4497.276188
 
   recipe:
     display_name: "RECIPE (NETLIB)"
@@ -1638,6 +1694,7 @@ problem_libraries:
     library_name: "NETLIB"
     problem_type: "LP"
     for_test_flag: false
+    known_objective_value: -266.616
 
   sc105:
     display_name: "SC105 (NETLIB)"
@@ -1646,6 +1703,7 @@ problem_libraries:
     library_name: "NETLIB"
     problem_type: "LP"
     for_test_flag: false
+    known_objective_value: -52.20206121
 
   sc205:
     display_name: "SC205 (NETLIB)"
@@ -1654,6 +1712,7 @@ problem_libraries:
     library_name: "NETLIB"
     problem_type: "LP"
     for_test_flag: false
+    known_objective_value: -52.20206121
 
   scagr25:
     display_name: "SCAGR25 (NETLIB)"
@@ -1662,6 +1721,7 @@ problem_libraries:
     library_name: "NETLIB"
     problem_type: "LP"
     for_test_flag: false
+    known_objective_value: -14753433.06
 
   scagr7:
     display_name: "SCAGR7 (NETLIB)"
@@ -1670,6 +1730,7 @@ problem_libraries:
     library_name: "NETLIB"
     problem_type: "LP"
     for_test_flag: false
+    known_objective_value: -2331389.255
 
   scfxm1:
     display_name: "SCFXM1 (NETLIB)"
@@ -1678,6 +1739,7 @@ problem_libraries:
     library_name: "NETLIB"
     problem_type: "LP"
     for_test_flag: false
+    known_objective_value: 18416.75903
 
   scfxm2:
     display_name: "SCFXM2 (NETLIB)"
@@ -1686,6 +1748,7 @@ problem_libraries:
     library_name: "NETLIB"
     problem_type: "LP"
     for_test_flag: false
+    known_objective_value: 36660.26157
 
   scfxm3:
     display_name: "SCFXM3 (NETLIB)"
@@ -1694,6 +1757,7 @@ problem_libraries:
     library_name: "NETLIB"
     problem_type: "LP"
     for_test_flag: false
+    known_objective_value: 54901.25455
 
   scorpion:
     display_name: "SCORPION (NETLIB)"
@@ -1702,6 +1766,7 @@ problem_libraries:
     library_name: "NETLIB"
     problem_type: "LP"
     for_test_flag: false
+    known_objective_value: 1878.124823
 
   scrs8:
     display_name: "SCRS8 (NETLIB)"
@@ -1710,6 +1775,7 @@ problem_libraries:
     library_name: "NETLIB"
     problem_type: "LP"
     for_test_flag: false
+    known_objective_value: 904.2999862
 
   scsd1:
     display_name: "SCSD1 (NETLIB)"
@@ -1718,6 +1784,7 @@ problem_libraries:
     library_name: "NETLIB"
     problem_type: "LP"
     for_test_flag: false
+    known_objective_value: 8.666666674
 
   scsd6:
     display_name: "SCSD6 (NETLIB)"
@@ -1726,6 +1793,7 @@ problem_libraries:
     library_name: "NETLIB"
     problem_type: "LP"
     for_test_flag: false
+    known_objective_value: 50.50000008
 
   scsd8:
     display_name: "SCSD8 (NETLIB)"
@@ -1734,6 +1802,7 @@ problem_libraries:
     library_name: "NETLIB"
     problem_type: "LP"
     for_test_flag: false
+    known_objective_value: 904.9999999
 
   sctap1:
     display_name: "SCTAP1 (NETLIB)"
@@ -1742,6 +1811,7 @@ problem_libraries:
     library_name: "NETLIB"
     problem_type: "LP"
     for_test_flag: false
+    known_objective_value: 1412.25
 
   sctap2:
     display_name: "SCTAP2 (NETLIB)"
@@ -1750,6 +1820,7 @@ problem_libraries:
     library_name: "NETLIB"
     problem_type: "LP"
     for_test_flag: false
+    known_objective_value: 1724.807143
 
   sctap3:
     display_name: "SCTAP3 (NETLIB)"
@@ -1758,6 +1829,7 @@ problem_libraries:
     library_name: "NETLIB"
     problem_type: "LP"
     for_test_flag: false
+    known_objective_value: 1424
 
   seba:
     display_name: "SEBA (NETLIB)"
@@ -1766,6 +1838,7 @@ problem_libraries:
     library_name: "NETLIB"
     problem_type: "LP"
     for_test_flag: false
+    known_objective_value: 15711.6
 
   share1b:
     display_name: "SHARE1B (NETLIB)"
@@ -1774,6 +1847,7 @@ problem_libraries:
     library_name: "NETLIB"
     problem_type: "LP"
     for_test_flag: false
+    known_objective_value: -76589.31858
 
   share2b:
     display_name: "SHARE2B (NETLIB)"
@@ -1782,6 +1856,7 @@ problem_libraries:
     library_name: "NETLIB"
     problem_type: "LP"
     for_test_flag: false
+    known_objective_value: -415.7322407
 
   shell:
     display_name: "SHELL (NETLIB)"
@@ -1790,6 +1865,7 @@ problem_libraries:
     library_name: "NETLIB"
     problem_type: "LP"
     for_test_flag: false
+    known_objective_value: 1208825346
 
   ship04l:
     display_name: "SHIP04L (NETLIB)"
@@ -1798,6 +1874,7 @@ problem_libraries:
     library_name: "NETLIB"
     problem_type: "LP"
     for_test_flag: false
+    known_objective_value: 1793324.538
 
   ship04s:
     display_name: "SHIP04S (NETLIB)"
@@ -1806,6 +1883,7 @@ problem_libraries:
     library_name: "NETLIB"
     problem_type: "LP"
     for_test_flag: false
+    known_objective_value: 1798714.7
 
   ship08l:
     display_name: "SHIP08L (NETLIB)"
@@ -1814,6 +1892,7 @@ problem_libraries:
     library_name: "NETLIB"
     problem_type: "LP"
     for_test_flag: false
+    known_objective_value: 1909055.211
 
   ship08s:
     display_name: "SHIP08S (NETLIB)"
@@ -1822,6 +1901,7 @@ problem_libraries:
     library_name: "NETLIB"
     problem_type: "LP"
     for_test_flag: false
+    known_objective_value: 1920098.211
 
   ship12l:
     display_name: "SHIP12L (NETLIB)"
@@ -1830,6 +1910,7 @@ problem_libraries:
     library_name: "NETLIB"
     problem_type: "LP"
     for_test_flag: false
+    known_objective_value: 1470187.919
 
   ship12s:
     display_name: "SHIP12S (NETLIB)"
@@ -1838,6 +1919,7 @@ problem_libraries:
     library_name: "NETLIB"
     problem_type: "LP"
     for_test_flag: false
+    known_objective_value: 1489236.134
 
   sierra:
     display_name: "SIERRA (NETLIB)"
@@ -1846,6 +1928,7 @@ problem_libraries:
     library_name: "NETLIB"
     problem_type: "LP"
     for_test_flag: false
+    known_objective_value: 15394362.18
 
   stair:
     display_name: "STAIR (NETLIB)"
@@ -1854,6 +1937,7 @@ problem_libraries:
     library_name: "NETLIB"
     problem_type: "LP"
     for_test_flag: false
+    known_objective_value: -251.2669512
 
   standata:
     display_name: "STANDATA (NETLIB)"
@@ -1862,6 +1946,7 @@ problem_libraries:
     library_name: "NETLIB"
     problem_type: "LP"
     for_test_flag: false
+    known_objective_value: 1257.6995
 
   standgub:
     display_name: "STANDGUB (NETLIB)"
@@ -1878,6 +1963,7 @@ problem_libraries:
     library_name: "NETLIB"
     problem_type: "LP"
     for_test_flag: false
+    known_objective_value: 1406.0175
 
   stocfor1:
     display_name: "STOCFOR1 (NETLIB)"
@@ -1886,6 +1972,7 @@ problem_libraries:
     library_name: "NETLIB"
     problem_type: "LP"
     for_test_flag: false
+    known_objective_value: -41131.97622
 
   stocfor2:
     display_name: "STOCFOR2 (NETLIB)"
@@ -1894,6 +1981,7 @@ problem_libraries:
     library_name: "NETLIB"
     problem_type: "LP"
     for_test_flag: false
+    known_objective_value: -39024.40854
 
   netlib_truss:
     display_name: "TRUSS (NETLIB)"
@@ -1902,6 +1990,7 @@ problem_libraries:
     library_name: "NETLIB"
     problem_type: "LP"
     for_test_flag: false
+    known_objective_value: 458815.8472
 
   tuff:
     display_name: "TUFF (NETLIB)"
@@ -1910,6 +1999,7 @@ problem_libraries:
     library_name: "NETLIB"
     problem_type: "LP"
     for_test_flag: false
+    known_objective_value: 0.2921477651
 
   vtp_base:
     display_name: "VTP.BASE (NETLIB)"
@@ -1918,6 +2008,7 @@ problem_libraries:
     library_name: "NETLIB"
     problem_type: "LP"
     for_test_flag: false
+    known_objective_value: 129831.4625
 
   wood1p:
     display_name: "WOOD1P (NETLIB)"
@@ -1926,6 +2017,7 @@ problem_libraries:
     library_name: "NETLIB"
     problem_type: "LP"
     for_test_flag: false
+    known_objective_value: 1.442902412
 
   woodw:
     display_name: "WOODW (NETLIB)"
@@ -1934,3 +2026,4 @@ problem_libraries:
     library_name: "NETLIB"
     problem_type: "LP"
     for_test_flag: false
+    known_objective_value: 1.304476333
