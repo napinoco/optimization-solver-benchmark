@@ -3,146 +3,35 @@
 This guide walks you through setting up, running, and contributing to the optimization solver benchmark system on your local machine.
 
 ## Table of Contents
-- [Quick Start](#quick-start)
-- [Installation](#installation)
-- [Running Benchmarks](#running-benchmarks)
+- [Setup](#setup)
 - [Understanding the Output](#understanding-the-output)
 - [Development Workflow](#development-workflow)
 - [Testing](#testing)
 - [Troubleshooting](#troubleshooting)
+- [Best Practices](#best-practices)
+- [Contributing](#contributing)
 
 ---
 
-## Quick Start
+## Setup
 
-### Prerequisites
-- Python 3.9+ 
-- Git
-- 4GB+ RAM
-- 1GB+ free disk space
+For installation, cloning with submodules, and running your first benchmark, see the [README Quick Start](../../README.md#quick-start).
 
-### 30-Second Setup
+### Alternative Python Environment Setup
+
+**Using pyenv**
 ```bash
-# Clone the repository
-git clone https://github.com/your-org/optimization-solver-benchmark.git
-cd optimization-solver-benchmark
-
-# Install dependencies
-pip install -r requirements.txt
-
-# Validate environment
-python main.py --validate
-
-# Run complete benchmark and generate reports
-python main.py --all
-```
-
-### View Results
-Open `docs/index.html` in your web browser to see the generated reports.
-
----
-
-## Installation
-
-### 1. Python Environment Setup
-
-**Option A: Using pyenv (Recommended)**
-```bash
-# Install Python 3.12
 pyenv install 3.12.2
 pyenv local 3.12.2
-
-# Create virtual environment
 python -m venv venv
 source venv/bin/activate  # On Windows: venv\Scripts\activate
 ```
 
-**Option B: Using conda**
+**Using conda**
 ```bash
 conda create -n solver-benchmark python=3.12
 conda activate solver-benchmark
 ```
-
-### 2. Install Dependencies
-
-**All Dependencies**
-```bash
-pip install -r requirements.txt
-```
-
-### 3. Verify Installation
-```bash
-python main.py --validate
-```
-
-Expected output:
-```
-✅ Environment validation passed
-✅ Configuration loaded successfully
-✅ 5 solvers available
-✅ 142 problems loaded (DIMACS + SDPLIB)
-```
-
----
-
-## Running Benchmarks
-
-### Basic Commands
-
-**Environment Check**
-```bash
-python main.py --validate
-```
-
-**Run Benchmarks Only**
-```bash
-python main.py --benchmark
-```
-
-**Generate Reports Only** (from existing results)
-```bash
-python main.py --report
-```
-
-**Complete Workflow** (benchmark + reports)
-```bash
-python main.py --all
-```
-
-### Advanced Options
-
-**Verbose Output**
-```bash
-python main.py --all --verbose
-```
-
-**Specific Solvers**
-```bash
-python main.py --all --solvers scipy_linprog,cvxpy_clarabel
-```
-
-**Verbose Output**
-```bash
-python main.py --all --verbose
-```
-
-**Quiet Mode**
-```bash
-python main.py --all --quiet
-```
-
-### Command Reference
-
-| Command | Description |
-|---------|-------------|
-| `--validate` | Check environment setup |
-| `--benchmark` | Run benchmarks only |
-| `--report` | Generate reports only |
-| `--all` | Run benchmarks + generate reports |
-| `--verbose` | Enable detailed logging |
-| `--quiet` | Suppress non-error output |
-| `--solvers` | Specify comma-separated solver list |
-| `--dry-run` | Run benchmarks without storing results |
 
 ---
 
@@ -150,22 +39,12 @@ python main.py --all --quiet
 
 ### Generated Files
 
-**HTML Reports** (`docs/`)
+**HTML Reports** (`docs/pages/`)
 - `index.html` - Main dashboard with overview statistics
-- `solver_comparison.html` - Detailed solver performance comparison
-- `problem_analysis.html` - Problem-specific analysis
-- `results_matrix.html` - Interactive results matrix
-- `statistical_analysis.html` - Statistical analysis and trends
-- `performance_profiling.html` - Performance profiling report
-- `environment_info.html` - System and environment information
+- `results_matrix.html` - Problems × solvers results matrix
+- `raw_data.html` - Raw results table
 
-**Data Files** (`docs/data/`)
-- `results.json` - Complete benchmark results (programmatic access)
-- `results.csv` - Results in CSV format (spreadsheet analysis)
-- `summary.json` - Summary statistics and solver comparison
-- `metadata.json` - Environment and configuration metadata
-- `statistical_analysis_report.json` - Statistical analysis data
-- `performance_profiling_report.json` - Performance profiling data
+**Data Files** (`docs/pages/data/`) - see [EXPORT_GUIDE.md](EXPORT_GUIDE.md) for the full format reference and analysis examples
 
 **Database** (`database/`)
 - `results.db` - SQLite database with all results
@@ -175,7 +54,7 @@ python main.py --all --quiet
 **Success Rate**: Percentage of problems solved optimally
 **Solve Time**: Wall-clock time for solver execution
 **Problem Types**: LP (Linear), QP (Quadratic), SOCP (Second-Order Cone), SDP (Semidefinite)
-**Solver Status**: optimal, error, timeout, infeasible, unbounded
+**Solver Status**: see the full status code table in [detail_design.md](../development/detail_design.md#solverresult-scriptssolverssolver_interfacepy)
 
 ### Interpreting Results
 
@@ -201,40 +80,12 @@ For the project structure, see [detail_design.md](../development/detail_design.m
 2. **Test Changes** with `python main.py --validate`
 3. **Run Benchmarks** with `python main.py --benchmark`
 4. **Generate Reports** with `python main.py --report`
-5. **Review Output** in `docs/index.html`
+5. **Review Output** in `docs/pages/index.html`
 6. **Commit Changes** including updated reports
 
-### Adding New Solvers
+### Adding New Solvers or Problems
 
-1. **Add an entry** to `scripts/solvers/python/solver_configs.py` (the single source of truth for Python solver configurations). For a new CVXPY backend this is the only code change; otherwise create a runner class following `scripts/solvers/python/cvxpy_runner.py` and register it in `RUNNER_CLASSES` in `python_solver_runner.py`.
-
-2. **Add the dependency** to `requirements.txt` (pinned version) and add the solver name to `display_order` in `config/site_config.yaml`.
-
-3. **Test Integration**
-```bash
-python main.py --validate
-python main.py --benchmark --solvers new_solver
-```
-
-### Adding New Problems
-
-The current system uses external problem libraries (DIMACS, SDPLIB). To add new problems:
-
-1. **Add to existing library structure** following DIMACS/SDPLIB format
-2. **Update Registry** in `config/problem_registry.yaml`
-```yaml
-problem_libraries:
-  new_problem_name:
-    library_name: "DIMACS"  # or appropriate library
-    file_path: "problems/DIMACS/data/new_file.mat.gz"
-    file_type: "mat"  # or "dat-s" for SDPLIB
-    problem_type: "SDP"
-```
-
-3. **Test Loading**
-```bash
-python -c "from scripts.data_loaders.python.problem_interface import load_problem; print(load_problem('new_problem_name'))"
-```
+See the [Development Guidelines](../development/detail_design.md#development-guidelines) in detail_design.md for the exact steps and files to touch.
 
 ---
 
@@ -386,14 +237,14 @@ git push origin feature/new-solver
 
 1. **Validate Environment**: `python main.py --validate`
 2. **Run Complete Benchmark**: `python main.py --all`
-3. **Check Generated Reports**: Verify `docs/index.html` looks correct
+3. **Check Generated Reports**: Verify `docs/pages/index.html` looks correct
 4. **Run Tests**: Execute relevant test files
 5. **Update Documentation**: Update this guide if you changed workflows
 
 ### Pull Request Checklist
 
 - [ ] Environment validation passes
-- [ ] All solvers execute successfully  
+- [ ] All solvers execute successfully
 - [ ] Reports generate without errors
 - [ ] Database contains expected results
 - [ ] Tests pass
@@ -402,6 +253,6 @@ git push origin feature/new-solver
 
 ---
 
-*This guide covers the essential aspects of local development. For technical details, see [detail_design.md](detail_design.md). For project overview, see the main [README.md](../../README.md).*
+*This guide covers the essential aspects of local development. For technical details, see [detail_design.md](../development/detail_design.md). For project overview and installation, see the main [README.md](../../README.md).*
 
-*Last Updated: June 2025*
+*Last Updated: July 2026*

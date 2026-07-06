@@ -136,6 +136,7 @@ Add external libraries as git submodules in `problems/` and extend loaders in `s
 
 - **[CLAUDE.md](CLAUDE.md)**: Development context and instructions
 - **[docs/development/](docs/development/)**: Technical design and implementation details
+- **[docs/guides/](docs/guides/)**: Setup and how-to guides (local development, MATLAB configuration, CI/CD, data export, etc.)
 
 ## License
 
