@@ -5,6 +5,8 @@ A research tool for benchmarking optimization solvers across LP, QP, SOCP, and S
 Benchmark results are continuously published at: https://napinoco.github.io/optimization-solver-benchmark/
 
 > **⚠️ Development Status**: This system is currently under active development. Some solvers and problem classes have not yet been properly measured, and comprehensive benchmarking coverage across all problem types is still being completed.
+>
+> **⚠️ Known Issue**: The Python MPS loader (`scripts/data_loaders/python/mps_loader.py`) does not reorder free variables, which produces incorrect objective values for 11 NETLIB problems when solved with Python solvers (the MATLAB loader is unaffected). See [NETLIB_KNOWN_OBJECTIVES.md](docs/guides/NETLIB_KNOWN_OBJECTIVES.md) before relying on Python-solver results for `capri`, `cycle`, `greenbeb`, `modszk1`, `pilot_ja`, `pilot_we`, `perold`, `pilot4`, `tuff`, `stair`, or `vtp_base`.
 
 ## Overview
 

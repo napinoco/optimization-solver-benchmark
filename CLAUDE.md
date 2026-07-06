@@ -74,6 +74,10 @@ Fair baseline benchmarking with minimal configuration, reproducible results, and
 - **Version Tracking**: Complete solver backend and Git commit recording
 - **Problem Formats**: SeDuMi .mat (DIMACS), SDPA .dat-s (SDPLIB), MPS (NETLIB)
 
+## Known Issues
+
+- **NETLIB Python MPS loader bug**: `scripts/data_loaders/python/mps_loader.py` does not reorder free variables, producing incorrect objective values for 11 NETLIB problems under Python solvers (MATLAB's `mps_loader.m` is unaffected). Not yet fixed. See [NETLIB_KNOWN_OBJECTIVES.md](docs/guides/NETLIB_KNOWN_OBJECTIVES.md) before trusting Python-solver results on NETLIB or working on the MPS loader.
+
 ## Critical Development Constraints
 
 These encode past failures; do not relax them without explicit user instruction.

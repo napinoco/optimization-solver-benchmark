@@ -135,3 +135,4 @@ See [Adding New Problem Formats](../development/detail_design.md#adding-new-prob
 ### Related Documentation
 - **[Technical Design](../development/detail_design.md)**: Problem loaders and data model
 - **[Local Development Guide](LOCAL_DEVELOPMENT_GUIDE.md)**: Running benchmarks locally
+- **[DIMACS/SDPLIB Known Objective Values](DIMACS_SDPLIB_KNOWN_OBJECTIVES.md)**: Source and caveats for the `known_objective_value` registry entries
