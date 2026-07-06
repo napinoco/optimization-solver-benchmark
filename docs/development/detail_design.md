@@ -6,7 +6,7 @@ Detailed technical specifications for the optimization solver benchmark system s
 
 ## System Overview
 
-**Purpose**: Benchmark optimization solvers using external problem libraries (DIMACS, SDPLIB) with minimal configuration for unbiased performance evaluation.
+**Purpose**: Benchmark optimization solvers using external problem libraries (DIMACS, SDPLIB, NETLIB) with minimal configuration for unbiased performance evaluation.
 
 **Core Components**:
 - **Problem Loaders**: Parse MAT/DAT formats → standardized ProblemData
@@ -54,7 +54,7 @@ graph TB
     
     %% File System Storage
     subgraph "File System"
-        PF[["Problem Libraries<br/>DIMACS .mat.gz<br/>SDPLIB .dat-s"]]
+        PF[["Problem Libraries<br/>DIMACS .mat.gz<br/>SDPLIB .dat-s<br/>NETLIB .mps"]]
         TJ[["Temp JSON Files<br/>/tmp/result_xxx.json"]]
         DBF[("Database Files<br/>results.db")]
         HTML[["Generated Reports<br/>docs/pages/"]]
@@ -168,10 +168,12 @@ optimization-solver-benchmark/
 │   │   │   ├── __init__.py
 │   │   │   ├── problem_interface.py  # Problem loading coordinator
 │   │   │   ├── mat_loader.py         # DIMACS .mat loader
-│   │   │   └── dat_loader.py         # SDPLIB .dat-s loader
+│   │   │   ├── dat_loader.py         # SDPLIB .dat-s loader
+│   │   │   └── mps_loader.py         # NETLIB .mps loader
 │   │   └── matlab/      # MATLAB format loaders
 │   │       ├── mat_loader.m    # MATLAB .mat loader
-│   │       └── dat_loader.m    # MATLAB .dat-s loader
+│   │       ├── dat_loader.m    # MATLAB .dat-s loader
+│   │       └── mps_loader.m    # MATLAB .mps loader
 │   ├── database/               # Database management
 │   │   ├── __init__.py
 │   │   ├── database_manager.py # Database operations
@@ -193,7 +195,8 @@ optimization-solver-benchmark/
 │   └── integration/            # Problem registry integrity checks
 ├── problems/                   # Problem library files
 │   ├── DIMACS/                 # External DIMACS library (git submodule)
-│   └── SDPLIB/                 # External SDPLIB library (git submodule)
+│   ├── SDPLIB/                 # External SDPLIB library (git submodule)
+│   └── NETLIB/                 # External NETLIB library (git submodule)
 ├── database/                   # SQLite database files (results.db, gitignored)
 ├── docs/
 │   ├── pages/                  # Generated HTML reports and data exports
@@ -249,8 +252,8 @@ Standardized dataclass returned by every solver: `solve_time`, `status`, primal/
 problem_name:
   display_name: string          # Human-readable problem name
   file_path: string            # Relative path to problem file
-  file_type: string            # "mat" | "dat-s" (supported formats: ProblemInterface.FORMAT_LOADERS)
-  library_name: string         # "DIMACS" | "SDPLIB"
+  file_type: string            # "mat" | "dat-s" | "mps" (supported formats: ProblemInterface.FORMAT_LOADERS)
+  library_name: string         # "DIMACS" | "SDPLIB" | "NETLIB"
   for_test_flag: boolean       # Mark problem for validation testing
 ```
 

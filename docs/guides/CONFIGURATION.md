@@ -24,7 +24,7 @@ Contains site metadata for the generated reports and the solver `display_order`.
 
 For MATLAB solvers to work, you need:
 
-1. **MATLAB Installation**: MATLAB R2019b or later
+1. **MATLAB Installation**: MATLAB R2020a or later
 2. **Solver Availability**: SeDuMi and SDPT3 must be installed and in MATLAB path
 3. **Command Line Access**: `matlab` command must be available in system PATH
 
@@ -168,7 +168,7 @@ print(f"Python solvers: {python_solvers}")
 **Error**: `MATLAB version not supported`
 
 **Solution**:
-- Use MATLAB R2019b or later
+- Use MATLAB R2020a or later
 - Update to latest MATLAB version if possible
 - Check solver compatibility with MATLAB version
 

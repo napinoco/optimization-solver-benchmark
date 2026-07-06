@@ -65,8 +65,9 @@ GITHUB ACTIONS (Publishing Only):
 **Problem Libraries**:
 - **DIMACS**: SeDuMi .mat format
 - **SDPLIB**: SDPA .dat-s format
+- **NETLIB**: MPS format (LP problems)
 
-Roughly 120 problems are currently registered; the authoritative list (and exact count) is `config/problem_registry.yaml`.
+Roughly 215 problems are currently registered; the authoritative list (and exact count) is `config/problem_registry.yaml`.
 
 **Solver Support**:
 - **Python (9)**: SciPy, CVXPY backends (CLARABEL, SCS, ECOS, OSQP, CVXOPT, SDPA, SCIP, HIGHS)
@@ -83,7 +84,7 @@ Roughly 120 problems are currently registered; the authoritative list (and exact
 ## Implementation Strategy
 
 ### Development Approach
-**External Library Focus**: Use established problem libraries (DIMACS, SDPLIB) rather than creating internal problems to ensure research relevance and standardization.
+**External Library Focus**: Use established problem libraries (DIMACS, SDPLIB, NETLIB) rather than creating internal problems to ensure research relevance and standardization.
 
 **Git Submodule Integration**: Pin problem libraries to specific commits for reproducibility while enabling updates when needed.
 
