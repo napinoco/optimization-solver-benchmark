@@ -1,10 +1,12 @@
 # Optimization Solver Benchmark System
 
-A research tool for benchmarking optimization solvers across LP, QP, SOCP, and SDP problems using external problem libraries (DIMACS, SDPLIB) with automated execution and HTML report generation.
+A research tool for benchmarking optimization solvers across LP, QP, SOCP, and SDP problems using external problem libraries (DIMACS, SDPLIB, NETLIB) with automated execution and HTML report generation.
 
 Benchmark results are continuously published at: https://napinoco.github.io/optimization-solver-benchmark/
 
 > **⚠️ Development Status**: This system is currently under active development. Some solvers and problem classes have not yet been properly measured, and comprehensive benchmarking coverage across all problem types is still being completed.
+>
+> **⚠️ Known Issue**: The Python MPS loader (`scripts/data_loaders/python/mps_loader.py`) does not reorder free variables, which produces incorrect objective values for 11 NETLIB problems when solved with Python solvers (the MATLAB loader is unaffected). See [NETLIB_KNOWN_OBJECTIVES.md](docs/guides/NETLIB_KNOWN_OBJECTIVES.md) before relying on Python-solver results for `capri`, `cycle`, `greenbeb`, `modszk1`, `pilot_ja`, `pilot_we`, `perold`, `pilot4`, `tuff`, `stair`, or `vtp_base`.
 
 ## Overview
 
@@ -13,7 +15,8 @@ Benchmark results are continuously published at: https://napinoco.github.io/opti
 **Problem Libraries**:
 - **DIMACS**: SeDuMi .mat format
 - **SDPLIB**: SDPA .dat-s format
-- Roughly 120 registered problems; see `config/problem_registry.yaml` for the authoritative list
+- **NETLIB**: MPS format (LP problems)
+- Roughly 215 registered problems; see `config/problem_registry.yaml` for the authoritative list
 
 **Supported Solvers**:
 - **Python (9)**: SciPy, CVXPY backends (CLARABEL, SCS, ECOS, OSQP, CVXOPT, SDPA, SCIP, HIGHS)
@@ -47,6 +50,7 @@ python main.py --all
 # Specific libraries
 python main.py --benchmark --library_names DIMACS
 python main.py --benchmark --library_names SDPLIB
+python main.py --benchmark --library_names NETLIB
 
 # Generate reports only
 python main.py --report
@@ -106,7 +110,8 @@ See [basic_design.md](docs/development/basic_design.md) for the full design prin
 │   └── reporting/              # HTML generation
 ├── problems/
 │   ├── DIMACS/                 # External library (git submodule)
-│   └── SDPLIB/                 # External library (git submodule)
+│   ├── SDPLIB/                 # External library (git submodule)
+│   └── NETLIB/                 # External library (git submodule)
 ├── database/                   # SQLite database files
 │   └── results.db              # Benchmark results storage
 └── docs/                       # Generated reports and documentation
@@ -121,6 +126,8 @@ See [basic_design.md](docs/development/basic_design.md) for the full design prin
 
 **Multi-Language Support**: Unified Python/MATLAB integration via JSON data exchange and standardized result format.
 
+See [Component Architecture](docs/development/detail_design.md#component-architecture) for the full process flow diagram.
+
 ## Adding Components
 
 ### New Solvers
@@ -134,6 +141,7 @@ Add external libraries as git submodules in `problems/` and extend loaders in `s
 
 - **[CLAUDE.md](CLAUDE.md)**: Development context and instructions
 - **[docs/development/](docs/development/)**: Technical design and implementation details
+- **[docs/guides/](docs/guides/)**: Setup and how-to guides (local development, MATLAB configuration, CI/CD, data export, etc.)
 
 ## License
 
@@ -141,7 +149,7 @@ MIT License - see [LICENSE](LICENSE) file.
 
 ## Acknowledgments
 
-- **External Problem Libraries**: VSDP team for DIMACS and SDPLIB repositories
+- **External Problem Libraries**: VSDP team for DIMACS and SDPLIB repositories; ozy4dm for the NETLIB LP problem set (`lp-data-netlib`)
 - **MATLAB Solvers**: SQLP team for maintaining Git repositories of SeDuMi and SDPT3 solvers  
 - **Open-Source Solvers**: SciPy, CVXPY, CLARABEL, SCS, ECOS, OSQP, CVXOPT, SDPA, SCIP, HIGHS communities
 - **Development Support**: Claude Code for coding assistance and development guidance

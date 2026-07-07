@@ -17,7 +17,7 @@ This is an automated benchmark system for optimization solvers (LP, QP, SOCP, SD
 ## Development Environment
 
 - **Platform**: GitHub Actions CI/CD with GitHub Pages deployment
-- **Languages**: Python 3.12+, MATLAB R2024+ (optional)
+- **Languages**: Python 3.12+, MATLAB R2020a+ (optional)
 - **Storage**: SQLite database (`database/results.db`)
 - **Reports**: `docs/pages/` (static HTML, inline CSS)
 
@@ -38,6 +38,7 @@ python main.py --all
 # Run specific library benchmarks
 python main.py --benchmark --library_names DIMACS
 python main.py --benchmark --library_names SDPLIB
+python main.py --benchmark --library_names NETLIB
 
 # Generate reports only
 python main.py --report
@@ -69,9 +70,13 @@ Fair baseline benchmarking with minimal configuration, reproducible results, and
 - **Solver Configurations**: Use minimal parameters (primarily `verbose: false`) for fair comparison
 - **Database Operations**: SQLite with comprehensive metadata and version tracking
 - **Result Validation**: Positive solve times, valid status codes, structure analysis
-- **External Libraries**: CVXPY conversion for DIMACS/SDPLIB compatibility
+- **External Libraries**: CVXPY conversion for DIMACS/SDPLIB/NETLIB compatibility
 - **Version Tracking**: Complete solver backend and Git commit recording
-- **Problem Formats**: SeDuMi .mat (DIMACS), SDPA .dat-s (SDPLIB)
+- **Problem Formats**: SeDuMi .mat (DIMACS), SDPA .dat-s (SDPLIB), MPS (NETLIB)
+
+## Known Issues
+
+- **NETLIB Python MPS loader bug**: `scripts/data_loaders/python/mps_loader.py` does not reorder free variables, producing incorrect objective values for 11 NETLIB problems under Python solvers (MATLAB's `mps_loader.m` is unaffected). Not yet fixed. See [NETLIB_KNOWN_OBJECTIVES.md](docs/guides/NETLIB_KNOWN_OBJECTIVES.md) before trusting Python-solver results on NETLIB or working on the MPS loader.
 
 ## Critical Development Constraints
 

@@ -2,29 +2,29 @@
 
 This guide explains how to set up and use external optimization problem libraries (DIMACS and SDPLIB) with the benchmark system.
 
-## 📋 Overview
+## Overview
 
 The benchmark system supports external problem libraries to test solvers on real-world optimization problems:
 
-- **DIMACS**: 47 optimization problems in SeDuMi .mat format
-- **SDPLIB**: 92 semidefinite programming problems in SDPA format
+- **DIMACS**: SeDuMi `.mat` format problems
+- **SDPLIB**: SDPA `.dat-s` format semidefinite programming problems
 - **Automatic Integration**: Problems are automatically detected and converted to CVXPY format
 
-## 🚀 Quick Setup
+Exact problem counts change over time; `config/problem_registry.yaml` is the authoritative list (see Verify Setup below for how to count them yourself).
+
+## Quick Setup
 
 ### 1. Clone External Libraries
 
-The external libraries are included as Git submodules. They should already be available if you cloned the repository with the complete implementation:
+The external libraries are included as Git submodules. They should already be available if you cloned the repository with `--recursive`:
 
 ```bash
 # Check if libraries are present
 ls problems/DIMACS/
 ls problems/SDPLIB/
 
-# If missing, clone manually
-cd problems/
-git clone https://github.com/vsdp/DIMACS_library.git DIMACS
-git clone https://github.com/vsdp/SDPLIB.git SDPLIB
+# If missing, clone manually (matches .gitmodules)
+git submodule update --init problems/DIMACS problems/SDPLIB
 ```
 
 ### 2. Verify Setup
@@ -33,17 +33,18 @@ git clone https://github.com/vsdp/SDPLIB.git SDPLIB
 # Validate external libraries are properly detected
 python main.py --validate
 
-# Check problem registry includes external problems
+# Count registered problems per library
 python -c "
 import yaml
 with open('config/problem_registry.yaml') as f:
-    registry = yaml.safe_load(f)
-    print(f'DIMACS problems: {len(registry.get(\"external_libraries\", {}).get(\"DIMACS\", {}).get(\"problems\", []))}')
-    print(f'SDPLIB problems: {len(registry.get(\"external_libraries\", {}).get(\"SDPLIB\", {}).get(\"problems\", []))}')
+    registry = yaml.safe_load(f)['problem_libraries']
+for lib in ('DIMACS', 'SDPLIB'):
+    count = sum(1 for p in registry.values() if p['library_name'] == lib)
+    print(f'{lib} problems: {count}')
 "
 ```
 
-## 🧪 Running External Library Benchmarks
+## Running External Library Benchmarks
 
 ### Basic Usage
 
@@ -54,7 +55,7 @@ python main.py --benchmark --library_names DIMACS,SDPLIB
 # Run only DIMACS problems
 python main.py --benchmark --library_names DIMACS
 
-# Run only SDPLIB problems  
+# Run only SDPLIB problems
 python main.py --benchmark --library_names SDPLIB
 
 # Full benchmark with reporting
@@ -71,65 +72,9 @@ python main.py --benchmark --solvers cvxpy_clarabel,cvxpy_scs --library_names DI
 python main.py --benchmark --library_names DIMACS,SDPLIB --verbose
 ```
 
-## 📊 Understanding External Problem Results
+## Understanding External Problem Results
 
-### Problem Structure Analysis
-
-The system automatically analyzes external problems and displays:
-
-- **Variables**: Number of decision variables
-- **Constraints**: Number of constraints
-- **Problem Type**: Automatic classification (LP, QP, SOCP, SDP)
-- **Library Source**: Origin information (e.g., "control family", "FILTER problem set")
-
-Example output:
-```
-control1 (SDP): 70 variables, 21 constraints
-Source: control family
-
-filter48_socp (SDP): 3284 variables, 969 constraints  
-Source: FILTER problem set
-```
-
-### Expected Performance
-
-External problems are significantly more challenging than synthetic test cases:
-
-| Library | Total Problems | Typical Success Rate | Best Solvers |
-|---------|---------------|---------------------|--------------|
-| DIMACS  | 47           | ~40%               | CLARABEL, SCS |
-| SDPLIB  | 92           | ~35%               | CLARABEL, SCS |
-| Combined | 139          | ~37%               | CLARABEL primary |
-
-## 🔧 Configuration
-
-### Problem Registry Structure
-
-External libraries are configured in `config/problem_registry.yaml`:
-
-```yaml
-external_libraries:
-  DIMACS:
-    path: "problems/DIMACS"
-    format: "sedumi_mat"
-    description: "DIMACS optimization problems"
-    problems:
-      - name: "arch0"
-        file: "arch/arch0.mat.gz"
-        family: "arch family"
-      - name: "control1"  
-        file: "control/control1.mat.gz"
-        family: "control family"
-        
-  SDPLIB:
-    path: "problems/SDPLIB"
-    format: "sdpa_sparse"
-    description: "Semidefinite programming library"
-    problems:
-      - name: "hinf1"
-        file: "hinf1.dat-s"
-        family: "hinf family"
-```
+External problems are significantly more challenging than synthetic test cases, and success rates vary by problem structure (LP/QP/SOCP/SDP) and solver. CLARABEL and SCS (via CVXPY) currently have the broadest compatibility across both libraries.
 
 ### Solver Compatibility
 
@@ -140,34 +85,17 @@ external_libraries:
 
 *Limited support for specific problem types
 
-## 📈 Analyzing Results
+## Configuration
 
-### HTML Reports
+### Problem Registry Structure
 
-External library results appear in all generated reports:
+External library problems are registered as flat entries in `config/problem_registry.yaml` under `problem_libraries:`. See [Problem Registry Structure](../development/detail_design.md#problem-registry-structure) in detail_design.md for the exact schema (`display_name`, `file_path`, `file_type`, `library_name`, `for_test_flag`).
 
-- **Problem Analysis**: Shows structure analysis and library sources
-- **Results Matrix**: Comprehensive solver performance across all problems
-- **Solver Comparison**: Success rates broken down by problem source
+## Analyzing Results
 
-### Data Exports
+External library results appear in all generated reports (see [detail_design.md](../development/detail_design.md#report-generation)) and in the JSON/CSV exports (see [EXPORT_GUIDE.md](EXPORT_GUIDE.md)), tagged with their `library_name`.
 
-JSON/CSV exports include external library metadata:
-
-```json
-{
-  "problem_name": "control1",
-  "problem_type": "SDP", 
-  "n_variables": 70,
-  "n_constraints": 21,
-  "library_source": "control family",
-  "solver_name": "CLARABEL (via CVXPY)",
-  "status": "optimal",
-  "solve_time": 0.018
-}
-```
-
-## 🛠️ Troubleshooting
+## Troubleshooting
 
 ### Common Issues
 
@@ -177,10 +105,8 @@ JSON/CSV exports include external library metadata:
 
 **Problem: Libraries not found**
 ```bash
-# Re-clone missing libraries
-cd problems/
-git clone https://github.com/vsdp/DIMACS_library.git DIMACS
-git clone https://github.com/vsdp/SDPLIB.git SDPLIB
+# Re-clone missing submodules
+git submodule update --init problems/DIMACS problems/SDPLIB
 ```
 
 **Problem: Low success rates**
@@ -192,56 +118,14 @@ git clone https://github.com/vsdp/SDPLIB.git SDPLIB
 
 1. **Use CLARABEL**: Best overall performance on external problems
 2. **Increase Timeouts**: Some problems require >300 seconds
-3. **Filter by Type**: Use specific problem sets (dimacs/sdplib) for focused testing
+3. **Filter by Library**: Use `--library_names` for focused testing
 4. **Expect Failures**: Many external problems are challenging by design
 
-## 🔍 Adding New External Libraries
+## Adding New External Libraries
 
-### Step-by-Step Process
+See [Adding New Problem Formats](../development/detail_design.md#adding-new-problem-formats) in detail_design.md for the current loader architecture and registration steps.
 
-1. **Add Library Directory**
-```bash
-cd problems/
-git clone <your-library-repo> NEW_LIBRARY
-```
-
-2. **Create Loader Module**
-```python
-# scripts/external/new_library_loader.py
-def load_new_library_problem(file_path, problem_name):
-    # Implement format-specific loading
-    return problem_data
-```
-
-3. **Update Problem Registry**
-```yaml
-external_libraries:
-  NEW_LIBRARY:
-    path: "problems/NEW_LIBRARY"
-    format: "custom_format"
-    description: "New optimization library"
-    problems:
-      - name: "problem1"
-        file: "problem1.ext"
-        family: "problem family"
-```
-
-4. **Update Problem Loader**
-```python
-# scripts/benchmark/problem_loader.py
-if problem_set == "NEW_LIBRARY":
-    from scripts.external.new_library_loader import load_new_library_problem
-    return load_new_library_problem(file_path, problem_name)
-```
-
-### Format Requirements
-
-New libraries should provide:
-- **Problem Data**: Objective function, constraints, variable bounds
-- **Metadata**: Problem dimensions, type classification
-- **CVXPY Compatibility**: Conversion to CVXPY format for solver compatibility
-
-## 📚 References
+## References
 
 ### External Library Sources
 - **DIMACS**: [DIMACS Implementation Challenges](http://dimacs.rutgers.edu/)
@@ -251,3 +135,4 @@ New libraries should provide:
 ### Related Documentation
 - **[Technical Design](../development/detail_design.md)**: Problem loaders and data model
 - **[Local Development Guide](LOCAL_DEVELOPMENT_GUIDE.md)**: Running benchmarks locally
+- **[DIMACS/SDPLIB Known Objective Values](DIMACS_SDPLIB_KNOWN_OBJECTIVES.md)**: Source and caveats for the `known_objective_value` registry entries

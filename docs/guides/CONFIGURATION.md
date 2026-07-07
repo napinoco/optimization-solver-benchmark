@@ -24,7 +24,7 @@ Contains site metadata for the generated reports and the solver `display_order`.
 
 For MATLAB solvers to work, you need:
 
-1. **MATLAB Installation**: MATLAB R2019b or later
+1. **MATLAB Installation**: MATLAB R2020a or later
 2. **Solver Availability**: SeDuMi and SDPT3 must be installed and in MATLAB path
 3. **Command Line Access**: `matlab` command must be available in system PATH
 
@@ -92,15 +92,11 @@ python main.py --validate
 python main.py --validate-verbose
 ```
 
-Expected output for working MATLAB integration:
+Working MATLAB integration reports both MATLAB solvers as available, e.g.:
 ```
-Solver Validation Results:
-  Working Solvers: 11/11
-  Working Problems: 139/139
-
 MATLAB Solver Status: 2/2 working
-  ✓ matlab_sedumi: SeDuMi (version 1.3.7)
-  ✓ matlab_sdpt3: SDPT3 (version 4.0)
+  ✓ matlab_sedumi: SeDuMi
+  ✓ matlab_sdpt3: SDPT3
 ```
 
 ## Solver Filtering and Selection
@@ -172,7 +168,7 @@ print(f"Python solvers: {python_solvers}")
 **Error**: `MATLAB version not supported`
 
 **Solution**:
-- Use MATLAB R2019b or later
+- Use MATLAB R2020a or later
 - Update to latest MATLAB version if possible
 - Check solver compatibility with MATLAB version
 
@@ -228,7 +224,7 @@ For debugging MATLAB integration issues, see `scripts/solvers/matlab/matlab_proc
 
 ### Custom Solver Addition
 
-See "Adding New Solvers" in the [Local Development Guide](LOCAL_DEVELOPMENT_GUIDE.md) — the entry point is `scripts/solvers/python/solver_configs.py`.
+See [Development Guidelines](../development/detail_design.md#development-guidelines) in detail_design.md — the entry point is `scripts/solvers/python/solver_configs.py`.
 
 ## Related Documentation
 
